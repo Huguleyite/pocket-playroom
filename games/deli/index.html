@@ -17,7 +17,7 @@ window.roomComplete=(id,date)=>{if(!date){const d=new Date();date=d.getFullYear(
 <body class="room-embedded room-deli">
 <main>
 <header><div><h1 style="font-size:clamp(23px,6vw,31px)">Stack to <span>the Future</span></h1><div class="eyebrow">Tiny deli. Big sandwich energy.</div></div><button class="sound" id="sound" aria-pressed="false">Sound off</button></header>
-<div class="modePicker"><label for="mode">Test mode</label><select id="mode"><option value="classic">A · Original deli</option><option value="rush" selected>B · Lettuce &amp; patience</option></select></div>
+
 <p class="modeNote" id="modeNote">Four ingredients. Keep an eye on customer patience. Practice first!</p>
 <section class="stats" aria-label="Round statistics"><div class="stat"><b id="time">60</b><small>Seconds</small></div><div class="stat"><b id="score">0</b><small>Points</small></div><div class="stat"><b id="combo">×1</b><small>Combo</small></div></section>
 <div class="roundControls"><div class="clock" aria-hidden="true"><div id="bar"></div></div><button id="pause" class="secondary" disabled aria-label="Pause game" aria-keyshortcuts="P Escape">Ⅱ Pause</button></div>
@@ -39,8 +39,8 @@ window.roomComplete=(id,date)=>{if(!date){const d=new Date();date=d.getFullYear(
  const buttons=[...document.querySelectorAll('[data-food]')];
  let phase='practice',order=[0,1,2],step=0,score=0,served=0,perfect=0,chain=0,topCombo=1,mistakes=0,clean=true;
  let remaining=60000,deadline=0,frame=0,nextOrderTimer=0,best=0,sound=false,audio;
- let mode='rush',lost=0,patienceRemaining=12000,patienceDeadline=0,patienceBudget=12000;
- const bestKey=()=>mode==='classic'?'order-up:best:v1':'order-up:best:rush:v1';
+ let lost=0,patienceRemaining=12000,patienceDeadline=0,patienceBudget=12000;
+ const bestKey=()=>'order-up:best:rush:v1';
  function loadBest(){best=0;try{const stored=Number(localStorage.getItem(bestKey()));if(Number.isFinite(stored)&&stored>=0)best=stored;}catch{$('notice').textContent='Personal bests can’t be saved in this browser.';}}
  function paintPatience(){
    $('patienceBar').value=Math.max(0,patienceRemaining/patienceBudget);
@@ -49,11 +49,11 @@ window.roomComplete=(id,date)=>{if(!date){const d=new Date();date=d.getFullYear(
  }
  function practice(){
    clearTimeout(nextOrderTimer);cancelAnimationFrame(frame);phase='practice';
-   mode=$('mode').value;loadBest();order=mode==='rush'?[0,1,3,2]:[0,1,2];
+   loadBest();order=[0,1,3,2];
    step=0;score=0;served=0;chain=0;remaining=60000;
-   $('tray').classList.toggle('rush',mode==='rush');buttons[3].classList.toggle('hidden',mode!=='rush');
+   $('tray').classList.add('rush');buttons[3].classList.remove('hidden');
    buttons.forEach(button=>button.disabled=false);
-   $('modeNote').textContent=mode==='rush'?'Four ingredients. Patience starts at 12 seconds per order and gently shortens. No points lost for missed orders.':'Original test: three ingredients, no patience timer.';
+   $('modeNote').textContent='Four ingredients. Patience starts at 12 seconds per order and gently shortens. No points lost for missed orders.';
    $('ticketLabel').textContent='YOUR FIRST ORDER · NO TIMER YET';$('orderTitle').textContent='Tap these ingredients in order';
    $('counter').textContent='Left to right. You’ve got this.';$('feedback').textContent='Tap the bread to start your practice order.';
    $('time').textContent=60;$('time').classList.remove('urgent');$('bar').style.transform='scaleX(1)';
@@ -83,12 +83,12 @@ window.roomComplete=(id,date)=>{if(!date){const d=new Date();date=d.getFullYear(
    step=0;clean=true;
    // The first three tickets stay simple; later tickets add one ingredient.
    const length=served<3?2:served<8?3:4;
-   order=Array.from({length},()=>Math.floor(Math.random()*(mode==='rush'?4:3)));
+   order=Array.from({length},()=>Math.floor(Math.random()*4));
    // Introduce lettuce in the first live ticket, after guided practice.
-   if(mode==='rush'&&served===0&&lost===0)order[length-1]=3;
+   if(served===0&&lost===0)order[length-1]=3;
    patienceBudget=served<3?12000:served<8?10000:8000;
    patienceRemaining=patienceBudget;patienceDeadline=performance.now()+patienceBudget;
-   $('patience').classList.toggle('hidden',mode!=='rush');paintPatience();
+   $('patience').classList.remove('hidden');paintPatience();
    $('ticketLabel').textContent=`ORDER ${served+1}`;
    $('orderTitle').textContent=served<3?'You’re on a roll.':'Keep those sandwiches coming!';
    $('counter').textContent=`${served} served · ${3-chain%3} perfect orders to ${multiplier()<5?'the next combo':'keep the streak'}`;
@@ -100,7 +100,7 @@ window.roomComplete=(id,date)=>{if(!date){const d=new Date();date=d.getFullYear(
    $('time').textContent=Math.ceil(remaining/1000);$('time').classList.toggle('urgent',remaining<=10000);
    $('bar').style.transform=`scaleX(${remaining/60000})`;
    if(remaining<=0){finish();return;}frame=requestAnimationFrame(tick);
-   if(mode==='rush'&&step<order.length){
+   if(step<order.length){
      patienceRemaining=Math.max(0,patienceDeadline-performance.now());paintPatience();
      if(patienceRemaining<=0){
        lost++;chain=0;newOrder();animate('oops');
@@ -111,17 +111,17 @@ window.roomComplete=(id,date)=>{if(!date){const d=new Date();date=d.getFullYear(
  function start(){
    clearTimeout(nextOrderTimer);cancelAnimationFrame(frame);$('results').close();
    phase='playing';score=0;served=0;perfect=0;chain=0;topCombo=1;mistakes=0;lost=0;remaining=60000;
-   $('mode').disabled=true;
+
    $('start').classList.add('hidden');$('pause').disabled=false;
    $('feedback').textContent='Let’s cook! Match the ticket.';newOrder();deadline=performance.now()+remaining;tick();
  }
  function finish(){
    phase='finished';window.roomComplete?.('deli');cancelAnimationFrame(frame);clearTimeout(nextOrderTimer);
-   $('mode').disabled=false;
+
    buttons.forEach(button=>button.disabled=true);$('pause').disabled=true;
    $('start').textContent='Play another 60 seconds';$('start').classList.remove('hidden');
    const newBest=score>best;if(newBest){best=score;try{localStorage.setItem(bestKey(),String(best));}catch{$('notice').textContent='Your best score could not be saved.';}}
-   $('finalScore').textContent=score;$('finalStats').textContent=`${mode==='rush'?'B · Lettuce & patience':'A · Original deli'}: ${served} sandwiches served · ${perfect} perfect orders · best combo ×${topCombo} · ${mistakes} wrong taps${mode==='rush'?` · ${lost} customers lost`:''}`;
+   $('finalScore').textContent=score;$('finalStats').textContent=`${served} sandwiches served · ${perfect} perfect orders · best combo ×${topCombo} · ${mistakes} wrong taps · ${lost} customers lost`;
    $('bestMessage').textContent=newBest?'A new personal best!':`Personal best: ${best}. Another shift?`;
    $('feedback').textContent=`Shift complete! ${served} sandwiches served.`;
    $('best').textContent=`Personal best: ${best}`;$('results').showModal();
@@ -129,7 +129,7 @@ window.roomComplete=(id,date)=>{if(!date){const d=new Date();date=d.getFullYear(
  function tap(food){
    if(phase!=='practice'&&phase!=='playing')return;
    if(phase==='playing'&&performance.now()>=deadline){tick();return;}
-   if(phase==='playing'&&mode==='rush'&&step<order.length&&performance.now()>=patienceDeadline){tick();return;}
+   if(phase==='playing'&&step<order.length&&performance.now()>=patienceDeadline){tick();return;}
    if(step>=order.length)return;
    if(food!==order[step]){
      clean=false;if(phase==='playing'){mistakes++;chain=0;}
@@ -175,7 +175,7 @@ window.roomComplete=(id,date)=>{if(!date){const d=new Date();date=d.getFullYear(
    }
  });
  document.addEventListener('keydown',event=>{if(event.repeat||document.querySelector('dialog[open]')||event.target.closest('select,input,textarea'))return;if(['1','2','3','4'].includes(event.key)){event.preventDefault();const button=buttons[Number(event.key)-1];if(!button.classList.contains('hidden'))button.click();}});
- $('mode').onchange=practice;
+
  practice();
 })();
 </script>
