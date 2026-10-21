@@ -18,7 +18,9 @@ body{padding-bottom:calc(66px + env(safe-area-inset-bottom,0px))}
 /* Keep the full ad inside narrow mobile dialogs and allow vertical scrolling. */
 #shiftlock-win{padding:20px 10px;max-height:calc(100svh - 24px);overflow-y:auto;max-width:400px;min-width:min(320px,calc(100vw - 16px));width:calc(100% - 16px)}
 </style>
- <link rel="stylesheet" href="../../night-game.css"><script src="../../night-frame.js" data-game="shift"></script><link rel="stylesheet" href="../../game-theme.css">
+<script>
+window.roomComplete=(id,date)=>{if(!date){const d=new Date();date=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}try{localStorage.setItem('room-for-play:completed:'+id,JSON.stringify(date));}catch{}parent.postMessage({type:'room:completed',id,date},location.origin);};
+</script> <link rel="stylesheet" href="../../night-game.css"><script src="../../night-frame.js" data-game="shift"></script><link rel="stylesheet" href="../../game-theme.css">
 </head>
 <body class="room-embedded room-shift">
 <main>
@@ -283,6 +285,7 @@ function streak(key = daily) { let n=0; while(store.days[key]?.won) { n++; key=p
 function shownStreak() { return streak(store.days[daily]?.won ? daily : priorDay(daily)); }
 function message(text) { $('status').textContent = text; }
 function save() {
+  if(state.isSolved&&!DEV)window.roomComplete?.('shift',daily);
   store.days[daily] = { history:history.map(move=>[...move]), moves:state.moves, won:state.isSolved, completedMoves:state.isSolved?state.moves:null, streak:state.isSolved?1+streak(priorDay(daily)):shownStreak() };
   try { localStorage.setItem(KEY,JSON.stringify(store)); } catch { storageAvailable=false; }
 }

@@ -30,7 +30,7 @@
   else bad=[...rows,...cols].some(line=>{const filled=line.filter(v=>v!==null);return new Set(filled).size!==filled.length;})||horizontal.some(i=>values[i]!==null&&values[i+1]!==null&&(solution[i]<solution[i+1]?values[i]>=values[i+1]:values[i]<=values[i+1]))||vertical.some(i=>values[i]!==null&&values[i+5]!==null&&(solution[i]<solution[i+5]?values[i]>=values[i+5]:values[i]<=values[i+5]));
   if(bad)$('status').textContent=binary?'Check balance, triples, and duplicate lines.':'Check repeated numbers and inequality signs.';
   else if(values.includes(null))$('status').textContent='No rule conflicts so far. Keep going.';
-  else{$('status').textContent='✓ Sample solved. Everything clicks.';$('complete-text').textContent=`You solved this practice board in ${moves} moves.`;if(!$('complete').open)$('complete').showModal();}
+  else{window.roomComplete?.('futoshiki');$('status').textContent='✓ Sample solved. Everything clicks.';$('complete-text').textContent=`You solved this practice board in ${moves} moves.`;if(!$('complete').open)$('complete').showModal();}
  }
  $('size').textContent=size+' × '+size;
  $('instruction').textContent=binary?'Tap to cycle: blank → 0 → 1 → blank. Dotted tiles are fixed clues.':'Select a square, then choose 1–5. Pencil toggles candidate marks.';

@@ -22,7 +22,9 @@ dialog{max-height:calc(100dvh - 24px);overflow:auto}
 .intro #category:before{content:'';position:absolute;z-index:-1;inset:17px 5px;border:1px solid #f1cd7cb0;border-radius:6px;box-shadow:0 0 10px #f1cd7c20,inset 0 1px 0 #ffffff30;pointer-events:none}
 .intro #category:after{content:'';position:absolute;inset:0;pointer-events:none;background:linear-gradient(90deg,#101a2b60,transparent 10%,transparent 90%,#101a2b60);box-shadow:inset 2px 0 2px #ffffff25,inset -2px 0 2px #0005}
 </style>
- <link rel="stylesheet" href="../../night-game.css"><script src="../../night-frame.js" data-game="lock"></script><link rel="stylesheet" href="../../game-theme.css">
+<script>
+window.roomComplete=(id,date)=>{if(!date){const d=new Date();date=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}try{localStorage.setItem('room-for-play:completed:'+id,JSON.stringify(date));}catch{}parent.postMessage({type:'room:completed',id,date},location.origin);};
+</script> <link rel="stylesheet" href="../../night-game.css"><script src="../../night-frame.js" data-game="lock"></script><link rel="stylesheet" href="../../game-theme.css">
 </head>
 <body class="room-embedded room-lock">
 <main>
@@ -372,6 +374,7 @@ function showVictory() {
   if (!$('victory').open) $('victory').showModal();
 }
 function finish() {
+  window.roomComplete?.('lock',date);
   stopClock();
   if (!completed.includes(date)) { completed.push(date); write(historyKey,completed); }
   persist(); render(); showVictory();

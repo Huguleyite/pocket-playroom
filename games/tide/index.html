@@ -16,7 +16,9 @@ svg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index
 #message{min-height:42px;text-align:center;font-size:12px;color:var(--muted);padding:12px 2px 6px}.actions{display:flex;gap:9px}.primary{background:var(--green);color:white;border:0;border-radius:12px;padding:12px 18px;font-weight:700;flex:1}.secondary{background:transparent;border:1px solid #cbd4c5;border-radius:12px;padding:10px 14px;font-size:13px}.details{display:flex;justify-content:space-between;color:var(--muted);font-size:11px;margin-top:15px}.history{list-style:none;padding:0;margin:14px 0;display:flex;gap:6px;flex-wrap:wrap}.history li{font-size:11px;background:#e5e9dd;padding:3px 8px;border-radius:7px}footer{font-size:10px;color:var(--muted);border-top:1px solid #d7ddd1;padding-top:13px;margin-top:19px;text-align:center}dialog{border:1px solid #d6ddcf;border-radius:24px;padding:27px;max-width:400px;width:calc(100% - 32px);background:var(--paper);color:var(--ink);box-shadow:0 20px 100px #10241e30}dialog::backdrop{background:#17372dcc;backdrop-filter:blur(5px)}dialog h2{font-size:30px;letter-spacing:-1px;margin:8px 0}dialog p{font-size:13px;color:var(--muted)}dialog textarea{width:100%;resize:none;border:1px solid #d4dacb;border-radius:12px;background:#fffef8;padding:12px;font:13px/1.65 system-ui;color:var(--ink);height:155px}dialog .actions{margin-top:13px}.badge{font-size:11px;letter-spacing:2px;color:var(--green);font-weight:800}.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}
 @media(max-width:360px){main{padding:16px 12px}h1{font-size:27px}:root{--gap:6px}.board{padding:8px}}@media(prefers-reduced-motion:reduce){:root{--drop:1ms}*,*::before,*::after{animation-duration:1ms!important;transition-duration:1ms!important}}
 </style>
- <link rel="stylesheet" href="../../night-game.css"><script src="../../night-frame.js" data-game="tide"></script><link rel="stylesheet" href="../../game-theme.css">
+<script>
+window.roomComplete=(id,date)=>{if(!date){const d=new Date();date=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}try{localStorage.setItem('room-for-play:completed:'+id,JSON.stringify(date));}catch{}parent.postMessage({type:'room:completed',id,date},location.origin);};
+</script> <link rel="stylesheet" href="../../night-game.css"><script src="../../night-frame.js" data-game="tide"></script><link rel="stylesheet" href="../../game-theme.css">
 </head>
 <body class="room-embedded room-tide">
 <main>
@@ -403,6 +405,7 @@ function streak() {
 }
 function best() { return Math.max(0,...Object.values(saved.days).map(day=>Number.isFinite(day?.score) ? day.score : 0)); }
 function persist() {
+ if(record.finished)window.roomComplete?.('tide',date);
  const state=game.getState();
  saved.days[date]={...record,score:state.score,movesRemaining:state.movesRemaining,history:history.map(r=>({word:r.word,points:r.points,combos:r.waves.length-1}))};
  saved.highScore=best(); saved.currentStreak=streak();

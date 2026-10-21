@@ -13,6 +13,35 @@
   const main=document.getElementById('main'),info=document.getElementById('info');
   let current=null,frame=null;
   function read(key){try{return JSON.parse(localStorage.getItem(key));}catch{return null;}}
+  const completedVisits={};
+  function gameDay(id){const d=new Date();return ['lock','tide'].includes(id)?d.toISOString().slice(0,10):`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;}
+  function completedToday(id){
+    const day=gameDay(id);
+    if(completedVisits[id]===day||read('room-for-play:completed:'+id)===day)return true;
+    const includes=(key)=>{const dates=read(key);return Array.isArray(dates)&&dates.includes(day);};
+    if(id==='weave')return includes('wordweave:completed:v1')||read('wordweave:v1:'+day)?.completed===true;
+    if(id==='lock')return includes('letterlock:v1:completed');
+    if(id==='tide')return read('worddrop:v1')?.days?.[day]?.finished===true;
+    if(id==='shift')return read('shift-lock:v2')?.days?.[day]?.won===true;
+    if(id==='binario')return read('room-for-play:neon:stats')?.days?.includes?.(day)===true||read('room-for-play:neon:'+day)?.completed===true;
+    if(id==='signal')return read('signal-flow:v3')?.days?.[day]?.completed===true;
+    return false;
+  }
+  function refreshCompletion(){
+    if(current)return;
+    for(const g of games){const done=completedToday(g.id);
+      main.querySelectorAll(`a[href="#games/${g.id}"]`).forEach(link=>{
+        link.classList.toggle('completed-today',done);
+        let badge=link.querySelector('.completion-badge');
+        if(done&&!badge){badge=document.createElement('span');badge.className='completion-badge';badge.textContent='✓ Completed today';(link.querySelector('.card-body')||link.querySelector('.signal-discovery-inner>div')||link).append(badge);}
+        if(!done)badge?.remove();
+        const cta=link.querySelector('.play-label,.discovery-cta');if(cta){if(!cta.dataset.original)cta.dataset.original=cta.textContent;cta.textContent=done?(g.id==='deli'||g.sample?'Play again ↗':'View results ↗'):cta.dataset.original;}
+        if(link.classList.contains('pill-link')&&link.firstChild?.nodeType===Node.TEXT_NODE)link.firstChild.textContent=done&&g.id!=='deli'&&!g.sample?'View results →':'Play again →';
+        const name=g.id==='binario'&&nightOn('binario')?'Neon Logic':g.name;
+        link.setAttribute('aria-label',`${name}${done?', completed today':''}`);
+      });
+    }
+  }
   const nightKey='room-for-play:night';
   const loadedNight=read(nightKey);let nightPrefs={global:loadedNight?.global===true,overrides:loadedNight?.overrides&&typeof loadedNight.overrides==='object'?loadedNight.overrides:{}};
   if(!loadedNight&&read('room-for-play:neon:mode')===true)nightPrefs.overrides.binario=true;
@@ -26,6 +55,7 @@
       if(!discovery){document.querySelector('.collection-top').insertAdjacentHTML('beforebegin',`<section id="night-discovery" aria-label="New game unlocked"><a class="signal-discovery" href="#games/signal" aria-label="Play Signal Flow, new Night Play exclusive"><div class="signal-discovery-inner"><div><span class="discovery-badge">✦ NEW GAME UNLOCKED</span><p class="discovery-exclusive">ONLY IN NIGHT PLAY</p><h2>Signal Flow<span>↗</span></h2><p class="discovery-copy">A new game comes to light.<br>Rotate prisms. Bring every signal home.</p><span class="discovery-cta">Enter the circuit →</span></div><svg class="signal-art" viewBox="0 0 160 130" aria-hidden="true"><g fill="#142132" stroke="#536176"><rect x="8" y="8" width="144" height="114" rx="17"/><path d="M56 8v114M104 8v114M8 46h144M8 84h144"/></g><g fill="none" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"><path stroke="#42e8ff" d="M8 27h72v38h72"/><path stroke="#ff5bd6" d="M32 122V65h96V8"/><path stroke="#ffd563" d="M8 103h72V27h72"/></g><g fill="#ffd563"><circle cx="8" cy="103" r="6"/><circle cx="152" cy="27" r="6"/></g></svg></div></a></section>`);}
     }else discovery?.remove();
     const count=document.getElementById('game-count');if(count)count.textContent=nightPrefs.global?'8 games · A new game unlocked':'7 games · No account needed';
+    refreshCompletion();
   }
   function syncBinarioName(){
     const name=nightOn('binario')?'Neon Logic':'Binario';
@@ -35,7 +65,7 @@
       if(link.classList.contains('pill-link'))link.closest('.resume')?.querySelector('strong')?.replaceChildren(document.createTextNode(name));
     });
   }
-  function applyNight(){const on=nightOn(),[accent,tile]=nightPalettes[current]||['#cba1fa','#332442'];document.documentElement.classList.toggle('night-play',on);document.documentElement.style.setProperty('--night-accent',accent);document.documentElement.style.setProperty('--night-tile',tile);const toggle=document.getElementById('night-toggle');if(toggle){toggle.setAttribute('aria-checked',String(on));toggle.textContent=`☾ Night Play${current?'':' · All games'}: ${on?'On':'Off'}`;}syncNightDiscovery();syncBinarioName();if(current==='binario')neonPage(on);frame?.contentWindow?.postMessage({type:'room:night',enabled:on},location.origin);}
+  function applyNight(){const on=nightOn(),[accent,tile]=nightPalettes[current]||['#cba1fa','#332442'];document.documentElement.classList.toggle('night-play',on);document.documentElement.style.setProperty('--night-accent',accent);document.documentElement.style.setProperty('--night-tile',tile);const toggle=document.getElementById('night-toggle');if(toggle){toggle.setAttribute('aria-checked',String(on));toggle.textContent=`☾ Night Play${current?'':' · All games'}: ${on?'On':'Off'}`;}syncNightDiscovery();syncBinarioName();refreshCompletion();if(current==='binario')neonPage(on);frame?.contentWindow?.postMessage({type:'room:night',enabled:on},location.origin);}
   function nightControl(){main.insertAdjacentHTML('afterbegin',`<div class="night-controls"><button id="night-toggle" class="night-toggle" role="switch" aria-checked="false"></button></div>`);document.getElementById('night-toggle').onclick=()=>{const on=!nightOn();if(current)nightPrefs.overrides[current]=on;else nightPrefs={global:on,overrides:{}};saveNight();if(current==='signal')route();else applyNight();};applyNight();}
   function remember(id){try{localStorage.setItem('room-for-play:last',JSON.stringify({id,visited:Date.now()}));}catch{}}
   function art(g){return g.art.length===1?`<span class="art-symbol" aria-hidden="true">${g.art[0]}</span>`:g.art.map(x=>`<span class="art-letter" aria-hidden="true">${x==='<'?'&lt;':x}</span>`).join('');}
@@ -78,5 +108,10 @@
   document.getElementById('about-button').addEventListener('click',()=>openInfo('About Pocket Playroom','about-content'));
   document.getElementById('privacy-button').addEventListener('click',()=>openInfo('Privacy','privacy-content'));
   document.getElementById('close-info').addEventListener('click',()=>info.close());
+  window.addEventListener('message',event=>{if(!frame||event.source!==frame.contentWindow||event.origin!==location.origin||event.data?.type!=='room:completed'||event.data.id!==current||event.data.date!==gameDay(current))return;completedVisits[current]=event.data.date;try{localStorage.setItem('room-for-play:completed:'+current,JSON.stringify(event.data.date));}catch{}});
+  window.addEventListener('storage',refreshCompletion);
+  window.addEventListener('focus',refreshCompletion);
+  document.addEventListener('visibilitychange',()=>{if(!document.hidden)refreshCompletion();});
+  setInterval(refreshCompletion,15000);
   window.addEventListener('hashchange',route);route();
 })();
