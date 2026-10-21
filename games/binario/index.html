@@ -17,7 +17,7 @@ const $=id=>document.getElementById(id),prefix='room-for-play:neon:',localDate=(
 const {clues}=initializeGame(date);let moves=0,history=[],won=false,neon=true,stats={days:[]},shareText='';
 function read(k){try{return JSON.parse(localStorage.getItem(k));}catch{return null;}}
 function write(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch{$('saving').textContent='Browser saving is unavailable. You can still play this visit.';}}
-const saved=read(key);try{if(saved){restoreBoard(saved.board);moves=Number.isSafeInteger(saved.moves)&&saved.moves>=0?saved.moves:0;}}catch{$('saving').textContent='An invalid save was ignored.';}
+const saved=read(key);try{if(saved){restoreBoard(saved.board.map((row,r)=>row.map((value,c)=>clues[r][c]??value)));moves=Number.isSafeInteger(saved.moves)&&saved.moves>=0?saved.moves:0;}}catch{$('saving').textContent='An invalid save was ignored.';}
 const prior=read(prefix+'stats');if(Array.isArray(prior?.days))stats.days=[...new Set(prior.days.filter(d=>typeof d==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(d)&&d<=date))];
 neon=document.documentElement.classList.contains('night-play');
 function streak(){const days=new Set(stats.days);let cursor=new Date(date+'T12:00:00Z'),n=0;if(!days.has(date))cursor.setUTCDate(cursor.getUTCDate()-1);while(days.has(cursor.toISOString().slice(0,10))){n++;cursor.setUTCDate(cursor.getUTCDate()-1);}return n;}

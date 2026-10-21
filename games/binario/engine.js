@@ -18,7 +18,8 @@ function solve(clues,limit=2,orders=Array.from({length:SIZE},()=>patterns)){
  function visit(r){if(r===SIZE){count++;solution=copy(b);return count>=limit;}for(const p of orders[r]){if(p.some((v,c)=>clues[r][c]!==null&&clues[r][c]!==v))continue;b[r]=[...p];if(isLegal(b)&&visit(r+1))return true;}b[r]=Array(SIZE).fill(null);return false;}visit(0);return {count,solution};
 }
 export function generateSolution(date){const rng=mulberry32(dateSeed(date));return solve(empty(),1,Array.from({length:SIZE},()=>shuffled(patterns,rng))).solution;}
-export function generatePuzzle(date){const solution=generateSolution(date),clues=copy(solution),rng=mulberry32(dateSeed(date)^0x9E3779B9);for(const i of shuffled(Array.from({length:36},(_,i)=>i),rng)){const r=Math.floor(i/SIZE),c=i%SIZE,v=clues[r][c];clues[r][c]=null;if(solve(clues).count!==1)clues[r][c]=v;}return {date,clues,solution};}
+export function generatePuzzle(date){const solution=generateSolution(date),clues=copy(solution),rng=mulberry32(dateSeed(date)^0x9E3779B9);for(const i of shuffled(Array.from({length:36},(_,i)=>i),rng)){const r=Math.floor(i/SIZE),c=i%SIZE,v=clues[r][c];clues[r][c]=null;if(solve(clues).count!==1)clues[r][c]=v;}// Retain one extra central clue after the minimal unique puzzle is built.
+const extra=Array.from({length:36},(_,i)=>i).filter(i=>clues[Math.floor(i/6)][i%6]===null).sort((a,b)=>{const distance=i=>Math.abs(Math.floor(i/6)-2.5)+Math.abs(i%6-2.5);return distance(a)-distance(b)||a-b;})[0];if(extra!==undefined)clues[Math.floor(extra/6)][extra%6]=solution[Math.floor(extra/6)][extra%6];return {date,clues,solution};}
 export function countSolutions(b){assertBoard(b);return solve(b).count;}
 let board=empty(),clues=empty();
 export function initializeGame(date){const puzzle=generatePuzzle(date);clues=copy(puzzle.clues);board=copy(clues);return {date,clues:copy(clues),board:copy(board)};}

@@ -18,3 +18,5 @@ body.room-lock main>.intro{display:block!important;margin:2px 0 12px!important}
 .room-lock .proximity{color:#cbd7dc}
 html:has(body.room-lock){background:#263b4b!important}
 @media(max-width:340px){body.room-embedded main{padding-left:8px!important;padding-right:8px!important}.room-lock .wheels{gap:4px}.room-lock .dial-buttons button{min-width:23px;font-size:13px}.room-lock .dial-buttons{gap:2px}.room-lock .wheel .letter{font-size:29px}.room-weave .controls{gap:7px}.room-weave .controls button{width:45px}}
+
+.room-lock .category-label{display:block;font-size:13px;font-weight:800;letter-spacing:1px;color:#f1cd7c;margin-bottom:4px}
