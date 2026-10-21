@@ -380,10 +380,12 @@ function finish() {
   persist(); render(); showVictory();
 }
 const delay = ms => new Promise(resolve=>setTimeout(resolve,ms));
+function haptic(pattern) { try { navigator.vibrate?.(pattern); } catch {} }
 async function step(index,direction,dragOffset=0) {
   if (busy || game.getState().complete) return;
   if (today() !== date) { location.reload(); return; }
   busy=true;
+  haptic(8);
   try {
     const strip=strips[index];
     strip.style.transition='none'; strip.style.transform=`translateY(${dragOffset}px)`;
@@ -397,7 +399,7 @@ async function step(index,direction,dragOffset=0) {
     if (result.isNew && result.kind==='target') {
       $('feedback').textContent=`✓ ${result.word} unlocked`;
       $('safe').classList.remove('unlock'); void $('safe').offsetWidth; $('safe').classList.add('unlock');
-      navigator.vibrate?.([20,30,45]);
+      haptic([20,30,45]);
       persist(); render();
       await delay(reduced?100:700); $('safe').classList.remove('unlock');
     } else if (result.isNew && result.kind==='bonus') $('feedback').textContent=`+ ${result.word} — bonus word!`;
