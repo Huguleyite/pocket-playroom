@@ -17,3 +17,8 @@ The About and Privacy sections are in HTML templates in `index.html`, opened by 
 The authoring project is `Game-Development/Room-for-Play` in the local workspace. Run its `build.mjs`, then replace this repository's website files with the contents of its generated `dist/` directory. Keep this README. Development previews, screenshots, and workspace notes are excluded.
 
 Before enabling affiliate tracking, update the privacy notice for the selected partners and configure any required consent controls.
+
+## Ad-supported play
+
+Game routes check for blocked ad elements and a small local ad probe before loading. Detected blocking shows a support message and retry button. No third-party advertising or tracking is connected by this check. Connectivity failures and missing probe files do not lock games. Direct game links return through the collection route. This browser-side gate is not server-enforced access control.
+

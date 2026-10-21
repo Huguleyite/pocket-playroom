@@ -12,6 +12,13 @@
   ];
   const main=document.getElementById('main'),info=document.getElementById('info');
   let current=null,frame=null;
+  let routeVersion=0;
+  function adMessage(g,checking=false){
+    current=g.id;frame=null;document.body.className=`game-${g.id}`;document.getElementById('mobile-ad-anchor').hidden=true;
+    document.title=`${g.name} · Pocket Playroom`;
+    main.innerHTML=`<a class="back-link" href="#home">← Back to all games</a><section class="ad-access" aria-labelledby="ad-access-title"><div class="ad-access-symbol" aria-hidden="true">✳</div><div class="eyebrow">A little support keeps us playing</div><h1 id="ad-access-title">${checking?'Getting your game ready…':'A little help to keep the games going.'}</h1><p role="status">${checking?'Checking that our ad spaces can load.':'It looks like ads are being blocked. Advertising helps fund Pocket Playroom’s games, hosting, and new puzzles, so we need ads enabled before the games can load.'}</p>${checking?'':'<p>Please allow ads for Pocket Playroom in your ad blocker or browser settings, then try again. Your saved progress will still be here.</p><button id="ad-retry" class="ad-retry">I’ve allowed ads · Try again</button><a class="ad-home" href="#home">Back to all games</a>'}</section>`;
+    document.getElementById('ad-retry')?.addEventListener('click',()=>route());
+  }
   function read(key){try{return JSON.parse(localStorage.getItem(key));}catch{return null;}}
   const completedVisits={};
   function gameDay(id){const d=new Date();return ['lock','tide'].includes(id)?d.toISOString().slice(0,10):`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;}
@@ -91,6 +98,7 @@
     if(current!=='binario')return;
     document.body.classList.toggle('neon-page',enabled);
     const heading=document.querySelector('.game-heading');
+    if(!heading)return;
     heading.querySelector('h1').textContent=enabled?'Neon Logic':'Binario';
     heading.querySelector('.eyebrow').textContent=enabled?'The daily circuit':'The balancing act';
     heading.querySelector('p').textContent=enabled?'Balance the energy. Complete the circuit.':'Two sides. One bright idea.';
@@ -102,7 +110,7 @@
     document.querySelector('.help p').textContent=help;
     document.title=(enabled?'Neon Logic':'Binario')+' · Pocket Playroom';
   }
-  function route(){const match=location.hash.match(/^#games\/([a-z]+)$/);const g=match&&games.find(g=>g.id===match[1]);if(g?.nightOnly&&!nightOn(g.id)){current=g.id;frame=null;document.body.className='';document.getElementById('mobile-ad-anchor').hidden=true;main.innerHTML='<a class="back-link" href="#home">← Back to all games</a><header class="game-heading"><h1>Signal Flow</h1><p>This circuit comes alive in Night Play. Turn it on above to enter.</p></header>';document.title='Signal Flow · Night Play';}else if(g)gamePage(g);else home();nightControl();window.scrollTo(0,0);main.focus({preventScroll:true});}
+  async function route(){const version=++routeVersion;const match=location.hash.match(/^#games\/([a-z]+)$/);const g=match&&games.find(g=>g.id===match[1]);if(g?.nightOnly&&!nightOn(g.id)){current=g.id;frame=null;document.body.className='';document.getElementById('mobile-ad-anchor').hidden=true;main.innerHTML='<a class="back-link" href="#home">← Back to all games</a><header class="game-heading"><h1>Signal Flow</h1><p>This circuit comes alive in Night Play. Turn it on above to enter.</p></header>';document.title='Signal Flow · Night Play';}else if(g){adMessage(g,true);const access=await window.roomAdAccess.check();if(version!==routeVersion)return;if(access==='blocked')adMessage(g);else gamePage(g);}else home();nightControl();window.scrollTo(0,0);main.focus({preventScroll:true});}
   window.addEventListener('message',event=>{if(!frame||event.source!==frame.contentWindow)return;const data=event.data;if(event.origin!==location.origin)return;if(data?.type==='room:ad-modal'&&current==='binario')document.getElementById('mobile-ad-anchor').hidden=data.open===true;if(data?.type==='room:neon'){const enabled=data.enabled===true;if(nightOn('binario')!==enabled){nightPrefs.overrides.binario=enabled;saveNight();applyNight();}else neonPage(enabled);}if(data?.type==='room:height'&&Number.isFinite(data.height)){frame.style.height=Math.max(300,Math.min(6000,data.height))+'px';const status=document.getElementById('frame-status');if(status)status.hidden=true;}});
   function openInfo(title,templateId){document.getElementById('info-title').textContent=title;document.getElementById('info-body').replaceChildren(document.getElementById(templateId).content.cloneNode(true));info.showModal();info.scrollTop=0;}
   document.getElementById('about-button').addEventListener('click',()=>openInfo('About Pocket Playroom','about-content'));
