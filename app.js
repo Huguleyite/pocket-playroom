@@ -1,7 +1,7 @@
 (() => {
   'use strict';
   const games = [
-    {id:'weave',name:'Weave It to Me',category:'Daily · Word puzzle',line:'Good words come together.',art:['W','E','A','V'],tile:'#e6d6f7',ink:'#603a86',paper:'#fbf3e9',accent:'#70429e',help:'Swipe horizontally to shift a row or vertically to shift a column. Four-letter words clear, letters fall, and cascades multiply your score. Complete five words to finish the day.',note:'One good word can unravel the whole board.',symbol:'W ↔',subtitle:'The daily word stitch'},
+    {id:'weave',name:'Weave It to Me',category:'Daily · Word puzzle',line:'Good words come together.',art:['W','E','A','V'],tile:'#e6d6f7',ink:'#603a86',paper:'#fbf3e9',accent:'#70429e',help:'Swipe horizontally to shift a row or vertically to shift a column. Four-letter words clear, letters fall, and cascades multiply your score. Start with 60 seconds and find as many words as possible. Every word adds 10 seconds, including cascade words. The round ends when time runs out.',note:'One good word can unravel the whole board.',symbol:'W ↔',subtitle:'The daily word stitch'},
     {id:'tide',name:'Tile Tide',category:'Daily · Word hunt',line:'Small words. Big drops.',art:['T','I','D','E'],tile:'#cce8dc',ink:'#226267',paper:'#eff8ef',accent:'#216d75',help:'Connect neighboring tiles, including diagonals, to make words of three or more letters. Submit your word to clear tiles and start a cascade. You have ten moves.',note:'The best word might be hiding one little turn away.',symbol:'≈ ≈',subtitle:'The daily word cascade'},
     {id:'shift',name:'Shift & Lock',category:'Daily · Logic puzzle',line:'A little shift. A little clarity.',art:['┏','━','┓'],tile:'#dce6bb',ink:'#446237',paper:'#f0f3df',accent:'#a84525',help:'Tap a tile to rotate it. Swipe a row or column to shift it with wraparound. Connect the two edge dots to lock the path. The answer preview can show one valid solution.',note:'Sometimes a new direction is all it takes.',symbol:'┏━┓',subtitle:'The daily connection workshop'},
     {id:'lock',name:'LetterLock',category:'Daily · Word safe',line:'Bright minds. Golden combinations.',art:['L','O','C','K'],tile:'#f1d99e',ink:'#77531f',paper:'#f5eddd',accent:'#85602b',help:'Swipe a dial up or down, or use its arrow buttons. Each dial moves independently. Align category words on the gold line to unlock them. Find every daily target to open the safe.',note:'Every word is another turn of the key.',symbol:'A ✳',subtitle:'The daily word safe'},
@@ -26,7 +26,7 @@
     const day=gameDay(id);
     if(completedVisits[id]===day||read('room-for-play:completed:'+id)===day)return true;
     const includes=(key)=>{const dates=read(key);return Array.isArray(dates)&&dates.includes(day);};
-    if(id==='weave')return includes('wordweave:completed:v1')||read('wordweave:v1:'+day)?.completed===true;
+    if(id==='weave')return includes('wordweave:completed:v1')||read('wordweave:v2:'+day)?.completed===true||read('wordweave:v1:'+day)?.completed===true;
     if(id==='lock')return includes('letterlock:v1:completed');
     if(id==='tide')return read('worddrop:v1')?.days?.[day]?.finished===true;
     if(id==='shift')return read('shift-lock:v2')?.days?.[day]?.won===true;
