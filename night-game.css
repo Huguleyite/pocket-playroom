@@ -19,7 +19,7 @@ html.night-play .ingredientStep.done{background:#2d503c!important;border-color:#
 html.night-play .feedback,html.night-play .status{color:var(--night-accent)!important}
 html.night-play .word-list li,html.night-play .history li{background:#253347!important;color:#edf0f7!important}
 html.night-play .room-lock .word-list .solved{color:#f1cd7c!important}
-html.night-play .room-lock .intro h2{color:#f1cd7c!important}
+html.night-play .room-lock .intro #category{color:#101720!important;text-shadow:0 1px 0 #ffffff80!important}
 html.night-play .room-lock .safe{background:#121c28!important}
 html.night-play dialog{background:#1b2230!important;color:#edf0f7!important}
 html.night-play .metrics strong{color:#edf0f7!important}
