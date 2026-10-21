@@ -1,0 +1,27 @@
+html.night-play{color-scheme:dark!important;--paper:#161c28!important;--ink:#edf0f7!important;--muted:#adb8ca!important;--green:var(--night-accent)!important;--red:#ffac80!important;--gold:#f1cd7c!important;--accent:var(--night-accent)!important}
+html.night-play,html.night-play body,html.night-play body.room-embedded{background:#161c28!important;color:#edf0f7!important}
+html.night-play button,html.night-play select{background:#253044!important;color:#edf0f7!important;border-color:#4b5970!important}
+html.night-play button:focus-visible{outline-color:var(--night-accent)!important}
+html.night-play body.room-weave .stats,html.night-play body.room-tide .stats,html.night-play .stats,html.night-play .stat{background:#202a3b!important;border-color:#3c4c63!important;color:#adb8ca!important}
+html.night-play .stats strong,html.night-play .stat b{color:#edf0f7!important}
+html.night-play .stat small,html.night-play .details,html.night-play .help,html.night-play .hint,html.night-play .goal,html.night-play .sub,html.night-play .section-title,html.night-play .proximity,html.night-play .modeNote,html.night-play .modePicker,html.night-play .counter,html.night-play .ticketLabel,html.night-play .footer,html.night-play .resultLabel,html.night-play #message,html.night-play #instruction,html.night-play .metrics{color:#adb8ca!important}
+html.night-play .board,html.night-play .binary-board{background:var(--night-tile)!important;border-color:#3b5060!important}
+html.night-play .tile,html.night-play .futo-cell{background:#293348!important;color:#f0effa!important;border-color:#455570!important;box-shadow:0 3px 0 #0c111b!important}
+html.night-play .tile.selected,html.night-play .futo-cell.selected{background:var(--night-accent)!important;color:#101820!important}
+html.night-play .tile.match,html.night-play .tile.tip{background:#365f49!important;color:#ecfff0!important}
+html.night-play .futo-cell.fixed{background:#363b54!important;color:#f1f1ff!important}
+html.night-play .inequality{color:var(--night-accent)!important}
+html.night-play .primary,html.night-play .keypad button{background:var(--night-accent)!important;color:#101820!important}
+html.night-play .ticket{background:#262530!important;border-color:#665040!important;box-shadow:0 6px 0 #382e29!important}
+html.night-play .ingredientStep,html.night-play .food{background:#30303b!important;border-color:#665040!important;color:#f7ece6!important}
+html.night-play .ingredientStep.next{background:#4b382c!important;border-color:#ffac80!important}
+html.night-play .ingredientStep.done{background:#2d503c!important;border-color:#8bc795!important}
+html.night-play .feedback,html.night-play .status{color:var(--night-accent)!important}
+html.night-play .word-list li,html.night-play .history li{background:#253347!important;color:#edf0f7!important}
+html.night-play .room-lock .word-list .solved{color:#f1cd7c!important}
+html.night-play .room-lock .intro h2{color:#f1cd7c!important}
+html.night-play .room-lock .safe{background:#121c28!important}
+html.night-play dialog{background:#1b2230!important;color:#edf0f7!important}
+html.night-play .metrics strong{color:#edf0f7!important}
+html.night-play progress{accent-color:var(--night-accent)}
+html.night-play .room-tide .board{background:#566178!important}html.night-play .room-shift .board{background:#34354c!important}html.night-play .futo-cell.selected{outline-color:var(--night-accent)!important}

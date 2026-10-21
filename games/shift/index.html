@@ -1,0 +1,542 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#f5f5ef">
+<title>Shift &amp; Lock — Daily puzzle</title>
+<style>
+:root{font-family:system-ui,sans-serif;color:#203b36;background:#f5f5ef;color-scheme:light;--green:#216b53;--muted:#667873}*{box-sizing:border-box}body{margin:0;min-height:100svh}main{max-width:480px;margin:auto;padding: max(24px,env(safe-area-inset-top)) 20px max(24px,env(safe-area-inset-bottom))}header{display:flex;justify-content:space-between;align-items:center}.eyebrow{font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted)}h1{font-size:32px;letter-spacing:-1.5px;margin:6px 0}p{line-height:1.6;color:var(--muted)}.stats{display:flex;justify-content:space-between;margin:26px 0 8px;padding:16px 0;border-block:1px solid #d6ded6}.stats span{font-size:12px;color:var(--muted)}.stats strong{display:block;font-size:24px;color:#203b36;margin-top:4px}button,select{font:inherit;border:1px solid #c4d0c7;border-radius:12px;background:#fffdf8;color:#203b36;min-height:44px;padding:10px 16px;cursor:pointer}button:focus-visible,select:focus-visible,canvas:focus-visible{outline:3px solid #d6993d;outline-offset:3px}button:disabled{opacity:.45;cursor:default}.board{position:relative;margin:8px -8px}canvas{display:block;width:100%;aspect-ratio:1;touch-action:none;user-select:none}.legend{display:flex;gap:16px;justify-content:center;font-size:12px;color:var(--muted)}.dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:#90b9a1;margin-right:5px}.dot.lock{background:#216b53}.status{min-height:48px;font-size:14px;text-align:center;margin:16px 0 8px}.controls{display:grid;grid-template-columns:1fr 1fr;gap:8px}.keyboard{margin-top:16px;display:flex;align-items:center;justify-content:space-between;gap:8px}.keyboard select{flex:1;min-width:0}.hint{font-size:12px;text-align:center}footer{font-size:11px;color:var(--muted);text-align:center;margin-top:24px}dialog{width:calc(100% - 32px);max-width:400px;border:0;border-radius:24px;padding:28px;background:#fffdf8;color:#203b36;box-shadow:0 24px 80px #1235}dialog::backdrop{background:#203b3677}dialog h2{font-size:30px;margin:8px 0}.win-stats{display:flex;gap:32px;margin:20px 0}.win-stats strong{display:block;font-size:28px}.win-stats span{font-size:12px;color:var(--muted)}pre{font:16px/1.7 system-ui;white-space:pre-wrap;background:#eff3eb;border-radius:12px;padding:16px}textarea{width:100%;min-height:140px;font:14px/1.5 system-ui}#shiftlock-share{background:var(--green);color:white;width:100%;border:0}#shiftlock-close{width:100%;margin-top:8px}.error{color:#9a382b}noscript{display:block;padding:24px}
+
+/* Reserve anchor space from first paint, including the device safe area. */
+body{padding-bottom:calc(66px + env(safe-area-inset-bottom,0px))}
+.ad-anchor-wrapper{position:fixed;bottom:0;left:0;right:0;z-index:20;min-height:50px;box-sizing:content-box;padding:8px 0 calc(8px + env(safe-area-inset-bottom,0px));display:flex;justify-content:center;background:#f5f5ef;border-top:1px solid #d6ded6}
+.ad-slot{box-sizing:border-box;display:flex;align-items:center;justify-content:center;background:#edf0e9;border:1px dashed #b8c7bc;color:#667873;font:11px system-ui;letter-spacing:.1em;text-transform:uppercase;flex-shrink:0}
+.ad-anchor{width:320px;height:50px;min-height:50px}
+.ad-modal-wrapper{width:300px;min-height:250px;margin:20px auto;flex-shrink:0}
+.ad-display{width:300px;height:250px;min-height:250px}
+/* Keep the full ad inside narrow mobile dialogs and allow vertical scrolling. */
+#shiftlock-win{padding:20px 10px;max-height:calc(100svh - 24px);overflow-y:auto;max-width:400px;min-width:min(320px,calc(100vw - 16px));width:calc(100% - 16px)}
+</style>
+ <link rel="stylesheet" href="../../night-game.css"><script src="../../night-frame.js" data-game="shift"></script><link rel="stylesheet" href="../../game-theme.css">
+</head>
+<body class="room-embedded room-shift">
+<main>
+<header><div><div class="eyebrow">A little shift. A little clarity.</div><h1>Shift &amp; Lock</h1></div><span aria-hidden="true" style="font-size:28px">▦</span></header>
+<p>Tap to rotate a tile. Its shape stays fixed. Swipe to shift a row or column. Connect the two edge dots to lock the path.</p>
+<div class="stats"><div><span>DAILY PUZZLE</span><strong id="shiftlock-date">—</strong></div><div><span>MOVES</span><strong id="shiftlock-moves">0</strong></div><div><span>STREAK</span><strong id="shiftlock-streak">0</strong></div></div>
+<div class="board"><canvas id="shiftlock-board" width="480" height="480" tabindex="0" aria-label="4 by 4 path puzzle. Tap a tile to rotate it; use arrow keys to shift its row or column. Swipe horizontally or vertically to move tiles."></canvas></div>
+<div class="legend"><span><i class="dot"></i>Aligned connection</span><span><i class="dot lock"></i>Locked path &amp; axes</span></div>
+<p id="shiftlock-status" class="status" role="status" aria-live="polite">Loading today's puzzle…</p>
+<section id="shiftlock-dev-panel" hidden style="padding:16px;margin:16px 0;border:2px dashed #bd9049;border-radius:12px">
+<strong>Developer sandbox</strong><p style="font-size:13px">Separate test saves. Replay any date or test a win repeatedly.</p>
+<label>Seed date <input id="shiftlock-dev-date" type="date" style="min-height:44px;font:inherit"></label>
+<p><label>Board <select id="shiftlock-dev-fixture"><option value="daily">Daily puzzle</option><option value="win">One move from a win</option></select></label></p>
+<div class="controls"><button id="shiftlock-dev-load">Load / reset board</button><button id="shiftlock-dev-clear">Clear test history</button></div>
+<p id="shiftlock-dev-info" style="font-size:12px"></p>
+</section>
+<div class="controls"><button id="shiftlock-restart" disabled>Restart puzzle</button><button id="shiftlock-results" disabled>Daily results</button></div><button id="shiftlock-answer" style="width:100%;margin-top:8px">Show answer</button>
+<div class="keyboard"><select id="shiftlock-selection" aria-label="Selected tile"></select><button id="shiftlock-left" aria-label="Shift selected row left">←</button><button id="shiftlock-right" aria-label="Shift selected row right">→</button><button id="shiftlock-up" aria-label="Shift selected column up">↑</button><button id="shiftlock-down" aria-label="Shift selected column down">↓</button></div>
+<p class="hint">Taps rotate fixed shapes. Move straight pieces into place with swipes. Swipes shift rows or columns with wraparound.</p>
+<footer>One puzzle per local calendar day · Progress saved on this device</footer>
+</main>
+<dialog id="shiftlock-win" aria-labelledby="shiftlock-win-title"><div class="eyebrow">Daily connection complete</div><h2 id="shiftlock-win-title">Locked in.</h2><p>Your path is complete. Come back tomorrow for a fresh shift.</p><div class="win-stats"><div><strong id="shiftlock-final-moves"></strong><span>MOVES</span></div><div><strong id="shiftlock-final-streak"></strong><span>DAY STREAK</span></div></div><pre id="shiftlock-share-preview"></pre><div class="ad-modal-wrapper"><div id="shiftlock-ad-completion" class="ad-slot ad-display" data-ad-placement="completion" role="region" aria-label="Advertisement placeholder, 300 by 250">Advertisement · 300 × 250</div></div><button id="shiftlock-share">Share result</button><p id="shiftlock-share-status" role="status"></p><textarea id="shiftlock-share-text" aria-label="Result text to copy" hidden readonly></textarea><button id="shiftlock-close">Back to board</button></dialog>
+<aside class="ad-anchor-wrapper" aria-label="Bottom advertisement"><div id="shiftlock-ad-anchor" class="ad-slot ad-anchor" data-ad-placement="anchor" role="region" aria-label="Advertisement placeholder, 320 by 50">Advertisement · 320 × 50</div></aside>
+<dialog id="shiftlock-answer-dialog" aria-labelledby="shiftlock-answer-title" style="max-height:90svh;overflow-y:auto"><h2 id="shiftlock-answer-title">One valid solution</h2><p>Match the dark path to connect the dots. Other solutions may also work. Your progress stays unchanged.</p><canvas id="shiftlock-answer-board" width="480" height="480" role="img" aria-label="Solved puzzle layout"></canvas><p id="shiftlock-answer-description" style="font-size:12px"></p><button id="shiftlock-answer-close" style="width:100%">Back to puzzle</button></dialog>
+<noscript>This puzzle needs JavaScript enabled.</noscript>
+<script>
+// Embedded from engine.js so this page also works from file://.
+const ShiftLockEngine = (() => {
+/** Shift & Lock rules engine. ES module; coordinates are zero-based. */
+const SIZE = 4;
+const DELTA = { N: [-1, 0], E: [0, 1], S: [1, 0], W: [0, -1] };
+const OPPOSITE = { N: 'S', E: 'W', S: 'N', W: 'E' };
+const SHAPES = [['N', 'S'], ['E', 'W'], ['N', 'E'], ['E', 'S'], ['S', 'W'], ['W', 'N']];
+
+function createPRNG(date) {
+  if (typeof date !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(date) ||
+      !Number.isFinite(Date.parse(`${date}T00:00:00Z`)) ||
+      new Date(`${date}T00:00:00Z`).toISOString().slice(0, 10) !== date) {
+    throw new TypeError('Seed must be a valid YYYY-MM-DD date.');
+  }
+  // FNV-1a string hash followed by Mulberry32.
+  let seed = 2166136261;
+  for (const char of date) seed = Math.imul(seed ^ char.charCodeAt(0), 16777619);
+  return function random() {
+    seed = (seed + 0x6D2B79F5) | 0;
+    let value = Math.imul(seed ^ (seed >>> 15), 1 | seed);
+    value ^= value + Math.imul(value ^ (value >>> 7), 61 | value);
+    return ((value ^ (value >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+function checkIndex(index) {
+  if (!Number.isInteger(index) || index < 0 || index >= SIZE) throw new RangeError('Index must be 0–3.');
+}
+
+function validateGrid(grid) {
+  const ids = new Set();
+  if (!Array.isArray(grid) || grid.length !== SIZE || grid.some(row =>
+    !Array.isArray(row) || row.length !== SIZE)) throw new TypeError('Expected a 4×4 grid.');
+  for (const tile of grid.flat()) {
+    if (!tile || typeof tile.id !== 'string' || ids.has(tile.id) ||
+        !Array.isArray(tile.connections) || tile.connections.length !== 2 ||
+        new Set(tile.connections).size !== 2 || tile.connections.some(side => !DELTA[side])) {
+      throw new TypeError('Tiles require unique string IDs and two distinct N/E/S/W connections.');
+    }
+    ids.add(tile.id);
+  }
+}
+
+/** A reversible scramble of a route with four required turns and offset terminals. */
+function createDailyPuzzle(date) {
+  const random = createPRNG(date);
+  const flip = random() < 0.5;
+  const route = [[0,0,['W','E']],[0,1,['W','E']],[0,2,['W','S']],
+    [1,2,['N','S']],[2,2,['N','W']],[2,1,['E','S']],
+    [3,1,['N','E']],[3,2,['W','E']],[3,3,['W','E']]];
+  const grid = Array.from({length:4},(_,r)=>Array.from({length:4},(_,c)=>({
+    id:r+':'+c,connections:[...SHAPES[Math.floor(random()*SHAPES.length)]],isLocked:false
+  })));
+  for (const [r,c,sides] of route) grid[flip?3-r:r][c].connections=sides.map(side=>flip?(side==='N'?'S':side==='S'?'N':side):side);
+  const terminals=[{pair:'A',side:'W',index:flip?3:0},{pair:'A',side:'E',index:flip?0:3}];
+  const scramble=[];
+  function shift(axis,index,direction) {
+    const line=Array.from({length:4},(_,i)=>axis==='row'?grid[index][i]:grid[i][index]);
+    for(let i=0;i<4;i++){const tile=line[(i-direction+4)%4];if(axis==='row')grid[index][i]=tile;else grid[i][index]=tile;}
+    scramble.push([axis,index,direction]);
+  }
+  for(let i=0;i<24;i++)shift(random()<0.5?'row':'col',Math.floor(random()*4),random()<0.5?-1:1);
+  // Never ship an already-complete daily board.
+  if(createEngine(date,{grid,terminals}).getState().isSolved) {
+    // Moving the entry straight into a corner orientation breaks the route,
+    // while retaining its type; include the rotation in the inverse witness.
+    const tile=grid[terminals[0].index][0];
+    const cw={N:'E',E:'S',S:'W',W:'N'};
+    let turns=0;
+    while(tile.connections.includes('W')){tile.connections=tile.connections.map(side=>cw[side]);turns++;}
+    for(let i=0;i<turns;i++)scramble.push(['rotate',terminals[0].index,0]);
+  }
+  const solution=[];
+  for(const [axis,index,direction] of scramble.reverse()) {
+    if(axis==='rotate')for(let i=0;i<3;i++)solution.push(['rotate',index,direction]);
+    else solution.push([axis,index,-direction]);
+  }
+  return {grid,terminals,solution};
+}
+
+/** Terminal: { pair: string, side: 'N'|'E'|'S'|'W', index: 0..3 }.
+ * N/S indices are columns; E/W indices are rows. Terminals stay fixed.
+ */
+function createEngine(date, options = {}) {
+  const random = createPRNG(date);
+  let grid;
+  const generated = options.grid ? null : createDailyPuzzle(date);
+  const terminals = (options.terminals ?? generated?.terminals ?? [
+    { pair: 'A', side: 'W', index: 0 }, { pair: 'A', side: 'E', index: 0 }
+  ]).map(terminal => ({ ...terminal }));
+  const slots = new Set();
+  const counts = new Map();
+  if (!terminals.length) throw new TypeError('At least one terminal pair is required.');
+  for (const terminal of terminals) {
+    checkIndex(terminal.index);
+    const slot = `${terminal.side}:${terminal.index}`;
+    if (!DELTA[terminal.side] || typeof terminal.pair !== 'string' || !terminal.pair || slots.has(slot)) {
+      throw new TypeError('Invalid or duplicate terminal.');
+    }
+    slots.add(slot);
+    counts.set(terminal.pair, (counts.get(terminal.pair) ?? 0) + 1);
+  }
+  if ([...counts.values()].some(count => count !== 2)) throw new TypeError('Each pair needs exactly two terminals.');
+  if (options.grid) {
+    validateGrid(options.grid);
+    grid = options.grid.map(row => row.map(tile => ({ ...tile, connections: [...tile.connections], isLocked: false })));
+  } else {
+    if (options.terminals) throw new TypeError('Custom terminals require a custom grid.');
+    grid = generated.grid.map(row => row.map(tile => ({...tile, connections:[...tile.connections]})));
+  }
+  let moves = 0;
+  let paths = [];
+  let lockedRows = new Set();
+  let lockedCols = new Set();
+
+  function rotate(axis, index, direction) {
+    const line = Array.from({ length: SIZE }, (_, i) => axis === 'row' ? grid[index][i] : grid[i][index]);
+    for (let i = 0; i < SIZE; i++) {
+      const tile = line[(i - direction + SIZE) % SIZE];
+      if (axis === 'row') grid[index][i] = tile;
+      else grid[i][index] = tile;
+    }
+  }
+
+  function cellFor(terminal) {
+    return terminal.side === 'N' ? [0, terminal.index] : terminal.side === 'S' ? [3, terminal.index] :
+      terminal.side === 'W' ? [terminal.index, 0] : [terminal.index, 3];
+  }
+
+  function trace(start) {
+    let [row, col] = cellFor(start);
+    let entry = start.side;
+    const cells = [];
+    const visited = new Set();
+    while (true) {
+      const key = `${row}:${col}`;
+      const tile = grid[row][col];
+      if (visited.has(key) || !tile.connections.includes(entry)) return null;
+      visited.add(key);
+      cells.push([row, col]);
+      const exit = tile.connections.find(side => side !== entry);
+      const [dr, dc] = DELTA[exit];
+      const nextRow = row + dr, nextCol = col + dc;
+      if (nextRow < 0 || nextRow >= SIZE || nextCol < 0 || nextCol >= SIZE) {
+        const index = exit === 'N' || exit === 'S' ? col : row;
+        const end = terminals.find(t => t.side === exit && t.index === index);
+        return end && end !== start && end.pair === start.pair ? { pair: start.pair, cells } : null;
+      }
+      row = nextRow;
+      col = nextCol;
+      entry = OPPOSITE[exit];
+    }
+  }
+
+  function checkConnections() {
+    paths = [];
+    const found = new Set();
+    lockedRows = new Set();
+    lockedCols = new Set();
+    for (const tile of grid.flat()) tile.isLocked = false;
+    for (const terminal of terminals) {
+      if (found.has(terminal.pair)) continue;
+      const path = trace(terminal);
+      if (!path) continue;
+      found.add(path.pair);
+      paths.push(path);
+      for (const [row, col] of path.cells) {
+        grid[row][col].isLocked = true;
+        lockedRows.add(row);
+        lockedCols.add(col);
+      }
+    }
+    return getState();
+  }
+
+  function shift(axis, index, direction) {
+    checkIndex(index);
+    // +1 means right/down; -1 means left/up. Tile orientation never changes.
+    if (direction !== 1 && direction !== -1) throw new RangeError('Direction must be +1 or -1.');
+    if ((axis === 'row' ? lockedRows : lockedCols).has(index)) return { moved: false, reason: 'locked', state: getState() };
+    rotate(axis, index, direction);
+    moves++;
+    return { moved: true, state: checkConnections() };
+  }
+
+  function getState() {
+    // Defensive snapshots keep callers from bypassing movement and lock rules.
+    return {
+      date, moves,
+      grid: grid.map(row => row.map(tile => ({ ...tile, connections: [...tile.connections] }))),
+      terminals: terminals.map(t => ({ ...t })),
+      paths: paths.map(path => ({ pair: path.pair, cells: path.cells.map(cell => [...cell]) })),
+      lockedRows: [...lockedRows].sort(), lockedCols: [...lockedCols].sort(),
+      isSolved: paths.length === counts.size
+    };
+  }
+
+  checkConnections();
+  return {
+    getState, checkConnections,
+    rotateTile(row, col) {
+      checkIndex(row); checkIndex(col);
+      if (grid[row][col].isLocked) return { moved: false, reason: 'locked', state: getState() };
+      const clockwise = { N: 'E', E: 'S', S: 'W', W: 'N' };
+      grid[row][col].connections = grid[row][col].connections.map(side => clockwise[side]);
+      moves++;
+      return { moved: true, state: checkConnections() };
+    },
+    shiftRow: (index, direction) => shift('row', index, direction),
+    shiftCol: (index, direction) => shift('col', index, direction)
+  };
+}
+
+// Connections stop at board edges; only tile movement wraps. Unlock actions are
+// intentionally left to a later rule specification. Scrambles are deterministic,
+// and include a reversible solution witness. They are not difficulty-rated.
+
+return { createEngine, createPRNG, createDailyPuzzle, SIZE };
+})();
+</script>
+<script>
+(() => {
+// Self-contained startup: no network request or module loader required.
+const $ = id => document.getElementById('shiftlock-'+id);
+const canvas = $('board'), ctx = canvas.getContext('2d');
+const DEV = new URLSearchParams(location.search).get('dev') === '1';
+let devDate = '', devFixture = 'daily';
+let KEY = DEV ? 'shift-lock:dev:v2:daily' : 'shift-lock:v2';
+const directions = {N:[0,-1],E:[1,0],S:[0,1],W:[-1,0]};
+const opposite = {N:'S',S:'N',E:'W',W:'E'};
+let engine, state, history = [], daily, selected = [0,0], gesture = null, store = {days:{}};
+let createEngine, storageAvailable = true;
+function dateKey(date = new Date()) { return `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`; }
+function priorDay(key) { const [y,m,d] = key.split('-').map(Number); return dateKey(new Date(y,m-1,d-1,12)); }
+function streak(key = daily) { let n=0; while(store.days[key]?.won) { n++; key=priorDay(key); } return n; }
+function shownStreak() { return streak(store.days[daily]?.won ? daily : priorDay(daily)); }
+function message(text) { $('status').textContent = text; }
+function save() {
+  store.days[daily] = { history:history.map(move=>[...move]), moves:state.moves, won:state.isSolved, completedMoves:state.isSolved?state.moves:null, streak:state.isSolved?1+streak(priorDay(daily)):shownStreak() };
+  try { localStorage.setItem(KEY,JSON.stringify(store)); } catch { storageAvailable=false; }
+}
+function fresh() {
+  if (DEV && devFixture === 'win') {
+    // Shift column 1 UP once to complete the top horizontal path.
+    const grid = Array.from({length:4},(_,r)=>Array.from({length:4},(_,c)=>({id:r+':'+c,connections:r===0?['E','W']:['N','S']})));
+    const column=grid.map(row=>row[0]);grid.forEach((row,r)=>row[0]=column[(r+3)%4]);
+    return createEngine(daily,{grid});
+  }
+  const candidate = createEngine(daily);
+  if (!candidate.getState().isSolved) return candidate;
+  // Rare already-solved scramble: a fixed, reversible one-shift fallback.
+  const grid = Array.from({length:4},(_,r)=>Array.from({length:4},(_,c)=>({id:`${r}:${c}`,connections:r===0?['E','W']:['N','S']})));
+  const col = grid.map(row=>row[0]); grid.forEach((row,r)=>row[0]=col[(r+3)%4]);
+  return createEngine(daily,{grid});
+}
+function loadDay() {
+  daily=DEV && devDate ? devDate : dateKey(); history=[]; engine=fresh();
+  const saved=store.days[daily];
+  if (saved) {
+    try {
+      if (!Array.isArray(saved.history) || saved.history.length>100000) throw Error('Invalid history');
+      for (const move of saved.history) {
+        if (!Array.isArray(move)||move.length!==3||!['row','col','rotate'].includes(move[0])||engine.getState().isSolved) throw Error('Invalid move');
+        const result=move[0]==='rotate'?engine.rotateTile(move[1],move[2]):move[0]==='row'?engine.shiftRow(move[1],move[2]):engine.shiftCol(move[1],move[2]);
+        if (!result.moved) throw Error('Locked move'); history.push([...move]);
+      }
+    } catch { engine=fresh(); history=[]; delete store.days[daily]; }
+  }
+  state=engine.getState(); save(); render();
+  message(state.isSolved?'Today’s path is complete. Well shifted.':storageAvailable?'Tap to rotate. Corners stay corners; straights stay straight. Swipe to shift a row or column.':'Storage unavailable. Progress lasts for this session.');
+  if (state.isSolved) showWin();
+}
+function ensureToday() { if(DEV) return true; if(dateKey()!==daily) { $('win').close(); loadDay(); return false; } return true; }
+function move(axis,index,direction) {
+  if(!engine||!ensureToday()||state.isSolved) return;
+  const result=axis==='row'?engine.shiftRow(index,direction):engine.shiftCol(index,direction);
+  if(!result.moved) { message('That axis is locked by a completed path.'); return; }
+  history.push([axis,index,direction]); state=result.state; save(); render();
+  message(state.isSolved?'Path complete. Locked in!':storageAvailable?'Nice shift. Connect the two edge dots.':'Move made. Storage unavailable; keep this tab open.');
+  if(state.isSolved) showWin();
+}
+function rotateTile(row,col) {
+  if(!engine||!ensureToday()||state.isSolved) return;
+  const result=engine.rotateTile(row,col);
+  if(!result.moved){message('That tile is locked by a completed path.');return;}
+  history.push(['rotate',row,col]);state=result.state;save();render();
+  message(state.isSolved?'Path complete. Locked in!':'Tile rotated. Its shape stays fixed.');
+  if(state.isSolved)showWin();
+}
+function connected(r,c,side) {
+  const [dx,dy]=directions[side], nr=r+dy,nc=c+dx;
+  return nr>=0&&nr<4&&nc>=0&&nc<4&&state.grid[nr][nc].connections.includes(opposite[side]);
+}
+function lockIcon(x,y) {
+  ctx.strokeStyle=window.roomNightColor('#216b53','#82d49b');ctx.lineWidth=1.7;ctx.beginPath();ctx.arc(x,y-3,3,Math.PI,0);ctx.stroke();ctx.fillStyle=window.roomNightColor('#216b53','#82d49b');ctx.fillRect(x-4,y-3,8,7);
+}
+function render() {
+  if(!state) return;
+  const width=canvas.getBoundingClientRect().width || 400, dpr=Math.min(window.devicePixelRatio||1,3);
+  canvas.width=Math.round(width*dpr);canvas.height=Math.round(width*dpr);ctx.setTransform(canvas.width/480,0,0,canvas.height/480,0,0);
+  ctx.clearRect(0,0,480,480);
+  // A light band identifies every axis blocked by a completed path.
+  ctx.fillStyle='#216b5310';
+  state.lockedRows.forEach(r=>ctx.fillRect(16,40+r*100,448,100));
+  state.lockedCols.forEach(c=>ctx.fillRect(40+c*100,16,100,448));
+  for(let r=0;r<4;r++) for(let c=0;c<4;c++) {
+    const tile=state.grid[r][c],x=40+c*100,y=40+r*100,cx=x+50,cy=y+50;
+    ctx.fillStyle=tile.isLocked?window.roomNightColor('#dcebdd','#30513c'):window.roomNightColor('#fffdf8','#192a32');ctx.beginPath();ctx.roundRect(x+4,y+4,92,92,15);ctx.fill();if(document.documentElement.classList.contains('night-play')){ctx.strokeStyle='#8197a7';ctx.lineWidth=1.8;ctx.stroke();}
+    if(selected[0]===r&&selected[1]===c) {ctx.strokeStyle=window.roomNightColor('#bd9049','#f4cd81');ctx.lineWidth=2;ctx.stroke();}
+    // Neutral full tile geometry, with reciprocal connections highlighted.
+    ctx.lineCap='round';ctx.lineJoin='round';ctx.lineWidth=9;ctx.strokeStyle=tile.isLocked?window.roomNightColor('#216b53','#82d49b'):window.roomNightColor('#becbc3','#758e7f');ctx.beginPath();
+    const [a,b]=tile.connections.map(side=>directions[side]);ctx.moveTo(cx+a[0]*46,cy+a[1]*46);ctx.lineTo(cx,cy);ctx.lineTo(cx+b[0]*46,cy+b[1]*46);ctx.stroke();
+    if(!tile.isLocked) for(const side of tile.connections) if(connected(r,c,side)) {const [dx,dy]=directions[side];ctx.strokeStyle=window.roomNightColor('#78a68d','#a2dfb0');ctx.beginPath();ctx.moveTo(cx,cy);ctx.lineTo(cx+dx*46,cy+dy*46);ctx.stroke();}
+    if(tile.isLocked) lockIcon(x+78,y+24);
+  }
+  state.lockedRows.forEach(r=>lockIcon(20,90+r*100));state.lockedCols.forEach(c=>lockIcon(90+c*100,20));
+  for(const t of state.terminals) {
+    const x=t.side==='W'?29:t.side==='E'?451:90+t.index*100;
+    const y=t.side==='N'?29:t.side==='S'?451:90+t.index*100;
+    ctx.fillStyle=window.roomNightColor('#216b53','#82d49b');ctx.beginPath();ctx.arc(x,y,9,0,Math.PI*2);ctx.fill();
+  }
+  $('date').textContent=new Date(`${daily}T12:00:00`).toLocaleDateString(undefined,{month:'short',day:'numeric'});
+  $('moves').textContent=state.moves; $('streak').textContent=shownStreak();
+  $('restart').disabled=state.isSolved && !DEV; $('results').disabled=!state.isSolved;
+  $('selection').value=selected.join(',');
+  for(const id of ['left','right','up','down']) $(id).disabled=state.isSolved||(id==='left'||id==='right'?state.lockedRows.includes(selected[0]):state.lockedCols.includes(selected[1]));
+  canvas.setAttribute('aria-label',`4 by 4 puzzle, ${state.moves} moves. Selected row ${selected[0]+1}, column ${selected[1]+1}. ${state.isSolved?'Solved.':'Arrow keys shift the selected tile’s row or column.'}`);
+}
+function shareText() {return `Shift & Lock · ${daily}\n${state.moves} moves · ${shownStreak()} day streak\n\n`+state.grid.map((row,r)=>row.map((t,c)=>t.isLocked?'🔒':t.connections.some(s=>connected(r,c,s))?'🟩':'⬜').join('')).join('\n');}
+function showWin() {
+  $('final-moves').textContent=state.moves;$('final-streak').textContent=shownStreak();$('share-preview').textContent=shareText();$('share-status').textContent='';$('share-text').hidden=true;
+  if(!$('win').open) $('win').showModal();
+}
+function point(x,y) {const b=canvas.getBoundingClientRect();const c=Math.floor(((x-b.left)/b.width*480-40)/100),r=Math.floor(((y-b.top)/b.height*480-40)/100);return r>=0&&r<4&&c>=0&&c<4?[r,c]:null;}
+function start(x,y) {if(!engine||!ensureToday())return;const cell=point(x,y);if(!cell)return;selected=cell;gesture={x,y,cell};render();}
+function end(x,y) {if(!gesture)return;const g=gesture;gesture=null;const dx=x-g.x,dy=y-g.y;if(Math.max(Math.abs(dx),Math.abs(dy))<24){rotateTile(...g.cell);return;}if(Math.abs(dx)>Math.abs(dy))move('row',g.cell[0],Math.sign(dx));else move('col',g.cell[1],Math.sign(dy));}
+canvas.addEventListener('touchstart',e=>{if(e.touches.length!==1){gesture=null;return;}e.preventDefault();start(e.touches[0].clientX,e.touches[0].clientY);},{passive:false});
+canvas.addEventListener('touchmove',e=>{if(gesture)e.preventDefault();if(e.touches.length!==1)gesture=null;},{passive:false});
+canvas.addEventListener('touchend',e=>{if(gesture&&e.changedTouches.length)end(e.changedTouches[0].clientX,e.changedTouches[0].clientY);});
+canvas.addEventListener('touchcancel',()=>gesture=null);
+canvas.addEventListener('pointerdown',e=>{if(e.pointerType==='touch')return;canvas.setPointerCapture(e.pointerId);start(e.clientX,e.clientY);});
+canvas.addEventListener('pointerup',e=>{if(e.pointerType!=='touch')end(e.clientX,e.clientY);});
+canvas.addEventListener('pointercancel',()=>gesture=null);
+canvas.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();rotateTile(...selected);return;}const actions={ArrowLeft:['row',selected[0],-1],ArrowRight:['row',selected[0],1],ArrowUp:['col',selected[1],-1],ArrowDown:['col',selected[1],1]};if(actions[e.key]){e.preventDefault();move(...actions[e.key]);}});
+for(let r=0;r<4;r++)for(let c=0;c<4;c++)$('selection').add(new Option(`Row ${r+1}, col ${c+1}`,`${r},${c}`));
+$('selection').onchange=()=>{selected=$('selection').value.split(',').map(Number);render();};
+for(const [id,axis,dir] of [['left','row',-1],['right','row',1],['up','col',-1],['down','col',1]])$(id).onclick=()=>move(axis,selected[axis==='row'?0:1],dir);
+$('restart').onclick=()=>{if(!ensureToday()||(state.isSolved&&!DEV))return;if(DEV||confirm('Restart today’s puzzle and reset its move count?')){$('win').close();engine=fresh();history=[];state=engine.getState();save();render();message('Fresh start. Find your connection.');}};
+$('answer').onclick=()=>{
+  if(!engine||!ensureToday())return;
+  const solutionGame=fresh();
+  const moves=DEV&&devFixture==='win'?[['col',0,-1]]:ShiftLockEngine.createDailyPuzzle(daily).solution;
+  for(const [axis,a,b] of moves){
+    if(solutionGame.getState().isSolved)break;
+    if(axis==='row')solutionGame.shiftRow(a,b);
+    else if(axis==='col')solutionGame.shiftCol(a,b);
+    else solutionGame.rotateTile(a,b);
+  }
+  const solved=solutionGame.getState();
+  if(!solved.isSolved){message('Unable to show this answer. Reset this test board and try again.');return;}
+  const ac=$('answer-board').getContext('2d');ac.clearRect(0,0,480,480);
+  const route=[];
+  for(let r=0;r<4;r++)for(let c=0;c<4;c++){
+    const tile=solved.grid[r][c],x=40+c*100,y=40+r*100;
+    ac.fillStyle=tile.isLocked?window.roomNightColor('#dcebdd','#30513c'):window.roomNightColor('#eff1ea','#192a32');ac.beginPath();ac.roundRect(x+4,y+4,92,92,14);ac.fill();if(document.documentElement.classList.contains('night-play')){ac.strokeStyle='#8197a7';ac.lineWidth=1.8;ac.stroke();}
+    ac.strokeStyle=tile.isLocked?window.roomNightColor('#216b53','#82d49b'):window.roomNightColor('#becbc3','#758e7f');ac.lineWidth=9;ac.lineCap='round';ac.lineJoin='round';ac.beginPath();
+    const [a,b]=tile.connections.map(side=>directions[side]);ac.moveTo(x+50+a[0]*45,y+50+a[1]*45);ac.lineTo(x+50,y+50);ac.lineTo(x+50+b[0]*45,y+50+b[1]*45);ac.stroke();
+    if(tile.isLocked)route.push('Row '+(r+1)+', column '+(c+1)+': '+tile.connections.join('–'));
+  }
+  for(const t of solved.terminals){const x=t.side==='W'?29:t.side==='E'?451:90+t.index*100;const y=t.side==='N'?29:t.side==='S'?451:90+t.index*100;ac.fillStyle=window.roomNightColor('#216b53','#82d49b');ac.beginPath();ac.arc(x,y,9,0,Math.PI*2);ac.fill();}
+  $('answer-description').textContent=route.join('; ');
+  $('answer-board').setAttribute('aria-label','Solved path. '+route.join('; '));
+  $('answer-dialog').showModal();
+};
+$('answer-close').onclick=()=>$('answer-dialog').close();
+$('results').onclick=()=>{if(ensureToday()&&state.isSolved)showWin();};$('close').onclick=()=>$('win').close();
+$('share').onclick=async()=>{
+  const text=shareText();
+  try {if(navigator.share){await navigator.share({text});$('share-status').textContent='Shared.';}else{await navigator.clipboard.writeText(text);$('share-status').textContent='Copied to clipboard.';}}
+  catch(error){if(error.name==='AbortError')return;$('share-text').hidden=false;$('share-text').value=text;$('share-text').focus();$('share-text').select();$('share-status').textContent='Copy the selected text to share your result.';}
+};
+window.addEventListener('room:night',render);if (typeof ResizeObserver !== 'undefined') new ResizeObserver(render).observe(canvas);
+else window.addEventListener('resize', render);
+document.addEventListener('visibilitychange',()=>{if(!document.hidden&&engine)ensureToday();});
+window.addEventListener('focus',()=>{if(engine)ensureToday();});
+setInterval(()=>{if(engine)ensureToday();},30000);
+if (DEV) {
+  $('dev-panel').hidden=false;
+  $('dev-date').value=dateKey();
+  $('dev-info').textContent='Win fixture: select Row 1, col 1 and press ↑. Restart remains available after winning.';
+  document.title='Shift & Lock — Developer sandbox';
+  function loadTest(clearAll=false) {
+    const seed=$('dev-date').value;
+    try { ShiftLockEngine.createPRNG(seed); } catch { message('Choose a valid seed date.');return; }
+    devDate=seed;devFixture=$('dev-fixture').value;
+    KEY='shift-lock:dev:v2:'+devFixture;
+    if(clearAll) {
+      try {localStorage.removeItem('shift-lock:dev:v2:daily');localStorage.removeItem('shift-lock:dev:v2:win');} catch {}
+    }
+    store={days:{}};
+    if(!clearAll)try{const saved=JSON.parse(localStorage.getItem(KEY)||'null');if(saved?.days)store=saved;}catch{}
+    delete store.days[seed];
+    $('win').close();selected=[0,0];loadDay();
+    message(devFixture==='win'?'Test fixture ready: press ↑ on column 1 to win.':'Test board reset. Play, reload, or choose another date.');
+  }
+  $('dev-load').onclick=()=>loadTest();
+  $('dev-clear').onclick=()=>loadTest(true);
+}
+try {
+  ({createEngine}=ShiftLockEngine);
+  try {const parsed=JSON.parse(localStorage.getItem(KEY)||'null');if(parsed&&parsed.days&&typeof parsed.days==='object'&&!Array.isArray(parsed.days))store=parsed;}catch{storageAvailable=false;}
+  loadDay();
+} catch(error) {message('Unable to start the puzzle. Reload the page to try again.');$('status').classList.add('error');console.error(error);}
+})();
+</script>
+
+<script>
+(() => {
+  // Integration hook: listen for this event and call the ad provider's refresh API.
+  // No ad requests are made by these placeholders.
+  const REQUIRED_MS = 30000;
+  const modal = document.getElementById('shiftlock-win');
+  const answerModal = document.getElementById('shiftlock-answer-dialog');
+  const records = new Map([...document.querySelectorAll('[data-ad-placement]')].map(element =>
+    [element, { ratio: 0, timer: null, since: null }]));
+  if (!('IntersectionObserver' in window)) return; // Fail closed.
+  const now = () => performance.now();
+  function eligible(element, record) {
+    return !document.hidden && record.ratio >= 0.5 && element.isConnected &&
+      (element.dataset.adPlacement === 'completion' ? modal.open && !answerModal.open : !modal.open && !answerModal.open);
+  }
+  function stop(record) {
+    if (record.timer !== null) clearTimeout(record.timer);
+    record.timer = null; record.since = null;
+  }
+  function sync(element, record) {
+    if (!eligible(element, record)) { stop(record); return; }
+    if (record.timer !== null) return;
+    record.since = now();
+    record.timer = setTimeout(() => {
+      record.timer = null;
+      // Flush pending observer changes before allowing a refresh.
+      for (const entry of observer.takeRecords()) {
+        const pending = records.get(entry.target);
+        pending.ratio = entry.isIntersecting ? entry.intersectionRatio : 0;
+        if (!eligible(entry.target, pending)) stop(pending);
+      }
+      if (!eligible(element, record) || record.since === null || now() - record.since < REQUIRED_MS) {
+        stop(record); sync(element, record); return;
+      }
+      record.since = null;
+      element.dispatchEvent(new CustomEvent('shiftlock:ad-refresh', {
+        bubbles: true, detail: { placement: element.dataset.adPlacement, element, visibleForMs: REQUIRED_MS }
+      }));
+      sync(element, record); // A further refresh requires another continuous 30 seconds.
+    }, REQUIRED_MS);
+  }
+  const observer = new IntersectionObserver(entries => {
+    for (const entry of entries) {
+      const record = records.get(entry.target);
+      record.ratio = entry.isIntersecting ? entry.intersectionRatio : 0;
+      sync(entry.target, record);
+    }
+  }, { root: null, threshold: [0, 0.5, 1] });
+  function restartObservation() {
+    observer.disconnect();
+    for (const [element, record] of records) {
+      stop(record); record.ratio = 0;
+      if (!document.hidden) observer.observe(element);
+    }
+  }
+  document.addEventListener('visibilitychange', restartObservation);
+  window.addEventListener('pagehide', () => { observer.disconnect(); for (const record of records.values()) stop(record); });
+  window.addEventListener('pageshow', restartObservation);
+  // Native modal dialogs cover the anchor; never refresh it through the backdrop.
+  const modalObserver = new MutationObserver(restartObservation);
+  for (const dialog of [modal, answerModal]) modalObserver.observe(dialog, { attributes: true, attributeFilter: ['open'] });
+  restartObservation();
+})();
+</script>
+<script>
+(() => {
+ let last=0,queued=false;
+ function measure(){queued=false;const main=document.querySelector('main');const height=Math.ceil((main?.getBoundingClientRect().bottom||document.body.getBoundingClientRect().height)+12);if(height!==last){last=height;parent.postMessage({type:'room:height',height},'*');}}
+ function update(){if(!queued){queued=true;requestAnimationFrame(measure);}}
+ new ResizeObserver(update).observe(document.body);
+ new MutationObserver(update).observe(document.body,{subtree:true,childList:true,attributes:true,characterData:true});
+ window.addEventListener('load',update);window.addEventListener('resize',update);update();
+})();
+</script>
+</body>
+</html>
+
+
+

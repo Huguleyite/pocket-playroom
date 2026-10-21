@@ -1,0 +1,376 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#080c16">
+  <meta name="description" content="Signal Flow: a daily neon circuit puzzle. Rotate prisms. Connect every signal.">
+  <title>Signal Flow · Daily Circuit</title>
+  <style>
+    :root{color-scheme:dark;--bg:#080c16;--panel:#101725;--muted:#91a0b8;--text:#edf6ff;--cyan:#42e8ff;--magenta:#ff5bd6;--gold:#ffd563;--green:#6bffb0;--line:#263348}
+    *{box-sizing:border-box}body{margin:0;min-height:100svh;background:radial-gradient(ellipse at 50% 20%,#142239 0,transparent 65%),var(--bg);color:var(--text);font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;padding: max(24px,env(safe-area-inset-top)) max(16px,env(safe-area-inset-right)) max(24px,env(safe-area-inset-bottom)) max(16px,env(safe-area-inset-left))}
+    button,textarea{font:inherit}button{cursor:pointer;color:inherit}button:focus-visible,textarea:focus-visible{outline:3px solid var(--cyan);outline-offset:4px}button:disabled{cursor:default}main{width:min(100%,520px);margin:auto}.topline,.stats,.board-meta,.footer{display:flex;align-items:center;justify-content:space-between;gap:12px}.brand-mark{font-size:11px;font-weight:700;letter-spacing:.19em;color:var(--cyan)}.live{width:7px;height:7px;display:inline-block;background:var(--cyan);border-radius:50%;box-shadow:0 0 12px var(--cyan);margin-right:7px}h1{font-size:clamp(32px,9vw,48px);letter-spacing:-.055em;margin:22px 0 8px;font-weight:800}h1 span{color:var(--cyan)}.intro{color:var(--muted);line-height:1.6;font-size:14px;margin:0 0 24px}.help{width:34px;height:34px;border:1px solid var(--line);border-radius:50%;background:#101725;color:var(--muted)}.stats{padding:17px 20px;border:1px solid var(--line);border-radius:14px;background:#101725b3;margin-bottom:24px}.stat{text-align:center;flex:1}.stat+.stat{border-left:1px solid var(--line)}.stat strong{display:block;font-variant-numeric:tabular-nums;font-size:23px;font-weight:650}.label{display:block;font-size:10px;letter-spacing:.14em;color:var(--muted);text-transform:uppercase;margin-top:4px}.board-meta{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin:0 2px 10px}.board-meta .state{color:var(--cyan)}
+    .board{position:relative;aspect-ratio:1;border:1px solid #33455e;border-radius:17px;overflow:hidden;background:#0c1321;box-shadow:0 16px 65px #0007,0 0 32px #42e8ff08;isolation:isolate}.board svg{display:block;width:100%;height:100%;position:absolute;inset:0}.beam-layer{pointer-events:none}.beam{fill:none;stroke-linecap:round;stroke-linejoin:round;filter:drop-shadow(0 0 4px currentColor)}.rotor{transition:transform 180ms cubic-bezier(.2,.8,.3,1);transform-origin:0 0}.controls{position:absolute;inset:0;display:grid;grid-template-columns:repeat(6,1fr);grid-template-rows:repeat(6,1fr)}.cell{border:0;background:transparent;border-radius:10px;margin:4px;touch-action:manipulation;-webkit-tap-highlight-color:transparent}.cell:not(:disabled):hover{background:#42e8ff0b}.cell:not(:disabled):active{background:#42e8ff19}.cell:focus-visible{outline-offset:-4px}.legend{display:flex;gap:18px;justify-content:center;flex-wrap:wrap;margin:20px 0;font-size:11px;color:var(--muted)}.legend span{display:flex;align-items:center;gap:7px}.dot{width:7px;height:7px;border-radius:50%;background:var(--cyan);box-shadow:0 0 8px #42e8ff66}.dot.gold{background:var(--gold)}.dot.magenta{background:var(--magenta)}.instruction{text-align:center;color:var(--muted);font-size:13px;line-height:1.7;margin:20px 0 6px}.footer{font-size:11px;color:var(--muted);border-top:1px solid var(--line);margin-top:27px;padding-top:18px}.footer span:last-child{color:#6b819e}.status{font-size:12px;line-height:1.5;min-height:18px;text-align:center;color:var(--gold)}.primary,.secondary{border-radius:10px;padding:13px 18px;font-weight:700;font-size:13px;min-height:44px}.primary{background:var(--cyan);color:#05252e;border:1px solid var(--cyan);box-shadow:0 0 24px #42e8ff20}.secondary{background:#152033;border:1px solid #34435a}.result-button{display:block;margin:16px auto 0}.hidden{display:none!important}
+    dialog{width:min(calc(100% - 32px),440px);max-height:85svh;overflow:auto;border:1px solid #3b556d;border-radius:20px;background:radial-gradient(ellipse at top,#15313a,transparent 70%),#101725;color:var(--text);padding:28px;box-shadow:0 0 80px #42e8ff16}dialog::backdrop{background:#030711d9;backdrop-filter:blur(7px)}dialog h2{margin:8px 0 10px;font-size:30px;letter-spacing:-.04em}dialog p,dialog li{font-size:14px;color:#b2bfd2;line-height:1.7}dialog ul{padding-left:20px}.success{color:var(--green);font-size:11px;letter-spacing:.15em}.modal-stats{display:flex;gap:14px;margin:24px 0}.modal-stats div{flex:1;border:1px solid #2b4851;border-radius:12px;text-align:center;padding:15px 4px}.modal-stats strong{font-size:30px;color:var(--cyan);text-shadow:0 0 18px #42e8ff55}.modal-stats div:last-child strong{color:var(--gold);text-shadow:0 0 18px #ffd56355}textarea{resize:none;width:100%;background:#080e18;color:var(--text);border:1px solid var(--line);border-radius:10px;text-align:center;padding:14px 8px;line-height:1.5;font-size:15px}.actions{display:flex;gap:10px;margin-top:16px}.actions button{flex:1}.hint{font-size:11px!important;text-align:center;margin:12px 0 0!important}#share-status{min-height:18px;font-size:12px;color:var(--green);margin-top:12px;text-align:center}.help-symbol{color:var(--cyan);font-weight:700}
+    .puzzle-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:22px 0 8px}.puzzle-actions #answer-button{grid-column:1/-1}.puzzle-actions .result-button{margin:0}.secondary:disabled{opacity:.4;cursor:default}.answer-note{text-align:center;color:var(--muted);font-size:11px;line-height:1.5;margin:8px 0 0}
+    #victory{width:min(calc(100% - 8px),440px);max-width:calc(100% - 8px);padding:28px clamp(5px,calc((100vw - 310px)/2),28px)}
+    .ad-slot{position:relative;flex:none;overflow:hidden;background:#080e18;outline:1px solid #263348}
+    .ad-slot:empty::before{content:'Advertisement';position:absolute;inset:0;display:grid;place-items:center;color:var(--muted);font-size:10px;letter-spacing:.12em;text-transform:uppercase;pointer-events:none}
+    .ad-anchor{display:none;position:fixed;inset:auto 0 0;z-index:20;min-height:50px;height:calc(50px + env(safe-area-inset-bottom,0px));padding-bottom:env(safe-area-inset-bottom,0px);background:#080c16;box-shadow:0 -1px 0 #263348;place-items:center}
+    #ad-anchor-slot{width:320px;height:50px;min-height:50px}
+    .completion-ad{margin:20px auto 8px;width:300px}
+    #ad-completion-slot{width:300px;height:250px;min-height:250px}
+    html.ad-modal-open .ad-anchor{visibility:hidden;pointer-events:none}
+    @media(min-width:320px) and (max-width:767px){body{padding-bottom:calc(74px + env(safe-area-inset-bottom,0px))}.ad-anchor{display:grid}}
+    @media(prefers-reduced-motion:reduce){.rotor{transition:none}*{scroll-behavior:auto!important}}@media(max-width:360px){body{padding-left:12px;padding-right:12px}.stats{padding:14px 8px}.legend{gap:12px}dialog{padding:22px}#victory{padding-top:16px;padding-bottom:16px}}
+  </style>
+<style>body{min-height:0;padding:0}main{padding:16px 12px 12px}main>header h1,main>header .intro,.ad-anchor,main>footer{display:none!important}</style></head>
+<body>
+  <main>
+    <header><div class="topline"><div class="brand-mark"><span class="live"></span>DAILY CIRCUIT / 6 × 6</div><button class="help" id="help-button" aria-label="How to play">?</button></div><h1>Signal<span> Flow</span></h1><p class="intro">One network. Three competing signals.<br>Shared junctions affect every color. Filters keep targets clean.</p></header>
+    <section class="stats" aria-label="Daily statistics"><div class="stat"><strong id="moves">0</strong><span class="label">Moves</span></div><div class="stat"><strong id="targets">0 / 2</strong><span class="label">Connected</span></div><div class="stat"><strong id="streak">0</strong><span class="label">Day streak</span></div></section>
+    <div class="board-meta"><span id="daily-date"></span><span class="state" id="circuit-state">Signal pending</span></div>
+    <div class="board" id="board"><svg id="tiles" viewBox="0 0 600 600" aria-hidden="true"></svg><svg id="beams" class="beam-layer" viewBox="0 0 600 600" aria-hidden="true"></svg><div class="controls" id="controls" role="group" aria-label="Circuit board. Tap a prism or use Tab and Enter to rotate clockwise."></div></div>
+    <div class="legend"><span><i class="dot"></i>Cyan</span><span><i class="dot magenta"></i>Magenta</span><span><i class="dot gold"></i>Gold</span></div>
+    <p class="instruction" id="instruction">Tap a prism to rotate it clockwise.<br>Connect the shared network. Use filters to protect both targets of every color.</p>
+    <div class="puzzle-actions" aria-label="Puzzle actions"><button class="secondary" id="restart-button">Restart puzzle</button><button class="secondary result-button" id="results-button" disabled>Daily results</button><button class="secondary" id="answer-button" aria-describedby="answer-note">Show answer</button></div>
+    <p class="answer-note" id="answer-note">Showing the answer marks today’s puzzle as assisted.</p>
+    <p class="status" id="status" role="status" aria-live="polite"></p>
+    <footer class="footer"><span>One circuit. Every day.</span><span>Resets at local midnight</span></footer>
+  </main>
+  <dialog id="victory" aria-labelledby="victory-title"><div class="success">● ALL SYSTEMS CONNECTED</div><h2 id="victory-title">You found the flow.</h2><p>Every signal is right where it belongs.</p><div class="modal-stats"><div><strong id="final-moves">0</strong><span class="label">Moves</span></div><div><strong id="final-streak">0</strong><span class="label">Day streak</span></div></div><textarea id="share-text" readonly rows="8" aria-label="Shareable puzzle result" spellcheck="false"></textarea><p class="hint">🟩 Connected target · ⬜ Multiple signals · ⬛ Inactive</p><div class="actions"><button class="primary" id="share-button">Copy result</button><button class="secondary" id="close-victory">Back to circuit</button></div><div id="share-status" role="status" aria-live="polite"></div><aside class="completion-ad" aria-label="Advertisement"><div class="ad-slot" id="ad-completion-slot" data-ad-slot data-ad-width="300" data-ad-height="250"></div></aside></dialog>
+  <dialog id="help" aria-labelledby="help-title"><div class="brand-mark">OPERATOR’S GUIDE</div><h2 id="help-title">Follow the signal.</h2><ul><li><span class="help-symbol">▲ Source:</span> fixed on the edge, sending light inward.</li><li><span class="help-symbol">◎ Target:</span> receive only the matching color. A wrong-color arrival turns the ring red and blocks completion.</li><li><span class="help-symbol">│ Straight / └ corner:</span> connect the visible ports to carry or bend light.</li><li><span class="help-symbol">┬ Splitter:</span> sends light through both other connected ports.</li><li><span class="help-symbol">◇ Filter:</span> required at every target; passes only its own color.</li><li>All three colors share junctions. Rotating one can disconnect several signals at once.</li></ul><p>Tap any of the 16 interior prisms for a clockwise quarter turn. Every tap counts as one move. Edge cells stay fixed. You can also use Tab and Enter or Space.</p><p>Solve daily to build your streak. Progress is saved in this browser when storage is available.</p><button class="primary" id="close-help">Let’s connect</button></dialog>
+  <noscript><p>This puzzle needs JavaScript enabled to trace its signals.</p></noscript>
+  <aside class="ad-anchor" aria-label="Advertisement"><div class="ad-slot" id="ad-anchor-slot" data-ad-slot data-ad-width="320" data-ad-height="50"></div></aside>
+  <script src="engine.js"></script>
+  <script>
+    'use strict';
+    (() => {
+      const $ = id => document.getElementById(id);
+      if (!globalThis.SignalFlow) { $('status').textContent = 'The circuit engine could not load. Place engine.js beside index.html and reload.'; return; }
+      const E = SignalFlow, KEY = 'signal-flow:v3', NS = 'http://www.w3.org/2000/svg';
+      const colors = { cyan: '#42e8ff', magenta: '#ff5bd6', gold: '#ffd563' };
+      const ports = { straight: [0,2], corner: [0,1], splitter: [0,1,3], filter: [0,2] };
+      const offsets = [[0,-46],[46,0],[0,46],[-46,0]];
+      let board, date, moves = 0, completed = false, earned = false, assisted = false, revealed = false, trace, records = Object.create(null);
+      const legacyCompletions=new Set();
+      let storageAvailable = true, lastTouch = -Infinity;
+      const rotors = new Map(), buttons = new Map(), angles = new Map(), targetRings = new Map();
+      const localDate = () => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; };
+      const previousDate = day => new Date(Date.parse(day + 'T00:00:00Z') - 86400000).toISOString().slice(0,10);
+      function storageWarning() { storageAvailable = false; $('status').textContent = 'Browser storage is unavailable. This session works, but progress may not be saved.'; }
+      function load() {
+        try {
+          const legacy=JSON.parse(localStorage.getItem('signal-flow:v1')||'{}');
+          if(legacy.version===1&&legacy.days)for(const [day,record]of Object.entries(legacy.days)){try{E.dateSeed(day);}catch{continue;}if(day<localDate()&&record?.completed===true&&!record.assisted&&!record.revealed)legacyCompletions.add(day);}
+          const previous=JSON.parse(localStorage.getItem('signal-flow:v2')||'{}');
+          if(previous.version===2&&previous.days)for(const [day,record]of Object.entries(previous.days)){try{E.dateSeed(day);}catch{continue;}if(day<localDate()&&record?.completed===true&&!record.assisted&&!record.revealed)legacyCompletions.add(day);}
+          let raw = JSON.parse(localStorage.getItem(KEY) || 'null');
+          // The approved preview uses this identical generator, so its progress can carry over.
+          if(!raw){const preview=JSON.parse(localStorage.getItem('signal-flow:shared-preview:v1')||'null');raw=preview?.version===2?{...preview,version:3}:{};}
+
+          if (raw && raw.version === 3 && raw.days && typeof raw.days === 'object' && !Array.isArray(raw.days)) {
+            for (const [day, record] of Object.entries(raw.days)) {
+              try { E.dateSeed(day); } catch { continue; }
+              if (!record || !Number.isSafeInteger(record.moves) || record.moves < 0 || !Array.isArray(record.rotations) || record.rotations.length !== 16 || !record.rotations.every(n => Number.isInteger(n) && n >= 0 && n <= 3)) continue;
+              records[day] = { moves: record.moves, rotations: record.rotations.slice(), completed: record.completed === true, assisted: record.assisted === true, revealed: record.revealed === true };
+            }
+          }
+        } catch { storageWarning(); }
+      }
+      function save() {
+        records[date] = { moves, completed: earned, assisted, revealed, rotations: board.grid.slice(1,5).flatMap(row => row.slice(1,5).map(tile => tile.rotation)) };
+        try { localStorage.setItem(KEY, JSON.stringify({ version: 3, days: records })); }
+        catch { storageWarning(); }
+      }
+      function streak() {
+        let day = records[date]?.completed ? date : previousDate(date), count = 0;
+        while (records[day]?.completed || legacyCompletions.has(day)) { count++; day = previousDate(day); }
+        return count;
+      }
+      function svg(name, attrs, parent) {
+        const node = document.createElementNS(NS, name);
+        for (const [key,value] of Object.entries(attrs)) node.setAttribute(key, value);
+        parent.appendChild(node); return node;
+      }
+      function buildBoard() {
+        $('tiles').replaceChildren(); $('controls').replaceChildren();
+        rotors.clear(); buttons.clear(); angles.clear(); targetRings.clear();
+        for (let row=0;row<6;row++) for (let col=0;col<6;col++) {
+          const tile = board.grid[row][col], key = `${row},${col}`, x=col*100+50, y=row*100+50;
+          const playable = !!ports[tile.type] && !tile.locked && row>0 && row<5 && col>0 && col<5;
+          svg('rect', { x: col*100+1, y: row*100+1, width:98, height:98, rx:11, fill:playable?'#142034':'#0c1321', stroke:'#1d2b40', 'stroke-width':1 }, $('tiles'));
+          const center = svg('g', { transform:`translate(${x} ${y})` }, $('tiles'));
+          if (ports[tile.type]) {
+            const rotor = svg('g', { class:'rotor' }, center);
+            rotor.style.transform = `rotate(${tile.rotation*90}deg)`;
+            rotors.set(key,rotor); angles.set(key,tile.rotation*90);
+            for (const direction of ports[tile.type]) {
+              const [dx,dy]=offsets[direction];
+              svg('line',{x1:0,y1:0,x2:dx,y2:dy,stroke:'#54708c','stroke-width':9,'stroke-linecap':'round'},rotor);
+              svg('line',{x1:0,y1:0,x2:dx,y2:dy,stroke:'#1b2b40','stroke-width':4,'stroke-linecap':'round'},rotor);
+            }
+            if (tile.type==='filter') svg('path',{d:'M 0 -14 L 14 0 L 0 14 L -14 0 Z',fill:'#101725',stroke:colors[tile.color],'stroke-width':3},rotor);
+            else svg('circle',{r:5,fill:'#9bb1c8'},rotor);
+          } else if (tile.type==='source') {
+            svg('circle',{r:27,fill:colors[tile.color],'fill-opacity':'.09',stroke:colors[tile.color],'stroke-opacity':'.4','stroke-width':1},center);
+            svg('path',{d:'M 0 -17 L 15 13 L -15 13 Z',fill:colors[tile.color],transform:`rotate(${tile.direction*90})`},center);
+          } else if (tile.type==='target') {
+            svg('circle',{r:19,fill:'#101725',stroke:colors[tile.color],'stroke-width':3},center);
+            svg('circle',{r:7,fill:colors[tile.color],'fill-opacity':'.8'},center);
+            targetRings.set(key,svg('circle',{r:28,fill:'none',stroke:colors[tile.color],'stroke-width':2,'stroke-dasharray':'4 5',opacity:'.25'},center));
+          } else {
+            svg('circle',{r:2,fill:'#30425b'},center);
+          }
+          const button=document.createElement('button'); button.className='cell'; button.type='button';
+          button.dataset.row=row; button.dataset.col=col; button.disabled=!playable;
+          $('controls').appendChild(button); buttons.set(key,button);
+        }
+      }
+      function render() {
+        trace = E.traceBeams(board);
+        const contaminated=new Set(trace.hitTargets.filter(hit=>!hit.matched).map(hit=>`${hit.row},${hit.col}`));
+        const matched = new Set(trace.hitTargets.filter(hit=>hit.matched&&!contaminated.has(`${hit.row},${hit.col}`)).map(hit=>`${hit.row},${hit.col}`));
+        $('beams').replaceChildren();
+        // Shared channels are drawn side by side, keeping simultaneous colors legible.
+        const channels = new Map();
+        for (const segment of trace.segments) {
+          const a=segment.from.row*6+segment.from.col,b=segment.to.row*6+segment.to.col;
+          const key=[Math.min(a,b),Math.max(a,b)].join(':');
+          if (!channels.has(key)) channels.set(key,{ from:a<b?segment.from:segment.to, to:a<b?segment.to:segment.from, colors:new Set() });
+          channels.get(key).colors.add(segment.color);
+        }
+        for (const channel of channels.values()) {
+          const palette=[...channel.colors].sort();
+          palette.forEach((color,i)=>{
+            const offset=(i-(palette.length-1)/2)*5;
+            const horizontal=channel.from.row===channel.to.row;
+            const x1=channel.from.col*100+50+(horizontal?0:offset),y1=channel.from.row*100+50+(horizontal?offset:0);
+            const x2=channel.to.col*100+50+(horizontal?0:offset),y2=channel.to.row*100+50+(horizontal?offset:0);
+            svg('line',{x1,y1,x2,y2,stroke:colors[color],color:colors[color],'stroke-width':4,opacity:'.85',class:'beam'},$('beams'));
+            svg('line',{x1,y1,x2,y2,stroke:'#ffffff','stroke-width':1,opacity:'.8'},$('beams'));
+          });
+        }
+        for (const [key,ring] of targetRings) { ring.setAttribute('stroke',contaminated.has(key)?'#ff6269':colors[board.grid[key.split(',')[0]][key.split(',')[1]].color]);ring.setAttribute('opacity',contaminated.has(key)||matched.has(key)?'1':'.25'); ring.setAttribute('stroke-dasharray',matched.has(key)?'none':'4 5'); }
+        for (const [key,button] of buttons) {
+          const [row,col]=key.split(',').map(Number),tile=board.grid[row][col];
+          button.setAttribute('aria-label',`Row ${row+1}, column ${col+1}: ${tile.color?tile.color+' ':''}${tile.type}${ports[tile.type]?`, ${tile.rotation*90} degrees. Rotate clockwise.`:''}`);
+          if (ports[tile.type]) button.disabled=completed || revealed || tile.locked;
+        }
+        $('moves').textContent=moves; $('targets').textContent=`${matched.size} / ${targetRings.size}`; $('streak').textContent=streak();
+        $('circuit-state').textContent=revealed?'Answer revealed':completed?(assisted?'Complete · assisted':'Circuit complete'):(contaminated.size?'Wrong-color signal':'Signal pending');
+        $('results-button').disabled=!completed || revealed;
+        $('restart-button').disabled=moves===0 && !completed && !revealed;
+        $('answer-button').disabled=completed || revealed;
+        $('instruction').textContent=revealed?'Answer revealed. Restart to explore the circuit yourself.':completed?'Circuit complete. Your next signal arrives tomorrow.':'Tap a prism to rotate it clockwise. Connect the shared network. Use filters to protect both targets of every color.';
+      }
+      function summary() {
+        const cells=Array.from({length:6},()=>Array.from({length:6},()=>new Set()));
+        for (const segment of trace.segments) for (const cell of [segment.from,segment.to]) cells[cell.row][cell.col].add(segment.color);
+        const emoji={cyan:'🟦',magenta:'🟪',gold:'🟨'};
+        const grid=cells.map((row,r)=>row.map((set,c)=>board.grid[r][c].type==='target'?'🟩':set.size>1?'⬜':set.size?emoji[[...set][0]]:'⬛').join('')).join('\n');
+        return `Signal Flow · ${date}\n${moves} ${moves===1?'move':'moves'} · ${streak()} day streak${assisted?' · Assisted':''}\n${grid}`;
+      }
+      function showResults() {
+        $('victory-title').textContent=assisted?'You explored the flow.':'You found the flow.';
+        $('final-moves').textContent=moves; $('final-streak').textContent=streak(); $('share-text').value=summary(); $('share-status').textContent='';
+        if (!$('victory').open) $('victory').showModal();
+      }
+      function startDay() {
+        date=localDate(); board=E.generateBoard(date); moves=0; completed=false; earned=false; assisted=false; revealed=false;
+        const record=records[date];
+        if (record) {
+          let i=0;
+          for(let r=1;r<5;r++)for(let c=1;c<5;c++) board.grid[r][c].rotation=record.rotations[i++];
+          moves=record.moves; assisted=record.assisted; revealed=record.revealed; earned=record.completed;
+          completed=E.checkVictory(board);
+          if(completed && !assisted && !revealed) earned=true;
+        }
+        $('daily-date').textContent=new Date(date+'T12:00:00').toLocaleDateString(undefined,{month:'short',day:'numeric',year:'numeric'});
+        save(); buildBoard(); render();
+        if (completed && !revealed) showResults();
+      }
+      function ensureToday() {
+        if (date===localDate()) return true;
+        for (const id of ['victory','help']) if ($(id).open) $(id).close();
+        startDay(); if(storageAvailable) $('status').textContent='A new day, a fresh circuit.';
+        return false;
+      }
+      function activate(event) {
+        const button=event.target.closest('button.cell');
+        if(!button || button.disabled) return;
+        if(event.type==='touchstart') {
+          if(event.touches.length!==1) return;
+          event.preventDefault(); lastTouch=performance.now();
+        } else if(event.detail!==0 && performance.now()-lastTouch<700) return;
+        if(!ensureToday() || completed || revealed) return;
+        const row=Number(button.dataset.row),col=Number(button.dataset.col),key=`${row},${col}`;
+        const result=E.rotateTile(row,col,board);
+        if(!result.rotated) return;
+        moves++; angles.set(key,angles.get(key)+90); rotors.get(key).style.transform=`rotate(${angles.get(key)}deg)`;
+        completed=result.victory; if(completed && !assisted) earned=true; save(); render();
+        if(completed) { $('status').textContent=storageAvailable?'All targets connected. Daily circuit complete.':$('status').textContent; showResults(); }
+      }
+      $('controls').addEventListener('touchstart',activate,{passive:false});
+      $('controls').addEventListener('click',activate);
+      $('help-button').addEventListener('click',()=>{ ensureToday(); $('help').showModal(); });
+      $('close-help').addEventListener('click',()=>$('help').close());
+      $('close-victory').addEventListener('click',()=>$('victory').close());
+      $('results-button').addEventListener('click',()=>{ if(ensureToday() && completed && !revealed) showResults(); });
+      $('restart-button').addEventListener('click',()=>{
+        if(!ensureToday()) return;
+        board=E.generateBoard(date); moves=0; completed=false; revealed=false;
+        // Keep an earned daily completion and any answer assistance across retries.
+        save(); buildBoard(); render();
+        if(storageAvailable) $('status').textContent=assisted?'Puzzle restarted. Today’s attempt remains assisted.':'Puzzle restarted. Moves reset to zero.';
+      });
+      $('answer-button').addEventListener('click',()=>{
+        if(!ensureToday() || completed || revealed) return;
+        assisted=true; revealed=true;
+        for(let row=1;row<5;row++) for(let col=1;col<5;col++) {
+          const key=`${row},${col}`,tile=board.grid[row][col];
+          const turns=(board.solution[row][col]-tile.rotation+4)%4;
+          tile.rotation=board.solution[row][col]; angles.set(key,angles.get(key)+turns*90);
+          rotors.get(key).style.transform=`rotate(${angles.get(key)}deg)`;
+        }
+        completed=E.checkVictory(board); save(); render();
+        if(storageAvailable) $('status').textContent='Answer shown. No daily completion or streak was awarded.';
+      });
+      $('share-button').addEventListener('click',async()=>{
+        if(!ensureToday()) return;
+        const text=summary(); $('share-text').value=text;
+        try {
+          if(!navigator.clipboard?.writeText) throw new Error('Clipboard unavailable');
+          await navigator.clipboard.writeText(text); $('share-status').textContent='Copied. Share your signal.';
+        } catch {
+          $('share-text').focus(); $('share-text').select(); $('share-text').setSelectionRange(0,text.length);
+          $('share-status').textContent='Select and copy the result above to share it.';
+        }
+      });
+      document.addEventListener('visibilitychange',()=>{ if(!document.hidden) ensureToday(); });
+      setInterval(ensureToday,30000);
+      load(); startDay();
+    })();
+  </script>
+  <script>
+    // Provider-neutral refresh hooks. No ad network requests are made here.
+    // Register your network refresh with:
+    // SignalFlowAds.onRefresh(({ slotId, element, width, height }) => { ... });
+    // Or listen on document for 'signalflow:ad-refresh' (same payload in detail).
+    (() => {
+      'use strict';
+      const WINDOW_MS = 30000;
+      const mobile = matchMedia('(min-width: 320px) and (max-width: 767px)');
+      const callbacks = new Set();
+      const states = [...document.querySelectorAll('[data-ad-slot]')].map(element => ({ element, ratio:0, since:null, timer:null, epoch:0 }));
+      const byElement = new Map(states.map(state => [state.element,state]));
+      let observer, mutations, destroyed = false;
+
+      function stop(state) {
+        clearTimeout(state.timer); state.timer=null; state.since=null; state.epoch++;
+      }
+      function eligible(state) {
+        if(destroyed || !mobile.matches || document.visibilityState!=='visible' || state.ratio<0.5) return false;
+        const element=state.element, dialog=element.closest('dialog');
+        const topDialog=[...document.querySelectorAll('dialog[open]')].at(-1);
+        if((dialog && !dialog.open) || (topDialog && topDialog!==dialog)) return false;
+        const style=getComputedStyle(element);
+        if(style.visibility!=='visible' || style.display==='none' || Number(style.opacity)===0) return false;
+        // Also respect the visual viewport (zoom, mobile keyboard, browser chrome).
+        // IntersectionObserver supplies ancestor/scroll-container clipping.
+        const box=element.getBoundingClientRect(), view=window.visualViewport;
+        const left=view?.offsetLeft ?? 0, top=view?.offsetTop ?? 0;
+        const width=view?.width ?? innerWidth, height=view?.height ?? innerHeight;
+        const visibleWidth=Math.max(0,Math.min(box.right,left+width)-Math.max(box.left,left));
+        const visibleHeight=Math.max(0,Math.min(box.bottom,top+height)-Math.max(box.top,top));
+        return box.width>0 && box.height>0 && visibleWidth*visibleHeight/(box.width*box.height)>=0.5;
+      }
+      function schedule(state, delay=WINDOW_MS) {
+        const epoch=state.epoch;
+        state.timer=setTimeout(() => {
+          // Drain pending crossings before a due timer can refresh a departed slot.
+          processEntries(observer.takeRecords());
+          if(epoch!==state.epoch) return;
+          state.timer=null;
+          if(!eligible(state)) { stop(state); return; }
+          const elapsed=performance.now()-state.since;
+          if(elapsed<WINDOW_MS) { schedule(state,WINDOW_MS-elapsed); return; }
+          const detail={slotId:state.element.id,element:state.element,width:Number(state.element.dataset.adWidth),height:Number(state.element.dataset.adHeight)};
+          // Each subsequent refresh requires a new full 30-second visible window.
+          state.since=performance.now();
+          schedule(state);
+          document.dispatchEvent(new CustomEvent('signalflow:ad-refresh',{detail}));
+          for(const callback of callbacks) {
+            try { callback(detail); } catch(error) { console.error('Ad refresh callback failed:',error); }
+          }
+        },delay);
+      }
+      function reconcile(state) {
+        if(!eligible(state)) { stop(state); return; }
+        if(state.since===null) { state.since=performance.now(); schedule(state); }
+      }
+      function processEntries(entries) {
+        // Process in chronological order so a brief below-threshold interval
+        // resets the window even if several crossings arrive in one batch.
+        for(const entry of [...entries].sort((a,b)=>a.time-b.time)) {
+          const state=byElement.get(entry.target);
+          if(!state) continue;
+          state.ratio=entry.isIntersecting?entry.intersectionRatio:0;
+          reconcile(state);
+        }
+      }
+      function resetObservation() {
+        const modalOpen=!!document.querySelector('dialog[open]');
+        document.documentElement.classList.toggle('ad-modal-open',modalOpen);
+        if(destroyed || !observer) return;
+        // Hidden tabs, modal transitions and viewport changes never carry credit.
+        observer.disconnect();
+        for(const state of states) { stop(state); state.ratio=0; observer.observe(state.element); }
+      }
+      function destroy() {
+        destroyed=true; observer?.disconnect(); mutations?.disconnect();
+        states.forEach(stop); callbacks.clear();
+        document.removeEventListener('visibilitychange',resetObservation);
+        window.removeEventListener('pagehide',resetObservation);
+        window.removeEventListener('pageshow',resetObservation);
+        window.removeEventListener('resize',resetObservation);
+        mobile.removeEventListener('change',resetObservation);
+        window.visualViewport?.removeEventListener('resize',resetObservation);
+        window.visualViewport?.removeEventListener('scroll',resetObservation);
+      }
+      window.SignalFlowAds=Object.freeze({
+        onRefresh(callback) {
+          if(typeof callback!=='function') throw new TypeError('Expected an ad refresh callback.');
+          if(destroyed) throw new Error('Ad viewability controls have been destroyed.');
+          callbacks.add(callback); return () => callbacks.delete(callback);
+        },
+        destroy
+      });
+      mutations=new MutationObserver(resetObservation);
+      for(const dialog of document.querySelectorAll('dialog')) mutations.observe(dialog,{attributes:true,attributeFilter:['open']});
+      // Without IntersectionObserver the safe fallback is to disable refreshes.
+      if('IntersectionObserver' in window) {
+        observer=new IntersectionObserver(processEntries,{root:null,rootMargin:'0px',threshold:[0,0.5,1]});
+        document.addEventListener('visibilitychange',resetObservation);
+        window.addEventListener('pagehide',resetObservation);
+        window.addEventListener('pageshow',resetObservation);
+        window.addEventListener('resize',resetObservation);
+        mobile.addEventListener('change',resetObservation);
+        window.visualViewport?.addEventListener('resize',resetObservation);
+        window.visualViewport?.addEventListener('scroll',resetObservation);
+      }
+      resetObservation();
+    })();
+  </script>
+<script>
+(() => {
+ let last=0,queued=false;
+ function measure(){queued=false;const main=document.querySelector('main');const height=Math.ceil((main?.getBoundingClientRect().bottom||document.body.getBoundingClientRect().height)+12);if(height!==last){last=height;parent.postMessage({type:'room:height',height},'*');}}
+ function update(){if(!queued){queued=true;requestAnimationFrame(measure);}}
+ new ResizeObserver(update).observe(document.body);
+ new MutationObserver(update).observe(document.body,{subtree:true,childList:true,attributes:true,characterData:true});
+ window.addEventListener('load',update);window.addEventListener('resize',update);update();
+})();
+</script>
+</body>
+</html>

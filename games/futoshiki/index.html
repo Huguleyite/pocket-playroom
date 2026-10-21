@@ -1,0 +1,13 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>Futoshiki · Pocket Playroom sample</title><link rel="stylesheet" href="logic.css"> <link rel="stylesheet" href="../../night-game.css"><script src="../../night-frame.js" data-game="futoshiki"></script></head>
+<body data-game="futoshiki"><main><div class="metrics"><span><strong id="size"></strong>GRID</span><span><strong id="filled"></strong>FILLED</span><span><strong id="moves">0</strong>MOVES</span></div><div id="board"></div><div id="keypad" class="keypad" hidden></div><p id="status" role="status" aria-live="polite"></p><div class="controls"><button id="undo">↶ Undo</button><button id="pencil" aria-pressed="false" hidden>Pencil</button><button id="erase" hidden>Erase</button><button id="check" class="primary">Check grid</button></div><p id="instruction"></p><button id="reset" class="reset">Restart sample</button><p id="saving" role="status"></p></main><dialog id="complete" aria-labelledby="complete-title"><h2 id="complete-title">Everything clicks.</h2><p id="complete-text"></p><button id="close-complete">Back to board</button></dialog><script src="logic.js"></script><script>
+(() => {
+ let last=0,queued=false;
+ function measure(){queued=false;const main=document.querySelector('main');const height=Math.ceil((main?.getBoundingClientRect().bottom||document.body.getBoundingClientRect().height)+12);if(height!==last){last=height;parent.postMessage({type:'room:height',height},'*');}}
+ function update(){if(!queued){queued=true;requestAnimationFrame(measure);}}
+ new ResizeObserver(update).observe(document.body);
+ new MutationObserver(update).observe(document.body,{subtree:true,childList:true,attributes:true,characterData:true});
+ window.addEventListener('load',update);window.addEventListener('resize',update);update();
+})();
+</script>
+</body></html>

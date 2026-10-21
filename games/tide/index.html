@@ -1,0 +1,588 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#f4f5ef">
+<meta name="description" content="Tile Tide. One daily board. Ten moves. Make every word count.">
+<title>Tile Tide · The daily word cascade</title>
+<style>
+:root{color-scheme:light;--paper:#f4f5ef;--ink:#203a34;--muted:#62736a;--green:#245c49;--lime:#ddec87;--gap:8px;--drop:400ms}
+*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.5 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}button{font:inherit;color:inherit;cursor:pointer}button:focus-visible{outline:3px solid #c17c24;outline-offset:3px}button:disabled{opacity:.45;cursor:default}
+main{max-width:480px;margin:auto;padding:24px 20px max(24px,env(safe-area-inset-bottom))}header{display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #d7ddd1;padding-bottom:17px}.brand{font-size:29px;letter-spacing:-1.4px;font-weight:850}.brand span{color:#719143}.icon{border:1px solid #d0d8cc;background:transparent;border-radius:50px;padding:8px 13px;font-size:12px;font-weight:700}.eyebrow{font-size:10px;letter-spacing:2px;font-weight:750;text-transform:uppercase;color:var(--muted);margin:23px 0 6px}h1{font-size:30px;letter-spacing:-1.1px;line-height:1.15;margin:0 0 8px}.intro{color:var(--muted);font-size:13px;margin:0}.stats{display:grid;grid-template-columns:repeat(3,1fr);margin:23px 0 16px;border:1px solid #d6ddcf;border-radius:14px;padding:12px 0}.stat{text-align:center;border-right:1px solid #d6ddcf}.stat:last-child{border:0}.stat strong{display:block;font-size:23px;line-height:1.25;font-variant-numeric:tabular-nums}.stat small{font-size:10px;text-transform:uppercase;letter-spacing:1.2px;color:var(--muted)}
+.word-bar{display:flex;align-items:center;justify-content:center;min-height:46px;font-weight:750;font-size:20px;letter-spacing:4px;color:var(--green)}.word-bar.idle{font-size:12px;letter-spacing:.5px;color:var(--muted);font-weight:500}
+.board-wrap{position:relative}.board{display:grid;grid-template-columns:repeat(5,1fr);gap:var(--gap);padding:10px;border:1px solid #d4dacb;border-radius:20px;background:#e5e9dd;touch-action:none;user-select:none;-webkit-user-select:none;position:relative;overflow:hidden}.tile{display:flex;justify-content:center;align-items:center;width:100%;aspect-ratio:1;border:0;border-radius:11px;background:#fffef8;box-shadow:0 3px 0 #cbd2c1;font-size:clamp(22px,7vw,32px);font-weight:750;padding:0;position:relative;z-index:1;transition:background .13s,color .13s;will-change:transform,opacity}.tile.selected{background:var(--green);color:white}.tile.tip{background:#406b42}.tile.pop{transform:scale(.15);opacity:0;transition:transform 180ms ease-in,opacity 180ms}.tile.falling{transition:transform var(--drop) cubic-bezier(.25,.65,.3,1),opacity var(--drop)}
+svg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:2;overflow:visible}#trace{fill:none;stroke:#c8df7e;stroke-width:8;stroke-linejoin:round;stroke-linecap:round;opacity:.75}.float{position:absolute;z-index:5;left:50%;top:42%;transform:translate(-50%,-50%);white-space:nowrap;pointer-events:none;background:var(--green);color:#fff;padding:8px 17px;border-radius:30px;font-size:19px;font-weight:800;box-shadow:0 5px 25px #203a3420;animation:float 850ms ease-out forwards}@keyframes float{0%{opacity:0;transform:translate(-50%,0) scale(.8)}20%{opacity:1}85%{opacity:1}100%{opacity:0;transform:translate(-50%,-100px) scale(1.05)}}
+#message{min-height:42px;text-align:center;font-size:12px;color:var(--muted);padding:12px 2px 6px}.actions{display:flex;gap:9px}.primary{background:var(--green);color:white;border:0;border-radius:12px;padding:12px 18px;font-weight:700;flex:1}.secondary{background:transparent;border:1px solid #cbd4c5;border-radius:12px;padding:10px 14px;font-size:13px}.details{display:flex;justify-content:space-between;color:var(--muted);font-size:11px;margin-top:15px}.history{list-style:none;padding:0;margin:14px 0;display:flex;gap:6px;flex-wrap:wrap}.history li{font-size:11px;background:#e5e9dd;padding:3px 8px;border-radius:7px}footer{font-size:10px;color:var(--muted);border-top:1px solid #d7ddd1;padding-top:13px;margin-top:19px;text-align:center}dialog{border:1px solid #d6ddcf;border-radius:24px;padding:27px;max-width:400px;width:calc(100% - 32px);background:var(--paper);color:var(--ink);box-shadow:0 20px 100px #10241e30}dialog::backdrop{background:#17372dcc;backdrop-filter:blur(5px)}dialog h2{font-size:30px;letter-spacing:-1px;margin:8px 0}dialog p{font-size:13px;color:var(--muted)}dialog textarea{width:100%;resize:none;border:1px solid #d4dacb;border-radius:12px;background:#fffef8;padding:12px;font:13px/1.65 system-ui;color:var(--ink);height:155px}dialog .actions{margin-top:13px}.badge{font-size:11px;letter-spacing:2px;color:var(--green);font-weight:800}.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}
+@media(max-width:360px){main{padding:16px 12px}h1{font-size:27px}:root{--gap:6px}.board{padding:8px}}@media(prefers-reduced-motion:reduce){:root{--drop:1ms}*,*::before,*::after{animation-duration:1ms!important;transition-duration:1ms!important}}
+</style>
+ <link rel="stylesheet" href="../../night-game.css"><script src="../../night-frame.js" data-game="tide"></script><link rel="stylesheet" href="../../game-theme.css">
+</head>
+<body class="room-embedded room-tide">
+<main>
+ <header><div class="brand">tile<span>tide</span><span aria-hidden="true">↘</span></div><button class="icon" id="sound" aria-pressed="false">Sound off</button></header>
+ <p class="eyebrow" id="daily">The daily word cascade</p>
+ <h1>Small words. Big drops.</h1>
+ <p class="intro">Connect neighbors. Find 3+ letter words. You have 10 moves.</p>
+ <section class="stats" aria-label="Game statistics"><div class="stat"><strong id="score">0</strong><small>Score</small></div><div class="stat"><strong id="moves">10</strong><small>Moves left</small></div><div class="stat"><strong id="streak">0</strong><small>Day streak</small></div></section>
+ <div class="word-bar idle" id="word">Drag a word to get things moving</div>
+ <div class="board-wrap" id="boardWrap"><div class="board" id="board" role="group" aria-label="Tile Tide letter board"></div><svg aria-hidden="true"><polyline id="trace"/></svg></div>
+ <div id="message" role="status" aria-live="polite">Diagonal moves count. Each tile can be used once.</div>
+ <div style="text-align:center;margin:0 0 12px"><button class="secondary" id="hint">Hint · suggest a word</button></div>
+ <div class="actions"><button class="secondary" id="clear">Clear</button><button class="primary" id="submit">Submit word</button><button class="secondary" id="finish">Finish early</button></div>
+ <div class="details"><span id="best">Personal best · 0</span><span>Daily reset · 00:00 UTC</span></div>
+ <ul class="history" id="history" aria-label="Submitted words"></ul>
+ <footer>One board a day · Same starting letters for everyone<br>Prototype word list · Tap tiles or drag; keyboard: Tab, Enter, Submit</footer>
+</main>
+<dialog id="results" aria-labelledby="resultsTitle"><span class="badge">DAILY DROP COMPLETE</span><h2 id="resultsTitle">Nicely dropped.</h2><p id="resultStats"></p><textarea id="summary" readonly aria-label="Shareable Tile Tide result"></textarea><div class="actions"><button class="primary" id="share">Share results</button><button class="secondary" id="closeResults">View board</button></div><p id="shareStatus" role="status"></p></dialog>
+<dialog id="confirmFinish" aria-labelledby="finishTitle"><h2 id="finishTitle">Finish today's drop?</h2><p>Your score will be saved and today's board will close. Come back tomorrow for a new board.</p><div class="actions"><button class="secondary" id="keepPlaying">Keep playing</button><button class="primary" id="confirmEnd">Finish & save</button></div></dialog>
+<!-- Embedded engine mirrors engine.js so direct file opening needs no module fetch. -->
+<script>
+(() => {
+const WordDropEngine = (() => {
+/** WordDrop: dependency-free ES module. Coordinates are { row, col }, zero-based.
+ * Import with <script type="module">. Dates use UTC unless supplied explicitly.
+ * Prototype dictionary only: this intentionally is not a complete English lexicon.
+ */
+const SIZE = 5;
+const COMMON_WORDS = Object.freeze(`
+ace act add age ago aid aim air all and ant any ape apt arc are arm art ash ask ate
+bad bag ban bar bat bay bed bee beg bet big bin bit boa bog bow box boy bud bug bun
+bus but buy cab can cap car cat cob cod cog cop cot cow coy cry cub cup cut dad dam
+day den dew did die dig dim dip dog dot dry dub due dug duo dye ear eat eel egg ego
+elf elk elm end era eve ewe eye fan far fat fax fed fee few fig fin fir fit fix flu
+fly foe fog for fox fry fun fur gap gas gel gem get gig gin god got gum gun gut guy
+gym had ham has hat hay hem hen her hey hid him hip his hit hog hop hot how hub hue
+hug hum hut ice icy ill imp ink inn ion ire ivy jab jam jar jaw jay jet job jog jot
+joy jug key kid kin kit lab lad lag lap law lay led leg let lid lie lip lit log lot
+low lug mad man map mat may men met mid mix mob mop mud mug nab nag nap net new nib
+nil nip nit nod nor not now nun nut oak oar oat odd off oil old one opt orb ore our
+out owe owl own pad pal pan par pat paw pay pea peg pen pep per pet pie pig pin pit
+ply pod pop pot pow pro pry pub pug pun pup put rag ram ran rap rat raw ray red rib
+rid rig rim rip rob rod rot row rub rug rum run rut rye sad sag sap sat saw say sea
+see set sew she shy sin sip sir sit six ski sky sly sob sod son sow soy spa spy sub
+sue sum sun tab tag tan tap tar tax tea tee ten the tie tin tip toe ton too top tow
+toy try tub tug two use van vat vet via vie vow wad wag war was wax way web wed wee
+wet who why wig win wit woe won woo wow yak yam yap yaw yea yes yet yew you zap zen
+zip zoo able ache acid acre aged also area army atom aunt away baby back bake ball
+band bank bark barn base bath bead beam bean bear beat beef been beer bell belt bend
+best bird bite blow blue boat body boil bold bolt bond bone book boot born both bowl
+bulk burn bush busy cake calf call calm came camp card care cart case cash cast cave
+chat chip city clam clap clay clip club coal coat code coil coin cold come cook cool
+cope copy core corn cost cozy crab crew crop cube curl cute dark dart data date dawn
+days dead deal dear deck deep deer desk dial dice diet dirt dish dive dock does done
+door down draw drop drum duck dull dust duty each earn ease east easy edge else even
+ever face fact fade fail fair fall farm fast fate fear feed feel feet fell felt file
+fill film find fine fire firm fish fist five flag flat flea fled flew flip flow foam
+fold folk food fool foot fork form fort four free frog from fuel full game gate gave
+gear gift girl give glad glow glue goat goes gold golf gone good grab gray grew grid
+grin grip grow gulf hair half hall hand hang hard harm hate have head heal heap hear
+heat held help herb herd here hero hide high hike hill hint hold hole holy home hood
+hook hope horn host hour huge hung hunt hurt idea inch into iron item jack jail join
+joke jump just keen keep kept kick kind king kiss kite knee knew knit knot know lace
+lack lady lake lamb lamp land lane last late lawn lead leaf lean leap left lend lens
+less life lift like lime line link lion list live load loan lock loft logo lone long
+look loop lord lose loss lost loud love luck made mail main make male many mark mask
+mass mate math meal mean meat meet melt memo menu mere mesh mild mile milk mill mind
+mine mint miss mist mode mood moon more most move much must nail name near neat neck
+need nest news next nice nine node none noon nose note obey odds once only onto open
+oval over pace pack page paid pain pair pale palm park part pass past path peak pear
+peel peer pick pier pile pine pink pipe plan play plot plug plus poem poet pole poll
+pond pool poor port pose post pour pray prey pull pure push quit quiz race rack rage
+raid rail rain rake rank rare rate read real rear reef rent rest rice rich ride ring
+rise risk road roam roar robe rock rode role roll roof room root rope rose rule rush
+safe said sail sake sale salt same sand sang save seal seam seat seed seek seem seen
+self sell send sent shed ship shoe shop shot show shut sick side sigh sign silk sing
+sink site size skin skip slab slam slap sled slim slip slow snap snow soap sock soda
+soft soil sold sole some song soon sore sort soul soup sour span spin spit spot star
+stay stem step stir stop such suit sure swim tail take tale talk tall tame tank tape
+task team tear tell tend tent term test text than that them then they thin this thus
+tide tidy tile till time tiny tire toad told tone took tool torn tour town trap tray
+tree trim trio trip true tube tune turn twin type unit upon urge used user vain vary
+vast veil vein very view vine visa void vote wage wait wake walk wall want warm warn
+wash wave weak wear weed week well went were west what when whip wide wife wild will
+wind wine wing wink wire wise wish with wolf wood wool word wore work worm worn wrap
+yard yarn year yell yoga your zero zone
+about above after again agent agree ahead alarm album alert alien alive alone along
+alter among angel anger angle angry apple apply argue arise armor aside asset audio
+avoid award aware baker basic beach began begin begun being below bench berry birth
+black blade blame blank blast blaze blend bless blind block blood bloom board boost
+bound brain brake brand brave bread break breed brick bride brief bring broad broke
+brown brush build built burst buyer cable carry catch cause chain chair chalk charm
+chart chase cheap check cheek cheer chess chest chief child chill choir chose civic
+claim class clean clear clerk click climb clock close cloth cloud coast color coral
+could count court cover crack craft crash crawl crazy cream creek crime crisp cross
+crowd crown curve cycle daily dairy dance dealt death debug delay depth devil diary
+dirty doubt dough dozen draft drain drama drank dream dress dried drink drive drove
+eager early earth eight elder elect empty enemy enjoy enter entry equal error essay
+event every exact exist extra faint fairy faith false fancy fault feast fence ferry
+fetch fever fiber field fifth fifty fight final first fixed flame flash fleet flesh
+float flood floor flour fluid focus force forge forth forty found frame frank fresh
+front frost fruit fully funny ghost giant given glass globe glory glove going grace
+grade grain grand grant grape graph grasp grass grave great green greet grief grind
+groan gross group grove grown guard guess guest guide guilt habit happy hardy harsh
+haste hatch haven heart heavy hence hobby honey honor horse hotel house human humid
+humor hurry ideal image imply index inner input issue ivory jelly jewel joint judge
+juice juicy knife knock known label labor large laser later laugh layer learn lease
+least leave legal lemon level light limit linen liver local logic loose loser lover
+lower lucky lunch magic major maker mango maple march match maybe mayor meant medal
+media melon mercy merge merit merry metal meter micro might minor model money month
+moral motor mount mouse mouth moved movie music naive nasty naval nerve never newly
+night noble noise north noted novel nurse ocean offer often olive onion opera orbit
+order organ other outer owner paint panel panic paper party pasta paste patch pause
+peace peach pearl pedal penny phase phone photo piano piece pilot pitch place plain
+plane plant plate plead point polar porch pound power press price pride prime print
+prior prize proof proud prove pulse punch pupil puppy queen query quest queue quick
+quiet quite quote radio raise rally range rapid ratio reach react ready realm rebel
+refer relax relay renew reply reset rhyme rider ridge right rigid rival river robin
+robot rocky roman rough round route royal rural sadly saint salad sales sandy sauce
+scale scare scarf scene scent scope score scout screw seeds sense serve seven shade
+shake shall shame shape share shark sharp sheep sheer sheet shelf shell shift shine
+shirt shock shook shoot shore short shout shown siege sight silly since skill skirt
+skull slate sleep slept slice slide slope small smart smell smile smoke snake solar
+solid solve sorry sound south space spare spark speak speed spell spend spent spice
+spike spill spine spite split spoil spoke spoon sport spray stack staff stage stain
+stair stake stale stall stamp stand stare start state steak steal steam steel steep
+steer stick stiff still stock stole stone stood stool store storm story stove strap
+straw stray strip stuck study stuff style sugar suite sunny super surge sweet swept
+swift swing swirl table taken taste teach teeth tense thank theft their theme there
+these thick thief thing think third thorn those three threw throw thumb tiger tight
+timer tired title toast today token topic total touch tough towel tower trace track
+trade trail train trait trash treat trend trial tribe trick tried troop truck truly
+trunk trust truth twice twist under union unity until upper upset urban usage usual
+valid value valve verse video virus visit vital vivid vocal voice voter wagon waist
+waste watch water weary weave wedge weird whale wheat wheel where which while white
+whole whose wider widow width woman women world worry worse worst worth would wound
+wrath wreck wrist write wrong wrote yield young youth zebra
+`.trim().split(/\s+/));
+const DICTIONARY = new Set(COMMON_WORDS);
+function isValidWord(word) {
+  return typeof word === 'string' && /^[a-z]{3,}$/i.test(word) &&
+    DICTIONARY.has(word.toLowerCase());
+}
+
+function mulberry32(seed) {
+  let state = seed >>> 0;
+  return () => {
+    state = (state + 0x6D2B79F5) >>> 0;
+    let t = Math.imul(state ^ (state >>> 15), state | 1);
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+function createDailyRandom(dateString) {
+  if (typeof dateString !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(dateString)) {
+    throw new TypeError('Expected a valid YYYY-MM-DD date.');
+  }
+  const parsed = new Date(`${dateString}T00:00:00Z`);
+  if (!Number.isFinite(parsed.getTime()) || parsed.toISOString().slice(0, 10) !== dateString) {
+    throw new TypeError('Expected a valid YYYY-MM-DD date.');
+  }
+  let hash = 2166136261;
+  for (const char of dateString) hash = Math.imul(hash ^ char.charCodeAt(0), 16777619);
+  return mulberry32(hash);
+}
+
+/** Geometry validation only; dictionary validation happens on submission. */
+function validatePath(coordsArray) {
+  if (!Array.isArray(coordsArray) || coordsArray.length < 3 || coordsArray.length > 25) return false;
+  const visited = new Set();
+  for (let i = 0; i < coordsArray.length; i++) {
+    const cell = coordsArray[i];
+    if (!cell || !Number.isInteger(cell.row) || !Number.isInteger(cell.col) ||
+        cell.row < 0 || cell.row >= SIZE || cell.col < 0 || cell.col >= SIZE) return false;
+    const key = cell.row * SIZE + cell.col;
+    if (visited.has(key)) return false;
+    visited.add(key);
+    if (i > 0 && (Math.abs(cell.row - coordsArray[i - 1].row) > 1 ||
+        Math.abs(cell.col - coordsArray[i - 1].col) > 1)) return false;
+  }
+  return true;
+}
+
+const VOWELS = 'AAAAAAAAAEEEEEEEEEEEEIIIIIIIIIOOOOOOOOUUUU';
+const CONSONANTS = 'BBCCDDDFFGGHHHHHHJKLLLLMMNNNNNNPPQRRRRRRSSSSSSTTTTTTTTTVVWWXYZ';
+const DIRECTIONS = [[0, 1], [1, 0], [1, 1], [1, -1]];
+const keyOf = ({ row, col }) => row * SIZE + col;
+const copyPath = path => path.map(({ row, col }) => ({ row, col }));
+
+/** Independent game instance. Same date + submissions => identical boards/refills.
+ * Cascades: contiguous straight lines, both directions, length 3–5. A match must
+ * touch a moved/refilled cell. Overlapping matches clear their union once.
+ * Each wave scores length² per distinct path; initial submission costs one move.
+ */
+function createWordDrop(dateString = new Date().toISOString().slice(0, 10)) {
+  const random = createDailyRandom(dateString);
+  const pick = pool => pool[Math.floor(random() * pool.length)];
+  const freshLetter = () => pick(random() < 0.4 ? VOWELS : CONSONANTS);
+  // Exactly 10 vowels and 15 consonants; Fisher–Yates avoids positional bias.
+  const letters = Array.from({ length: 25 }, (_, i) => pick(i < 10 ? VOWELS : CONSONANTS));
+  for (let i = letters.length - 1; i > 0; i--) {
+    const j = Math.floor(random() * (i + 1));
+    [letters[i], letters[j]] = [letters[j], letters[i]];
+  }
+  let board = Array.from({ length: SIZE }, (_, r) => letters.slice(r * SIZE, (r + 1) * SIZE));
+  let score = 0;
+  let moves = 0;
+  const snapshot = () => board.map(row => row.slice());
+  const state = () => ({ date: dateString, board: snapshot(), score, moves, movesRemaining: 10 - moves });
+  const wordAt = path => path.map(({ row, col }) => board[row][col]).join('');
+
+  function findCascadeMatches(changedCells) {
+    const matches = [];
+    const seen = new Set();
+    for (let row = 0; row < SIZE; row++) for (let col = 0; col < SIZE; col++) {
+      for (const [dr, dc] of DIRECTIONS) {
+        const path = [];
+        for (let step = 0; step < SIZE; step++) {
+          const r = row + dr * step, c = col + dc * step;
+          if (r < 0 || r >= SIZE || c < 0 || c >= SIZE) break;
+          path.push({ row: r, col: c });
+          if (path.length < 3 || !path.some(cell => changedCells.has(keyOf(cell)))) continue;
+          const forward = wordAt(path);
+          for (const reverse of [false, true]) {
+            const word = reverse ? [...forward].reverse().join('') : forward;
+            const identity = path.map(keyOf).join(',');
+            // Palindromes and reverse-word pairs count once for the same tiles.
+            if (!isValidWord(word) || seen.has(identity)) continue;
+            seen.add(identity);
+            matches.push({ word, path: reverse ? copyPath(path).reverse() : copyPath(path) });
+          }
+        }
+      }
+    }
+    return matches;
+  }
+
+  function clearAndDrop(matches) {
+    const unique = new Map();
+    for (const { path } of matches) for (const cell of path) unique.set(keyOf(cell), cell);
+    const before = snapshot();
+    for (const { row, col } of unique.values()) board[row][col] = null;
+    const cleared = snapshot();
+    const changed = new Set();
+    const falls = [], spawns = [];
+    for (let col = 0; col < SIZE; col++) {
+      let target = SIZE - 1;
+      for (let row = SIZE - 1; row >= 0; row--) {
+        if (board[row][col] === null) continue;
+        const letter = board[row][col];
+        board[target][col] = letter;
+        if (target !== row) {
+          changed.add(target * SIZE + col);
+          falls.push({ letter, from: { row, col }, to: { row: target, col } });
+        }
+        target--;
+      }
+      for (let row = target; row >= 0; row--) {
+        const letter = freshLetter();
+        board[row][col] = letter;
+        changed.add(row * SIZE + col);
+        spawns.push({ letter, to: { row, col } });
+      }
+    }
+    return { changed, event: { matches, removed: copyPath([...unique.values()]), before,
+      cleared, after: snapshot(), falls, spawns } };
+  }
+
+  function processWordClear(pathCoords) {
+    const reject = reason => ({ accepted: false, reason, ...state(), waves: [] });
+    if (moves >= 10) return reject('No moves remaining.');
+    if (!validatePath(pathCoords)) return reject('Invalid tile path.');
+    const word = wordAt(pathCoords);
+    if (!isValidWord(word)) return reject('Word is not in the prototype dictionary.');
+    moves++;
+    let matches = [{ word, path: copyPath(pathCoords) }];
+    const waves = [];
+    let points = 0;
+    // One player clear plus at most ten automatic waves; pending matches remain.
+    for (let wave = 0; wave <= 10 && matches.length; wave++) {
+      const { changed, event } = clearAndDrop(matches);
+      const earned = matches.reduce((sum, match) => sum + match.word.length ** 2, 0);
+      points += earned;
+      waves.push({ ...event, bonus: wave > 0, points: earned });
+      matches = findCascadeMatches(changed);
+    }
+    score += points;
+    return { accepted: true, word, points, ...state(), waves,
+      cascadeLimitReached: matches.length > 0 };
+  }
+
+  return Object.freeze({ getState: state, validatePath, isValidWord, processWordClear });
+}
+
+return { createWordDrop, isValidWord, COMMON_WORDS };
+})();
+const { createWordDrop, isValidWord, COMMON_WORDS } = WordDropEngine;
+
+// Prefix tree prunes paths that cannot produce a dictionary word.
+const hintTrie = Object.create(null);
+for (const word of COMMON_WORDS) {
+ let node = hintTrie;
+ for (const letter of word.toUpperCase()) node = node[letter] ||= Object.create(null);
+ node.word = word.toUpperCase();
+}
+function findHint(grid) {
+ const visited = new Set();
+ function search(row, col, node, trail) {
+  const key = row * 5 + col;
+  if (visited.has(key)) return null;
+  const next = node[grid[row][col]];
+  if (!next) return null;
+  const path = [...trail, { row, col }];
+  if (next.word) return { word: next.word, path };
+  visited.add(key);
+  for (let r = Math.max(0, row - 1); r <= Math.min(4, row + 1); r++) {
+   for (let c = Math.max(0, col - 1); c <= Math.min(4, col + 1); c++) {
+    const found = search(r, c, next, path);
+    if (found) { visited.delete(key); return found; }
+   }
+  }
+  visited.delete(key);
+  return null;
+ }
+ for (let row = 0; row < 5; row++) for (let col = 0; col < 5; col++) {
+  const found = search(row, col, hintTrie, []);
+  if (found) return found;
+ }
+ return null;
+}
+
+const $ = id => document.getElementById(id);
+const STORAGE = 'worddrop:v1';
+const utcDay = () => new Date().toISOString().slice(0,10);
+const date = utcDay();
+const game = createWordDrop(date);
+const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const wait = ms => new Promise(resolve => setTimeout(resolve, reduced ? 0 : ms));
+let storageOK = true;
+let saved = { version:1, days:{} };
+try {
+ const data = JSON.parse(localStorage.getItem(STORAGE) || 'null');
+ if(data?.version === 1 && data.days && typeof data.days === 'object' && !Array.isArray(data.days)) saved = data;
+} catch { storageOK = false; }
+let record = { paths:[], finished:false };
+let history = [];
+// Replaying at most ten accepted paths restores the PRNG as well as the board.
+// Do not trust stored scores or move counts; derive them from the engine.
+const candidate = saved.days[date];
+if(candidate && Array.isArray(candidate.paths)) {
+ for(const path of candidate.paths.slice(0,10)) {
+  const result = game.processWordClear(path);
+  if(!result.accepted) break;
+  record.paths.push(path.map(p=>({row:p.row,col:p.col})));
+  history.push(result);
+ }
+ record.finished = candidate.finished === true || game.getState().moves === 10;
+}
+let busy = false, path = [], dragging = false, touchId = null, lastPoint = null;
+let soundOn = false, audio;
+const board = $('board');
+const cells = [];
+for(let row=0;row<5;row++) for(let col=0;col<5;col++) {
+ const button = document.createElement('button');
+ button.className='tile'; button.type='button'; button.dataset.row=row; button.dataset.col=col;
+ button.addEventListener('click', event => {
+  // Pointer selections are handled on down/move/up; synthetic keyboard clicks tap.
+  if(event.detail === 0 && !busy && !record.finished) { addCell({row,col}); tone(330+path.length*35); }
+ });
+ board.append(button); cells.push(button);
+}
+const index = p => p.row*5+p.col;
+const same = (a,b) => a && b && a.row===b.row && a.col===b.col;
+const selectedWord = () => { const grid=game.getState().board; return path.map(p=>grid[p.row][p.col]).join(''); };
+function message(text) { $('message').textContent = text; }
+function streak() {
+ let cursor = new Date(`${date}T00:00:00Z`), count=0;
+ if(!record.finished) cursor.setUTCDate(cursor.getUTCDate()-1);
+ while(saved.days[cursor.toISOString().slice(0,10)]?.finished === true) { count++; cursor.setUTCDate(cursor.getUTCDate()-1); }
+ return count;
+}
+function best() { return Math.max(0,...Object.values(saved.days).map(day=>Number.isFinite(day?.score) ? day.score : 0)); }
+function persist() {
+ const state=game.getState();
+ saved.days[date]={...record,score:state.score,movesRemaining:state.movesRemaining,history:history.map(r=>({word:r.word,points:r.points,combos:r.waves.length-1}))};
+ saved.highScore=best(); saved.currentStreak=streak();
+ try { localStorage.setItem(STORAGE,JSON.stringify(saved)); } catch {storageOK=false;}
+}
+function renderBoard(grid=game.getState().board) {
+ cells.forEach((tile,i)=>{
+  tile.textContent=grid[Math.floor(i/5)][i%5];
+  tile.className='tile'; tile.style.transform=''; tile.style.opacity='';
+  tile.setAttribute('aria-label',`${tile.textContent}, row ${Math.floor(i/5)+1}, column ${i%5+1}`);
+  tile.setAttribute('aria-pressed','false');
+ });
+}
+function updateStats() {
+ const state=game.getState();
+ $('score').textContent=state.score.toLocaleString(); $('moves').textContent=state.movesRemaining;
+ $('streak').textContent=streak(); $('best').textContent=`Personal best · ${best().toLocaleString()}`;
+ $('clear').disabled=busy || record.finished || !path.length;
+ $('submit').disabled=busy || record.finished || path.length<3;
+ $('finish').disabled=busy || record.finished;
+ $('hint').disabled=busy || record.finished;
+ $('finish').textContent=record.finished?'Complete':'Finish early';
+ cells.forEach(tile=>{tile.disabled=busy || record.finished;});
+ $('history').replaceChildren(...history.map(r=>{const li=document.createElement('li');li.textContent=`${r.word} +${r.points}`;return li;}));
+}
+function drawPath() {
+ cells.forEach((cell,i)=>{const pos=path.findIndex(p=>index(p)===i);cell.classList.toggle('selected',pos!==-1);cell.classList.toggle('tip',pos===path.length-1&&pos!==-1);cell.setAttribute('aria-pressed',String(pos!==-1));});
+ const wrap=$('boardWrap').getBoundingClientRect();
+ $('trace').setAttribute('points',path.map(p=>{const box=cells[index(p)].getBoundingClientRect();return `${box.left+box.width/2-wrap.left},${box.top+box.height/2-wrap.top}`;}).join(' '));
+ $('word').textContent=path.length?selectedWord():'Drag a word to get things moving';
+ $('word').classList.toggle('idle',!path.length); updateStats();
+}
+function clearPath() {path=[];drawPath();}
+function addCell(cell) {
+ if(same(path.at(-1),cell)) return;
+ if(path.length>1 && same(path.at(-2),cell)) {path.pop();drawPath();return;}
+ if(path.some(p=>same(p,cell))) return;
+ const last=path.at(-1);
+ if(last && (Math.abs(last.row-cell.row)>1 || Math.abs(last.col-cell.col)>1)) return;
+ path.push(cell);drawPath();
+}
+function hit(x,y) {
+ const rect=board.getBoundingClientRect();
+ if(x<rect.left||x>rect.right||y<rect.top||y>rect.bottom)return null;
+ for(let i=0;i<cells.length;i++) {
+  const b=cells[i].getBoundingClientRect(), inset=b.width*.13;
+  if(x>=b.left+inset&&x<=b.right-inset&&y>=b.top+inset&&y<=b.bottom-inset)return {row:Math.floor(i/5),col:i%5};
+ }
+ return null;
+}
+function moveTrace(x,y) {
+ const from=lastPoint||{x,y}, steps=Math.max(1,Math.ceil(Math.hypot(x-from.x,y-from.y)/8));
+ for(let i=1;i<=steps;i++){const cell=hit(from.x+(x-from.x)*i/steps,from.y+(y-from.y)*i/steps);if(cell)addCell(cell);}
+ lastPoint={x,y};
+}
+function startTrace(x,y) {
+ if(busy||record.finished)return false;
+ if(utcDay()!==date){message('A new daily board is ready. Reload to play it.');return false;}
+ const cell=hit(x,y);if(!cell)return false;
+ dragging=true;lastPoint={x,y};clearPath();addCell(cell);tone(360);return true;
+}
+function endTrace(cancel=false) {
+ if(!dragging)return;
+ dragging=false;touchId=null;lastPoint=null;
+ if(cancel){clearPath();return;}
+ void submit();
+}
+board.addEventListener('touchstart',e=>{
+ if(touchId!==null)return;
+ const t=e.changedTouches[0];if(startTrace(t.clientX,t.clientY)){touchId=t.identifier;e.preventDefault();}
+},{passive:false});
+board.addEventListener('touchmove',e=>{
+ const t=[...e.changedTouches].find(t=>t.identifier===touchId);
+ if(t&&dragging){e.preventDefault();moveTrace(t.clientX,t.clientY);}
+},{passive:false});
+board.addEventListener('touchend',e=>{if([...e.changedTouches].some(t=>t.identifier===touchId)){e.preventDefault();endTrace();}},{passive:false});
+board.addEventListener('touchcancel',()=>endTrace(true));
+// Mouse/pen use pointer events; touch is owned by the explicit touch handlers.
+board.addEventListener('pointerdown',e=>{if(e.pointerType==='touch'||e.button!==0)return;if(startTrace(e.clientX,e.clientY)){board.setPointerCapture(e.pointerId);e.preventDefault();}});
+board.addEventListener('pointermove',e=>{if(e.pointerType!=='touch'&&dragging)moveTrace(e.clientX,e.clientY);});
+board.addEventListener('pointerup',e=>{if(e.pointerType!=='touch')endTrace();});
+board.addEventListener('pointercancel',e=>{if(e.pointerType!=='touch')endTrace(true);});
+window.addEventListener('blur',()=>endTrace(true));
+window.addEventListener('resize',()=>{if(path.length)drawPath();});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!busy)clearPath();});
+async function tone(frequency) {
+ if(!soundOn)return;
+ try {
+  audio ||= new (window.AudioContext||window.webkitAudioContext)();
+  if(audio.state !== 'running') await audio.resume();
+  const oscillator=audio.createOscillator(),gain=audio.createGain();
+  oscillator.type='sine';oscillator.frequency.value=frequency;
+  gain.gain.setValueAtTime(.08,audio.currentTime);gain.gain.exponentialRampToValueAtTime(.001,audio.currentTime+.13);
+  oscillator.connect(gain);gain.connect(audio.destination);oscillator.start();oscillator.stop(audio.currentTime+.14);
+ } catch {soundOn=false;$('sound').textContent='Sound unavailable';$('sound').setAttribute('aria-pressed','false');}
+}
+function popup(text) {const el=document.createElement('div');el.className='float';el.textContent=text;$('boardWrap').append(el);setTimeout(()=>el.remove(),950);}
+async function animateWave(wave,n) {
+ renderBoard(wave.before);
+ wave.removed.forEach(p=>cells[index(p)].classList.add('pop'));
+ tone(440+n*65); await wait(200);
+ renderBoard(wave.after);
+ const distance=cells[5].getBoundingClientRect().top-cells[0].getBoundingClientRect().top;
+ const moving=[];
+ for(const fall of wave.falls){const tile=cells[index(fall.to)];tile.style.transform=`translateY(${(fall.from.row-fall.to.row)*distance}px)`;moving.push(tile);}
+ for(const spawn of wave.spawns){const tile=cells[index(spawn.to)];tile.style.transform=`translateY(${-(spawn.to.row+1)*distance}px)`;tile.style.opacity='0';moving.push(tile);}
+ // Force the starting transforms to commit before enabling the transitions.
+ void board.offsetHeight;
+ moving.forEach(tile=>{tile.classList.add('falling');tile.style.transform='translateY(0)';tile.style.opacity='1';});
+ popup(n?`COMBO x${n+1}! +${wave.points}`:`+${wave.points}`);
+ await wait(450);
+}
+async function submit() {
+ if(busy||record.finished)return;
+ if(utcDay()!==date){clearPath();message('A new daily board is ready. Reload to play it.');return;}
+ const chosen=path.map(p=>({...p}));
+ if(chosen.length<3){clearPath();message('Connect at least 3 letters.');return;}
+ if(!isValidWord(selectedWord())){clearPath();message('That word is not in our prototype dictionary. Try another.');tone(180);return;}
+ const result=game.processWordClear(chosen);
+ if(!result.accepted){clearPath();message(result.reason);return;}
+ busy=true;record.paths.push(chosen);history.push(result);
+ if(result.movesRemaining===0)record.finished=true;
+ persist();clearPath();message(`${result.word} · +${result.points}${result.waves.length>1?' · bonus cascade!':''}`);
+ try {for(let i=0;i<result.waves.length;i++)await animateWave(result.waves[i],i);}
+ finally {busy=false;renderBoard();updateStats();if(record.finished)showResults();}
+ if(!storageOK)message('Progress is available this session, but browser storage is unavailable.');
+}
+function summaryText() {
+ const state=game.getState();
+ const emojis=history.map(r=>r.waves.length>1?'🟩':r.word.length>=5?'🟦':'🟨');
+ while(emojis.length<10)emojis.push('⬜');
+ return `Tile Tide · ${date}\n${state.score} points · ${state.moves}/10 moves\n${emojis.slice(0,5).join('')}\n${emojis.slice(5).join('')}\n${streak()} day streak\n🟨 Word · 🟦 5+ letters · 🟩 Cascade`;
+}
+function showResults() {
+ const state=game.getState(),bonuses=history.reduce((sum,r)=>sum+r.waves.length-1,0);
+ $('resultStats').textContent=`${state.score.toLocaleString()} points · ${state.moves} moves · ${bonuses} bonus cascades · ${streak()} day streak. Come back tomorrow for another drop.`;
+ $('summary').value=summaryText();
+ if(!$('results').open)$('results').showModal();
+}
+$('sound').addEventListener('click',()=>{soundOn=!soundOn;$('sound').textContent=soundOn?'Sound on':'Sound off';$('sound').setAttribute('aria-pressed',String(soundOn));tone(500);});
+$('clear').addEventListener('click',clearPath);
+$('hint').addEventListener('click',()=>{
+ if(busy || dragging || record.finished)return;
+ if(utcDay()!==date){message('A new daily board is ready. Reload to play it.');return;}
+ const hint=findHint(game.getState().board);
+ if(!hint){clearPath();message('No words remain in the prototype dictionary. Choose Finish early to save your score.');return;}
+ path=hint.path;drawPath();
+ message(`Try ${hint.word}. Its path is highlighted. Tap Submit word to play it. No move used for the hint.`);
+ tone(480);
+});
+$('submit').addEventListener('click',()=>void submit());
+$('finish').addEventListener('click',()=>{if(!busy&&!record.finished)$('confirmFinish').showModal();});
+$('keepPlaying').addEventListener('click',()=>$('confirmFinish').close());
+$('confirmEnd').addEventListener('click',()=>{$('confirmFinish').close();record.finished=true;clearPath();persist();updateStats();showResults();});
+$('closeResults').addEventListener('click',()=>$('results').close());
+$('share').addEventListener('click',async()=>{
+ const text=summaryText();
+ try {
+  if(navigator.share){await navigator.share({title:'Tile Tide',text});$('shareStatus').textContent='Results shared.';}
+  else if(navigator.clipboard&&window.isSecureContext){await navigator.clipboard.writeText(text);$('shareStatus').textContent='Copied. Paste your results anywhere.';}
+  else {$('summary').focus();$('summary').select();$('shareStatus').textContent='Select and copy the summary above.';}
+ } catch(error){if(error.name!=='AbortError'){$('summary').focus();$('summary').select();$('shareStatus').textContent='Select and copy the summary above.';}}
+});
+// Reopen results after closing the modal without permitting another daily run.
+const resultsButton=document.createElement('button');resultsButton.className='secondary';resultsButton.textContent='View results';resultsButton.hidden=!record.finished;
+resultsButton.addEventListener('click',showResults);document.querySelector('.actions').after(resultsButton);
+const observe=new MutationObserver(()=>{resultsButton.hidden=!record.finished;});observe.observe($('moves'),{childList:true});
+$('daily').textContent=`The daily word cascade · ${new Date(date+'T12:00:00Z').toLocaleDateString(undefined,{month:'short',day:'numeric',timeZone:'UTC'})}`;
+persist();renderBoard();drawPath();
+if(!storageOK)message('Browser storage is unavailable. Progress lasts for this session only.');
+if(record.finished)showResults();
+})();
+</script>
+<script>
+(() => {
+ let last=0,queued=false;
+ function measure(){queued=false;const main=document.querySelector('main');const height=Math.ceil((main?.getBoundingClientRect().bottom||document.body.getBoundingClientRect().height)+12);if(height!==last){last=height;parent.postMessage({type:'room:height',height},'*');}}
+ function update(){if(!queued){queued=true;requestAnimationFrame(measure);}}
+ new ResizeObserver(update).observe(document.body);
+ new MutationObserver(update).observe(document.body,{subtree:true,childList:true,attributes:true,characterData:true});
+ window.addEventListener('load',update);window.addEventListener('resize',update);update();
+})();
+</script>
+</body>
+</html>

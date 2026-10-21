@@ -1,0 +1,492 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#151d27">
+<title>LetterLock · Daily word safe</title>
+<style>
+:root{color-scheme:dark;--gold:#f1cd7c;--muted:#a5b2bf;--row:64px;font-family:system-ui,sans-serif;background:#101720;color:#eef2f5}
+*{box-sizing:border-box}body{margin:0;min-height:100svh;background:radial-gradient(ellipse at top,#2a394a,transparent 65%),#101720}button{font:inherit;cursor:pointer;color:inherit;background:#293644;border:1px solid #52606c;border-radius:12px;padding:12px 16px;min-height:44px}button:hover{background:#354858}button:focus-visible,.wheel:focus-visible{outline:3px solid var(--gold);outline-offset:4px}button:disabled{opacity:.5;cursor:default}main{max-width:520px;margin:auto;padding:28px 18px 40px}header{display:flex;align-items:center;justify-content:space-between}h1{font-size:25px;letter-spacing:-1px;margin:0}.brand{color:var(--gold)}.eyebrow{font-size:11px;letter-spacing:3px;text-transform:uppercase;color:var(--muted)}.intro{text-align:center;margin:30px 0 22px}h2{font-size:32px;letter-spacing:5px;margin:8px 0}.sub{font-size:14px;color:var(--muted);line-height:1.6}.stats{display:flex;justify-content:space-between;gap:8px;margin:22px 0;font-size:13px;color:var(--muted)}.stats strong{color:#fff}.safe{position:relative;padding:18px 12px;border:1px solid #66727c;border-radius:24px;background:linear-gradient(125deg,#445260,#202c38 35%,#17212a);box-shadow:0 22px 45px #0005,inset 0 1px #ffffff40}.safe:before,.safe:after{content:'✦';position:absolute;color:#8b99a4;font-size:12px;top:5px}.safe:before{left:12px}.safe:after{right:12px}.wheels{display:flex;gap:7px;position:relative}.target-line{position:absolute;left:7px;right:7px;top:calc(18px + var(--row));height:var(--row);pointer-events:none;border:2px solid #f1cd7c90;border-radius:8px;z-index:3;box-shadow:0 0 22px #f1cd7c12}.column{flex:1;min-width:0;text-align:center}.wheel{height:calc(var(--row)*3);overflow:hidden;border-radius:10px;position:relative;touch-action:none;user-select:none;background:#a8b0b7;color:#202831;box-shadow:inset 0 0 12px #0008;cursor:grab}.wheel:after{content:'';position:absolute;inset:0;pointer-events:none;background:linear-gradient(#101a2bea,transparent 37%,#ffffff22 50%,transparent 63%,#101a2bea);z-index:2}.strip{position:absolute;top:calc(-2*var(--row));width:100%;will-change:transform}.letter{height:var(--row);display:grid;place-items:center;font-size:clamp(30px,8vw,43px);font-weight:750;text-shadow:0 1px #fff8;border-top:1px solid #ffffff35;border-bottom:1px solid #0002;background:linear-gradient(90deg,#8e99a3,#d1d6da 45%,#a6afb7)}.dial-buttons{display:flex;justify-content:center;gap:3px;margin-top:9px}.dial-buttons button{padding:3px;min-width:28px;flex:1;max-width:45px;border-radius:7px;font-size:15px}.feedback{height:54px;display:grid;place-items:center;text-align:center;color:var(--gold);font-size:14px}.proximity{display:flex;align-items:center;gap:10px;font-size:12px;color:var(--muted);margin:5px 0 24px}progress{width:100%;height:6px;accent-color:var(--gold)}.word-list{list-style:none;padding:0;display:grid;gap:8px}.word-list li{display:flex;justify-content:space-between;background:#ffffff06;border:1px solid #ffffff0b;padding:13px 16px;border-radius:10px;letter-spacing:5px}.word-list .solved{color:var(--gold);border-color:#f1cd7c44}.section-title{font-size:13px;letter-spacing:2px;text-transform:uppercase;color:var(--muted)}footer{text-align:center;margin-top:24px;font-size:12px;color:var(--muted)}.unlock .wheel{animation:lock .65s ease}.unlock .target-line{animation:flash .7s ease}.unlock{box-shadow:0 0 35px #eebf5d66}dialog{max-width:440px;width:calc(100% - 32px);border:1px solid #a28b58;border-radius:24px;background:#1c2835;color:#eef2f5;padding:28px;text-align:center}dialog::backdrop{background:#060b12cc;backdrop-filter:blur(7px)}dialog h2{letter-spacing:-1px;font-size:30px}.victory-icon{font-size:50px}.summary{white-space:pre-wrap;font:14px/1.7 system-ui;background:#111c27;padding:16px;border-radius:12px}.actions{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}.primary{background:var(--gold);color:#202831;border-color:var(--gold);font-weight:700}.primary:hover{background:#ffdfa0}.storage-note{color:#e8bda1;font-size:12px;text-align:center}[hidden]{display:none!important}@keyframes flash{40%{background:#f8d27899;box-shadow:0 0 40px #ffe2a0}}@keyframes lock{25%{filter:sepia(.8) brightness(1.35)}45%{transform:translateY(2px)}65%{transform:translateY(-2px)}}@media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important}}@media(max-width:350px){main{padding:18px 10px}.safe{padding-left:8px;padding-right:8px}.wheels{gap:4px}:root{--row:56px}}
+.ad-slot{display:grid;place-items:center;flex:none;overflow:hidden;background:#111923;color:#84909c;font:10px system-ui;letter-spacing:1px}
+.ad-anchor{position:fixed;bottom:0;left:0;right:0;z-index:10;min-height:50px;box-sizing:content-box;padding-bottom:env(safe-area-inset-bottom,0px);display:flex;justify-content:center;background:#111923;border-top:1px solid #ffffff18}
+#ad-anchor{width:320px;height:50px;min-height:50px}
+.completion-ad{margin:20px auto 8px;width:300px;min-height:250px}
+#ad-completion{width:300px;height:250px;min-height:250px}
+dialog{max-height:calc(100dvh - 24px);overflow:auto}
+@media(max-width:767px){body{padding-bottom:calc(66px + env(safe-area-inset-bottom,0px))}}
+@media(min-width:768px){.ad-anchor{display:none}}
+@media(max-width:380px){dialog{width:calc(100% - 8px);padding:16px 4px}.actions{gap:4px}}
+</style>
+ <link rel="stylesheet" href="../../night-game.css"><script src="../../night-frame.js" data-game="lock"></script><link rel="stylesheet" href="../../game-theme.css">
+</head>
+<body class="room-embedded room-lock">
+<main>
+<header><h1>Letter<span class="brand">Lock</span></h1><button id="results" hidden>Results ↗</button><span id="daily" class="eyebrow">Daily safe</span></header>
+<section class="intro"><div class="eyebrow" id="date"></div><h2 id="category">LETTERLOCK</h2><div class="sub">One category. One safe.<br>Spin each dial to uncover today’s words.</div></section>
+<div class="stats"><span><strong id="found">0 / 0</strong> unlocked</span><span><strong id="moves">0</strong> moves</span><span>🔥 <strong id="streak">0</strong> streak</span></div>
+<section class="safe" id="safe" aria-label="Letter combination lock"><div class="wheels" id="wheels"></div><div class="target-line"></div></section>
+<div class="feedback" id="feedback" role="status" aria-live="polite">Swipe a dial up or down to begin.</div>
+<div class="proximity"><span>Getting warmer</span><progress id="heat" max="1" value="0" aria-label="Proximity to a remaining word"></progress></div>
+<div class="section-title">Today’s combinations</div><ul id="words" class="word-list"></ul>
+<p class="sub" id="bonus"></p><p id="storage" class="storage-note" hidden>Saving is unavailable. Progress will last for this visit only.</p>
+<footer>Swipe, use the arrow buttons, or focus a dial and press ↑ ↓.<br>A move is one letter step. New puzzle daily at 00:00 UTC.</footer>
+<noscript>Enable JavaScript to play LetterLock.</noscript>
+</main>
+<aside class="ad-anchor" aria-label="Advertisement"><div id="ad-anchor" class="ad-slot" data-ad-slot="anchor" aria-label="320 by 50 advertisement">ADVERTISEMENT · 320 × 50</div></aside>
+<dialog id="victory" aria-labelledby="victory-title"><div class="victory-icon">🔓</div><h2 id="victory-title">Safe cracked.</h2><p class="sub" id="victory-stats"></p><p id="solved"></p><pre id="summary" class="summary"></pre><div class="actions"><button id="share" class="primary">Share results</button><button id="close">Back to safe</button></div><p id="share-status" role="status" class="sub"></p></dialog>
+<script>
+/* Provider integration:
+ * LetterLockAds.onRefresh(({ slotId, element }) => yourAdProvider.refresh(element));
+ * No ad requests are sent until your provider callback is connected.
+ */
+(() => {
+  const INTERVAL = 30000;
+  const mobile = matchMedia('(max-width: 767px)');
+  const modal = document.getElementById('victory');
+  const wrapper = document.createElement('div');
+  wrapper.className = 'completion-ad';
+  wrapper.setAttribute('aria-label', 'Advertisement');
+  const completion = document.createElement('div');
+  completion.id = 'ad-completion';
+  completion.className = 'ad-slot';
+  completion.dataset.adSlot = 'completion';
+  completion.setAttribute('aria-label', '300 by 250 advertisement');
+  completion.textContent = 'ADVERTISEMENT · 300 × 250';
+  wrapper.append(completion);
+  modal.append(wrapper);
+
+  const callbacks = new Set();
+  const slots = [...document.querySelectorAll('[data-ad-slot]')].map(element =>
+    ({ element, ratio: 0, timer: null, since: null }));
+  window.LetterLockAds = Object.freeze({
+    onRefresh(callback) {
+      if (typeof callback !== 'function') throw new TypeError('Expected a refresh callback.');
+      callbacks.add(callback);
+      return () => callbacks.delete(callback);
+    }
+  });
+  if (!('IntersectionObserver' in window)) return; // Fail closed.
+
+  function reset(slot) {
+    clearTimeout(slot.timer); slot.timer = null; slot.since = null;
+  }
+  function qualifies(slot) {
+    if (document.hidden || !mobile.matches || slot.ratio < .5) return false;
+    if (slot.element === completion ? !modal.open : modal.open) return false;
+    // Also respect the visual viewport during zoom or an on-screen keyboard.
+    const box = slot.element.getBoundingClientRect(), viewport = window.visualViewport;
+    const left = viewport?.offsetLeft || 0, top = viewport?.offsetTop || 0;
+    const width = viewport?.width || document.documentElement.clientWidth;
+    const height = viewport?.height || document.documentElement.clientHeight;
+    const area = box.width * box.height;
+    const visible = Math.max(0, Math.min(box.right, left + width) - Math.max(box.left, left)) *
+      Math.max(0, Math.min(box.bottom, top + height) - Math.max(box.top, top));
+    return area > 0 && visible / area >= .5;
+  }
+  function sync(slot) {
+    if (!qualifies(slot)) { reset(slot); return; }
+    if (slot.timer !== null) return;
+    slot.since = performance.now();
+    slot.timer = setTimeout(() => {
+      // Process pending threshold crossings before deciding to refresh.
+      processEntries(observer.takeRecords());
+      if (slot.since === null || !qualifies(slot)) { reset(slot); return; }
+      const visibleMilliseconds = performance.now() - slot.since;
+      reset(slot);
+      if (visibleMilliseconds >= INTERVAL) {
+        const detail = { slotId: slot.element.id, element: slot.element, visibleMilliseconds };
+        for (const callback of callbacks) {
+          try { callback(detail); } catch (error) { console.error('Ad refresh callback failed', error); }
+        }
+      }
+      sync(slot); // Another refresh requires another full continuous interval.
+    }, INTERVAL);
+  }
+  function processEntries(entries) {
+    for (const entry of entries) {
+      const slot = slots.find(slot => slot.element === entry.target);
+      slot.ratio = entry.isIntersecting ? entry.intersectionRatio : 0;
+      sync(slot);
+    }
+  }
+  const observer = new IntersectionObserver(processEntries, { root: null, threshold: [0, .5, 1] });
+  slots.forEach(slot => observer.observe(slot.element));
+  const syncAll = () => slots.forEach(sync);
+  const restart = () => { slots.forEach(reset); syncAll(); };
+  document.addEventListener('visibilitychange', restart);
+  mobile.addEventListener('change', restart);
+  // A modal backdrop obscures the anchor even when geometric intersection is 100%.
+  new MutationObserver(restart).observe(modal, { attributes: true, attributeFilter: ['open'] });
+  window.visualViewport?.addEventListener('resize', syncAll);
+  window.visualViewport?.addEventListener('scroll', syncAll);
+  window.addEventListener('pagehide', () => slots.forEach(reset));
+  window.addEventListener('pageshow', restart);
+})();
+</script>
+<script>
+// Local-file fallback, generated from engine.js. Hosted pages import the ES module.
+window.LetterLockEmbedded = (() => {
+/** LetterLock: dependency-free ES module. Dial index 0 is the center line.
+ * Use <script type="module"> and import { createGame } from './engine.js'.
+ * The bundled dictionary is deliberately small; supply bonusWords to expand it.
+ */
+const CATEGORIES = Object.freeze([
+  Object.freeze({ category: 'FRUIT', words: Object.freeze(['APPLE', 'GRAPE', 'MANGO', 'PEACH', 'LEMON', 'GUAVA']) }),
+  Object.freeze({ category: 'SPACE', words: Object.freeze(['STAR', 'MOON', 'MARS', 'DUST', 'VOID']) }),
+  Object.freeze({ category: 'ANIMALS', words: Object.freeze(['TIGER', 'ZEBRA', 'HORSE', 'OTTER', 'CAMEL', 'LEMUR']) })
+]);
+
+const BONUS_WORDS = ['STONE', 'NOTES', 'TONES', 'RATES', 'TEARS', 'STARE',
+  'HEART', 'EARTH', 'OTHER', 'REACH', 'TEACH', 'CHARM', 'LIGHT', 'NIGHT',
+  'TIME', 'TIDE', 'RIDE', 'ROAD', 'SAND', 'HAND', 'HARD', 'CARD', 'COLD'];
+const ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+const normalize = word => typeof word === 'string' ? word.trim().toUpperCase() : '';
+
+function mulberry32(seed) {
+  let state = seed >>> 0;
+  return function random() {
+    state = (state + 0x6D2B79F5) >>> 0;
+    let value = Math.imul(state ^ (state >>> 15), state | 1);
+    value ^= value + Math.imul(value ^ (value >>> 7), value | 61);
+    return ((value ^ (value >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+function createPRNG(date) {
+  if (typeof date !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(date) ||
+      !Number.isFinite(Date.parse(`${date}T00:00:00Z`)) ||
+      new Date(`${date}T00:00:00Z`).toISOString().slice(0, 10) !== date) {
+    throw new TypeError('Expected a valid YYYY-MM-DD date.');
+  }
+  let seed = 2166136261;
+  for (const char of date) seed = Math.imul(seed ^ char.charCodeAt(0), 16777619);
+  return mulberry32(seed);
+}
+
+function shuffle(values, random) {
+  const result = [...values];
+  for (let i = result.length - 1; i > 0; i--) {
+    const j = Math.floor(random() * (i + 1));
+    [result[i], result[j]] = [result[j], result[i]];
+  }
+  return result;
+}
+
+/** All date decisions use the supplied date; default daily rollover is UTC.
+ * Each puzzle has a single word length, so every target fits the same board.
+ */
+function createDailyPuzzle(date = new Date().toISOString().slice(0, 10)) {
+  const random = createPRNG(date);
+  const entry = CATEGORIES[Math.floor(random() * CATEGORIES.length)];
+  const targets = shuffle(entry.words, random).slice(0, 3 + Math.floor(random() * 3));
+  const columnCount = targets[0].length;
+  const dials = Array.from({ length: columnCount }, (_, column) => {
+    const required = [...new Set(targets.map(word => word[column]))];
+    const distractors = shuffle([...ALPHABET].filter(letter => !required.includes(letter)), random);
+    return shuffle([...required, ...distractors.slice(0, 10 - required.length)], random);
+  });
+  return { date, category: entry.category, targets, columnCount, dials };
+}
+
+/** Returns target | bonus | invalid. Target words always take precedence. */
+function validateWord(word, targets, dictionary = BONUS_WORDS) {
+  const candidate = normalize(word);
+  if (!/^[A-Z]{4,5}$/.test(candidate)) return 'invalid';
+  if ([...targets].some(value => normalize(value) === candidate)) return 'target';
+  return [...dictionary].some(value => normalize(value) === candidate) ? 'bonus' : 'invalid';
+}
+
+function createGame(date, { bonusWords = BONUS_WORDS, savedState = null } = {}) {
+  const puzzle = createDailyPuzzle(date);
+  const dials = puzzle.dials.map(dial => [...dial]);
+  const targets = new Set(puzzle.targets);
+  const dictionary = new Set([...bonusWords].map(normalize));
+  const unlocked = new Set();
+  const bonuses = new Set();
+  const getCurrentWord = () => dials.map(dial => dial[0]).join('');
+
+  /** Defensive snapshots prevent callers from moving other columns accidentally. */
+  function getState() {
+    return {
+      date: puzzle.date, category: puzzle.category, columnCount: puzzle.columnCount,
+      targets: [...targets], dials: dials.map(dial => [...dial]),
+      currentWord: getCurrentWord(), unlockedWords: [...unlocked], bonusWords: [...bonuses],
+      remainingWords: [...targets].filter(word => !unlocked.has(word)),
+      complete: unlocked.size === targets.size
+    };
+  }
+
+  /** Call on settling a dial; repeated submissions do not award duplicates. */
+  function checkCurrentWord() {
+    const word = getCurrentWord();
+    const kind = validateWord(word, targets, dictionary);
+    const collection = kind === 'target' ? unlocked : kind === 'bonus' ? bonuses : null;
+    const isNew = collection !== null && !collection.has(word);
+    if (isNew) collection.add(word);
+    return { word, kind, isNew, complete: unlocked.size === targets.size };
+  }
+
+  /** up: next letter enters center; down: previous letter enters center.
+   * Mutates exactly one dial, then checks the newly aligned center word.
+   */
+  function spinColumn(columnIndex, direction) {
+    if (!Number.isInteger(columnIndex) || columnIndex < 0 || columnIndex >= dials.length) {
+      throw new RangeError('Column index is out of bounds.');
+    }
+    if (direction !== 'up' && direction !== 'down') {
+      throw new TypeError('Direction must be "up" or "down".');
+    }
+    const dial = dials[columnIndex];
+    if (direction === 'up') dial.push(dial.shift());
+    else dial.unshift(dial.pop());
+    return { ...checkCurrentWord(), columnIndex, direction, proximity: getProximity() };
+  }
+
+  /** Score is the fraction of aligned columns (0..1). Circular distance is
+   * the minimum number of one-step spins, used to break equal-score ties.
+   * No remaining targets returns score 1 and word null.
+   */
+  function getProximity() {
+    const candidates = [...targets].filter(word => !unlocked.has(word)).map(word => {
+      const columns = dials.map((dial, index) => {
+        const up = dial.indexOf(word[index]);
+        const down = (dial.length - up) % dial.length;
+        return { columnIndex: index, letter: word[index], aligned: up === 0,
+          steps: Math.min(up, down), direction: up === 0 ? null : up <= down ? 'up' : 'down' };
+      });
+      const matchedColumns = columns.filter(column => column.aligned).length;
+      return { word, score: matchedColumns / dials.length, matchedColumns,
+        totalSteps: columns.reduce((sum, column) => sum + column.steps, 0), columns };
+    });
+    candidates.sort((a, b) => b.score - a.score || a.totalSteps - b.totalSteps);
+    return candidates[0] || { word: null, score: 1, matchedColumns: dials.length, totalSteps: 0, columns: [] };
+  }
+
+  // Restore rotations directly so loading never awards intermediate words.
+  if (savedState && savedState.date === puzzle.date) {
+    const rotations = dials.map((dial, i) => {
+      const saved = savedState.dials?.[i];
+      if (!Array.isArray(saved) || saved.length !== dial.length) return -1;
+      const offset = dial.indexOf(saved[0]);
+      return offset >= 0 && saved.every((letter, j) => letter === dial[(j + offset) % dial.length]) ? offset : -1;
+    });
+    if (rotations.every(offset => offset >= 0)) {
+      rotations.forEach((offset, i) => { dials[i] = [...dials[i].slice(offset), ...dials[i].slice(0, offset)]; });
+      for (const word of Array.isArray(savedState.unlockedWords) ? savedState.unlockedWords : []) {
+        if (targets.has(word)) unlocked.add(word);
+      }
+      for (const word of Array.isArray(savedState.bonusWords) ? savedState.bonusWords : []) {
+        if (validateWord(word, targets, dictionary) === 'bonus') bonuses.add(word);
+      }
+    }
+  }
+  // A randomly generated opening alignment can itself be a valid word.
+  checkCurrentWord();
+  return Object.freeze({ getState, getCurrentWord, checkCurrentWord, spinColumn, getProximity });
+}
+
+return { createGame };
+})();
+</script>
+<script>
+(async () => {
+const { createGame } = location.protocol === 'file:'
+  ? window.LetterLockEmbedded
+  : await import('./engine.js').catch(() => window.LetterLockEmbedded);
+
+const $ = id => document.getElementById(id);
+const today = () => new Date().toISOString().slice(0,10);
+const date = today();
+const key = `letterlock:v1:${date}`;
+const historyKey = 'letterlock:v1:completed';
+const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+let storageOK = true;
+function read(key, fallback) {
+  try { const value = localStorage.getItem(key); return value ? JSON.parse(value) : fallback; }
+  catch { storageOK = false; return fallback; }
+}
+function write(key, value) {
+  try { localStorage.setItem(key, JSON.stringify(value)); }
+  catch { storageOK = false; }
+  $('storage').hidden = storageOK;
+}
+let saved = read(key, null);
+if (!saved || typeof saved !== 'object' || saved.version !== 1 || saved.state?.date !== date) saved = null;
+const game = createGame(date, { savedState: saved?.state });
+let moves = Number.isSafeInteger(saved?.moves) && saved.moves >= 0 ? saved.moves : 0;
+let elapsed = Number.isFinite(saved?.elapsed) && saved.elapsed >= 0 ? saved.elapsed : 0;
+let clockStarted = document.hidden || game.getState().complete ? null : performance.now();
+let completed = read(historyKey, []);
+completed = Array.isArray(completed) ? [...new Set(completed.filter(d => typeof d === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(d) && d <= date))] : [];
+let busy = false, gesture = null, celebrationTimer;
+const wheels = [], strips = [];
+function elapsedNow() { return elapsed + (clockStarted === null ? 0 : (performance.now()-clockStarted)/1000); }
+function stopClock() { elapsed = elapsedNow(); clockStarted = null; }
+function streak() {
+  let cursor = new Date(`${date}T00:00:00Z`), count = 0;
+  if (!completed.includes(date)) cursor.setUTCDate(cursor.getUTCDate()-1);
+  while (completed.includes(cursor.toISOString().slice(0,10))) { count++; cursor.setUTCDate(cursor.getUTCDate()-1); }
+  return count;
+}
+function persist() { write(key, { version:1, state:game.getState(), moves, elapsed:elapsedNow() }); }
+function rowHeight() { return parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--row')); }
+function paintColumn(index, offset = 0) {
+  const dial = game.getState().dials[index];
+  strips[index].replaceChildren(...Array.from({length:7}, (_,i) => {
+    const cell = document.createElement('div'); cell.className='letter'; cell.textContent=dial[(i-3+dial.length)%dial.length]; return cell;
+  }));
+  strips[index].style.transform=`translateY(${offset}px)`;
+  wheels[index].setAttribute('aria-valuetext',dial[0]);
+}
+function render() {
+  const state = game.getState();
+  $('found').textContent=`${state.unlockedWords.length} / ${state.targets.length}`;
+  $('moves').textContent=moves; $('streak').textContent=streak();
+  $('heat').value=game.getProximity().score;
+  $('words').replaceChildren(...state.targets.map(word => {
+    const li=document.createElement('li'), solved=state.unlockedWords.includes(word);
+    li.className=solved?'solved':'';
+    const label=document.createElement('span'); label.textContent=solved?word:'•'.repeat(word.length);
+    const check=document.createElement('span'); check.textContent=solved?'✓':'○';
+    li.setAttribute('aria-label',solved?`${word}, unlocked`:`${word.length}-letter word, locked`);
+    li.append(label,check); return li;
+  }));
+  $('bonus').textContent=state.bonusWords.length?`Bonus words: ${state.bonusWords.join(' · ')}`:'';
+  $('results').hidden=!state.complete; $('daily').hidden=state.complete;
+  document.querySelectorAll('.dial-buttons button').forEach(button=>button.disabled=state.complete);
+  $('storage').hidden=storageOK;
+}
+function summary() {
+  const state=game.getState();
+  return `LetterLock · ${date}\n${state.category} · ${state.unlockedWords.length}/${state.targets.length}\n${moves} moves · ${Math.round(elapsedNow())}s · 🔥 ${streak()}\n\n${state.unlockedWords.map(()=> '🔓'+'🟩'.repeat(state.columnCount)).join('\n')}`;
+}
+function showVictory() {
+  $('victory-stats').textContent=`${moves} moves · ${Math.round(elapsedNow())} seconds · ${streak()} day streak`;
+  $('solved').textContent=game.getState().unlockedWords.join(' · ');
+  $('summary').textContent=summary();
+  if (!$('victory').open) $('victory').showModal();
+}
+function finish() {
+  stopClock();
+  if (!completed.includes(date)) { completed.push(date); write(historyKey,completed); }
+  persist(); render(); showVictory();
+}
+const delay = ms => new Promise(resolve=>setTimeout(resolve,ms));
+async function step(index,direction,dragOffset=0) {
+  if (busy || game.getState().complete) return;
+  if (today() !== date) { location.reload(); return; }
+  busy=true;
+  try {
+    const strip=strips[index];
+    strip.style.transition='none'; strip.style.transform=`translateY(${dragOffset}px)`;
+    // Flush the initial position before animating this dial alone.
+    void strip.offsetHeight;
+    strip.style.transition=reduced?'none':'transform 95ms ease-out';
+    strip.style.transform=`translateY(${direction==='up'?-rowHeight():rowHeight()}px)`;
+    if (!reduced) await delay(100);
+    const result=game.spinColumn(index,direction); moves++;
+    strip.style.transition='none'; paintColumn(index);
+    if (result.isNew && result.kind==='target') {
+      $('feedback').textContent=`✓ ${result.word} unlocked`;
+      $('safe').classList.remove('unlock'); void $('safe').offsetWidth; $('safe').classList.add('unlock');
+      navigator.vibrate?.([20,30,45]);
+      persist(); render();
+      await delay(reduced?100:700); $('safe').classList.remove('unlock');
+    } else if (result.isNew && result.kind==='bonus') $('feedback').textContent=`+ ${result.word} — bonus word!`;
+    else $('feedback').textContent=result.kind==='target'?`✓ ${result.word} already unlocked`:'Follow the category. Find your next combination.';
+    persist(); render();
+    if (result.complete) finish();
+  } finally { busy=false; }
+}
+async function flick(index,direction,count,offset) {
+  for(let i=0;i<count;i++) {
+    await step(index,direction,i===0?offset:0);
+    if(game.getState().complete) break;
+  }
+}
+function cancelGesture() {
+  if (!gesture) return;
+  strips[gesture.index].style.transition=reduced?'none':'transform 120ms ease-out';
+  strips[gesture.index].style.transform='translateY(0px)'; gesture=null;
+}
+const state=game.getState();
+$('category').textContent=state.category;
+$('date').textContent=new Date(`${date}T00:00:00Z`).toLocaleDateString(undefined,{month:'long',day:'numeric',year:'numeric',timeZone:'UTC'});
+for(let index=0;index<state.columnCount;index++) {
+  const column=document.createElement('div'); column.className='column';
+  const wheel=document.createElement('div'); wheel.className='wheel'; wheel.tabIndex=0;
+  wheel.setAttribute('role','spinbutton'); wheel.setAttribute('aria-label',`Letter dial ${index+1}`);
+  wheel.setAttribute('aria-describedby','feedback');
+  const strip=document.createElement('div'); strip.className='strip'; strip.setAttribute('aria-hidden','true'); wheel.append(strip);
+  wheels.push(wheel); strips.push(strip);
+  const buttons=document.createElement('div'); buttons.className='dial-buttons';
+  for(const [direction,label] of [['up','↑'],['down','↓']]) {
+    const button=document.createElement('button'); button.textContent=label; button.setAttribute('aria-label',`Spin dial ${index+1} ${direction}`);
+    button.addEventListener('click',()=>{if(!gesture) void step(index,direction);}); buttons.append(button);
+  }
+  wheel.addEventListener('keydown',event=>{
+    if(event.key==='ArrowUp'||event.key==='ArrowDown') { event.preventDefault(); if(!gesture) void step(index,event.key==='ArrowUp'?'up':'down'); }
+  });
+  wheel.addEventListener('touchstart',event=>{
+    if(busy||gesture||game.getState().complete||event.touches.length!==1) return;
+    const touch=event.changedTouches[0];
+    gesture={index,id:touch.identifier,y:touch.clientY,offset:0,lastY:touch.clientY,lastTime:performance.now(),velocity:0};
+    strip.style.transition='none';
+  },{passive:true});
+  wheel.addEventListener('touchmove',event=>{
+    if(!gesture||gesture.index!==index) return;
+    if(event.touches.length!==1) { cancelGesture(); return; }
+    const touch=[...event.touches].find(t=>t.identifier===gesture.id); if(!touch) return;
+    event.preventDefault(); const now=performance.now();
+    gesture.velocity=(touch.clientY-gesture.lastY)/Math.max(1,now-gesture.lastTime);
+    gesture.lastY=touch.clientY; gesture.lastTime=now;
+    gesture.offset=Math.max(-rowHeight()*.95,Math.min(rowHeight()*.95,touch.clientY-gesture.y));
+    strip.style.transform=`translateY(${gesture.offset}px)`;
+  },{passive:false});
+  wheel.addEventListener('touchend',event=>{
+    if(!gesture||gesture.index!==index||![...event.changedTouches].some(t=>t.identifier===gesture.id)) return;
+    const drag=gesture; gesture=null;
+    const velocity=performance.now()-drag.lastTime>100?0:drag.velocity;
+    if(Math.abs(drag.offset)<12&&Math.abs(velocity)<.35) { strip.style.transition='transform 120ms ease-out'; strip.style.transform='translateY(0px)'; return; }
+    const direction=(Math.abs(drag.offset)>=12?drag.offset:velocity)<0?'up':'down';
+    void flick(index,direction,Math.min(4,1+Math.floor(Math.abs(velocity)*1.3)),drag.offset);
+  },{passive:true});
+  wheel.addEventListener('touchcancel',cancelGesture,{passive:true});
+  column.append(wheel,buttons); $('wheels').append(column); paintColumn(index);
+}
+$('close').addEventListener('click',()=>$('victory').close());
+$('results').addEventListener('click',showVictory);
+$('share').addEventListener('click',async()=>{
+  const text=summary();
+  try {
+    if(navigator.share) { await navigator.share({title:'LetterLock',text}); $('share-status').textContent='Results shared.'; }
+    else if(navigator.clipboard?.writeText) { await navigator.clipboard.writeText(text); $('share-status').textContent='Copied! Paste your results anywhere.'; }
+    else { getSelection()?.selectAllChildren($('summary')); $('share-status').textContent='Select and copy the results above.'; }
+  } catch(error) { if(error.name!=='AbortError') { getSelection()?.selectAllChildren($('summary')); $('share-status').textContent='Select and copy the results above.'; } }
+});
+document.addEventListener('visibilitychange',()=>{
+  if(document.hidden) { cancelGesture(); stopClock(); persist(); }
+  else if(today()!==date) location.reload();
+  else if(!game.getState().complete) clockStarted=performance.now();
+});
+window.addEventListener('pagehide',()=>{stopClock();persist();});
+setInterval(()=>{if(!document.hidden&&today()!==date)location.reload();},30000);
+render(); persist(); if(state.complete) finish();
+})().catch(error => {
+  console.error('LetterLock startup failed', error);
+  document.getElementById('feedback').textContent = 'The game could not start. Please reload the page.';
+});
+</script>
+<script>
+(() => {
+ let last=0,queued=false;
+ function measure(){queued=false;const main=document.querySelector('main');const height=Math.ceil((main?.getBoundingClientRect().bottom||document.body.getBoundingClientRect().height)+12);if(height!==last){last=height;parent.postMessage({type:'room:height',height},'*');}}
+ function update(){if(!queued){queued=true;requestAnimationFrame(measure);}}
+ new ResizeObserver(update).observe(document.body);
+ new MutationObserver(update).observe(document.body,{subtree:true,childList:true,attributes:true,characterData:true});
+ window.addEventListener('load',update);window.addEventListener('resize',update);update();
+})();
+</script>
+</body>
+</html>
