@@ -1,7 +1,8 @@
 window.renderBigScreen = function(main) {
+  if(location.hash==='#big-screen/lineage'){window.renderLineageShowcase(main);return;}
   main.innerHTML = `
   <div class="big-section-label">More room. Deeper play.</div>
-  <nav class="big-game-tabs" aria-label="Big Screen games"><a href="#big-screen/chronodeck" aria-current="page">ChronoDeck: Breach</a></nav>
+  <nav class="big-game-tabs" aria-label="Big Screen games"><a href="#big-screen/chronodeck" aria-current="page">ChronoDeck: Breach</a><a href="#big-screen/lineage">Lineage: Kingdom Architect</a></nav>
   <section class="chrono-hero" aria-labelledby="chrono-title">
     <div class="chrono-copy"><p class="chrono-kicker">Sci-fi deckbuilding · Three-act campaign</p>
       <h1 id="chrono-title">CHRONODECK<span>BREACH</span></h1>
@@ -25,4 +26,15 @@ window.renderBigScreen = function(main) {
   const dialog=document.getElementById('chrono-guide');
   document.getElementById('chrono-help').onclick=()=>dialog.showModal();
   document.getElementById('chrono-guide-close').onclick=()=>dialog.close();
+};
+
+window.renderLineageShowcase=function(main){
+  document.body.classList.add('lineage-page');
+  main.innerHTML=`<div class="big-section-label">More room. Deeper play.</div>
+  <nav class="big-game-tabs" aria-label="Big Screen games"><a href="#big-screen/chronodeck">ChronoDeck: Breach</a><a href="#big-screen/lineage" aria-current="page">Lineage: Kingdom Architect</a></nav>
+  <section class="lineage-hero" aria-labelledby="lineage-title"><div class="chrono-copy"><p class="chrono-kicker">Dynasty management · Five-chapter reigns</p><h1 id="lineage-title">LINEAGE<span>KINGDOM ARCHITECT</span></h1><p class="chrono-tagline">Wear the crown. Earn your legacy.</p><p class="chrono-description">Four powers. Four proposals. One lasting consequence. Guide your house through five-year chapters, earn royal rewards, and complete a victorious 25-year reign.</p><div class="chrono-actions"><a class="chrono-play" href="games/lineage/index.html">Play Lineage <span aria-hidden="true">→</span></a><button id="lineage-help">How to play</button></div><p class="chrono-device">A royal command dashboard on desktop. Touch-friendly on mobile.</p></div><div class="lineage-seal" aria-hidden="true"><span>♜</span><strong>HOUSE OF YOUR MAKING</strong><div>V DEEDS · ONE LEGACY</div></div></section>
+  <section class="chrono-features lineage-features" aria-label="Lineage features"><div><h2>A reward every five years</h2><p>Survive a chapter crisis to earn favors, titles, balance wards, landmarks, and heir training.</p></div><div><h2>Tools, not just bigger numbers</h2><p>Postpone a debt, redraw a petition, or bring a meter toward balance. Plan around the promises you make.</p></div><div><h2>A finish worth reaching</h2><p>Celebrate your 25-year victory, then finish proudly or continue through an heir. Progress saves in this browser.</p></div></section>
+  <section class="chrono-preview lineage-preview" aria-labelledby="lineage-preview-title"><div class="chrono-preview-title"><h2 id="lineage-preview-title">Your seat at the royal council</h2><p>Five years to your first reward.</p><span>Gameplay preview</span></div><img src="assets/lineage/gameplay.png" alt="Lineage’s royal council dashboard with four kingdom meters, four decision cards, a five-year chapter track, and a consequence forecast." loading="lazy"></section>
+  <dialog id="lineage-guide" aria-labelledby="lineage-guide-title"><div class="dialog-top"><h2 id="lineage-guide-title">Rule one chapter at a time.</h2><button id="lineage-guide-close" aria-label="Close instructions">×</button></div><ol><li>Select one of four responses, inspect the forecast, then commit your decree. Each decision advances one year.</li><li>Keep Treasury, Military, Loyalty, and Prestige between 0 and 100. Either extreme ends the dynasty.</li><li>Clear a crisis every five years. Choose rewards at years 5, 10, 15, and 20. Favors cost no year; obligations resolve when due.</li><li>Win at year 25 and receive a reign rating. Finish the dynasty or continue with an heir. A 75-year dynasty is an optional achievement.</li></ol><p>A full first-play guide appears before setup. Your progress stays in this browser.</p><a class="chrono-play" href="games/lineage/index.html">Play Lineage →</a></dialog>`;
+  const dialog=document.getElementById('lineage-guide');document.getElementById('lineage-help').onclick=()=>dialog.showModal();document.getElementById('lineage-guide-close').onclick=()=>dialog.close();
 };

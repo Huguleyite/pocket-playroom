@@ -22,3 +22,15 @@ Before enabling affiliate tracking, update the privacy notice for the selected p
 
 Game routes check for blocked ad elements and a small local ad probe before loading. Detected blocking shows a support message and retry button. No third-party advertising or tracking is connected by this check. Connectivity failures and missing probe files do not lock games. Direct game links return through the collection route. This browser-side gate is not server-enforced access control.
 
+
+## Lineage: Kingdom Architect
+
+Lineage joins ChronoDeck under Big Screen Games at `#big-screen/lineage`. Launch the complete game at `games/lineage/index.html`.
+
+Complete five chapters of five decrees each. Clear a chapter crisis to earn royal favors, a title and balance ward, a landmark, and heir training. Year 25 awards a victory and balance rating; choose to finish or continue through an heir. A 75-year dynasty is optional. The first-play guide appears before setup, and progress and earned rewards save in this browser.
+
+Beehiiv subscription options are removed for now. This release includes no newsletter signup, email collection, subscription verification endpoint, or membership unlock controls. No ad network was connected.
+
+The current local authoring project is `Game-Development/Pocket-Playroom`; Lineage imports from the sibling `Lineage-Kingdom-Architect/index.html`. This release updates only the Lineage runtime/showcase and shared Big Screen navigation. Existing Pocket Games and ChronoDeck runtime files are preserved.
+
+Verified: 116 decision responses, all eight collapse endings, reward choices, favors, deferred obligations, landmarks, inheritance, 25-year victory/continue/finish, previous-save migration, reload, and desktop/mobile layouts. Twenty deterministic complete-campaign smoke runs reached year 25 using a balance-seeking policy. See `games/lineage/README.md` for mechanics.
