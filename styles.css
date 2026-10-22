@@ -53,3 +53,9 @@ body.neon-page{color-scheme:dark;--paper:#090d1b!important;--panel:#121a30;--ink
  body[class*="game-"] .game-heading .eyebrow,body[class*="game-"] .game-heading>p,
  body[class*="game-"] .help{display:none}
 }
+
+/* A shared, tile-style sandwich mark for the collection and game sidebar. */
+.sandwich-mark{display:inline-block;flex-shrink:0;vertical-align:middle;transform:rotate(-7deg)}
+.card-art .sandwich-mark{position:relative;width:96px;height:80px}
+.side-symbol .sandwich-mark{width:64px;height:auto}
+@media(max-width:600px){.card-art .sandwich-mark{width:72px;height:60px}}
