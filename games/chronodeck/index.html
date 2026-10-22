@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#080e1c"><title>ChronoDeck: Breach</title>
+<link rel="stylesheet" href="./style.css">
+<style>.playroom-return{display:block;position:relative;z-index:2;padding:12px 24px;background:#0c1422;color:#70ede3;text-decoration:none;font:600 13px system-ui;border-bottom:1px solid #2b3b52}.playroom-return:focus-visible{outline:3px solid #70ede3;outline-offset:-4px}</style></head>
+<body><a class="playroom-return" href="../../index.html#big-screen">← Pocket Playroom · Big Screen Games</a>
+<div class="desktop-stage">
+<header class="leaderboard-wrapper" aria-label="Advertisement"><div class="ad-label">ADVERTISEMENT</div><div class="display-ad leaderboard-unit" data-display-ad="leaderboard" data-ad-size="728x90"><span class="ad-placeholder">Leaderboard · ad placement</span></div></header>
+<aside class="rail-wrapper rail-left" aria-label="Left advertisement"><div class="ad-label">ADVERTISEMENT</div><div class="display-ad skyscraper-unit" data-display-ad="left-rail" data-ad-size="160x600"><span class="ad-placeholder">Skyscraper · ad placement</span></div></aside>
+<div class="app">
+<header class="topbar"><a class="brand" href="./index.html">CHRONO<span>DECK</span><small>BREACH // TEMPORAL OPERATIONS</small></a><div id="mission">SECTOR 01 · THE FRACTURE</div><nav><button class="help-button">? How to play</button><button id="map-button">⌘ Node map</button><button id="deck-button">▤ Deck</button><button id="new-button">New run</button></nav></header>
+<main class="dashboard">
+<aside class="panel player-panel"><div class="eyebrow">OPERATOR // 001</div><div class="portrait" aria-hidden="true">◈</div><h1>The Drifter</h1><p class="muted">Temporal breach specialist</p><div class="stat-head"><span>HULL INTEGRITY</span><strong id="hp-text"></strong></div><div class="meter"><div id="hp-bar"></div></div><div class="stat-pair"><div><small>BLOCK</small><strong id="block">0</strong></div><div><small>CREDITS</small><strong id="gold">0</strong></div></div><div id="player-status" class="statuses"></div><div class="section-label">ACTIVE RELICS</div><div id="relics"></div><div class="operator-note">Bend the sequence.<br>Break the inevitable.</div><div id="save-status" class="muted">Local save ready</div></aside>
+<section class="combat-area" aria-label="Combat arena"><div class="arena-heading"><span class="eyebrow">BREACH DETECTED</span><span id="turn-label"></span></div><div id="enemies" class="enemy-row"></div><div class="arena-ground" aria-hidden="true"></div><p id="combat-hint" class="combat-hint">Select a card, then select its target.</p></section>
+<section class="timeline-panel panel" aria-label="Five turn timeline"><div class="panel-heading"><div><span class="eyebrow">TEMPORAL PROJECTION</span><h2>Timeline track</h2></div><span class="muted">NOW → +4 TURNS</span></div><div id="timeline" class="timeline"></div><div id="timeline-detail" class="timeline-detail">Select a slot to inspect queued actions.</div></section>
+<section class="hand-panel" aria-label="Your card hand"><div class="hand-heading"><span class="eyebrow">YOUR HAND <span id="hand-count"></span></span><span class="muted">Click to select · Drag to target · Esc to cancel</span></div><div id="hand" class="hand"></div></section>
+<aside class="panel actions-panel"><div class="eyebrow">TURN RESOURCES</div><div class="energy-orb"><strong id="energy">3</strong><small>ENERGY</small></div><button class="pile" data-pile="drawPile"><span>▥</span><b>Draw pile</b><strong id="draw-count">0</strong></button><button class="pile" data-pile="discardPile"><span>▤</span><b>Discard pile</b><strong id="discard-count">0</strong></button><button class="pile" data-pile="exhaustPile"><span>◇</span><b>Exhausted</b><strong id="exhaust-count">0</strong></button><div class="action-spacer"></div><div id="selection" class="muted">Awaiting command</div><button id="play-button" class="primary" disabled>Play selected card</button><button id="end-turn" class="end-turn">End turn <span>→</span></button><small class="muted">Unplayed cards are discarded.</small></aside>
+</main><footer><span>CHRONODECK: BREACH <b> / </b> ACT I</span><span id="footer-state">SYSTEM ONLINE</span></footer>
+</div>
+<aside class="rail-wrapper rail-right" aria-label="Right advertisement"><div class="ad-label">ADVERTISEMENT</div><div class="display-ad skyscraper-unit" data-display-ad="right-rail" data-ad-size="160x600"><span class="ad-placeholder">Skyscraper · ad placement</span></div></aside></div>
+<dialog id="screen" class="screen" aria-labelledby="screen-title"><div class="overlay-shell"><div class="overlay-header"><div><div id="screen-kicker" class="eyebrow"></div><h1 id="screen-title"></h1></div><div class="overlay-tools"><a class="playroom-return" href="../../index.html#big-screen">← Playroom</a><button class="help-button">? How to play</button><button id="screen-close" aria-label="Close overlay">✕</button></div></div><div id="screen-body"></div></div></dialog>
+<dialog id="help" class="help-dialog" aria-labelledby="help-title">
+<div class="eyebrow">FIRST MISSION // FIELD GUIDE</div><h1 id="help-title">Survive the breach.</h1>
+<p class="help-intro">Cross seven floors and defeat the final Chrono Sentinel. <strong>You lose when your HP reaches zero.</strong></p>
+<div class="help-grid">
+<section><h2>01 / Choose your route</h2><p>Click a glowing map node. Clear the encounter to unlock connected paths. Combat gives credits and a choice of cards; Elites are tougher. Shops sell cards and relics and offer card removal. Rest sites heal; Events offer choices.</p></section>
+<section><h2>02 / Spend your energy</h2><p>Each turn, draw <strong>5 cards</strong> and refill to <strong>3 energy</strong>. A card’s corner number is its cost. Click an Attack, then an enemy, or drag it onto the target. For self or all-enemy cards, select the card and click <strong>Play selected card</strong>, or drag it into the arena.</p></section>
+<section><h2>03 / Prepare for the enemy</h2><p>Later fights can include several enemies, each with its own intent. “All enemies” cards affect the whole group. <strong>Block absorbs attack damage</strong> in the upcoming enemy phase, then resets next turn. HP carries between fights. Click <strong>End turn</strong> when ready: your remaining hand is discarded, and enemy actions due Now resolve.</p></section>
+<section><h2>04 / Bend the timeline</h2><p>The track shows <strong>Now plus four future turns</strong>. Delay moves an enemy’s next action two turns later. Loop replays the last non-Loop card from your previous turn; it cannot work on turn one. Click a timeline slot for details.</p></section>
+</div>
+<div class="help-bottom"><p><strong>Start here:</strong> Block the incoming attack, then spend remaining energy on Pulse Strikes. Your discard pile reshuffles when needed. Exhausted cards stay out until combat ends. Relics act automatically; some change your energy or draw.</p><p>Progress saves automatically in this browser. Refresh to resume. <strong>New run</strong> replaces your save after confirmation.</p></div>
+<div class="help-actions"><span class="muted">Reopen this guide anytime with “How to play.”</span><button id="help-done" class="primary">Got it — continue</button></div>
+</dialog>
+<div id="toast" role="status" aria-live="polite"></div>
+<noscript>This game requires JavaScript enabled in your browser.</noscript>
+<script type="module" src="./ui.js"></script>
+</body></html>
+
+
+
+
