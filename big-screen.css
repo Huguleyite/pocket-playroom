@@ -51,3 +51,6 @@ html:has(.big-screen-page){--paper:#030b16;background-color:#030b16!important}
 
 /* Keep Quantum Draft's anomaly artwork clear of the shared portal backdrop. */
 .quantum-page #main:before{background:none!important}
+
+/* Gameplay preview follows the shared Big Screen panel, with Quantum accents. */
+.quantum-preview{margin-top:24px;border-color:#35565e;background:linear-gradient(145deg,#10212c,#07111d 70%)}.quantum-preview h2{color:#86eee0}.quantum-preview>img{border:1px solid #29434e;border-bottom:0}
