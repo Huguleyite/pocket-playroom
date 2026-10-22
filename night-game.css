@@ -25,3 +25,5 @@ html.night-play dialog{background:#1b2230!important;color:#edf0f7!important}
 html.night-play .metrics strong{color:#edf0f7!important}
 html.night-play progress{accent-color:var(--night-accent)}
 html.night-play .room-tide .board{background:#566178!important}html.night-play .room-shift .board{background:#34354c!important}html.night-play .futo-cell.selected{outline-color:var(--night-accent)!important}
+
+html.night-play .room-futoshiki .cell.given{background:#363b54!important;color:#f1f1ff!important}html.night-play .room-futoshiki .cell.selected{background:var(--night-accent)!important;color:#101820!important}html.night-play .room-futoshiki .digit-dock{background:#161c28!important}

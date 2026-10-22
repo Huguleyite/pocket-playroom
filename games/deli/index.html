@@ -10,9 +10,9 @@
 .modePicker{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:13px;margin:6px 0 12px}.modePicker select{font:inherit;max-width:72%;padding:12px 8px;border:1px solid #dbc4a7;border-radius:12px;background:#fffdf7;color:inherit;min-height:44px}.tray.rush{grid-template-columns:repeat(4,minmax(0,1fr))}.tray.rush .food{min-height:98px}.tray.rush .emoji{font-size:34px}.patience{margin-top:17px;text-align:left;font-size:11px;color:#756044}.patience label{display:flex;justify-content:space-between;margin-bottom:6px}.patience progress{width:100%;height:12px;accent-color:var(--green)}.patience.urgent progress{accent-color:var(--red)}.ingredientStep{min-width:0;flex:1;max-width:78px}.recipe{gap:6px}.modeNote{font-size:12px;color:#80694e;line-height:1.5;margin:0 0 12px}
 .roundControls{display:flex;align-items:center;gap:12px;margin-bottom:22px}.roundControls .clock{flex:1;margin:0}.roundControls #pause{background:#30251f;color:#fff;border-color:#30251f;font-weight:750;min-width:100px}
 </style>
-<script>
+<script>window.roomHaptic=()=>{try{navigator.vibrate?.(8);}catch{}};</script><script>
 window.roomComplete=(id,date)=>{if(!date){const d=new Date();date=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}try{localStorage.setItem('room-for-play:completed:'+id,JSON.stringify(date));}catch{}parent.postMessage({type:'room:completed',id,date},location.origin);};
-</script> <link rel="stylesheet" href="../../night-game.css"><script src="../../night-frame.js" data-game="deli"></script><link rel="stylesheet" href="../../game-theme.css">
+</script><script src="../../mobile-frame.js" defer></script> <link rel="stylesheet" href="../../night-game.css"><script src="../../night-frame.js" data-game="deli"></script><link rel="stylesheet" href="../../game-theme.css">
 </head>
 <body class="room-embedded room-deli">
 <main>
@@ -131,7 +131,7 @@ window.roomComplete=(id,date)=>{if(!date){const d=new Date();date=d.getFullYear(
    if(phase==='playing'&&performance.now()>=deadline){tick();return;}
    if(phase==='playing'&&step<order.length&&performance.now()>=patienceDeadline){tick();return;}
    if(step>=order.length)return;
-   if(food!==order[step]){
+   window.roomHaptic?.();if(food!==order[step]){
      clean=false;if(phase==='playing'){mistakes++;chain=0;}
      $('feedback').textContent=`Try ${foods[order[step]].name.toLowerCase()} next. No need to start over.`;
      tone(false);animate('oops');renderOrder();return;

@@ -1,8 +1,565 @@
 <!doctype html>
-<html lang="en"><head><script>if(window.top===window){document.documentElement.style.visibility='hidden';location.replace(new URL('../../index.html#games/futoshiki',location.href));}</script><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>Futoshiki · Pocket Playroom sample</title><link rel="stylesheet" href="logic.css"> <link rel="stylesheet" href="../../night-game.css"><script src="../../night-frame.js" data-game="futoshiki"></script><script>
+<html lang="en">
+<head><script>if(window.top===window){document.documentElement.style.visibility='hidden';location.replace(new URL('../../index.html#games/futoshiki',location.href));}</script>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#f7f5ee">
+  <title>Futoshiki · Daily logic</title>
+  <style>
+    :root { color-scheme: light; --paper:#f7f5ee; --ink:#223e36; --muted:#64766d; --accent:#266b51; --line:#b9c8ba; }
+    * { box-sizing:border-box; }
+    body { margin:0; background:var(--paper); color:var(--ink); font-family:system-ui,sans-serif; }
+    button { font:inherit; color:inherit; cursor:pointer; touch-action:manipulation; -webkit-tap-highlight-color:transparent; }
+    button:focus-visible, textarea:focus-visible { outline:3px solid #b87525; outline-offset:3px; }
+    main { width:min(100%,480px); margin:auto; padding:32px 20px calc(210px + env(safe-area-inset-bottom)); }
+    .eyebrow { text-transform:uppercase; letter-spacing:.2em; font-size:11px; font-weight:750; color:var(--muted); }
+    header { display:flex; justify-content:space-between; align-items:center; gap:12px; }
+    h1 { margin:5px 0; font:600 43px Georgia,serif; letter-spacing:-2px; }
+    .tag { border:1px solid var(--line); border-radius:30px; padding:8px 12px; font-size:12px; white-space:nowrap; }
+    .intro { color:var(--muted); font-size:14px; line-height:1.6; margin:18px 0; }
+    .metrics { display:flex; justify-content:space-between; margin:24px 0 15px; font-size:13px; font-variant-numeric:tabular-nums; }
+    .board { position:relative; display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); border:2px solid var(--ink); border-radius:12px; background:#fffdf7; padding:5px; gap:5px; }
+    .cell { position:relative; aspect-ratio:1; min-width:0; border:1px solid var(--line); background:transparent; border-radius:5px; font-size:clamp(23px,7vw,34px); font-weight:450; color:var(--accent); }
+    .cell.given { background:#e9eee4; color:var(--ink); font-weight:750; }
+    .cell.selected { background:#d2e8d8; box-shadow:inset 0 0 0 2px var(--accent); }
+    .cell.conflict { animation:conflict 1.1s ease; }
+    @keyframes conflict { 0%,75% { background:#ffe0d9; color:#9a281e; box-shadow:inset 0 0 0 2px #bf5342; } }
+    .sign { position:absolute; z-index:2; display:grid; place-items:center; width:22px; height:22px; background:#fffdf7; color:var(--ink); font-size:22px; font-weight:750; pointer-events:none; transform:translate(-50%,-50%); line-height:1; }
+    .sign.down { transform:translate(-50%,-50%) rotate(90deg); }
+    .status { min-height:42px; margin:16px 0 0; text-align:center; font-size:13px; color:var(--muted); line-height:1.5; }
+    details { border-top:1px solid var(--line); margin-top:20px; padding-top:17px; font-size:13px; line-height:1.7; }
+    summary { cursor:pointer; font-weight:650; }
+    .storage { font-size:12px; color:#9a281e; }
+    .digit-dock { position:fixed; bottom:calc(50px + env(safe-area-inset-bottom)); left:0; right:0; background:var(--paper); border-top:1px solid var(--line); padding:12px 12px 14px; z-index:5; }
+    .anchor-ad { position:fixed; bottom:0; left:0; right:0; min-height:50px; height:calc(50px + env(safe-area-inset-bottom)); padding-bottom:env(safe-area-inset-bottom); display:flex; justify-content:center; background:var(--paper); z-index:6; }
+    .ad-slot { flex:none; display:grid; place-items:center; background:#e9eee4; color:var(--muted); font-size:10px; letter-spacing:.12em; text-transform:uppercase; overflow:hidden; }
+    #ad-anchor { width:320px; height:50px; min-height:50px; }
+    .completion-ad { margin:20px -14px; display:flex; justify-content:center; }
+    #ad-completion { width:300px; height:250px; min-height:250px; }
+    dialog { max-height:calc(100dvh - 24px); overflow-y:auto; }
+    @media (min-width:768px), (max-width:319px) {
+      .anchor-ad { display:none; }
+      .digit-dock { bottom:0; padding-bottom:calc(14px + env(safe-area-inset-bottom)); }
+      main { padding-bottom:calc(150px + env(safe-area-inset-bottom)); }
+    }
+    .digits { max-width:440px; margin:auto; display:grid; grid-template-columns:repeat(5,1fr) 1.2fr; gap:7px; }
+    .digits button { min-height:56px; padding:0; border:1px solid var(--line); border-radius:12px; background:#fffdf7; font-size:25px; font-weight:600; }
+    .digits button:last-child { font-size:13px; }
+    button:disabled { cursor:default; opacity:.45; }
+    .dock-label { text-align:center; font-size:11px; color:var(--muted); margin:0 0 9px; }
+    dialog { width:min(92vw,420px); border:0; border-radius:22px; padding:28px; color:var(--ink); background:var(--paper); box-shadow:0 20px 80px #122b3540; }
+    dialog::backdrop { background:#142e28a6; }
+    dialog h2 { font:36px Georgia,serif; margin:12px 0; }
+    .stats { display:flex; justify-content:space-around; text-align:center; margin:25px 0; }
+    .stats strong { display:block; font-size:23px; }
+    .stats span { font-size:12px; color:var(--muted); }
+    .emoji { white-space:pre; text-align:center; line-height:1.5; font-size:22px; margin:15px 0; }
+    .action { display:block; width:100%; border:0; background:var(--accent); color:white; border-radius:12px; padding:14px; margin-top:10px; font-weight:650; }
+    .secondary { background:transparent; color:var(--ink); border:1px solid var(--line); }
+    textarea { width:100%; height:180px; margin-top:12px; font:14px monospace; }
+    #share-status { font-size:13px; text-align:center; }
+    #results { margin:10px auto; }
+    .board-actions { display:flex; justify-content:center; gap:10px; margin:10px 0; }
+    .board-actions button { min-height:44px; border:1px solid var(--line); border-radius:10px; background:transparent; padding:10px 16px; font-size:13px; }
+    [hidden] { display:none !important; }
+    @media (prefers-reduced-motion:reduce) { .cell.conflict { animation-duration:.01ms; background:#ffe0d9; } }
+    @media (max-height:700px) { main { padding-top:15px; } .metrics { margin-top:14px; } .intro { margin:10px 0; } }
+  </style>
+<script>window.roomHaptic=()=>{try{navigator.vibrate?.(8);}catch{}};</script><script>
 window.roomComplete=(id,date)=>{if(!date){const d=new Date();date=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}try{localStorage.setItem('room-for-play:completed:'+id,JSON.stringify(date));}catch{}parent.postMessage({type:'room:completed',id,date},location.origin);};
-</script></head>
-<body data-game="futoshiki"><main><div class="metrics"><span><strong id="size"></strong>GRID</span><span><strong id="filled"></strong>FILLED</span><span><strong id="moves">0</strong>MOVES</span></div><div id="board"></div><div id="keypad" class="keypad" hidden></div><p id="status" role="status" aria-live="polite"></p><div class="controls"><button id="undo">↶ Undo</button><button id="pencil" aria-pressed="false" hidden>Pencil</button><button id="erase" hidden>Erase</button><button id="check" class="primary">Check grid</button></div><p id="instruction"></p><button id="reset" class="reset">Restart sample</button><p id="saving" role="status"></p></main><dialog id="complete" aria-labelledby="complete-title"><h2 id="complete-title">Everything clicks.</h2><p id="complete-text"></p><button id="close-complete">Back to board</button></dialog><script src="logic.js"></script><script>
+</script><script src="../../mobile-frame.js" defer></script><style>.room-futoshiki .digit-dock{position:static;width:100%;transform:none;box-shadow:none;padding:12px 0;margin-top:16px}.room-futoshiki .digits{max-width:100%}</style> <link rel="stylesheet" href="../../night-game.css"><script src="../../night-frame.js" data-game="futoshiki"></script><link rel="stylesheet" href="../../game-theme.css">
+</head>
+<body class="room-embedded room-futoshiki">
+  <main>
+    <header><div><div class="eyebrow">A little order, every day</div><h1>Futoshiki</h1></div><span class="tag">Daily · 5 × 5</span></header>
+    <p class="intro">Five numbers. One place for each.<br>Follow the signs and find your balance.</p>
+    <div class="metrics"><span id="date"></span><span><span id="filled">0</span>/25 filled · <time id="timer">0:00</time></span></div>
+    <div id="board" class="board" role="group" aria-label="Futoshiki puzzle, five rows and five columns"></div>
+    <p id="status" class="status" role="status" aria-live="polite">Select an empty cell, then choose a number.</p>
+    <button id="results" class="action secondary" hidden>View results</button>
+    <div class="board-actions"><button id="clear-cell" disabled>Clear selected cell</button><button id="reset-board">Reset board</button></div>
+    <p id="storage" class="storage" role="status" hidden>Progress cannot be saved in this browser. Keep this page open to continue.</p>
+    <details><summary>How to play</summary><p>Use 1–5 exactly once in every row and column. The open side of each sign faces the larger number. A vertical ∧ means the top number is smaller; ∨ means it is larger.</p><p>Tap a filled cell, then Erase or Clear selected cell to leave it blank. Starting clues stay fixed. Reset board clears all your entries and resets today’s timer and stats after confirmation. Keyboard: arrow keys to move, 1–5 to enter, and Backspace or Delete to erase. Conflicting entries stay editable and briefly glow red.</p><p>The daily puzzle changes at midnight in your local time. The timer counts time while this page is visible.</p></details>
+    <noscript>This puzzle requires JavaScript. Enable it to play.</noscript>
+  <footer class="digit-dock"><p class="dock-label" id="input-label">Select a cell to begin</p><div class="digits" role="group" aria-label="Enter a number"><button data-digit="1" disabled>1</button><button data-digit="2" disabled>2</button><button data-digit="3" disabled>3</button><button data-digit="4" disabled>4</button><button data-digit="5" disabled>5</button><button data-digit="0" disabled>Erase</button></div></footer></main>
+  
+  <aside class="anchor-ad" aria-label="Advertisement"><div id="ad-anchor" class="ad-slot" data-ad-slot>Advertisement</div></aside>
+  <dialog id="victory" aria-labelledby="victory-title">
+    <div class="eyebrow">Everything in its place</div><h2 id="victory-title">Beautifully balanced.</h2><p>You solved today’s Futoshiki.</p>
+    <div class="stats"><div><strong id="final-time"></strong><span>Active time</span></div><div><strong id="final-moves"></strong><span>Entries</span></div><div><strong id="final-errors"></strong><span>Conflicts</span></div></div>
+    <div id="emoji" class="emoji" aria-label="Completed puzzle: white squares are starting clues, green squares are solved cells"></div>
+    <aside class="completion-ad" aria-label="Advertisement"><div id="ad-completion" class="ad-slot" data-ad-slot>Advertisement</div></aside>
+    <button id="share" class="action">Share result</button><p id="share-status" role="status"></p><textarea id="share-fallback" aria-label="Result text to copy" readonly hidden></textarea>
+    <button id="close" class="action secondary">Back to puzzle</button>
+  </dialog>
+  <!-- Local-file fallback, mirrored from engine.js. Hosted pages import engine.js. -->
+  <script>
+    if (location.protocol === 'file:') {
+      window.FutoshikiLocalEngine = (() => {
+/** Static Futoshiki engine. Import using <script type="module">.
+ * Boards are square arrays; 0 means empty. Coordinates are zero-based.
+ * Inequality: { row, col, direction: 'right' | 'down', sign: '<' | '>' }.
+ * The sign compares (row, col) with its right/down neighbor.
+ */
+
+function mulberry32(seed) {
+  let state = seed >>> 0;
+  return function random() {
+    state = (state + 0x6D2B79F5) >>> 0;
+    let value = Math.imul(state ^ (state >>> 15), 1 | state);
+    value ^= value + Math.imul(value ^ (value >>> 7), 61 | value);
+    return ((value ^ (value >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+function dateToSeed(dateString) {
+  if (typeof dateString !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(dateString)) {
+    throw new TypeError('Expected a date string in YYYY-MM-DD format.');
+  }
+  const date = new Date(`${dateString}T00:00:00.000Z`);
+  if (!Number.isFinite(date.getTime()) || date.toISOString().slice(0, 10) !== dateString) {
+    throw new RangeError('Invalid calendar date.');
+  }
+  // FNV-1a hashes the complete date without locale or timezone dependence.
+  let hash = 2166136261;
+  for (let i = 0; i < dateString.length; i++) {
+    hash = Math.imul(hash ^ dateString.charCodeAt(i), 16777619);
+  }
+  return hash >>> 0;
+}
+
+function shuffled(items, random) {
+  const result = items.slice();
+  for (let i = result.length - 1; i > 0; i--) {
+    const j = Math.floor(random() * (i + 1));
+    [result[i], result[j]] = [result[j], result[i]];
+  }
+  return result;
+}
+
+function validShape(board) {
+  return Array.isArray(board) && board.length >= 2 && board.every(row =>
+    Array.isArray(row) && row.length === board.length && row.every(value =>
+      Number.isInteger(value) && value >= 0 && value <= board.length));
+}
+
+function validInequalities(inequalities, size) {
+  return Array.isArray(inequalities) && inequalities.every(rule => {
+    if (!rule || !Number.isInteger(rule.row) || !Number.isInteger(rule.col)) return false;
+    const { row, col, direction, sign } = rule;
+    return row >= 0 && row < size && col >= 0 && col < size &&
+      (sign === '<' || sign === '>') &&
+      ((direction === 'right' && col < size - 1) ||
+       (direction === 'down' && row < size - 1));
+  });
+}
+
+/** Returns whether all filled cells obey the rules. Empty cells are allowed.
+ * Malformed input returns false. For victory, also call isBoardComplete().
+ */
+function validateBoard(board, inequalities = []) {
+  if (!validShape(board) || !validInequalities(inequalities, board.length)) return false;
+  const size = board.length;
+  for (let i = 0; i < size; i++) {
+    const row = new Set();
+    const column = new Set();
+    for (let j = 0; j < size; j++) {
+      const a = board[i][j];
+      const b = board[j][i];
+      if ((a && row.has(a)) || (b && column.has(b))) return false;
+      if (a) row.add(a);
+      if (b) column.add(b);
+    }
+  }
+  return inequalities.every(({ row, col, direction, sign }) => {
+    const a = board[row][col];
+    const b = board[row + (direction === 'down' ? 1 : 0)]
+      [col + (direction === 'right' ? 1 : 0)];
+    return !a || !b || (sign === '<' ? a < b : a > b);
+  });
+}
+
+function isBoardComplete(board, inequalities = []) {
+  return validateBoard(board, inequalities) && board.every(row => row.every(value => value !== 0));
+}
+
+// Count up to two solutions, choosing the most constrained empty cell first.
+function countSolutions(board, inequalities) {
+  let best = null;
+  for (let row = 0; row < board.length; row++) {
+    for (let col = 0; col < board.length; col++) {
+      if (board[row][col]) continue;
+      const candidates = [];
+      for (let value = 1; value <= board.length; value++) {
+        board[row][col] = value;
+        if (validateBoard(board, inequalities)) candidates.push(value);
+      }
+      board[row][col] = 0;
+      if (!candidates.length) return 0;
+      if (!best || candidates.length < best.candidates.length) best = { row, col, candidates };
+    }
+  }
+  if (!best) return 1;
+  let count = 0;
+  for (const value of best.candidates) {
+    board[best.row][best.col] = value;
+    count += countSolutions(board, inequalities);
+    board[best.row][best.col] = 0;
+    if (count >= 2) return 2;
+  }
+  return count;
+}
+
+/** Generate a deterministic 5x5 daily puzzle with exactly one solution.
+ * Same date and engine version produce the same puzzle on every device.
+ * clueCount is a target: extra givens remain when uniqueness requires them.
+ * The returned solution is for local hints; keep it separate from player state.
+ */
+function generateDailyPuzzle(dateString, { inequalityCount = 12, clueCount = 7 } = {}) {
+  const seed = dateToSeed(dateString);
+  const size = 5;
+  if (!Number.isInteger(inequalityCount) || inequalityCount < 1 || inequalityCount >= 40) {
+    throw new RangeError('inequalityCount must be an integer from 1 to 39.');
+  }
+  if (!Number.isInteger(clueCount) || clueCount < 0 || clueCount >= 25) {
+    throw new RangeError('clueCount must be an integer from 0 to 24.');
+  }
+  const random = mulberry32(seed);
+  const indices = [0, 1, 2, 3, 4];
+  const rows = shuffled(indices, random);
+  const columns = shuffled(indices, random);
+  const digits = shuffled([1, 2, 3, 4, 5], random);
+  const solution = rows.map(row => columns.map(col => digits[(row + col) % size]));
+  const edges = [];
+  for (let row = 0; row < size; row++) {
+    for (let col = 0; col < size; col++) {
+      for (const direction of ['right', 'down']) {
+        const nextRow = row + (direction === 'down' ? 1 : 0);
+        const nextCol = col + (direction === 'right' ? 1 : 0);
+        if (nextRow < size && nextCol < size) {
+          edges.push({ row, col, direction,
+            sign: solution[row][col] < solution[nextRow][nextCol] ? '<' : '>' });
+        }
+      }
+    }
+  }
+  const inequalities = shuffled(edges, random).slice(0, inequalityCount);
+  const board = solution.map(row => row.slice());
+  let remaining = size * size;
+  for (const index of shuffled(Array.from({ length: 25 }, (_, i) => i), random)) {
+    if (remaining <= clueCount) break;
+    const row = Math.floor(index / size);
+    const col = index % size;
+    const value = board[row][col];
+    board[row][col] = 0;
+    if (countSolutions(board, inequalities) === 1) remaining--;
+    else board[row][col] = value;
+  }
+  return { date: dateString, seed, size, board, inequalities, solution };
+}
+
+        return { generateDailyPuzzle, validateBoard, isBoardComplete };
+      })();
+    }
+  </script>
+  <script>
+  (async () => {
+    let engine;
+    try {
+      engine = location.protocol === 'file:' ? window.FutoshikiLocalEngine : await import('./engine.js');
+    } catch (error) {
+      document.getElementById('status').textContent = 'The game engine could not load. Keep engine.js beside index.html, then refresh.';
+      console.error(error);
+      return;
+    }
+    const { generateDailyPuzzle, validateBoard, isBoardComplete } = engine;
+
+    const $ = id => document.getElementById(id);
+    const localDate = () => {
+      const d = new Date();
+      return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+    };
+    const formatTime = seconds => `${Math.floor(seconds/60)}:${String(seconds%60).padStart(2,'0')}`;
+    const date = localDate();
+    const key = `futoshiki:v1:${date}`;
+    let puzzle, state, selected = null, lastTick = performance.now(), fractionalTime = 0, flashTimer;
+    const cells = [];
+    const digits = [...document.querySelectorAll('[data-digit]')];
+    try {
+      puzzle = generateDailyPuzzle(date);
+      state = { board:puzzle.board.map(row => row.slice()), moves:0, errors:0, elapsed:0, completed:false };
+      try {
+        const saved = JSON.parse(localStorage.getItem(key));
+        // Restore only well-formed progress matching this exact generated puzzle.
+        if (saved && saved.fingerprint === JSON.stringify(puzzle.board) &&
+          Array.isArray(saved.board) && saved.board.length === 5 && saved.board.every((row,r) =>
+            Array.isArray(row) && row.length === 5 && row.every((v,c) => Number.isInteger(v) && v>=0 && v<=5 && (!puzzle.board[r][c] || v===puzzle.board[r][c]))) &&
+          ['moves','errors','elapsed'].every(k => Number.isSafeInteger(saved[k]) && saved[k]>=0)) {
+          state = { board:saved.board, moves:saved.moves, errors:saved.errors, elapsed:saved.elapsed,
+            completed:isBoardComplete(saved.board,puzzle.inequalities) };
+        }
+      } catch { $('storage').hidden = false; }
+      initialize();
+    } catch (error) {
+      $('status').textContent = 'The puzzle could not load. Please refresh to try again.';
+      console.error(error);
+    }
+
+    function save() {
+      try { localStorage.setItem(key,JSON.stringify({...state, fingerprint:JSON.stringify(puzzle.board)})); }
+      catch { $('storage').hidden = false; }
+    }
+    function tick() {
+      const now = performance.now();
+      if (!document.hidden && !state.completed) {
+        fractionalTime += Math.max(0,now-lastTick);
+        const seconds = Math.floor(fractionalTime/1000);
+        state.elapsed += seconds;
+        fractionalTime -= seconds*1000;
+      }
+      lastTick = now;
+      $('timer').textContent = formatTime(state.elapsed);
+    }
+    function initialize() {
+      $('date').textContent = new Intl.DateTimeFormat(undefined,{month:'short',day:'numeric',year:'numeric'}).format(new Date(`${date}T12:00:00`));
+      for (let r=0;r<5;r++) for (let c=0;c<5;c++) {
+        const button = document.createElement('button');
+        button.className = 'cell';
+        button.type = 'button';
+        button.addEventListener('click',() => select(r,c));
+        cells.push(button); $('board').append(button);
+      }
+      for (const rule of puzzle.inequalities) {
+        const sign = document.createElement('span');
+        sign.className = `sign ${rule.direction}`;
+        sign.textContent = rule.sign;
+        const next = rule.direction === 'right' ? `column ${rule.col+2}` : `row ${rule.row+2}`;
+        sign.setAttribute('role','img');
+        sign.setAttribute('aria-label',`Row ${rule.row+1}, column ${rule.col+1} ${rule.sign==='<'?'less than':'greater than'} ${next}`);
+        $('board').append(sign);
+      }
+      new ResizeObserver(positionSigns).observe($('board'));
+      digits.forEach(button => button.addEventListener('click',() => enter(Number(button.dataset.digit))));
+      $('close').addEventListener('click',() => $('victory').close());
+      $('results').addEventListener('click',showVictory);
+      $('clear-cell').addEventListener('click',() => enter(0));
+      $('reset-board').addEventListener('click',resetBoard);
+      $('share').addEventListener('click',share);
+      document.addEventListener('keydown',onKey);
+      document.addEventListener('visibilitychange',() => { lastTick=performance.now(); save(); checkDate(); });
+      window.addEventListener('pagehide',() => { tick(); save(); });
+      setInterval(() => { tick(); save(); checkDate(); },1000);
+      render();
+      if (state.completed) showVictory();
+    }
+    function checkDate() {
+      if (!document.hidden && date !== localDate()) { save(); location.reload(); }
+    }
+    function positionSigns() {
+      [...$('board').querySelectorAll('.sign')].forEach((sign,i) => {
+        const rule = puzzle.inequalities[i];
+        const a = cells[rule.row*5+rule.col];
+        const b = cells[(rule.row+(rule.direction==='down'?1:0))*5+rule.col+(rule.direction==='right'?1:0)];
+        sign.style.left = `${(a.offsetLeft+a.offsetWidth/2+b.offsetLeft+b.offsetWidth/2)/2}px`;
+        sign.style.top = `${(a.offsetTop+a.offsetHeight/2+b.offsetTop+b.offsetHeight/2)/2}px`;
+      });
+    }
+    function select(r,c) {
+      if (state.completed) return;
+      window.roomHaptic?.();selected = [r,c]; render();
+      $('status').textContent = puzzle.board[r][c] ? 'This is a starting clue. Choose an empty or editable cell.' : `Row ${r+1}, column ${c+1}. Choose a number.`;
+    }
+    function render() {
+      let filled=0;
+      cells.forEach((cell,i) => {
+        const r=Math.floor(i/5), c=i%5, value=state.board[r][c], given=!!puzzle.board[r][c];
+        if (value) filled++;
+        cell.textContent = value || '';
+        cell.classList.toggle('given',given);
+        cell.classList.toggle('selected',!!selected && selected[0]===r && selected[1]===c);
+        cell.setAttribute('aria-label',`Row ${r+1}, column ${c+1}, ${value || 'empty'}${given?', starting clue':''}`);
+        cell.setAttribute('aria-pressed',String(!!selected && selected[0]===r && selected[1]===c));
+      });
+      const editable=selected && !state.completed && !puzzle.board[selected[0]][selected[1]];
+      digits.forEach(button => button.disabled=!editable);
+      $('clear-cell').disabled = !editable || !state.board[selected[0]][selected[1]];
+      $('input-label').textContent = state.completed ? 'Today’s puzzle complete' : editable ? `Row ${selected[0]+1} · Column ${selected[1]+1}` : 'Select an editable cell';
+      $('filled').textContent=filled;
+      $('timer').textContent=formatTime(state.elapsed);
+      $('results').hidden=!state.completed;
+    }
+    function conflicts() {
+      const bad=new Set(), board=state.board;
+      for(let r=0;r<5;r++) for(let c=0;c<5;c++) {
+        if(!board[r][c]) continue;
+        for(let k=0;k<5;k++) {
+          if(k!==c && board[r][k]===board[r][c]) {bad.add(r*5+c);bad.add(r*5+k);}
+          if(k!==r && board[k][c]===board[r][c]) {bad.add(r*5+c);bad.add(k*5+c);}
+        }
+      }
+      for(const {row:r,col:c,direction,sign} of puzzle.inequalities) {
+        const nr=r+(direction==='down'?1:0), nc=c+(direction==='right'?1:0);
+        const a=board[r][c], b=board[nr][nc];
+        if(a && b && !(sign==='<'?a<b:a>b)) {bad.add(r*5+c);bad.add(nr*5+nc);}
+      }
+      return bad;
+    }
+    function enter(value) {
+      checkDate();
+      if(!selected || state.completed) return;
+      const [r,c]=selected;
+      if(puzzle.board[r][c] || state.board[r][c]===value) return;
+      tick();
+      window.roomHaptic?.();state.board[r][c]=value; state.moves++;
+      const bad=conflicts();
+      if(value && bad.has(r*5+c)) state.errors++;
+      clearTimeout(flashTimer);
+      cells.forEach(cell=>cell.classList.remove('conflict'));
+      render();
+      // Restart the brief highlight even when consecutive entries conflict.
+      void $('board').offsetWidth;
+      bad.forEach(i=>cells[i].classList.add('conflict'));
+      flashTimer=setTimeout(()=>cells.forEach(cell=>cell.classList.remove('conflict')),1100);
+      const valid=validateBoard(state.board,puzzle.inequalities);
+      $('status').textContent=valid ? (value?'Looking good. Keep going.':'Cell cleared.') : 'Conflicting cells highlighted. Check the rows, columns and signs.';
+      if(isBoardComplete(state.board,puzzle.inequalities)) {
+        window.roomComplete?.('futoshiki');state.completed=true; selected=null; render();
+        $('status').textContent='Solved! Come back tomorrow for a new puzzle.';
+        showVictory();
+      }
+      save();
+    }
+    function resetBoard() {
+      if (!window.confirm('Reset today’s board? This clears your entries, timer and stats. Starting clues stay in place.')) return;
+      clearTimeout(flashTimer);
+      cells.forEach(cell => cell.classList.remove('conflict'));
+      state = { board:puzzle.board.map(row => row.slice()), moves:0, errors:0, elapsed:0, completed:false };
+      selected = null;
+      fractionalTime = 0;
+      lastTick = performance.now();
+      if ($('victory').open) $('victory').close();
+      $('share-fallback').hidden = true;
+      $('share-status').textContent = '';
+      render();
+      save();
+      $('status').textContent = 'Board reset. Select an empty cell to start again.';
+    }
+    function onKey(event) {
+      if($('victory').open || event.ctrlKey || event.metaKey || event.altKey || event.target.closest('details')) return;
+      if(/^[1-5]$/.test(event.key)) {event.preventDefault();enter(Number(event.key));}
+      else if(['Backspace','Delete'].includes(event.key)) {event.preventDefault();enter(0);}
+      else if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(event.key)) {
+        event.preventDefault();
+        let [r,c]=selected || [0,0];
+        if(selected) {
+          r=Math.max(0,Math.min(4,r+(event.key==='ArrowDown'?1:event.key==='ArrowUp'?-1:0)));
+          c=Math.max(0,Math.min(4,c+(event.key==='ArrowRight'?1:event.key==='ArrowLeft'?-1:0)));
+        }
+        select(r,c); cells[r*5+c].focus();
+      }
+    }
+    function emojiBoard() { return puzzle.board.map(row=>row.map(v=>v?'⬜':'🟩').join('')).join('\n'); }
+    function resultText() {
+      return `Futoshiki · ${date}\nSolved in ${formatTime(state.elapsed)} · ${state.moves} entries · ${state.errors} conflicts\n\n${emojiBoard()}\n\n⬜ Starting clue · 🟩 Solved cell`;
+    }
+    function showVictory() {
+      $('final-time').textContent=formatTime(state.elapsed);
+      $('final-moves').textContent=state.moves;
+      $('final-errors').textContent=state.errors;
+      $('emoji').textContent=emojiBoard();
+      if(!$('victory').open) $('victory').showModal();
+    }
+    async function share() {
+      const text=resultText();
+      if(navigator.share) {
+        try {await navigator.share({title:'Daily Futoshiki',text});return;}
+        catch(error) {if(error.name==='AbortError') return;}
+      }
+      try {
+        await navigator.clipboard.writeText(text);
+        $('share-status').textContent='Result copied. Paste it wherever you like.';
+      } catch {
+        $('share-fallback').hidden=false; $('share-fallback').value=text;
+        $('share-fallback').focus(); $('share-fallback').select();
+        $('share-status').textContent='Select and copy your result below.';
+      }
+    }
+  })();
+  </script>
+  <script>
+    // Provider-neutral integration: listen for "futoshiki:ad-refresh" on a slot
+    // or window. event.detail = { slotId, slot, visibleMilliseconds: 30000 }.
+    // Connect that event to the ad provider's refresh API after its initial fill.
+    (() => {
+      if (!('IntersectionObserver' in window)) return; // No unmeasured refreshes.
+      const duration = 30000;
+      const mobile = matchMedia('(min-width:320px) and (max-width:767px)');
+      const modal = document.getElementById('victory');
+      const slots = [...document.querySelectorAll('[data-ad-slot]')];
+      const states = new Map(slots.map(slot => [slot, { ratio:0, since:null, timer:null }]));
+
+      function eligible(slot, state) {
+        if (document.visibilityState !== 'visible' || !mobile.matches || state.ratio < .5) return false;
+        if (slot.id === 'ad-anchor' && modal.open) return false;
+        if (slot.id === 'ad-completion' && !modal.open) return false;
+        // Account for browser chrome, zoom, keyboard and dialog scrolling.
+        const rect = slot.getBoundingClientRect();
+        if (!rect.width || !rect.height) return false;
+        const viewport = window.visualViewport;
+        let left = viewport ? viewport.offsetLeft : 0;
+        let top = viewport ? viewport.offsetTop : 0;
+        let right = left + (viewport ? viewport.width : document.documentElement.clientWidth);
+        let bottom = top + (viewport ? viewport.height : document.documentElement.clientHeight);
+        if (slot.id === 'ad-completion') {
+          const clip = modal.getBoundingClientRect();
+          left = Math.max(left, clip.left); top = Math.max(top, clip.top);
+          right = Math.min(right, clip.right); bottom = Math.min(bottom, clip.bottom);
+        }
+        const area = Math.max(0, Math.min(rect.right,right)-Math.max(rect.left,left)) *
+          Math.max(0, Math.min(rect.bottom,bottom)-Math.max(rect.top,top));
+        return area / (rect.width * rect.height) >= .5;
+      }
+      function reset(state) {
+        clearTimeout(state.timer); state.timer = null; state.since = null;
+      }
+      function update(slot, state) {
+        if (!eligible(slot,state)) { reset(state); return; }
+        if (state.since !== null) return;
+        state.since = performance.now();
+        state.timer = setTimeout(() => {
+          state.timer = null;
+          if (!eligible(slot,state)) { reset(state); return; }
+          const elapsed = performance.now() - state.since;
+          if (elapsed < duration) { reset(state); update(slot,state); return; }
+          // Each refresh requires another full continuous qualifying period.
+          state.since = null;
+          slot.dispatchEvent(new CustomEvent('futoshiki:ad-refresh', {
+            bubbles:true, detail:{slotId:slot.id, slot, visibleMilliseconds:duration}
+          }));
+          update(slot,state);
+        },duration);
+      }
+      function reconcile() { states.forEach((state,slot) => update(slot,state)); }
+      const observer = new IntersectionObserver(entries => {
+        for (const entry of entries) {
+          const state = states.get(entry.target);
+          state.ratio = entry.isIntersecting ? entry.intersectionRatio : 0;
+          update(entry.target,state);
+        }
+      }, { threshold:[0,.5,1] });
+      slots.forEach(slot => observer.observe(slot));
+      document.addEventListener('visibilitychange',reconcile);
+      document.addEventListener('scroll',reconcile,true);
+      window.addEventListener('resize',reconcile);
+      mobile.addEventListener('change',reconcile);
+      window.visualViewport?.addEventListener('resize',reconcile);
+      window.visualViewport?.addEventListener('scroll',reconcile);
+      new MutationObserver(reconcile).observe(modal,{attributes:true,attributeFilter:['open']});
+      window.addEventListener('pagehide',() => states.forEach(reset));
+      window.addEventListener('pageshow',reconcile);
+    })();
+  </script>
+<script>
 (() => {
  let last=0,queued=false;
  function measure(){queued=false;const main=document.querySelector('main');const height=Math.ceil((main?.getBoundingClientRect().bottom||document.body.getBoundingClientRect().height)+12);if(height!==last){last=height;parent.postMessage({type:'room:height',height},'*');}}
@@ -12,4 +569,5 @@ window.roomComplete=(id,date)=>{if(!date){const d=new Date();date=d.getFullYear(
  window.addEventListener('load',update);window.addEventListener('resize',update);update();
 })();
 </script>
-</body></html>
+</body>
+</html>

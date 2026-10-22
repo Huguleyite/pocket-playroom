@@ -34,3 +34,22 @@ body.neon-page{color-scheme:dark;--paper:#090d1b!important;--panel:#121a30;--ink
 .signal-discovery .completion-badge{margin-left:8px}
 
 .ad-access{max-width:540px;margin:36px auto 60px;padding:32px 24px;text-align:center;border:2px solid var(--edge);border-radius:22px;background:var(--panel);box-shadow:5px 7px 0 var(--shadow)}.ad-access-symbol{font-size:48px;color:#9161bb;margin-bottom:12px}.ad-access h1{font-size:clamp(27px,6vw,38px);line-height:1.1;letter-spacing:-1px;margin:14px 0 20px}.ad-access p{font-size:15px;line-height:1.75;color:var(--muted)}.ad-retry{display:block;margin:24px auto 16px;min-height:48px;padding:12px 18px;border:2px solid #56327f;border-radius:12px;background:#56327f;color:#fff;font:800 14px/1.5 inherit;cursor:pointer}.ad-home{display:inline-block;padding:10px;text-decoration:underline;font-size:13px}html.night-play .ad-access{background:#202b40;border-color:#657491}html.night-play .ad-access-symbol{color:#d6b5ff}html.night-play .ad-retry{background:#d6b5ff;color:#271b3c;border-color:#b88ae9}
+
+
+/* Instructions are shared across screen sizes; compact page chrome is mobile only. */
+.night-controls{flex-wrap:wrap}
+#game-instructions h2{font-size:26px;line-height:1.2;margin:0 0 18px}
+#game-instructions ol{padding-left:22px;line-height:1.6}
+#game-instructions li{padding-left:4px;margin:14px 0}
+#game-instructions strong{font-weight:700}
+#game-instructions p{font-size:13px;color:var(--muted)}
+.instructions-play{width:100%;border:1px solid var(--edge);border-radius:12px;background:var(--accent);color:var(--paper);padding:12px;font-weight:700}
+@media(max-width:600px){
+ body[class*="game-"] .night-controls{margin:10px 0 0;gap:8px;justify-content:flex-end}
+ body[class*="game-"] .night-toggle{padding:8px 12px;font-size:12px}
+ body[class*="game-"] .back-link{margin:0;min-height:36px}
+ body[class*="game-"] .game-heading{padding:3px 0 12px}
+ body[class*="game-"] .game-heading h1{margin:5px 0;font-size:34px}
+ body[class*="game-"] .game-heading .eyebrow,body[class*="game-"] .game-heading>p,
+ body[class*="game-"] .help{display:none}
+}

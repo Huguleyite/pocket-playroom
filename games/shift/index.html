@@ -18,9 +18,9 @@ body{padding-bottom:calc(66px + env(safe-area-inset-bottom,0px))}
 /* Keep the full ad inside narrow mobile dialogs and allow vertical scrolling. */
 #shiftlock-win{padding:20px 10px;max-height:calc(100svh - 24px);overflow-y:auto;max-width:400px;min-width:min(320px,calc(100vw - 16px));width:calc(100% - 16px)}
 </style>
-<script>
+<script>window.roomHaptic=()=>{try{navigator.vibrate?.(8);}catch{}};</script><script>
 window.roomComplete=(id,date)=>{if(!date){const d=new Date();date=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}try{localStorage.setItem('room-for-play:completed:'+id,JSON.stringify(date));}catch{}parent.postMessage({type:'room:completed',id,date},location.origin);};
-</script> <link rel="stylesheet" href="../../night-game.css"><script src="../../night-frame.js" data-game="shift"></script><link rel="stylesheet" href="../../game-theme.css">
+</script><script src="../../mobile-frame.js" defer></script> <link rel="stylesheet" href="../../night-game.css"><script src="../../night-frame.js" data-game="shift"></script><link rel="stylesheet" href="../../game-theme.css">
 </head>
 <body class="room-embedded room-shift">
 <main>
@@ -325,7 +325,7 @@ function move(axis,index,direction) {
   if(!engine||!ensureToday()||state.isSolved) return;
   const result=axis==='row'?engine.shiftRow(index,direction):engine.shiftCol(index,direction);
   if(!result.moved) { message('That axis is locked by a completed path.'); return; }
-  history.push([axis,index,direction]); state=result.state; save(); render();
+  window.roomHaptic?.();history.push([axis,index,direction]); state=result.state; save(); render();
   message(state.isSolved?'Path complete. Locked in!':storageAvailable?'Nice shift. Connect the two edge dots.':'Move made. Storage unavailable; keep this tab open.');
   if(state.isSolved) showWin();
 }
@@ -333,7 +333,7 @@ function rotateTile(row,col) {
   if(!engine||!ensureToday()||state.isSolved) return;
   const result=engine.rotateTile(row,col);
   if(!result.moved){message('That tile is locked by a completed path.');return;}
-  history.push(['rotate',row,col]);state=result.state;save();render();
+  window.roomHaptic?.();history.push(['rotate',row,col]);state=result.state;save();render();
   message(state.isSolved?'Path complete. Locked in!':'Tile rotated. Its shape stays fixed.');
   if(state.isSolved)showWin();
 }
@@ -540,3 +540,6 @@ try {
 </script>
 </body>
 </html>
+
+
+

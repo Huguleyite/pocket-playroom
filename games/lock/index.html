@@ -24,7 +24,7 @@ dialog{max-height:calc(100dvh - 24px);overflow:auto}
 </style>
 <script>
 window.roomComplete=(id,date)=>{if(!date){const d=new Date();date=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}try{localStorage.setItem('room-for-play:completed:'+id,JSON.stringify(date));}catch{}parent.postMessage({type:'room:completed',id,date},location.origin);};
-</script> <link rel="stylesheet" href="../../night-game.css"><script src="../../night-frame.js" data-game="lock"></script><link rel="stylesheet" href="../../game-theme.css">
+</script><script src="../../mobile-frame.js" defer></script> <link rel="stylesheet" href="../../night-game.css"><script src="../../night-frame.js" data-game="lock"></script><link rel="stylesheet" href="../../game-theme.css">
 </head>
 <body class="room-embedded room-lock">
 <main>

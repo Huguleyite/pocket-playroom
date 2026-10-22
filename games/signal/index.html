@@ -24,9 +24,9 @@
     @media(min-width:320px) and (max-width:767px){body{padding-bottom:calc(74px + env(safe-area-inset-bottom,0px))}.ad-anchor{display:grid}}
     @media(prefers-reduced-motion:reduce){.rotor{transition:none}*{scroll-behavior:auto!important}}@media(max-width:360px){body{padding-left:12px;padding-right:12px}.stats{padding:14px 8px}.legend{gap:12px}dialog{padding:22px}#victory{padding-top:16px;padding-bottom:16px}}
   </style>
-<script>
+<script>window.roomHaptic=()=>{try{navigator.vibrate?.(8);}catch{}};</script><script>
 window.roomComplete=(id,date)=>{if(!date){const d=new Date();date=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}try{localStorage.setItem('room-for-play:completed:'+id,JSON.stringify(date));}catch{}parent.postMessage({type:'room:completed',id,date},location.origin);};
-</script><style>body{min-height:0;padding:0}main{padding:16px 12px 12px}main>header h1,main>header .intro,.ad-anchor,main>footer{display:none!important}</style></head>
+</script><script src="../../mobile-frame.js" defer></script><style>body{min-height:0;padding:0}main{padding:16px 12px 12px}main>header h1,main>header .intro,.ad-anchor,main>footer{display:none!important}</style></head>
 <body>
   <main>
     <header><div class="topline"><div class="brand-mark"><span class="live"></span>DAILY CIRCUIT / 6 × 6</div><button class="help" id="help-button" aria-label="How to play">?</button></div><h1>Signal<span> Flow</span></h1><p class="intro">One network. Three competing signals.<br>Shared junctions affect every color. Filters keep targets clean.</p></header>
@@ -210,7 +210,7 @@ window.roomComplete=(id,date)=>{if(!date){const d=new Date();date=d.getFullYear(
         const row=Number(button.dataset.row),col=Number(button.dataset.col),key=`${row},${col}`;
         const result=E.rotateTile(row,col,board);
         if(!result.rotated) return;
-        moves++; angles.set(key,angles.get(key)+90); rotors.get(key).style.transform=`rotate(${angles.get(key)}deg)`;
+        window.roomHaptic?.();moves++; angles.set(key,angles.get(key)+90); rotors.get(key).style.transform=`rotate(${angles.get(key)}deg)`;
         completed=result.victory; if(completed && !assisted) earned=true; save(); render();
         if(completed) { $('status').textContent=storageAvailable?'All targets connected. Daily circuit complete.':$('status').textContent; showResults(); }
       }
