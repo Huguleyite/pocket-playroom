@@ -34,3 +34,13 @@ Beehiiv subscription options are removed for now. This release includes no newsl
 The current local authoring project is `Game-Development/Pocket-Playroom`; Lineage imports from the sibling `Lineage-Kingdom-Architect/index.html`. This release updates only the Lineage runtime/showcase and shared Big Screen navigation. Existing Pocket Games and ChronoDeck runtime files are preserved.
 
 Verified: 116 decision responses, all eight collapse endings, reward choices, favors, deferred obligations, landmarks, inheritance, 25-year victory/continue/finish, previous-save migration, reload, and desktop/mobile layouts. Twenty deterministic complete-campaign smoke runs reached year 25 using a balance-seeking policy. See `games/lineage/README.md` for mechanics.
+
+## Hex-Gambit: Rogue Checkers
+
+Hex-Gambit joins Big Screen Games at `#big-screen/hex-gambit`, with full-page play at `games/hex-gambit/index.html`. Its cinematic gold/violet landing page includes illustrated spell cards, a gameplay preview, instructions, and launch/return navigation.
+
+Command an enchanted checkers army through five sectors and the Boss Commander. Mandatory captures, Berserkers, Necromancers, Shield-Guards, spell drafting, and illustrated victory celebrations are included. This edition is solo against AI; multiplayer is deferred. Progress saves locally in this browser and does not transfer between origins.
+
+The complete game and artwork are embedded in one HTML file. The optional local Archmage preview is not subscriber verification; no live Beehiiv verification endpoint or ad provider is configured. No email is collected by the default configuration.
+
+Authoring sources are in `Game-Development/Pocket-Playroom` and the sibling `Hex-Gambit` project. This release adds Hex-Gambit, its showcase images, and shared navigation while preserving the other published game runtimes. Collection checks covered six viewport sizes, image loading, instructions, repository-subpath launch, saves/reload, return links, three-game navigation, and Pocket Games/Night Play preservation.
