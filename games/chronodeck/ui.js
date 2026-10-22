@@ -1,4 +1,5 @@
-import { CombatState, CARD_DATABASE as CARDS, STARTER_DECK, RELIC_DATABASE as RELICS, SeededRNG, generateNodeMap, createEncounter, draftCards } from './engine.js';
+import { ACTS, campaignMap, campaignEncounter, advanceAct, eventVariant } from './campaign.js';
+import { CombatState, CARD_DATABASE as CARDS, STARTER_DECK, RELIC_DATABASE as RELICS, SeededRNG, draftCards } from './engine.js';
 import './display-ads.js';
 
 const $ = id => document.getElementById(id);
@@ -56,7 +57,7 @@ function save() {
 function newRun() {
   const seed = `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
   combat = null; selected = null;
-  run = { version: 1, seed, map: generateNodeMap(seed), currentNodeId: null, completed: [], hp: 80, maxHp: 80, gold: 80, deck: [...STARTER_DECK], relics: ['anchor'], stage: 'map', combat: null, offers: null, shop: null };
+  run = { version: 1, act: 1, clearedBefore: 0, seed, map: campaignMap(seed, 1), currentNodeId: null, completed: [], hp: 80, maxHp: 80, gold: 80, deck: [...STARTER_DECK], relics: ['anchor'], stage: 'map', combat: null, offers: null, shop: null };
   save(); render(); showStage();
 }
 function load() {
@@ -64,7 +65,10 @@ function load() {
     const data = JSON.parse(localStorage.getItem(KEY));
     if (!data) return false;
     if (data.version !== 1 || !Array.isArray(data.deck) || data.deck.some(id => !CARDS[id]) || !data.map?.floors || !Array.isArray(data.completed) || !Array.isArray(data.relics) || data.relics.some(id => !RELICS[id]) || !Number.isFinite(data.hp)) throw Error('Invalid save');
-    if (!['map', 'combat', 'draft', 'shop', 'rest', 'event', 'victory', 'defeat'].includes(data.stage)) throw Error('Invalid stage');
+    if (!['map', 'combat', 'draft', 'shop', 'rest', 'event', 'intermission', 'victory', 'defeat'].includes(data.stage)) throw Error('Invalid stage');
+    data.act ??= 1; data.clearedBefore ??= 0;
+    if (!Number.isInteger(data.act) || data.act < 1 || data.act > 3) throw Error('Invalid act');
+    if (data.stage === 'victory' && data.act < 3) data.stage = 'intermission';
     run = data; combat = data.combat ? CombatState.fromJSON(data.combat) : null;
     if (run.stage === 'combat' && !combat) throw Error('Missing combat');
     render(); showStage(); return true;
@@ -144,7 +148,7 @@ function render() {
     el.title = r.description; el.append(text('span', '◈'), document.createTextNode(r.name), text('p', r.description, 'muted')); return el;
   }));
   $('energy').textContent = combat?.energy ?? '—'; $('turn-label').textContent = combat ? `TURN ${String(combat.turn).padStart(2, '0')}` : 'AWAITING ENCOUNTER';
-  $('mission').textContent = `SECTOR 01 · FLOOR ${node(run.currentNodeId)?.floor || 1} / 7`;
+  $('mission').textContent = `ACT ${ACTS[run.act - 1].numeral} · FLOOR ${node(run.currentNodeId)?.floor || 1} / 7`;
   $('hand-count').textContent = combat ? ` / ${combat.hand.length}` : '';
   for (const [pile, id] of [['drawPile', 'draw-count'], ['discardPile', 'discard-count'], ['exhaustPile', 'exhaust-count']]) $(id).textContent = combat?.[pile].length || 0;
   $('enemies').replaceChildren();
@@ -233,21 +237,21 @@ function enterNode(id) {
   if (run.stage !== 'map' || !available().includes(id)) return;
   const n = node(id); run.currentNodeId = id; selected = null; run.shop = null; run.offers = null;
   if (n.type === 'Combat' || n.type === 'Elite') {
-    combat = new CombatState({ seed: `${run.seed}:${id}`, deck: run.deck, relics: run.relics, player: { hp: run.hp, maxHp: run.maxHp }, enemies: createEncounter(n.type, n.floor, `${run.seed}:${id}`) }); run.stage = 'combat';
+    combat = new CombatState({ seed: `${run.seed}:${id}`, deck: run.deck, relics: run.relics, player: { hp: run.hp, maxHp: run.maxHp }, enemies: campaignEncounter(n.type, n.floor, `${run.seed}:${run.act}:${id}`, run.act) }); run.stage = 'combat';
   } else run.stage = n.type.toLowerCase();
   save(); render(); showStage();
 }
 function completeNode() {
   if (!run.completed.includes(run.currentNodeId)) run.completed.push(run.currentNodeId);
   run.combat = null; combat = null; run.offers = null; run.shop = null;
-  run.stage = run.currentNodeId === run.map.exitId ? 'victory' : 'map'; save(); render(); showStage();
+  run.stage = run.currentNodeId === run.map.exitId ? (run.act < 3 ? 'intermission' : 'victory') : 'map'; save(); render(); showStage();
 }
 function showMap(preview = false) {
-  const body = openScreen('The fracture', 'ACT I // SEVEN FLOORS', preview, 'map');
+  const body = openScreen(ACTS[run.act - 1].name, `ACT ${ACTS[run.act - 1].numeral} / III // SEVEN FLOORS`, preview, 'map');
   const descriptions = { Combat: 'Face Breach Drones. Win credits and draft a card.', Elite: 'Challenge a Chrono Sentinel. Earn greater rewards.', Shop: 'Buy cards and relics, or remove a card.', Rest: 'Repair up to 30% of your maximum hull.', Event: 'Investigate a damaged relay. Choose your reward and risk.' };
   const progress = text('div', '', 'route-progress');
   progress.append(text('span', `${run.completed.length} / 7 floors cleared`), text('span', `Hull ${run.hp}/${run.maxHp} · ${run.gold} credits`));
-  const status = text('p', preview ? 'Finish your encounter to continue the route.' : 'Choose a glowing encounter to enter. Follow its path to the Sentinel.', 'route-status');
+  const status = text('p', preview ? 'Finish your encounter to continue the route.' : 'Choose a glowing encounter to enter. Follow its path to the sector boss.', 'route-status');
   status.setAttribute('aria-live', 'polite');
   const board = text('div', '', 'map-board');
   const svgs = ['wide', 'tall'].map(layout => { const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg'); svg.setAttribute('viewBox', '0 0 100 100'); svg.setAttribute('preserveAspectRatio', 'none'); svg.setAttribute('aria-hidden', 'true'); svg.classList.add('map-lines', `map-lines-${layout}`); board.append(svg); return svg; });
@@ -270,7 +274,7 @@ function showMap(preview = false) {
     if (id) visit(id);
     board.querySelectorAll('line').forEach(line => line.classList.toggle('route-highlight', reachable.has(line.dataset.from) && reachable.has(line.dataset.to)));
     board.querySelectorAll('.map-node').forEach(el => el.classList.toggle('route-highlight', reachable.has(el.dataset.node)));
-    status.textContent = id ? descriptions[node(id).type] : preview ? 'Finish your encounter to continue the route.' : 'Choose a glowing encounter to enter. Follow its path to the Sentinel.';
+    status.textContent = id ? descriptions[node(id).type] : preview ? 'Finish your encounter to continue the route.' : 'Choose a glowing encounter to enter. Follow its path to the sector boss.';
   }
   for (const n of run.map.floors.flat()) {
     const canEnter = !preview && available().includes(n.id), done = run.completed.includes(n.id);
@@ -331,11 +335,38 @@ function showRest() {
   intro(body, `Hull integrity: ${run.hp} / ${run.maxHp}. Recover before the next breach.`); body.append(text('div', '✚', 'event-art'), button(`Repair hull · restore ${amount} HP`, () => { run.hp = Math.min(run.maxHp, run.hp + amount); completeNode(); }, 'choice primary'), button('Continue without resting', completeNode, 'choice'));
 }
 function showEvent() {
+  const variant = eventVariant(run);
+  if (variant === 1) {
+    const body = openScreen('The stranded archivist', 'SURVIVOR SIGNAL');
+    intro(body, 'An archivist offers a shield schematic in exchange for a safe passage.');
+    body.append(button('Escort · pay 20 credits, gain Phase Armor and heal 12 HP', () => { if (run.gold < 20) return; run.gold -= 20; run.deck.push('phase'); run.hp = Math.min(run.maxHp, run.hp + 12); completeNode(); }, 'choice', run.gold < 20), button('Accept emergency supplies · gain 20 credits', () => { run.gold += 20; completeNode(); }, 'choice'));
+    return;
+  }
+  if (variant === 2) {
+    const body = openScreen('The unstable aperture', 'TEMPORAL ANOMALY');
+    intro(body, 'The aperture can rewrite your hull or reveal a weapon from a lost future.');
+    body.append(button('Stabilize · gain 5 maximum hull and heal 5 HP', () => { run.maxHp += 5; run.hp += 5; completeNode(); }, 'choice'), button('Reach through · lose 10 HP, gain Temporal Fracture', () => { if (run.hp <= 10) return; run.hp -= 10; run.deck.push('fracture'); completeNode(); }, 'choice', run.hp <= 10));
+    return;
+  }
   const body = openScreen('An echo in the static', 'UNKNOWN SIGNAL // EVENT'); intro(body, 'A derelict relay offers a fragment of tomorrow. Its power core remains unstable.'); body.append(text('div', '⌁', 'event-art'));
   body.append(button('Extract the core · gain 65 credits', () => { if (run.hp <= 8) return; run.hp -= 8; run.gold += 65; completeNode(); }, 'choice', run.hp <= 8), text('p', 'Extraction costs 8 HP. You must survive the procedure.', 'muted'), button('Recover a safe fragment · gain Deep Scan', () => { run.deck.push('scan'); completeNode(); }, 'choice'), button('Leave the relay', completeNode, 'choice'));
 }
+function showIntermission() {
+  const act = ACTS[run.act - 1], body = openScreen(`${act.boss} defeated`, `ACT ${act.numeral} COMPLETE`);
+  intro(body, `Next: ${ACTS[run.act].name}. Your deck, credits and relics carry forward. Choose a relic, gain 45 credits, increase maximum hull by 8 and repair 40% of your new maximum hull.`);
+  const grid = text('div', '', 'offer-grid');
+  for (const id of Object.keys(RELICS).filter(id => !run.relics.includes(id))) {
+    const box = text('div', '', 'offer');
+    box.append(text('div', '◈', 'event-art'), text('h2', RELICS[id].name), text('p', RELICS[id].description), button('Claim and continue', () => continueCampaign(id), 'primary'));
+    grid.append(box);
+  }
+  body.append(grid, button('Take 90 credits and continue', () => continueCampaign(null), 'choice'));
+}
+function continueCampaign(relic) {
+  advanceAct(run, relic); combat = null; selected = null; save(); render(); showStage();
+}
 function showVictory() {
-  const body = openScreen('Breach sealed', 'ACT I COMPLETE');
+  const body = openScreen('Breach sealed', 'CAMPAIGN COMPLETE');
   $('screen').classList.add('victory-screen');
   const celebration = text('div', '', 'victory-particles');
   celebration.setAttribute('aria-hidden', 'true');
@@ -355,19 +386,19 @@ function showVictory() {
   const hero = text('section', '', 'victory-hero');
   const emblem = text('div', '', 'victory-emblem'); emblem.setAttribute('aria-hidden', 'true');
   emblem.append(text('span', '', 'breach-ring ring-one'), text('span', '', 'breach-ring ring-two'), text('span', '', 'breach-ring ring-three'), text('span', '◈', 'victory-sigil'));
-  hero.append(text('div', 'CHRONO SENTINEL DEFEATED', 'victory-ribbon'), emblem,
-    text('p', 'ACT I COMPLETE', 'victory-act'), text('h2', 'Breach sealed', 'victory-title'),
+  hero.append(text('div', 'PARADOX SOVEREIGN DEFEATED', 'victory-ribbon'), emblem,
+    text('p', 'ALL THREE ACTS COMPLETE', 'victory-act'), text('h2', 'Breach sealed', 'victory-title'),
     text('p', 'You broke the sequence. You brought the future back.', 'victory-message'));
   const summary = text('div', '', 'victory-summary'); summary.setAttribute('aria-label', 'Completed run summary');
-  const metrics = [[run.completed.length, 'Nodes cleared'], [run.deck.length, 'Cards collected'], [run.gold, 'Credits recovered'], [`${run.hp} / ${run.maxHp}`, 'Hull remaining']];
+  const metrics = [[(run.clearedBefore || 0) + run.completed.length, 'Nodes cleared'], [run.deck.length, 'Cards collected'], [run.gold, 'Credits recovered'], [`${run.hp} / ${run.maxHp}`, 'Hull remaining']];
   metrics.forEach(([value, label], i) => {
     const metric = text('div', '', 'victory-metric'); metric.style.setProperty('--metric-delay', `${.8 + i * .12}s`);
     metric.append(text('strong', String(value)), text('span', label)); summary.append(metric);
   });
   const actions = text('div', '', 'victory-actions');
   actions.append(button('Inspect your deck', () => inspectPile()), button('Start a new run →', newRun, 'primary victory-start'));
-  body.append(celebration, hero, summary, text('p', 'Seven floors behind you. One timeline reclaimed.', 'victory-epilogue'), actions,
-    text('p', 'Act I is the full current prototype. Your completed run is saved.', 'victory-save-note'));
+  body.append(celebration, hero, summary, text('p', 'Twenty-one floors behind you. One timeline reclaimed.', 'victory-epilogue'), actions,
+    text('p', 'Campaign complete. Your final deck and completed run are saved.', 'victory-save-note'));
 }
 function showStage() {
   switch (run.stage) {
@@ -377,6 +408,7 @@ function showStage() {
     case 'shop': showShop(); break;
     case 'rest': showRest(); break;
     case 'event': showEvent(); break;
+    case 'intermission': showIntermission(); break;
     case 'victory': showVictory(); break;
     case 'defeat': {
       const body = openScreen('Timeline collapsed', 'RUN ENDED');
