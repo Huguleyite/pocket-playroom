@@ -41,7 +41,7 @@ export function generatePuzzle(date){
  const solution=generateSolution(date),clues=copy(solution),rng=mulberry32(dateSeed(date)^0x9E3779B9);
  let remaining=36;
  for(const i of shuffled(Array.from({length:36},(_,i)=>i),rng)){
-  if(remaining<=20)break;
+  if(remaining<=17)break;
   const r=Math.floor(i/SIZE),c=i%SIZE,v=clues[r][c];clues[r][c]=null;
   const distributed=groups(clues).flat().every(line=>line.filter(v=>v!==null).length>=2);
   if(!distributed||!solveByDeduction(clues).solved||solve(clues).count!==1)clues[r][c]=v;
