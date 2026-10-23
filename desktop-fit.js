@@ -33,6 +33,8 @@
   for (const [selector, label] of panels[game] || []) {
     const panel = document.querySelector(selector);
     if (!panel) continue;
+    const originalPosition = document.createComment('Secondary panel position');
+    panel.before(originalPosition);
     const dialog = document.createElement('dialog');
     dialog.className = 'playroom-drawer';
     dialog.id = 'playroom-' + selector.slice(1);
@@ -48,10 +50,22 @@
     toggle.setAttribute('aria-haspopup', 'dialog');
     toggle.setAttribute('aria-controls', dialog.id);
     toggle.addEventListener('click', () => {
+      dialog.append(panel);
       if (panel.tagName === 'DETAILS') panel.open = true;
       dialog.showModal();
     });
     dialog.addEventListener('close', () => toggle.focus());
+    if (game === 'chronodeck') {
+      const roomy = matchMedia('(min-width:1400px) and (min-height:850px)');
+      const arrangeRelics = () => {
+        if (dialog.open) return;
+        if (roomy.matches) originalPosition.after(panel);
+        else dialog.append(panel);
+      };
+      roomy.addEventListener('change', arrangeRelics);
+      dialog.addEventListener('close', arrangeRelics);
+      arrangeRelics();
+    }
     bar.append(toggle);
   }
   const full = document.createElement('button');

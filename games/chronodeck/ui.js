@@ -184,6 +184,7 @@ function render() {
   const slots = combat?.timelineTrack || Array.from({ length: 5 }, (_, i) => ({ turn: i + 1, actions: [] }));
   slots.forEach((slot, i) => {
     const el = button('', () => { $('timeline-detail').textContent = slot.actions.length ? slot.actions.map(a => `${combat.enemies.find(e => e.id === a.enemyId)?.name}: ${intentText(a)}`).join(' · ') : `Turn ${slot.turn}: no queued actions.`; }, 'time-slot');
+    el.classList.toggle('has-actions', slot.actions.length > 0);
     el.append(text('small', i === 0 ? 'NOW' : `+${i} TURN${i > 1 ? 'S' : ''}`), text('span', slot.actions.length ? slot.actions.map(intentText).join(' / ') : '— Clear', slot.actions.length ? '' : 'quiet')); $('timeline').append(el);
   });
   $('hand').replaceChildren(...(combat?.hand || []).map(c => cardElement(c.definitionId, c.id)));

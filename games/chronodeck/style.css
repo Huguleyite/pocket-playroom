@@ -205,3 +205,15 @@ html{scrollbar-gutter:stable}body{min-width:0}button{touch-action:manipulation}
 @media(max-width:520px){.reward-screen .offer-grid{grid-template-columns:1fr;max-width:270px}.reward-screen .offer .card{height:300px}.reward-screen .offer .card-art{height:120px;min-height:120px}.reward-banner{gap:12px;align-items:flex-start}.reward-seal{width:44px;height:44px;font-size:23px}.reward-screen .overlay-header{gap:8px}.reward-screen .overlay-header .help-button{padding:8px;font-size:11px}.reward-screen #screen-kicker{font-size:8px;letter-spacing:1px}}
 @media(max-height:700px) and (min-width:850px){.reward-screen .overlay-header{margin-bottom:10px;padding-bottom:12px}.desktop-ads .reward-screen .overlay-header h1{font-size:40px}.reward-banner{margin:12px 0}.reward-seal{width:44px;height:44px;font-size:23px}.reward-screen .offer-grid{margin:16px auto 12px}.reward-screen .offer{padding:10px;gap:10px}.reward-screen .offer .card{height:260px}.reward-screen .offer .card-art{height:96px;min-height:96px}.reward-actions{margin:12px 0}}
 @media(prefers-reduced-motion:reduce){.reward-screen .offer,.reward-screen .overlay-header h1,.reward-seal,.reward-screen .overlay-header::after{animation:none!important}}
+
+/* The breach is a living projection beneath the independent enemy targets. */
+.combat-area{isolation:isolate;--field-color:#64eadf;background:radial-gradient(ellipse at 50% 48%,#24526655,transparent 60%),linear-gradient(155deg,#101e30,#080e1c 65%);border:1px solid #38536c66}
+.combat-area.elite-arena{--field-color:#b795ff}
+.combat-area::before{inset:10% 18% 8%;border:1px solid color-mix(in srgb,var(--field-color) 35%,transparent);border-radius:50%;background:repeating-conic-gradient(from 0deg,transparent 0deg 29deg,#82dfef22 29deg 30deg);box-shadow:0 0 65px #64eadf12,inset 0 0 70px #64eadf10;animation:breach-orbit 65s linear infinite;z-index:-1}
+.arena-ground{position:absolute;left:-20%;right:-20%;height:65%;bottom:-30%;background:repeating-linear-gradient(90deg,transparent 0 79px,#64eadf25 80px),repeating-linear-gradient(0deg,transparent 0 59px,#64eadf25 60px);transform:perspective(440px) rotateX(55deg);mask-image:linear-gradient(transparent,#000);pointer-events:none;z-index:-1}
+.combat-area::after{content:'';position:absolute;inset:0;background:linear-gradient(transparent 48%,#64eadf0c 50%,transparent 52%);background-size:100% 220%;animation:breach-scan 9s linear infinite;pointer-events:none;z-index:-1}
+.time-slot.has-actions{border-color:#d78688;background:linear-gradient(130deg,#422b3d,#172438)}
+.time-slot:focus{outline:2px solid var(--cyan);outline-offset:2px}
+@keyframes breach-orbit{to{transform:rotate(360deg)}}
+@keyframes breach-scan{to{background-position:0 220%}}
+@media(prefers-reduced-motion:reduce){.combat-area::before,.combat-area::after{animation:none}}

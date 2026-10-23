@@ -251,3 +251,66 @@ body[data-playroom-game] .playroom-drawer{width:min(720px,calc(100vw - 24px));he
  body[data-playroom-game="lineage"] .event-art{display:none}
 }
 @media(max-width:699px){body[data-playroom-game="lineage"] .council-hand{order:8}body[data-playroom-game="lineage"] .strategy{order:9}}
+
+/* Roomy desktop command deck; compact laptop rules remain height-aware. */
+@media(min-width:1400px) and (min-height:850px){
+ body[data-playroom-game="chronodeck"] .desktop-stage{max-width:2400px;padding:0 clamp(18px,2vw,48px)}
+ body[data-playroom-game="chronodeck"] .dashboard{grid-template-columns:minmax(0,1fr) 310px;grid-template-rows:54px minmax(270px,1fr) 154px clamp(300px,29dvh,390px);gap:14px;padding:10px 0}
+ body[data-playroom-game="chronodeck"] .combat-area{grid-area:2/1/3/3}
+ body[data-playroom-game="chronodeck"] .arena-heading{padding:16px 22px}
+ body[data-playroom-game="chronodeck"] .enemy{max-width:340px}
+ body[data-playroom-game="chronodeck"] .enemy-body,body[data-playroom-game="chronodeck"] .enemy-row .enemy .enemy-body{height:clamp(170px,19dvh,300px);max-width:300px}
+ body[data-playroom-game="chronodeck"] .enemy .intent{font-size:13px;padding:5px 14px}
+ body[data-playroom-game="chronodeck"] .enemy .meter{width:160px}
+ body[data-playroom-game="chronodeck"] .enemy .enemy-name{font-size:16px}
+ body[data-playroom-game="chronodeck"] .timeline-panel{grid-area:3/1/4/3;padding:12px 20px;background:linear-gradient(100deg,#122a37,#151b30)}
+ body[data-playroom-game="chronodeck"] .timeline-panel .panel-heading{display:flex;margin-bottom:8px}
+ body[data-playroom-game="chronodeck"] .timeline-panel .eyebrow,body[data-playroom-game="chronodeck"] .timeline-panel .panel-heading>.muted{display:block}
+ body[data-playroom-game="chronodeck"] .timeline{grid-template-columns:repeat(5,minmax(0,1fr));gap:18px;position:relative}
+ body[data-playroom-game="chronodeck"] .timeline::before{content:'';position:absolute;left:2%;right:2%;top:50%;height:2px;background:linear-gradient(90deg,#64eadf,#ad91ff55);pointer-events:none}
+ body[data-playroom-game="chronodeck"] .time-slot{min-height:58px;display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:2px;padding:7px 14px;border-radius:9px}
+ body[data-playroom-game="chronodeck"] .time-slot span{font-size:13px}
+ body[data-playroom-game="chronodeck"] .time-slot small{font-size:10px}
+ body[data-playroom-game="chronodeck"] .timeline-detail{font-size:11px}
+ body[data-playroom-game="chronodeck"] .hand-panel{grid-area:4/1}
+ body[data-playroom-game="chronodeck"] .hand-heading{height:24px}
+ body[data-playroom-game="chronodeck"] .hand-heading>.muted{display:block}
+ body[data-playroom-game="chronodeck"] .hand{height:calc(100% - 24px);gap:14px;padding:12px 8px 6px;align-items:stretch}
+ body[data-playroom-game="chronodeck"] .hand .card{flex:0 1 220px;min-width:155px;width:220px;height:100%;padding:11px}
+ body[data-playroom-game="chronodeck"] .hand .card .card-art{height:auto;min-height:100px;flex:1;margin:6px -5px 0}
+ body[data-playroom-game="chronodeck"] .hand .card-name{font-size:15px;margin:8px 0 6px}
+ body[data-playroom-game="chronodeck"] .hand .card-description{font-size:12px;line-height:1.4;min-height:48px}
+ body[data-playroom-game="chronodeck"] .hand .card-cost{width:28px;height:28px;top:7px;left:8px}
+ body[data-playroom-game="chronodeck"] .actions-panel{grid-area:4/2;grid-template-columns:84px minmax(0,1fr);grid-template-rows:24px repeat(3,minmax(34px,1fr)) 44px 48px;gap:8px;padding:14px}
+ body[data-playroom-game="chronodeck"] .actions-panel>.eyebrow{display:block;grid-area:1/1/2/3}
+ body[data-playroom-game="chronodeck"] .energy-orb{grid-area:2/1/5/2;align-self:center;width:80px;height:100px;border:1px solid #64eadf55;border-radius:40px;background:radial-gradient(ellipse,#64eadf25,transparent 70%)}
+ body[data-playroom-game="chronodeck"] .energy-orb strong{font-size:42px}
+ body[data-playroom-game="chronodeck"] .pile{grid-column:2;padding:8px;grid-template-columns:22px 1fr 22px}
+ body[data-playroom-game="chronodeck"] #play-button{grid-area:5/1/6/3}
+ body[data-playroom-game="chronodeck"] .end-turn{grid-area:6/1/7/3;font-size:15px}
+}
+/* Desktop framing follows the original operator / field / resources composition. */
+@media(min-width:1400px) and (min-height:850px){
+ body[data-playroom-game="chronodeck"] .dashboard{grid-template-columns:clamp(205px,13vw,280px) minmax(0,1fr) clamp(250px,16vw,320px);grid-template-rows:minmax(280px,1fr) 154px clamp(300px,31dvh,420px);gap:16px;padding:16px 0}
+ body[data-playroom-game="chronodeck"] .player-panel{grid-area:1/1/4/2;display:flex;flex-direction:column;align-items:stretch;padding:24px 20px;gap:0}
+ body[data-playroom-game="chronodeck"] .player-panel>.eyebrow,body[data-playroom-game="chronodeck"] .portrait,body[data-playroom-game="chronodeck"] .player-panel>h1,body[data-playroom-game="chronodeck"] .player-panel>p,body[data-playroom-game="chronodeck"] .player-panel>.section-label,body[data-playroom-game="chronodeck"] .operator-note,body[data-playroom-game="chronodeck"] #save-status{display:block}
+ body[data-playroom-game="chronodeck"] .portrait{display:grid;height:120px;margin:24px auto}
+ body[data-playroom-game="chronodeck"] .stat-head{margin-top:30px;justify-content:space-between}
+ body[data-playroom-game="chronodeck"] .player-panel>.meter{width:100%;margin-top:10px;flex:none}
+ body[data-playroom-game="chronodeck"] .stat-pair{margin:24px 0;justify-content:space-between}
+ body[data-playroom-game="chronodeck"] .stat-pair strong{font-size:26px}
+ body[data-playroom-game="chronodeck"] #relics{display:block;max-height:none;overflow:auto}
+ body[data-playroom-game="chronodeck"] .relic{font-size:12px;padding:12px 0}
+ body[data-playroom-game="chronodeck"] .combat-area{grid-area:1/2}
+ body[data-playroom-game="chronodeck"] .timeline-panel{grid-area:2/2}
+ body[data-playroom-game="chronodeck"] .hand-panel{grid-area:3/2}
+ body[data-playroom-game="chronodeck"] .actions-panel{grid-area:1/3/4/4;display:flex;flex-direction:column;align-items:stretch;padding:24px 20px;gap:14px}
+ body[data-playroom-game="chronodeck"] .actions-panel>.eyebrow{margin-bottom:12px}
+ body[data-playroom-game="chronodeck"] .energy-orb{align-self:center;width:120px;height:150px;flex:none;margin:12px 0 24px}
+ body[data-playroom-game="chronodeck"] .energy-orb strong{font-size:56px}
+ body[data-playroom-game="chronodeck"] .pile{min-height:60px;padding:12px;flex:none}
+ body[data-playroom-game="chronodeck"] .action-spacer{display:block;flex:1}
+ body[data-playroom-game="chronodeck"] #selection,body[data-playroom-game="chronodeck"] .actions-panel>small{display:block}
+ body[data-playroom-game="chronodeck"] #play-button,body[data-playroom-game="chronodeck"] .end-turn{min-height:50px;flex:none}
+ body[data-playroom-game="chronodeck"] .hand .card{min-width:150px}
+}
