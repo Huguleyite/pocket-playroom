@@ -344,9 +344,30 @@ function showEvent() {
     return;
   }
   if (variant === 2) {
-    const body = openScreen('The unstable aperture', 'TEMPORAL ANOMALY');
+    const body = openScreen('The unstable aperture', 'TEMPORAL ANOMALY', false, 'aperture');
     intro(body, 'The aperture can rewrite your hull or reveal a weapon from a lost future.');
-    body.append(button('Stabilize · gain 5 maximum hull and heal 5 HP', () => { run.maxHp += 5; run.hp += 5; completeNode(); }, 'choice'), button('Reach through · lose 10 HP, gain Temporal Fracture', () => { if (run.hp <= 10) return; run.hp -= 10; run.deck.push('fracture'); completeNode(); }, 'choice', run.hp <= 10));
+    const atmosphere = text('div', '', 'aperture-atmosphere');
+    atmosphere.setAttribute('aria-hidden', 'true'); body.append(atmosphere);
+    const choices = text('div', '', 'aperture-choices');
+    function apertureChoice(kind, label, title, description, art, rewards, action, callback, disabled = false) {
+      const choice = button('', callback, `aperture-choice ${kind}`, disabled);
+      const image = document.createElement('img'); image.src = art; image.alt = ''; image.className = 'aperture-choice-art';
+      const copy = text('div', '', 'aperture-choice-copy');
+      copy.append(text('span', label, 'eyebrow'), text('h2', title), text('p', description));
+      const effects = text('div', '', 'aperture-effects');
+      rewards.forEach(([value, tone]) => effects.append(text('span', value, tone || '')));
+      copy.append(effects, text('span', action + ' →', 'aperture-action'));
+      choice.append(image, copy); choices.append(choice);
+    }
+    apertureChoice('restore', 'RESTORE', 'Stabilize the aperture', 'Anchor the breach. Rebuild what remains.', CARD_ART.repair,
+      [['+5 maximum hull'], ['Heal 5 HP']], 'Stabilize', () => { run.maxHp += 5; run.hp += 5; completeNode(); });
+    apertureChoice('risk', 'RISK / REWARD', 'Reach into the fracture', 'Claim a weapon from a future that never was.', CARD_ART.fracture,
+      [['−10 HP', 'cost'], ['Gain Temporal Fracture']], run.hp <= 10 ? 'Requires more than 10 HP' : 'Reach through',
+      () => { if (run.hp <= 10) return; run.hp -= 10; run.deck.push('fracture'); completeNode(); }, run.hp <= 10);
+    const preview = text('p', describe(CARDS.fracture), 'aperture-card-preview');
+    preview.prepend(document.createTextNode('Temporal Fracture · '));
+    choices.lastElementChild.querySelector('.aperture-effects').after(preview);
+    body.append(choices);
     return;
   }
   const body = openScreen('An echo in the static', 'UNKNOWN SIGNAL // EVENT'); intro(body, 'A derelict relay offers a fragment of tomorrow. Its power core remains unstable.'); body.append(text('div', '⌁', 'event-art'));
@@ -454,4 +475,3 @@ document.querySelectorAll('.help-button').forEach(el => el.addEventListener('cli
 $('help-done').addEventListener('click', dismissHelp);
 $('help').addEventListener('cancel', event => { event.preventDefault(); dismissHelp(); });
 try { if (!localStorage.getItem(HELP_KEY)) showHelp(); } catch { showHelp(); }
-
