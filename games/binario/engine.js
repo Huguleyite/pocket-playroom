@@ -18,11 +18,40 @@ function solve(clues,limit=2,orders=Array.from({length:SIZE},()=>patterns)){
  function visit(r){if(r===SIZE){count++;solution=copy(b);return count>=limit;}for(const p of orders[r]){if(p.some((v,c)=>clues[r][c]!==null&&clues[r][c]!==v))continue;b[r]=[...p];if(isLegal(b)&&visit(r+1))return true;}b[r]=Array(SIZE).fill(null);return false;}visit(0);return {count,solution};
 }
 export function generateSolution(date){const rng=mulberry32(dateSeed(date));return solve(empty(),1,Array.from({length:SIZE},()=>shuffled(patterns,rng))).solution;}
-export function generatePuzzle(date){const solution=generateSolution(date),clues=copy(solution),rng=mulberry32(dateSeed(date)^0x9E3779B9);for(const i of shuffled(Array.from({length:36},(_,i)=>i),rng)){const r=Math.floor(i/SIZE),c=i%SIZE,v=clues[r][c];clues[r][c]=null;if(solve(clues).count!==1)clues[r][c]=v;}// Retain one extra central clue after the minimal unique puzzle is built.
-const extra=Array.from({length:36},(_,i)=>i).filter(i=>clues[Math.floor(i/6)][i%6]===null).sort((a,b)=>{const distance=i=>Math.abs(Math.floor(i/6)-2.5)+Math.abs(i%6-2.5);return distance(a)-distance(b)||a-b;})[0];if(extra!==undefined)clues[Math.floor(extra/6)][extra%6]=solution[Math.floor(extra/6)][extra%6];return {date,clues,solution};}
+// Only local, explainable rules are used to certify the daily difficulty.
+export function findDeduction(b){
+ assertBoard(b);
+ for(const [axis,lines] of groups(b).entries())for(const [lineIndex,line] of lines.entries()){
+  const at=i=>axis===0?{row:lineIndex,col:i}:{row:i,col:lineIndex};
+  for(let i=0;i<SIZE;i++)if(line[i]===null){
+   for(const value of ['C','M']){
+    if(line.filter(v=>v===value).length===3)return {...at(i),value:value==='C'?'M':'C',axis,line:lineIndex,rule:'balance'};
+    for(let start=Math.max(0,i-2);start<=Math.min(i,SIZE-3);start++)if([start,start+1,start+2].filter(j=>j!==i).every(j=>line[j]===value))return {...at(i),value:value==='C'?'M':'C',axis,line:lineIndex,rule:'triple'};
+   }
+  }
+ }
+ return null;
+}
+export function solveByDeduction(clues){
+ const board=copy(clues),steps=[];let step;
+ while(isLegal(board)&&(step=findDeduction(board))){board[step.row][step.col]=step.value;steps.push(step);}
+ return {board,steps,solved:isSolved(board)};
+}
+export function generatePuzzle(date){
+ const solution=generateSolution(date),clues=copy(solution),rng=mulberry32(dateSeed(date)^0x9E3779B9);
+ let remaining=36;
+ for(const i of shuffled(Array.from({length:36},(_,i)=>i),rng)){
+  if(remaining<=20)break;
+  const r=Math.floor(i/SIZE),c=i%SIZE,v=clues[r][c];clues[r][c]=null;
+  const distributed=groups(clues).flat().every(line=>line.filter(v=>v!==null).length>=2);
+  if(!distributed||!solveByDeduction(clues).solved||solve(clues).count!==1)clues[r][c]=v;
+  else remaining--;
+ }
+ return {date,clues,solution};
+}
 export function countSolutions(b){assertBoard(b);return solve(b).count;}
 let board=empty(),clues=empty();
-export function initializeGame(date){const puzzle=generatePuzzle(date);clues=copy(puzzle.clues);board=copy(clues);return {date,clues:copy(clues),board:copy(board)};}
+export function initializeGame(date){const puzzle=generatePuzzle(date);clues=copy(puzzle.clues);board=copy(clues);return {date,clues:copy(clues),board:copy(board),solution:copy(puzzle.solution)};}
 export function getBoard(){return copy(board);}
 export function restoreBoard(saved){assertBoard(saved);if(clues.some((r,i)=>r.some((v,j)=>v!==null&&saved[i][j]!==v)))throw Error('Saved clues do not match');board=copy(saved);return getBoard();}
 export function toggleCell(row,col){if(!Number.isInteger(row)||!Number.isInteger(col)||row<0||row>=SIZE||col<0||col>=SIZE)throw Error('Invalid cell');if(clues[row][col]!==null)return false;const states=[null,'C','M'];board[row][col]=states[(states.indexOf(board[row][col])+1)%3];return true;}
