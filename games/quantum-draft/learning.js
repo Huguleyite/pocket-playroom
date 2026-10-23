@@ -58,6 +58,46 @@
   const node=(tag,cls,text)=>{const e=document.createElement(tag);e.className=cls||'';if(text)e.textContent=text;return e;};
   const panel=document.querySelector('.effects-panel');
   panel.id='learning-panel';
+  // A separate playfield contains all reward/celebration layers, outside the text panel.
+  const playfield=node('section');playfield.id='playfield';playfield.setAttribute('aria-label','Open table');
+  for(const child of [...$('arena').children])if(child!==panel)playfield.append(child);
+  $('arena').prepend(playfield);
+  const rewardLane=node('section');rewardLane.id='reward-lane';rewardLane.setAttribute('aria-label','Visible card rewards');rewardLane.setAttribute('aria-live','polite');playfield.append(rewardLane);
+  let laneIndex=0;
+  function fitPlayedCards(){
+    if(!matchMedia('(min-width:700px)').matches)return;
+    const beside=matchMedia('(max-height:600px)').matches;
+    const room=playfield.clientHeight-playfield.querySelector('.arena-head').offsetHeight-(beside?0:rewardLane.offsetHeight)-58;
+    const height=Math.max(76,Math.min(340,room,(playfield.clientWidth-50)/1.36));
+    const width=Math.min((playfield.clientWidth-50)/2,Math.max(160,height*.68));
+    playfield.style.setProperty('--played-height',height+'px');playfield.style.setProperty('--played-width',width+'px');
+    playfield.dataset.compact=height<150?'small':height<210?'medium':'large';
+  }
+  new ResizeObserver(fitPlayedCards).observe(playfield);
+  const matchDialog=node('dialog');matchDialog.id='match-result';matchDialog.setAttribute('aria-labelledby','match-result-title');
+  const matchLabel=node('p','match-label','MATCH COMPLETE'),matchTitle=node('h2');matchTitle.id='match-result-title';
+  const matchScore=node('p','match-score'),matchMessage=node('p'),matchActions=node('div','match-actions');
+  const matchReview=node('button','btn','Review final trick'),matchAgain=node('button','btn primary','Play a new match');
+  matchActions.append(matchReview,matchAgain);matchDialog.append(matchLabel,matchTitle,matchScore,matchMessage,matchActions);document.body.append(matchDialog);
+  let announcedMatch=null;
+  matchReview.onclick=()=>matchDialog.close();matchAgain.onclick=()=>{matchDialog.close();fresh();};
+  function renderOutcome(){
+    const settled=!!g.result&&['result','over'].includes(g.phase),won=g.result?.winner==='p',over=g.phase==='over'&&modeName!=='learn';
+    const exhausted=settled&&(!g.hands.p.length||!g.hands.a.length)&&modeName!=='learn'&&!over;
+    playfield.dataset.outcome=settled?(won?'won':'lost'):'';
+    if(settled){
+      const phase=$('phase');phase.textContent=over?(won?'MATCH WON':'MATCH LOST'):(won?'YOU WON THE TRICK':'NEXUS WON THE TRICK');
+      phase.setAttribute('role','status');phase.setAttribute('aria-live','polite');
+      phase.title=`Match score: you ${g.score.p}, Nexus ${g.score.a}.`;
+      if(exhausted){phase.textContent+=' · HAND COMPLETE';$('nextBtn').textContent='Deal next hand →';}
+      if(over){
+        matchDialog.dataset.outcome=won?'won':'lost';matchTitle.textContent=won?'You won the match!':'Nexus won the match';
+        matchScore.textContent=`You ${g.score.p} — ${g.score.a} Nexus`;
+        matchMessage.textContent=won?'You reached seven tricks and secured the anomaly.':'Nexus reached seven tricks and secured the anomaly. Try a new match to challenge Nexus again.';
+        if(announcedMatch!==g.result){announcedMatch=g.result;matchDialog.showModal();}
+      }
+    }else{if(matchDialog.open)matchDialog.close();announcedMatch=null;}
+  }
   const lessonBar=node('div','lesson-banner');lessonBar.id='lesson-banner';panel.prepend(lessonBar);
   const inspect=node('section','inspect-panel');inspect.id='inspect-panel';inspect.setAttribute('aria-label','Selected card');
   const inspectTitle=node('h3','','Select a card to inspect');inspectTitle.id='inspect-title';
@@ -160,6 +200,24 @@
     if(expanded)section.classList.add('expanded-movement');
     return section;
   }
+  function renderRewardLane(){
+    const changes=moves.filter(m=>m.kind!=='play'),show=changes.length&&(g.result||frame?.kind==='rewards');
+    rewardLane.replaceChildren();
+    if(!show){rewardLane.append(node('div','reward-placeholder',g.phase==='input'?'Draws and discards appear here, below the played cards.':'No cards gained or discarded by abilities.'));return;}
+    laneIndex=Math.min(laneIndex,changes.length-1);
+    const heading=node('div','reward-lane-heading'),label=node('strong','',changes.length>1?`Card change ${laneIndex+1} of ${changes.length}`:'Card reward / effect');
+    const replay=node('button','btn','Replay');replay.type='button';replay.onclick=()=>{const tile=rewardLane.querySelector('.moving-card');tile.style.animation='none';void tile.offsetWidth;tile.style.animation='';};heading.append(label,replay);
+    if(changes.length>1){for(const [text,delta] of [['←',-1],['→',1]]){const b=node('button','btn',text);b.type='button';b.setAttribute('aria-label',delta<0?'Previous card change':'Next card change');b.disabled=laneIndex+delta<0||laneIndex+delta>=changes.length;b.onclick=()=>{laneIndex+=delta;renderRewardLane();fitPlayedCards();};heading.append(b);}}
+    const summary=movementSummary(),rows=summary.querySelectorAll('.card-change');
+    rewardLane.append(heading,rows[laneIndex]);
+  }
+  function movementNote(){
+    const n=node('div','movement-note');
+    const changes=moves.filter(m=>m.kind!=='play');
+    if(!changes.length)n.append(node('p','','No cards were gained or discarded by abilities.'));
+    for(const m of changes)n.append(node('p','',`${m.cause}: ${m.owner==='p'?'your':'opponent’s'} hand ${m.before} → ${m.after}. See the card movement below the played cards.`));
+    return n;
+  }
   function renderSelection(){
     const c=g.hands.p.find(c=>c.id===selectedId);inspect.hidden=g.phase!=='input';
     for(const e of $('hand').querySelectorAll('button')){const selected=e.dataset.card===selectedId;e.classList.toggle('inspected',selected);e.setAttribute('aria-pressed',String(selected));}
@@ -189,13 +247,14 @@
       stageTitle.textContent=frame.title;
       if(frame.r){for(const p of ['p','a'])$(p==='p'?'playerSlot':'aiSlot').innerHTML=cardHTML(g.plays[p],frame.r.enabled[p]?'':'silenced',frame.r.ranks[p]);$('trumpBadge').textContent=`${LABEL[frame.r.trump]} HAS PRIORITY${frame.r.lock?' / LOCKED':''}`;}
       const root=$('effectLines');root.replaceChildren(...frame.lines.map(t=>node('div','effect-line',t)));
-      if(frame.kind==='rewards')root.replaceChildren(node('div','plain-verdict',explainWinner(frame.r)),movementSummary(),abilityNotes(),effectLog());
+      if(frame.kind==='rewards')root.replaceChildren(node('div','plain-verdict',explainWinner(frame.r)),movementNote(),abilityNotes(),effectLog());
       if(frame.kind==='commit')root.append(movementSummary());
     }else if(g.result){
-      const reason=node('div','plain-verdict',explainWinner(g.result));$('effectLines').replaceChildren(reason,movementSummary(),abilityNotes(),effectLog());
+      const reason=node('div','plain-verdict',explainWinner(g.result));$('effectLines').replaceChildren(reason,movementNote(),abilityNotes(),effectLog());
       if(modeName==='learn')$('effectLines').prepend(node('div','lesson-verdict',passed()?'Lesson complete. Read the result, then continue.':'That choice did not meet the lesson goal. Read the result and try again.'));
     }else if(g.phase==='input'&&latest){$('effectLines').replaceChildren(node('div','last-result',`Last trick: ${latest.winner==='p'?'you won':'Nexus won'}. ${latest.reason}`));}
     $('nextBtn').hidden=!['result','over'].includes(g.phase);$('nextBtn').textContent=modeName==='learn'?(passed()?(lessonIndex===lessons.length-1?'Start Practice →':'Next lesson →'):'Try this lesson again'):g.phase==='over'?'Play again →':'Next trick →';
+    renderOutcome();renderRewardLane();fitPlayedCards();
     expandResult.hidden=!g.result&&frame?.kind!=='rewards';
     if(g.result&&latest)latest.cardMoves=moves.map(m=>({...m,card:{...m.card}}));
     if(modeName==='learn'&&passed()){completed=Math.max(completed,lessonIndex+1);try{localStorage.setItem('quantum-draft:lessons',String(completed));}catch{}}
@@ -215,7 +274,7 @@
     const l=lessons[index];g={history:[],score:{p:0,a:0},round:index+1,trick:0,leader:l.leader,phase:'input',hands:{p:l.p.map(card),a:l.a.map(card)},discards:{p:[],a:[]},deck:['bio3','void5'].filter(id=>![...l.p,...l.a].includes(id)).map(card),captured:[],plays:{},face:card('cyber5'),trump:l.trump,lock:false,result:null};
     $('logs').replaceChildren();begin();
   }
-  fresh=()=>{cancelStage();if(details.open)details.close();if(resultDialog.open)resultDialog.close();selectedId=null;frame=null;if(modeName==='learn')loadLesson(Math.min(completed,lessons.length-1));else original.fresh();};
+  fresh=()=>{cancelStage();if(matchDialog.open)matchDialog.close();announcedMatch=null;if(details.open)details.close();if(resultDialog.open)resultDialog.close();selectedId=null;frame=null;if(modeName==='learn')loadLesson(Math.min(completed,lessons.length-1));else original.fresh();};
   const next=()=>{
     if(!['result','over'].includes(g.phase))return;
     if(modeName==='learn'){
@@ -246,7 +305,7 @@
       const token=epoch;advanceTimer=setTimeout(()=>{advanceTimer=null;if(token!==epoch||g.phase!=='result')return;if(document.hidden||document.querySelector('dialog[open]'))return schedule();next();},6000);
     }
   };
-  globalThis.QDLearning={get mode(){return modeName;},ai,schedule,beginTrick(){moves=[];},cardMove(move){moves.push({...move,card:{...move.card}});},
+  globalThis.QDLearning={get mode(){return modeName;},ai,schedule,beginTrick(){moves=[];laneIndex=0;},cardMove(move){moves.push({...move,card:{...move.card}});},
     async stage(kind,r,before){
       if(kind==='commit')stageNumber=0;
       stageNumber++;if(kind==='commit'){beforeFrame={p:g.hands.p.map(c=>c.id),a:g.hands.a.map(c=>c.id),trump:g.trump};frame={title:'1 · Both cards are now visible',lines:['No ability happens when a card is only selected. Now both cards are committed; their abilities can resolve.']};}
