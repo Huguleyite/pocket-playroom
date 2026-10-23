@@ -249,6 +249,7 @@ function completeNode() {
 }
 function showMap(preview = false) {
   const body = openScreen(ACTS[run.act - 1].name, `ACT ${ACTS[run.act - 1].numeral} / III // SEVEN FLOORS`, preview, 'map');
+  $('screen').dataset.act = run.act;
   const descriptions = { Combat: 'Face Breach Drones. Win credits and draft a card.', Elite: 'Challenge a Chrono Sentinel. Earn greater rewards.', Shop: 'Buy cards and relics, or remove a card.', Rest: 'Repair up to 30% of your maximum hull.', Event: 'Investigate a damaged relay. Choose your reward and risk.' };
   const progress = text('div', '', 'route-progress');
   progress.append(text('span', `${run.completed.length} / 7 floors cleared`), text('span', `Hull ${run.hp}/${run.maxHp} · ${run.gold} credits`));
@@ -257,6 +258,8 @@ function showMap(preview = false) {
   const board = text('div', '', 'map-board');
   const svgs = ['wide', 'tall'].map(layout => { const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg'); svg.setAttribute('viewBox', '0 0 100 100'); svg.setAttribute('preserveAspectRatio', 'none'); svg.setAttribute('aria-hidden', 'true'); svg.classList.add('map-lines', `map-lines-${layout}`); board.append(svg); return svg; });
   const coords = new Map();
+  const nextNodes = preview ? [] : available();
+  let briefingNode = nextNodes[0] || null;
   run.map.floors.forEach((floor, f) => {
     floor.forEach((n, i) => coords.set(n.id, { x: 7 + f * 14.3, y: floor.length === 1 ? 50 : 20 + i * 60 / (floor.length - 1) }));
     const label = text('span', `${f === 6 ? 'BOSS' : 'FLOOR ' + (f + 1)}`, 'floor-label'); label.style.setProperty('--floor-position', `${7 + f * 14.3}%`); board.append(label);
@@ -266,7 +269,8 @@ function showMap(preview = false) {
     svgs.forEach((svg, i) => { const line = document.createElementNS(svg.namespaceURI, 'line');
       line.setAttribute('x1', i ? a.y : a.x); line.setAttribute('y1', i ? a.x : a.y); line.setAttribute('x2', i ? b.y : b.x); line.setAttribute('y2', i ? b.x : b.y); line.setAttribute('vector-effect', 'non-scaling-stroke');
       line.dataset.from = n.id; line.dataset.to = next;
-      if (run.completed.includes(n.id)) line.classList.add('active'); svg.append(line);
+      if (run.completed.includes(n.id) && (run.completed.includes(next) || nextNodes.includes(next))) line.classList.add('active');
+      if (nextNodes.includes(n.id)) line.classList.add('onward'); svg.append(line);
     });
   }
   function highlight(id) {
@@ -276,11 +280,20 @@ function showMap(preview = false) {
     board.querySelectorAll('line').forEach(line => line.classList.toggle('route-highlight', reachable.has(line.dataset.from) && reachable.has(line.dataset.to)));
     board.querySelectorAll('.map-node').forEach(el => el.classList.toggle('route-highlight', reachable.has(el.dataset.node)));
     status.textContent = id ? descriptions[node(id).type] : preview ? 'Finish your encounter to continue the route.' : 'Choose a glowing encounter to enter. Follow its path to the sector boss.';
+    if (id) updateBriefing(id);
   }
   for (const n of run.map.floors.flat()) {
-    const canEnter = !preview && available().includes(n.id), done = run.completed.includes(n.id);
+    const canEnter = nextNodes.includes(n.id), done = run.completed.includes(n.id);
     const el = button('', () => enterNode(n.id), `map-node${canEnter ? ' available' : ''}${done ? ' complete' : ''}${n.floor === 7 ? ' boss-node' : ''}`, !canEnter);
     el.dataset.node = n.id; el.append(nodeArtwork(n.type), text('span', n.type, 'node-label'));
+    el.dataset.type = n.type;
+    if (n.floor === 7) {
+      el.querySelector('img').src = './assets/enemies/chrono-sentinel.png';
+      el.querySelector('.node-label').textContent = ACTS[run.act - 1].boss;
+      el.append(text('span', 'SECTOR BOSS', 'boss-caption'));
+    }
+    if (!done && !canEnter && n.floor <= run.completed.length) el.classList.add('route-skipped');
+    if (n.id === run.currentNodeId && done) el.classList.add('current-position');
     if (canEnter) el.append(text('span', 'ENTER', 'node-enter'));
     if (done) { const check = text('span', '✓', 'node-completed'); check.setAttribute('aria-hidden', 'true'); el.append(check); }
     el.style.setProperty('--map-x', `${coords.get(n.id).x}%`); el.style.setProperty('--map-y', `${coords.get(n.id).y}%`);
@@ -291,7 +304,33 @@ function showMap(preview = false) {
   }
   const legend = text('div', '', 'legend');
   for (const type of Object.keys(icons)) { const item = text('span', '', 'legend-item'); item.append(nodeArtwork(type), text('span', type)); legend.append(item); }
-  body.append(progress, status, board, legend);
+  const footer = text('div', '', 'sector-footer');
+  const briefing = text('section', '', 'sector-briefing');
+  briefing.setAttribute('aria-label', 'Next encounter briefing');
+  const briefingArt = nodeArtwork('Combat');
+  const briefingCopy = text('div', '', 'briefing-copy');
+  const briefingTitle = text('h2', '', 'briefing-title');
+  const briefingDescription = text('p', '', 'briefing-description');
+  const briefingRewards = text('div', '', 'briefing-rewards');
+  const enter = button('Enter encounter →', () => { if (briefingNode && !preview) enterNode(briefingNode); }, 'primary briefing-enter', preview || !briefingNode);
+  briefingCopy.append(text('span', preview ? 'ROUTE PREVIEW' : 'NEXT ENCOUNTER', 'eyebrow'), briefingTitle, briefingDescription, briefingRewards);
+  briefing.append(briefingArt, briefingCopy, enter);
+  function updateBriefing(id) {
+    briefingNode = id;
+    const n = id && node(id), type = n?.type || 'Elite';
+    const titles = { Combat: 'Breach patrol', Elite: n?.floor === 7 ? ACTS[run.act - 1].boss : 'Elite signature', Shop: 'Supply outpost', Rest: 'Repair chamber', Event: 'Unknown anomaly' };
+    briefingTitle.textContent = preview ? 'Chart your next move' : titles[type];
+    briefingDescription.textContent = preview ? 'Finish the current encounter to continue your route.' : descriptions[type];
+    const rewards = { Combat: ['Earn credits', 'Draft a card'], Elite: ['Greater rewards', 'Powerful enemies'], Shop: ['Buy cards & relics', 'Trim your deck'], Rest: ['Repair hull'], Event: ['Discover a signal', 'Choose risk or reward'] };
+    briefingRewards.replaceChildren(...(preview ? [] : rewards[type]).map(value => text('span', value)));
+    briefingArt.querySelector('img').src = n?.floor === 7 ? './assets/enemies/chrono-sentinel.png' : NODE_ART[type];
+    briefing.dataset.type = type;
+    enter.textContent = preview ? 'Encounter in progress' : `Enter ${type === 'Elite' ? 'battle' : type.toLowerCase()} →`;
+    enter.disabled = preview || !id;
+  }
+  footer.append(legend, briefing);
+  body.append(progress, status, board, footer);
+  updateBriefing(briefingNode);
 }
 function showDraft() {
   const body = openScreen('Encounter cleared', 'BREACH SECURED // CARD REWARD');

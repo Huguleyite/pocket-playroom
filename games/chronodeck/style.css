@@ -256,3 +256,58 @@ body #screen[data-view="aperture"] .overlay-shell{max-width:2200px;min-height:10
 @media(max-width:699px){body #screen[data-view="aperture"]{background-position:62% top;background-attachment:fixed}body #screen[data-view="aperture"] .overlay-shell{padding:20px 16px}#screen[data-view="aperture"] .overlay-header{flex-direction:column-reverse;gap:24px}#screen[data-view="aperture"] .overlay-tools{align-self:flex-end}#screen[data-view="aperture"] #screen-title{font-size:42px;letter-spacing:-1px;max-width:330px}#screen[data-view="aperture"] .overlay-intro{font-size:15px;max-width:330px}.aperture-atmosphere{min-height:140px}.aperture-choices{grid-template-columns:1fr;gap:14px}.aperture-choice{grid-template-columns:95px minmax(0,1fr);gap:12px}.aperture-choice-art{min-height:220px}.aperture-choice h2{font-size:22px}.aperture-choice .eyebrow{font-size:9px}.aperture-action{font-size:13px;padding:10px}}
 @media(max-height:750px) and (min-width:700px){#screen[data-view="aperture"] #screen-title{font-size:clamp(34px,4vw,56px)}#screen[data-view="aperture"] .overlay-intro{font-size:16px;margin-top:12px}.aperture-atmosphere{min-height:90px}.aperture-choice-art{min-height:190px}.aperture-choice h2{font-size:23px}.aperture-choices{margin-top:12px}.aperture-choice{padding:12px}.aperture-effects{margin:12px 0}.aperture-choice p{font-size:12px}}
 @media(prefers-reduced-motion:reduce){.aperture-atmosphere::before,.aperture-atmosphere::after{animation:none}.aperture-choice:hover:enabled{transform:none}}
+
+/* Sector navigation: illustrated encounters over a fractured orbital station. */
+body #screen[data-view="map"]{inset:0;left:0;top:0;width:100%;height:100dvh;max-height:100dvh;max-width:none;border:0;border-radius:0;overflow:auto;background:linear-gradient(#05101c44,#05101c55),url('./assets/maps/fractured-sector.png') center/cover no-repeat #07121f}
+body #screen[data-view="map"][data-act="2"]{background-color:#102631;background-blend-mode:normal,luminosity}
+body #screen[data-view="map"][data-act="3"]{background-color:#261332;background-blend-mode:normal,luminosity}
+body #screen[data-view="map"] .overlay-shell{max-width:2300px;min-height:100%;height:100%;padding:24px clamp(20px,3vw,60px);display:flex;flex-direction:column}
+body #screen[data-view="map"] .overlay-header{margin:0 0 12px;padding-bottom:12px;border-bottom:1px solid #67adca44;gap:12px}
+body #screen[data-view="map"] .overlay-header h1{font-size:clamp(30px,3vw,58px);margin-top:4px;line-height:1.1;text-shadow:0 3px 16px #000}
+body #screen[data-view="map"] #screen-body{display:flex;flex:1;flex-direction:column;min-height:0}
+body #screen[data-view="map"] .route-progress{padding:8px 12px;background:#06111edb;border:1px solid #47677866;border-radius:6px;font-size:13px}
+body #screen[data-view="map"] .route-status{font-size:12px;margin-top:8px;min-height:22px;color:#bed3e4;text-shadow:0 1px 4px #000}
+body #screen[data-view="map"] .map-board{height:auto;flex:1;min-height:280px;max-height:650px;margin:25px 24px 14px;background:linear-gradient(90deg,#030d1744,transparent);border-radius:16px}
+body #screen[data-view="map"] .map-lines-wide{display:block}
+body #screen[data-view="map"] .map-lines-tall{display:none}
+body #screen[data-view="map"] .map-lines line{stroke:#8396b9;stroke-opacity:.4;stroke-width:2}
+body #screen[data-view="map"] .map-lines line.active{stroke:var(--cyan);stroke-opacity:1;stroke-width:3;filter:drop-shadow(0 0 4px #64eadf88)}
+body #screen[data-view="map"] .map-lines line.onward{stroke:#a7a1e6;stroke-opacity:.65}
+body #screen[data-view="map"] .map-lines line.route-highlight{stroke:#adfff5;stroke-opacity:1;stroke-width:3}
+body #screen[data-view="map"] .floor-label{left:var(--floor-position);top:-24px;transform:translateX(-50%);width:auto;font-size:11px;color:#c2dcf2;font-weight:600;letter-spacing:1.5px;text-shadow:0 2px 4px #000}
+body #screen[data-view="map"] .map-node{--node-color:#f4a568;left:var(--map-x);top:var(--map-y);width:clamp(68px,6.2vw,128px);min-height:0;padding:0 0 5px;gap:3px;border:0;background:transparent;box-shadow:none;overflow:visible;border-radius:12px;color:#e2eefa;font-size:12px;line-height:1.2}
+body #screen[data-view="map"] .map-node[data-type="Shop"]{--node-color:#efca75}
+body #screen[data-view="map"] .map-node[data-type="Rest"]{--node-color:#64deec}
+body #screen[data-view="map"] .map-node[data-type="Event"],body #screen[data-view="map"] .map-node[data-type="Elite"]{--node-color:#b795ff}
+body #screen[data-view="map"] .map-node .node-icon{width:clamp(54px,5.4vw,112px);height:clamp(54px,5.4vw,112px);border:2px solid var(--node-color);border-radius:50%;padding:5px;background:radial-gradient(ellipse,#23364c,#06111f);box-shadow:0 4px 16px #0008,inset 0 0 14px color-mix(in srgb,var(--node-color) 18%,transparent);transition:box-shadow .2s}
+body #screen[data-view="map"] .map-node .node-icon img{opacity:1;object-fit:contain;filter:drop-shadow(0 2px 5px #000)}
+body #screen[data-view="map"] .node-label{background:#06111edb;padding:3px 7px;border-radius:5px;text-shadow:0 1px 4px #000}
+body #screen[data-view="map"] .map-node:disabled{color:#acc1d0}
+body #screen[data-view="map"] .map-node:disabled .node-icon{opacity:.65}
+body #screen[data-view="map"] .map-node.complete .node-icon{opacity:1;border-color:#6be4d6}
+body #screen[data-view="map"] .map-node.route-skipped{opacity:.4}
+body #screen[data-view="map"] .map-node.available{animation:none;background:transparent;border:0;box-shadow:none}
+body #screen[data-view="map"] .map-node.available .node-icon{outline:2px solid var(--cyan);outline-offset:4px;box-shadow:0 0 28px #64eadf55;animation:sector-beacon 3s ease-in-out infinite}
+body #screen[data-view="map"] .node-enter{position:static;writing-mode:horizontal-tb;background:var(--cyan);color:#06202a;border-radius:5px;padding:4px 12px;font-size:10px;letter-spacing:1px;font-weight:800}
+body #screen[data-view="map"] .node-completed{right:4px;top:0;width:23px;height:23px;border:1px solid var(--cyan);background:#072b30;color:#94fff2}
+body #screen[data-view="map"] .map-node.current-position::after{content:'YOU ARE HERE';color:var(--cyan);font-size:8px;letter-spacing:1px;background:#04121e;padding:3px;border-radius:3px}
+body #screen[data-view="map"] .map-node.boss-node{width:clamp(110px,12vw,230px);z-index:1;--node-color:#b795ff}
+body #screen[data-view="map"] .map-node.boss-node .node-icon{width:clamp(96px,11vw,215px);height:clamp(96px,11vw,215px);border-color:#b795ff;background:radial-gradient(ellipse,#703b8b77,#0d1326);box-shadow:0 0 35px #a55aff55,inset 0 0 24px #b06aff33}
+body #screen[data-view="map"] .boss-node .node-label{font-size:clamp(11px,1.1vw,20px);letter-spacing:1px;color:#ebdfff}
+.boss-caption{font-size:9px;letter-spacing:2px;color:#be9ef1;background:#07111dcc;padding:3px 6px}
+.sector-footer{display:flex;align-items:flex-end;justify-content:space-between;gap:24px;margin-top:auto;padding-top:8px}
+body #screen[data-view="map"] .legend{justify-content:flex-start;margin:0;padding:10px 12px;gap:10px 18px;background:#05101cdd;border-radius:8px;font-size:11px}
+body #screen[data-view="map"] .legend .node-icon{width:26px;height:26px}
+.sector-briefing{display:grid;grid-template-columns:78px minmax(0,1fr) auto;align-items:center;gap:16px;width:min(720px,58%);padding:14px 18px;background:linear-gradient(135deg,#132c3bed,#07101ff2);border:1px solid #5796a780;border-radius:12px;box-shadow:0 8px 24px #0006}
+.sector-briefing>.node-icon{width:78px;height:78px;background:#0a1726;border-radius:12px;padding:5px}
+.briefing-title{font-size:22px;line-height:1.2;margin:5px 0}
+.briefing-description{font-size:12px;color:#b7cada;line-height:1.4}
+.briefing-rewards{display:flex;flex-wrap:wrap;gap:6px;margin-top:9px}
+.briefing-rewards span{font-size:10px;padding:4px 7px;border:1px solid #65869d66;border-radius:5px;color:#d5e5f2}
+.briefing-enter{min-height:46px;white-space:nowrap}
+@keyframes sector-beacon{50%{box-shadow:0 0 35px #64eadf99}}
+@media(min-width:700px) and (max-height:750px){body #screen[data-view="map"] .overlay-shell{padding:12px 22px}body #screen[data-view="map"] .overlay-header{padding-bottom:8px;margin-bottom:6px}body #screen[data-view="map"] .route-progress{padding:4px 10px}body #screen[data-view="map"] .route-status{min-height:16px;margin-top:4px;font-size:11px}body #screen[data-view="map"] .map-board{min-height:240px;margin-top:24px;margin-bottom:4px}body #screen[data-view="map"] .map-node .node-icon{width:52px;height:52px}body #screen[data-view="map"] .map-node.boss-node .node-icon{width:100px;height:100px}.sector-briefing{padding:8px 12px;gap:10px;grid-template-columns:52px minmax(0,1fr) auto}.sector-briefing>.node-icon{width:52px;height:52px}.briefing-title{font-size:18px}.briefing-description{font-size:11px}.briefing-rewards{margin-top:4px}.sector-footer{padding-top:0}.briefing-enter{padding:8px;font-size:12px}}
+@media(min-width:700px) and (max-width:1100px){body #screen[data-view="map"] .legend{max-width:250px;gap:6px 12px}.sector-briefing{width:65%;grid-template-columns:48px minmax(0,1fr)}.sector-briefing>.node-icon{width:48px;height:48px}.briefing-enter{grid-column:2;padding:6px;font-size:12px}.briefing-description{display:none}.briefing-title{font-size:17px}body #screen[data-view="map"] .map-node{font-size:10px}body #screen[data-view="map"] .map-node.boss-node{width:106px}body #screen[data-view="map"] .map-node.boss-node .node-icon{width:86px;height:86px}}
+@media(max-width:699px){body #screen[data-view="map"]{background-position:65% center}body #screen[data-view="map"] .overlay-shell{height:auto;padding:18px 14px}body #screen[data-view="map"] .overlay-header{align-items:flex-start;flex-wrap:wrap}body #screen[data-view="map"] .overlay-tools{gap:5px}body #screen[data-view="map"] .overlay-tools button{font-size:11px;padding:8px}body #screen[data-view="map"] .route-progress{font-size:11px}body #screen[data-view="map"] .map-board{flex:none;height:780px;min-height:780px;max-height:none;margin:15px 35px 20px 42px}body #screen[data-view="map"] .map-lines-wide{display:none}body #screen[data-view="map"] .map-lines-tall{display:block}body #screen[data-view="map"] .map-node{left:var(--map-y);top:var(--map-x);width:64px;font-size:10px}body #screen[data-view="map"] .map-node .node-icon{width:48px;height:48px;padding:3px}body #screen[data-view="map"] .floor-label{left:-38px;top:var(--floor-position);transform:translateY(-50%);width:34px;font-size:9px;letter-spacing:0}body #screen[data-view="map"] .node-enter{font-size:8px;padding:2px 6px}body #screen[data-view="map"] .node-completed{width:18px;height:18px;right:0}body #screen[data-view="map"] .map-node.boss-node{width:130px}body #screen[data-view="map"] .map-node.boss-node .node-icon{width:92px;height:92px}body #screen[data-view="map"] .boss-node .node-label{font-size:11px}.boss-caption{font-size:8px}.sector-footer{flex-direction:column;align-items:stretch;gap:12px}.sector-briefing{width:100%;grid-template-columns:55px minmax(0,1fr);padding:12px;gap:10px}.sector-briefing>.node-icon{width:55px;height:55px}.briefing-title{font-size:20px}.briefing-enter{grid-column:1/3}body #screen[data-view="map"] .legend{justify-content:center}}
+@media(prefers-reduced-motion:reduce){body #screen[data-view="map"] .map-node.available .node-icon{animation:none}}
+@media(min-width:700px) and (max-height:750px){body #screen[data-view="map"] .map-board{min-height:320px}}
