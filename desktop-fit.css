@@ -220,3 +220,34 @@ body[data-playroom-game] .playroom-drawer{width:min(720px,calc(100vw - 24px));he
   body[data-playroom-game="quantum-draft"] .slot .card .card-effect,body[data-playroom-game="quantum-draft"] .slot .card .card-name{display:none}
   body[data-playroom-game="quantum-draft"] .arena{grid-template-rows:26px minmax(0,1fr) auto;padding:6px 10px}
 }
+/* Lineage Council & Consequence: retain the playable hand and owned-book rails. */
+@media(min-width:700px){
+ body[data-playroom-game="lineage"] .console{grid-template-areas:'brand controls' 'meters council' 'chapter council' 'petition council' 'hand hand';grid-template-rows:74px 78px 54px minmax(160px,1fr) 246px;height:calc(var(--playroom-height) - 16px)}
+ body[data-playroom-game="lineage"] .council-hand{padding:8px 12px;min-height:0;height:246px;overflow:auto}
+ body[data-playroom-game="lineage"] .hand-heading h3{font-size:17px;margin:2px 0}
+ body[data-playroom-game="lineage"] .hand-heading .eyebrow{font-size:8px}
+ body[data-playroom-game="lineage"] .influence strong{font-size:19px}
+ body[data-playroom-game="lineage"] #handSummary{font-size:10px;margin:1px 0 6px}
+ body[data-playroom-game="lineage"] .council-cards{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px}
+ body[data-playroom-game="lineage"] .council-card{min-height:140px;padding:7px;gap:0}
+ body[data-playroom-game="lineage"] .council-icon{font-size:21px;margin:3px 0}
+ body[data-playroom-game="lineage"] .council-card strong{font-size:13px;margin-bottom:5px}
+ body[data-playroom-game="lineage"] .card-rule{font-size:10px;line-height:1.25}
+ body[data-playroom-game="lineage"] .council-card small{padding-top:5px;font-size:8px}
+ body[data-playroom-game="lineage"] .combo-notice{font-size:9px;margin:7px 0 0}
+ body[data-playroom-game="lineage"] .event-art{height:58px;margin:-14px -14px 8px}
+ body[data-playroom-game="lineage"] .event .story-badge{margin:4px 0;font-size:9px}
+ body[data-playroom-game="lineage"] .strategy{align-self:stretch}
+ body[data-playroom-game="lineage"] .score-settings{font-size:10px}
+ body[data-playroom-game="lineage"] .score-settings .music-settings{right:0}
+ body[data-playroom-game="lineage"] .council-projects{margin-top:5px}
+}
+@media(min-width:1650px) and (min-height:700px){
+ body[data-playroom-game="lineage"]>.shell{display:grid;grid-template-columns:160px minmax(0,1fr) 160px;max-width:1920px;gap:18px}
+ body[data-playroom-game="lineage"]>.shell>.ad{display:block!important;position:sticky;top:60px}
+}
+@media(min-width:700px) and (max-height:700px){
+ body[data-playroom-game="lineage"] .console{height:auto;min-height:calc(var(--playroom-height) - 16px);grid-template-rows:74px 78px 54px minmax(240px,auto) 246px}
+ body[data-playroom-game="lineage"] .event-art{display:none}
+}
+@media(max-width:699px){body[data-playroom-game="lineage"] .council-hand{order:8}body[data-playroom-game="lineage"] .strategy{order:9}}
