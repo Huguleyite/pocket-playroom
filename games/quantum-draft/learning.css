@@ -1,0 +1,184 @@
+/* Card information has a solid reading surface, independent of the artwork. */
+body #hand .card,body .slot .card{padding:8px;position:relative;background-image:linear-gradient(180deg,#03091444,transparent 45%,#050b14 65%),var(--art);border-radius:8px;text-shadow:none;overflow:hidden}
+body #hand .card{min-height:164px;height:164px;cursor:pointer;opacity:1;filter:none}
+body #hand .card.illegal{border-style:dashed;border-color:#637184}
+body #hand .card.illegal .card-top{opacity:.6}
+body #hand .card.inspected{border:2px solid #a3f7dd;box-shadow:0 0 0 1px #a3f7dd;transform:none}
+body #hand .card .card-top{min-height:24px;height:24px}
+body #hand .card .rank{font-size:25px}
+body .card-copy{position:absolute;bottom:0;left:0;right:0;min-height:86px;padding:7px;background:#08121ff5;border-top:1px solid #5c6f82;display:flex;flex-direction:column;gap:4px}
+body #hand .card-name,body .slot .card-name{font:600 11px/1.15 system-ui;margin:0;color:#fff}
+body .ability-timing{color:#a3f7dd;font:600 10px/1.2 system-ui;letter-spacing:0}
+body #hand .card-effect,body .slot .card-effect{font:11px/1.25 system-ui;color:#edf4ff;min-height:0;margin:0;text-shadow:none}
+body #hand .sector{font:9px system-ui;padding:2px 4px;margin:4px 0 0}
+body .slot .card-copy{min-height:78px}
+body .slot .effective,body .slot .silence-tag{top:43px;left:7px;font:700 11px system-ui;z-index:5}
+body #hand button:focus-visible{outline:3px solid #fff;outline-offset:1px}
+body #learning-panel{position:relative;max-width:none;max-height:none;display:flex;flex-direction:column;padding:12px;gap:8px;background:#0b1523;overflow:hidden;border-color:#557184}
+body #learning-content{flex:1;min-height:0;overflow:auto;overscroll-behavior:contain;display:flex;flex-direction:column;gap:8px}
+body #learning-content>*{flex:none}
+body #learning-panel>h3:not(#stage-title){display:none}
+body #learning-panel p{font:14px/1.5 system-ui;margin:0}
+body #learning-panel h3{font:650 15px/1.25 system-ui;margin:0;color:#eff8ff;text-transform:none;letter-spacing:0}
+body #arena #playerSlot .card,body #arena #aiSlot .card{opacity:1;filter:none}
+body #arena .slot .card.flash{animation:none}
+body #inspect-panel{display:flex;flex-direction:column;gap:7px}
+body #inspect-panel[hidden]{display:none}
+body #inspect-description{color:#e1ecf7}
+body #inspect-context{padding:8px;background:#14293a;border-left:3px solid #78d9e1;color:#d5ebfa}
+body #play-card{min-height:44px;margin-top:2px;flex:none}
+body #stage-title{font-size:13px;color:#a3f7dd}
+body #learning-counts{font:14px/1.4 system-ui;color:#e1edf7;padding:8px;background:#172438;border-radius:4px}
+body .counts-changed{animation:count-change 1.2s ease}
+@keyframes count-change{35%{background:#27614c;color:#fff;box-shadow:0 0 10px #a3f7dd}}
+body #hand .drawn-card{animation:draw-arrival 1s ease;outline:2px solid #a3f7dd}
+body .trump-changed{animation:count-change 1.2s ease}
+body .hand-discarded{animation:discard-change .9s ease}
+@keyframes draw-arrival{from{transform:translateY(35px);opacity:.2}to{transform:none;opacity:1}}
+@keyframes discard-change{40%{opacity:.3;transform:translateY(-8px)}to{opacity:1;transform:none}}
+body #effectLines{display:flex;flex-direction:column;gap:5px;min-height:0}
+body #effectLines .effect-line{font:14px/1.5 system-ui;padding:7px 0;color:#e1ecf7}
+body .plain-verdict,body .lesson-verdict{padding:10px;border:1px solid #4c8b78;border-radius:5px;color:#d4ffe6;font:600 15px/1.5 system-ui;background:#132e27}
+body .lesson-verdict{border-color:#768db5;background:#17283f;color:#e0edff}
+body .last-result{font:12px/1.4 system-ui;color:#c0d2e4}
+body .lesson-banner{padding:9px;background:#17283f;border:1px solid #647ba3;border-radius:6px}
+body .lesson-banner[hidden]{display:none}
+body .lesson-banner strong{display:block;color:#e2ecff;font:650 14px/1.3 system-ui;margin-bottom:5px}
+body #learning-panel .lesson-banner p{font-size:12px;line-height:1.4}
+body .lesson-banner small{display:block;color:#9eb4cd;font:10px/1.4 system-ui;margin-top:5px}
+body .resolution-controls{position:static;background:#0b1523;padding:0;display:flex;gap:6px;z-index:6;flex:none;margin-top:0}
+body .resolution-controls button{min-height:44px;flex:1;font-size:13px}
+body .resolution-controls #play-card{flex:1}
+body #learning-panel #nextBtn{position:static;grid-area:auto;margin:0;z-index:auto}
+body #learning-panel #coach{position:static;max-width:none;max-height:none;bottom:auto;right:auto;padding:8px;margin:0;background:#11251f}
+body #learning-panel #coach p{font-size:12px}
+body .learning-coach{padding:5px 0}
+body .learning-coach summary{font:12px system-ui;cursor:pointer}
+body #learning-settings{width:min(720px,calc(100vw - 24px));max-height:calc(100dvh - 24px);overflow:auto;padding:22px}
+body #learning-settings p{font:14px/1.5 system-ui;color:#c4d7e6}
+body .mode-options{display:grid;gap:10px;margin:18px 0}
+body .mode-option{display:flex;flex-direction:column;gap:6px;text-align:left;padding:14px;color:#e7f5ff;border:1px solid #577186;border-radius:7px;background:#142337;min-height:74px}
+body .mode-option strong{font:650 17px system-ui;color:#a3f7dd}
+body .mode-option span{font:13px/1.4 system-ui}
+body .mode-option:hover,body .mode-option:focus-visible{background:#203a47;border-color:#a3f7dd}
+body .pace-setting{display:flex;gap:10px;align-items:center;font:14px/1.5 system-ui}
+body #fast-play{width:20px;height:20px;accent-color:#a3f7dd}
+body #modeBtn{white-space:nowrap}
+body #inspect-open{font:12px system-ui;padding:6px 9px;min-height:32px;align-self:start}
+body #card-details{width:min(620px,calc(100vw - 24px));max-height:calc(100dvh - 24px);overflow:auto;background:#0b1523;padding:24px}
+body #card-details p{font:16px/1.55 system-ui;color:#e1ecf7;margin:16px 0}
+body #card-details h2{font:650 23px/1.3 system-ui;margin:0 0 12px}
+body #card-details .ability-timing{font-size:13px}
+body #card-details .card-context{background:#172b3e;border-left:3px solid #78d9e1;padding:12px}
+body .card-details-actions{display:flex;justify-content:space-between;gap:10px;position:sticky;bottom:-24px;background:#0b1523;padding:12px 0}
+body .card-details-actions button{min-height:44px;font-size:14px}
+body .learning-guide{padding:12px;background:#17283f;border:1px solid #647ba3;border-radius:6px}
+body .card-changes{display:flex;flex-direction:column;gap:10px}
+body .card-changes h4{font:700 17px/1.3 system-ui;margin:0;color:#fff}
+body .played-summary{font:13px/1.5 system-ui;color:#c9dae9;padding:9px;border:1px solid #42576a;border-radius:6px;background:#142131}
+body .played-summary strong{display:block;font-size:14px;color:#e9f2fc}
+body .card-change{padding:12px;border:1px solid #6c9f8b;background:#102c27;border-radius:8px;display:flex;flex-direction:column;gap:9px}
+body .card-change.card-lost{border-color:#b18a68;background:#30261f}
+body .move-cause{font:600 13px/1.3 system-ui;color:#b9d7eb}
+body .move-path{display:grid;grid-template-columns:minmax(0,1fr) 26px minmax(0,1fr);align-items:center;gap:5px}
+body .move-source{font:600 14px/1.4 system-ui;padding:10px 6px;border:1px dashed #8396aa;border-radius:6px;text-align:center}
+body .move-arrow{font:700 27px system-ui;text-align:center;color:#e9faff}
+body .move-destination{display:flex;flex-direction:column;align-items:center;gap:5px;font:600 13px/1.35 system-ui;text-align:center}
+body .moving-card{width:62px;height:78px;border:1px solid #99c8d3;border-radius:6px;padding:6px;background-image:linear-gradient(180deg,#06111a88,transparent 40%,#071321f5 80%),var(--art);background-position:center;background-size:cover;display:flex;flex-direction:column;justify-content:space-between;animation:move-card-arrival .8s ease-out}
+body .moving-card strong{font:700 25px system-ui;color:#fff;text-shadow:0 1px 4px #000}
+body .moving-card span{font:600 12px system-ui;color:#fff;background:#071321bb}
+body .moving-card.face-down{background:repeating-linear-gradient(45deg,#1a3548 0 5px,#0e1f31 5px 10px)}
+body .move-count{display:flex;align-items:center;justify-content:space-between;gap:7px;font:14px/1.3 system-ui;padding:8px;background:#060e1699;border-radius:5px;flex-wrap:wrap}
+body .move-count strong{font:750 24px/1.2 system-ui;color:#fff}
+body .move-delta{font:700 15px system-ui;color:#a3f7dd}
+body .card-lost .move-delta{color:#ffd1aa}
+body #learning-panel .move-explanation{font:14px/1.45 system-ui;color:#e1eaf4}
+body .ability-log{padding:8px 0}
+body .ability-log summary{font:14px system-ui;color:#b8d1e5;cursor:pointer}
+body .ability-log p{font:14px/1.5 system-ui;margin:9px 0}
+body #result-details{width:min(760px,calc(100vw - 24px));max-height:calc(100dvh - 24px);padding:24px;overflow:auto;background:#0b1523}
+body #result-details h2{font:700 25px/1.3 system-ui;margin:0 0 16px}
+body #result-details>div{display:flex;flex-direction:column;gap:16px}
+body #result-details .plain-verdict,body #result-details .move-explanation,body #result-details .ability-log p{font-size:16px;line-height:1.55}
+body #result-details .move-path{grid-template-columns:minmax(0,1fr) 40px minmax(0,1fr)}
+body #result-details .moving-card{width:86px;height:110px}
+body #result-details .move-source,body #result-details .move-destination{font-size:16px}
+body #result-details .move-count strong{font-size:30px}
+body #result-details-close{position:sticky;bottom:-24px;margin-top:16px;min-height:44px;width:100%}
+@keyframes move-card-arrival{from{transform:translateX(-35px);opacity:.3}to{transform:none;opacity:1}}
+@media(min-width:700px){
+  body #arena{display:grid;grid-template-columns:minmax(0,1fr) minmax(300px,38%);grid-template-rows:30px minmax(0,1fr);height:100%;min-height:0;gap:6px 12px;overflow:hidden;padding:8px 12px}
+  body #arena .arena-head{grid-area:1/1/2/3}
+  body #arena .duel{grid-area:2/1;margin:22px 0 0;align-self:center;gap:18px;min-height:0}
+  body #arena .arena-message,body #arena .opponent-label,body #arena .nexus-beacon{display:none}
+  body #arena #learning-panel{grid-area:2/2;align-self:stretch;min-height:0;max-height:none;margin:0}
+  body #arena #backs{display:flex;position:absolute;top:47px;left:22px;justify-content:flex-start;height:18px;margin:0;z-index:1;max-width:35%;overflow:hidden}
+  body #arena .back{height:18px;width:14px;margin-left:0;transform:none}
+  body #arena .slot,body #arena .slot .card{height:clamp(150px,25dvh,230px);width:116px;min-width:116px}
+  body #arena .holo-reactor{width:55px;height:55px;flex:none}
+  body #arena .reactor-caption{font-size:7px}
+  body #learning-panel #nextBtn{grid-area:auto}
+  body #learning-hand{height:100%;padding:4px 8px;display:block;min-height:0}
+  body #learning-hand .hand-head{height:24px;margin:0}
+  body #learning-hand #hand{height:174px;min-height:0;padding:4px 3px;display:flex;gap:6px;flex-wrap:nowrap;overflow-x:auto;align-items:stretch}
+  body #learning-hand #hand .card{height:164px;min-height:164px;flex:1 0 104px;min-width:104px;max-width:145px}
+}
+@media(min-width:700px) and (max-width:1100px){
+  body #arena{grid-template-columns:minmax(0,1fr) 320px;gap:6px}
+  body #arena .holo-reactor{display:none}
+  body #arena .duel{gap:12px}
+  body #arena .slot,body #arena .slot .card{width:100px;min-width:100px}
+  body #learning-panel p{font-size:14px}
+}
+@media(min-width:700px) and (max-height:650px){
+  body[data-playroom-game="quantum-draft"]>.shell{grid-template-rows:48px minmax(0,1fr) 208px}
+  body #arena{grid-template-rows:26px minmax(0,1fr);padding:5px 8px}
+  body #arena #learning-panel{padding:8px;gap:6px}
+  body #learning-panel p{font-size:14px;line-height:1.45}
+  body #arena .slot,body #arena .slot .card{height:136px;min-height:0}
+  body #arena .slot .card-copy{min-height:72px;padding:5px}
+  body #arena .slot .card-name,body #arena .slot .card-effect{display:block}
+  body #arena .slot .card-name{font-size:10px}
+  body #arena .slot .card-effect{font-size:10px}
+  body #arena .slot .ability-timing{font-size:9px}
+  body #arena .duel{margin-top:0}
+  body #arena .slot-label{margin-top:4px;font:8px/1.1 system-ui;letter-spacing:.5px}
+  body .resolution-controls{bottom:-8px}
+}
+@media(min-width:700px) and (max-height:580px){
+  body #arena{grid-template-rows:minmax(0,1fr)}
+  body #arena .arena-head{position:absolute;top:4px;left:8px;right:8px;width:auto;height:22px}
+  body #arena .duel{grid-area:1/1;margin-top:20px}
+  body #arena #learning-panel{grid-area:1/2;margin-top:24px}
+  body #arena #backs{display:none}
+  body #arena .slot,body #arena .slot .card{height:112px}
+  body #arena .slot .card{padding:5px}
+  body #arena .slot .card-top{height:20px;min-height:20px}
+  body #arena .slot .rank{font-size:20px}
+  body #arena .slot .sector{font:8px system-ui;margin-top:2px;padding:1px 3px}
+  body #arena .slot .card-copy{min-height:66px;padding:5px;gap:3px}
+  body #arena .slot .effective,body #arena .slot .silence-tag{top:29px;font-size:9px}
+}
+@media(min-width:700px) and (max-aspect-ratio:1/1){
+  body[data-playroom-game="quantum-draft"]>.shell{grid-template-rows:58px minmax(0,1fr) 380px}
+  body #learning-hand #hand{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));grid-template-rows:repeat(2,164px);height:346px;gap:6px}
+  body #learning-hand #hand .card{width:100%;min-width:0;max-width:none}
+  body #arena .duel{gap:8px}
+}
+@media(max-width:699px){
+  body #arena{display:flex;flex-direction:column;min-height:0;padding:12px;gap:12px;overflow:hidden}
+  body #arena .backs,body #arena .nexus-beacon,body #arena .table-coordinates,body #arena .arena-message{display:none}
+  body #arena .duel{gap:10px;margin:0}
+  body #arena .holo-reactor{display:none}
+  body #arena .slot,body #arena .slot .card{width:122px;min-width:122px;height:178px}
+  body #arena #learning-panel{width:100%;margin:0;max-height:none}
+  body #learning-content{max-height:65dvh;flex:auto}
+  body #learning-hand{padding:8px;margin-top:12px}
+  body #learning-hand #hand{height:180px;min-height:0;padding:6px 3px;gap:7px;flex-wrap:nowrap}
+  body #learning-hand #hand .card{height:164px;min-height:164px;min-width:110px;flex:0 0 110px}
+  body #learning-hand .hand-head{margin-bottom:5px}
+  body .header-actions{gap:4px}
+  body .header-actions .btn{font-size:11px;padding:7px}
+  body .resolution-controls{position:static}
+}
+@media(prefers-reduced-motion:reduce){body .moving-card{animation:none}body .counts-changed,body .trump-changed,body .hand-discarded,body #hand .drawn-card{animation:none;outline:2px solid #a3f7dd}}
