@@ -17,3 +17,6 @@ Source: https://www.atlasvalleybooks.com/helios/halloween/
 - Crow’s Hollow traditional: assets/books/crows-hollow.jpg; source traditional-cover-web.jpg; destination https://payhip.com/b/mRIFo
 
 Covers are unmodified and displayed with object-fit: contain. Both banners explicitly advertise printable PDFs, not print copies. Links open in a new tab with noopener/noreferrer. No third-party ad scripts, ad-network requests, or tracking pixels were added. Covers and soundtrack are served locally.
+
+## Cinematic scene illustrations
+Sixteen original scene illustrations were created with the built-in image generation tool for Lineage on October 23, 2026, using the approved mercenary artwork as a style reference. No third-party photographic portraits were used. Runtime assets are optimized WebP copies of preserved PNG originals. Prompts and asset notes are retained locally in assets/scenes/PROMPTS.md.
