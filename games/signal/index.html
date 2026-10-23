@@ -365,6 +365,26 @@ window.roomComplete=(id,date)=>{if(!date){const d=new Date();date=d.getFullYear(
       resetObservation();
     })();
   </script>
+<style>
+.completion-ad{width:min(300px,100%);text-align:center;color:var(--muted);font-size:11px}
+#ad-completion-slot{width:100%;height:auto;min-height:250px;outline:0;background:transparent;overflow:visible}
+#ad-completion-slot::before{display:none}
+#ad-completion-slot a{display:block;margin:8px 0}
+#ad-completion-slot img{display:block;width:100%;height:auto;aspect-ratio:6/5}
+#ad-completion-slot a:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
+#ad-completion-slot p{margin:8px 0;font-size:11px}
+</style>
+<script>
+(() => {
+ const dialog=document.getElementById('victory');
+ const slot=document.getElementById('ad-completion-slot');
+ slot.innerHTML='<span>Advertisement</span><a href="https://www.kqzyfj.com/click-101910956-15640650" target="_blank" rel="sponsored noopener"><img data-src="https://www.awltovhc.com/image-101910956-15640650" width="300" height="250" alt="NordVPN — faster than ever. Explore VPN plans."></a><p>We may earn a commission if you purchase through this ad.</p>';
+ const loadBanner=()=>{if(!dialog.open)return;const image=slot.querySelector('img[data-src]');if(image){image.src=image.dataset.src;image.removeAttribute('data-src');}};
+ new MutationObserver(loadBanner).observe(dialog,{attributes:true,attributeFilter:['open']});
+ loadBanner();
+})();
+</script>
+
 <script>
 (() => {
  let last=0,queued=false;
