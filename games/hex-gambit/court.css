@@ -1,0 +1,52 @@
+/* Obsidian Court benchmark: native materials remain crisp at every resolution. */
+body{--court-gold:#e6c184;--court-violet:#ad86ef}
+.court-controls{display:flex;align-items:center;flex-wrap:wrap;gap:12px;padding:12px 16px;margin-bottom:12px;border:1px solid #ac87514d;border-radius:10px;background:linear-gradient(110deg,#292330,#111923);box-shadow:inset 0 1px #f8dcac16}
+.court-controls label{display:flex;align-items:center;gap:8px;color:#dac8aa;font-size:13px}
+.court-controls select{min-height:44px;padding:6px 10px;background:#111a29;color:#f3e6cf;border:1px solid #79674e;border-radius:6px}
+.court-signature{margin-right:auto;letter-spacing:2px;color:#e6c184;font:700 12px Georgia}
+.court-stage{position:relative;display:grid;place-items:center;width:100%;padding:24px 16px 32px;isolation:isolate;perspective:1100px;background:radial-gradient(ellipse at 50% 70%,#9e65f027,transparent 60%)}
+.court-stage:before{content:'';position:absolute;inset:8% 13%;border:1px solid #c09b5e25;border-radius:50%;transform:rotateX(60deg);box-shadow:0 0 50px #bb7be218,inset 0 0 35px #bd8a4d13;pointer-events:none}
+body .arena .court-stage>.board-wrap{width:min(100%,600px,max(360px,calc(var(--playroom-height,100dvh) - 490px)));padding:22px;position:relative;transform-origin:50% 50%;transition:transform .45s ease,box-shadow .45s ease;border:1px solid #e6c184;border-radius:14px;background:repeating-linear-gradient(110deg,#f9dd9510 0 1px,transparent 1px 4px),linear-gradient(135deg,#c5a971,#6b5637 12%,#27222a 30%,#151a24 65%,#a98954);box-shadow:0 8px 0 #403326,0 10px 0 #b18b54,0 13px 0 #211a17,0 28px 35px #000a,0 0 40px #ac6ce61c,inset 0 0 0 5px #171821,inset 0 0 0 6px #caa86a,inset 0 0 0 12px #2e2b30,inset 0 0 0 13px #8a7147}
+body[data-court-view="angled"] .court-stage>.board-wrap{transform:rotateX(24deg);box-shadow:0 12px 0 #403326,0 14px 0 #b18b54,0 18px 0 #211a17,0 36px 40px #000b,0 0 60px #b27de324,inset 0 0 0 5px #171821,inset 0 0 0 6px #caa86a,inset 0 0 0 12px #2e2b30,inset 0 0 0 13px #8a7147}
+body .court-stage .board{gap:3px;padding:3px;border:1px solid #d5b27277;background:#080b15;box-shadow:0 0 0 2px #060a11,0 0 15px #ab7bef3b}
+body .court-stage .cell{position:relative;background:repeating-linear-gradient(150deg,transparent 0 23px,#eedcbb0c 24px,transparent 25px 38px),radial-gradient(ellipse at 25% 0,#87909e,#4a5263 65%,#333b4b);box-shadow:inset 0 2px #f3dfbe55,inset 2px 0 #e1d6c11c,inset 0 -3px #1c2330,inset -2px 0 #202534;border-radius:3px;overflow:visible}
+body .court-stage .cell.dark{background:linear-gradient(145deg,#ad85db0e,transparent 45%),repeating-linear-gradient(32deg,transparent 0 17px,#bb9ad50c 18px,transparent 19px 34px),radial-gradient(ellipse at 25% 5%,#303247,#111a29 65%,#080d18);box-shadow:inset 0 1px #c7acd72c,inset 1px 0 #d1ba931a,inset 0 -3px #03060d,0 0 5px #9570dc13}
+body .court-stage .cell.selected{background:radial-gradient(ellipse,#92703e99,#272131);box-shadow:inset 0 0 0 2px #ffe0a0,inset 0 0 25px #d7a95466,0 0 16px #e1b25555;z-index:2}
+body .court-stage .cell.legal{background:radial-gradient(#406d625c,#142a30);box-shadow:inset 0 0 0 1px #8de3c2b0,inset 0 0 20px #4dd5ac30}
+body .court-stage .cell.target{box-shadow:inset 0 0 0 2px #c8a5ff,inset 0 0 25px #a47cdf66}
+.court-stage .piece{background-image:radial-gradient(ellipse at 30% 15%,#fff4c35c,transparent 48%);box-shadow:0 5px 0 #61452a,0 8px 0 #231b1b,0 11px 10px #000b,inset 0 0 0 2px #edc578,inset 0 0 0 4px #e9c87d55;transition:filter .2s}
+.court-stage .piece.enemy{box-shadow:0 5px 0 #564369,0 8px 0 #201827,0 11px 10px #000b,inset 0 0 0 2px #b9a0db,inset 0 0 0 4px #cab0ea55}
+.court-stage .selected .piece{transform:translateY(-4px);filter:drop-shadow(0 0 7px #e5c07c99)}
+.court-stage .coord{font-size:8px;color:#eadcbd9e}
+.court-stage .court-arrival{animation:court-settle .6s ease-out}
+.court-stage .court-crowned{animation:court-coronation 1s ease-out}
+@keyframes court-settle{0%{filter:brightness(1.8)}45%{filter:brightness(1.3)}100%{filter:brightness(1)}}
+@keyframes court-coronation{0%{filter:drop-shadow(0 0 18px #ffdd85);transform:translateY(-8px)}100%{filter:none;transform:none}}
+.court-trail{position:fixed;width:5px;height:5px;background:#ffe1a3;border-radius:50%;box-shadow:0 0 7px #e8ac55,0 0 16px #ba71ef;pointer-events:none;z-index:120}
+body[data-court-effects="off"] .cell.legal:after{animation:none}
+@media(max-width:999px){body .arena .court-stage>.board-wrap{width:min(100%,540px)}.court-stage{padding:18px 8px 26px}}
+@media(max-width:560px){body .arena .court-stage>.board-wrap{padding:14px}.court-stage{padding:12px 0 22px}.court-controls{gap:8px;padding:10px}.court-signature{width:100%}body .court-stage .board{gap:2px}.court-stage .coord{font-size:6px}}
+@media(prefers-reduced-motion:reduce){.court-stage *{animation:none!important;transition:none!important}}
+/* Ivory Citadel: warm polished stone and walnut marquetry. */
+body[data-court-board="ivory"] .court-stage{background:radial-gradient(ellipse at 50% 65%,#c797452b,transparent 65%)}
+body[data-court-board="ivory"] .court-stage>.board-wrap{background:repeating-linear-gradient(7deg,#f7d69714 0 1px,transparent 1px 5px),linear-gradient(135deg,#efcf8d,#875c32 18%,#3e2920 50%,#d3a362);border-color:#ffe5af}
+body[data-court-board="ivory"] .court-stage .cell{background:repeating-linear-gradient(145deg,transparent 0 20px,#8c715b18 22px,transparent 23px 37px),radial-gradient(ellipse at 25% 5%,#fff3d8,#d6c4a6 70%,#a38a6e);box-shadow:inset 0 2px #fff9e9,inset 2px 0 #f6e3bf66,inset 0 -3px #7f6853}
+body[data-court-board="ivory"] .court-stage .cell.dark{background:repeating-linear-gradient(8deg,transparent 0 4px,#e6ae6f12 5px,transparent 6px 13px),radial-gradient(ellipse at 25% 0,#70503a,#392b27 65%,#241b1b);box-shadow:inset 0 1px #d6aa7a66,inset 1px 0 #d1ba9333,inset 0 -3px #170f0d}
+body[data-court-board="ivory"] .court-stage .coord{color:#513724}
+body[data-court-board="ivory"] .court-stage .dark .coord{color:#e2c3a0}
+body[data-court-board="ivory"] .court-stage .board{background:#5b3e2b;box-shadow:0 0 0 2px #3b281e,0 0 20px #eabf6a33}
+/* Astral Nexus: crystal tiles above a restrained nebula and silver inlays. */
+body[data-court-board="astral"] .court-stage{background:radial-gradient(ellipse at 60% 35%,#6643b844,transparent 50%),radial-gradient(ellipse at 35% 75%,#318baf33,transparent 60%)}
+body[data-court-board="astral"] .court-stage>.board-wrap{border-color:#d6e9ff;background:repeating-linear-gradient(120deg,#d4efff20 0 1px,transparent 1px 5px),linear-gradient(135deg,#c7d8f0,#586a89 18%,#171e39 55%,#8a9bbb);box-shadow:0 8px 0 #35435e,0 10px 0 #98b1d4,0 14px 0 #101329,0 28px 40px #000a,0 0 50px #7389f74d,inset 0 0 0 5px #151a32,inset 0 0 0 6px #bdcce9,inset 0 0 0 12px #252c47,inset 0 0 0 13px #8a9bbc}
+body[data-court-board="astral"] .court-stage .cell{background:radial-gradient(circle at 70% 25%,#e7f8ff 0 1px,transparent 2px),linear-gradient(145deg,transparent 40%,#c5dcff33 41%,transparent 42%),radial-gradient(ellipse at 20% 0,#9baecb,#566382 65%,#303b60);box-shadow:inset 0 2px #d9ebff88,inset 1px 0 #d8e8ff44,inset 0 -3px #22294c}
+body[data-court-board="astral"] .court-stage .cell.dark{background:radial-gradient(circle at 30% 70%,#b9dcff 0 1px,transparent 2px),linear-gradient(30deg,transparent 55%,#b4c7ff22 56%,transparent 57%),radial-gradient(ellipse at 30% 20%,#35356b,#151e3d 65%,#080f25);box-shadow:inset 0 1px #b8c6ff44,inset 1px 0 #a6baff22,inset 0 -3px #060a1d}
+body[data-court-board="astral"] .court-stage .board{background:#090c24;box-shadow:0 0 0 2px #141832,0 0 24px #7c89ff66}
+/* Interaction signals are invariant across materials. */
+body[data-court-board] .court-stage .cell.selected{background:radial-gradient(#92703eaa,#272131);box-shadow:inset 0 0 0 2px #ffe0a0,inset 0 0 25px #d7a95466,0 0 16px #e1b25555}
+body[data-court-board] .court-stage .cell.legal{background:radial-gradient(#406d6277,#142a30);box-shadow:inset 0 0 0 1px #8de3c2b0,inset 0 0 20px #4dd5ac30}
+body[data-court-board] .court-stage .cell.target{box-shadow:inset 0 0 0 2px #c8a5ff,inset 0 0 25px #a47cdf66}
+body[data-court-board="ivory"] .court-trail{background:#ffe6af;box-shadow:0 0 7px #d3a35c,0 0 16px #a56b36}
+body[data-court-board="astral"] .court-trail{background:#dcf4ff;box-shadow:0 0 7px #91baff,0 0 16px #9e81f5}
+/* Terrain remains visible above every material skin. */
+body[data-court-board] .court-stage .cell.rift{background:linear-gradient(120deg,#0b1020 32%,#8354b4 35%,#1b0d2b 42%,#d2a063 46%,#351942 49%,#0a0f1c 53%);box-shadow:inset 0 0 12px #b989e977}
+body[data-court-board] .court-stage .cell.trap{box-shadow:inset 0 0 0 2px #b8ecff99,inset 0 0 20px #8bdfff55}

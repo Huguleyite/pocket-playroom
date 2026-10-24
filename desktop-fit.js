@@ -1,24 +1,51 @@
 // Collection-only presentation. Moving secondary panels retains their state and handlers.
 (() => {
   const game = document.body.dataset.playroomGame;
-  // Spells share the orders column so the board can use the full available height.
+  // Keep the hand beneath the board at every size; resizing never moves game state.
   if (game === 'hex-gambit') {
-    const orders = document.querySelector('.orders');
-    const controls = orders?.querySelector('.battle-controls');
-    const spells = ['.hand-label', '#hand'].map(selector => {
-      const element = document.querySelector(selector);
-      const anchor = document.createComment('Original spell position');
-      element?.before(anchor);
-      return {element, anchor};
-    });
-    const wide = matchMedia('(min-width:700px)');
-    const arrange = () => spells.forEach(({element, anchor}) => {
-      if (!element || !controls) return;
-      if (wide.matches) orders.insertBefore(element, controls);
-      else anchor.after(element);
-    });
-    wide.addEventListener('change', arrange);
-    arrange();
+    const arena = document.querySelector('.arena');
+    const hand = document.querySelector('#hand');
+    const label = document.querySelector('.hand-label');
+    if (arena && hand && label) {
+      const tray = document.createElement('section');
+      tray.className = 'hex-hand-tray';
+      tray.setAttribute('aria-label', 'Your spell cards');
+      tray.append(label, hand);
+      arena.after(tray);
+      const inspectRow = document.createElement('div');
+      inspectRow.className = 'hex-inspect-row';
+      tray.append(inspectRow);
+      const preview = document.createElement('dialog');
+      preview.className = 'playroom-drawer hex-card-preview';
+      preview.setAttribute('aria-label', 'Spell details');
+      document.body.append(preview);
+      const update = () => {
+        inspectRow.replaceChildren();
+        hand.querySelectorAll('[data-card]').forEach(card => {
+          const inspect = document.createElement('button');
+          inspect.textContent = 'Inspect ' + card.querySelector('strong').textContent;
+          inspect.addEventListener('click', () => {
+            const close = document.createElement('button');
+            close.textContent = 'Close';
+            close.className = 'playroom-close';
+            close.onclick = () => preview.close();
+            const content = document.createElement('div');
+            content.className = 'hex-enlarged-card';
+            content.innerHTML = card.innerHTML;
+            const cast = document.createElement('button');
+            cast.textContent = 'Select spell to cast';
+            cast.disabled = card.disabled;
+            cast.onclick = () => { preview.close(); if (card.isConnected && !card.disabled) card.click(); };
+            preview.replaceChildren(close, content, cast);
+            preview.onclose = () => { if (inspect.isConnected) inspect.focus(); };
+            preview.showModal();
+          });
+          inspectRow.append(inspect);
+        });
+      };
+      new MutationObserver(update).observe(hand, {childList:true});
+      update();
+    }
   }
   const bar = document.createElement('div');
   bar.className = 'playroom-tools';
