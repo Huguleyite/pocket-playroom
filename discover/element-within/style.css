@@ -4,3 +4,4 @@
 
 body.embedded>header,body.embedded>footer,.embedded .standalone-return{display:none}body.embedded main{padding:38px 5% 24px;min-height:0}body.embedded .hero{gap:28px}body.embedded h1{font-size:clamp(46px,6vw,80px)}body.embedded .strip{margin-top:38px}body.embedded .promotions{margin-top:30px}.standalone-return{display:inline-block;padding:18px 6%;color:#d9b779;font-size:13px}.wheel{max-width:420px;margin:auto}.result h1{font-size:clamp(40px,7vw,76px)}
 body.embedded{min-height:0}html.playroom-night body{background:radial-gradient(ellipse at 72% 30%,#173a4288,transparent 60%),#0a151d}html.playroom-night .panel{background:#14242d}
+.entertainment-disclaimer{max-width:760px;margin:24px auto 0;padding:22px 6%;border-top:1px solid #ffffff20}.entertainment-disclaimer p{max-width:none;font-size:12px;line-height:1.7;color:var(--muted);margin:0}body.embedded .entertainment-disclaimer{margin:16px 5% 0;padding:20px 0 24px}
