@@ -12,8 +12,15 @@ export function campaignMap(seed, act) {
   map.floors[5].forEach(n => { n.type = 'Rest'; });
   return map;
 }
-export function campaignEncounter(type, floor, seed, act = 1) {
-  const enemies = createEncounter(type, floor, seed);
+export function campaignEncounter(type, floor, seed, act = 1, advanced = false) {
+  const enemies = createEncounter(type, floor, seed).map(enemy => advanced ? { ...enemy,
+    maxHp: Math.round(enemy.maxHp * 1.32),
+    pattern: enemy.pattern.map(intent => ({ ...intent, amount: ['attack', 'block'].includes(intent.kind) ? Math.ceil(intent.amount * 1.22) : intent.amount })).concat([
+      { kind: 'status', status: 'weak', amount: 1 },
+      // Keep escorts within their own damage budget rather than giving them a boss-sized attack.
+      { kind: 'attack', amount: Math.ceil(Math.max(...enemy.pattern.filter(intent => intent.kind === 'attack').map(intent => intent.amount)) * 1.12) }
+    ])
+  } : enemy);
   if (act === 1) return enemies;
   const boss = type === 'Elite' && floor === 7;
   return enemies.map((enemy, i) => ({ ...enemy,

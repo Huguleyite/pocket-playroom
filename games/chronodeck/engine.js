@@ -35,10 +35,16 @@ export const CARD_DATABASE = freeze(Object.fromEntries([
   card('rewind', 'Rewind', 'Time', 2, 'none', [effect('loop', 1)], { exhaust: true }),
   card('fracture', 'Temporal Fracture', 'Time', 2, 'enemy', [effect('damage', 10), effect('delay', 1)]),
   card('accelerate', 'Accelerate', 'Time', 1, 'self', [effect('draw', 1), effect('energy', 1)], { exhaust: true }),
-  card('echo', 'Echo Chamber', 'Time', 2, 'none', [effect('loop', 2)], { exhaust: true })
+  card('echo', 'Echo Chamber', 'Time', 2, 'none', [effect('loop', 2)], { exhaust: true }),
+  card('borrowed', 'Borrowed Tomorrow', 'Time', 0, 'self', [effect('energy', 2), effect('debt', 1)], { advanced: true, exhaust: true }),
+  card('fracturepoint', 'Fracture Point', 'Attack', 1, 'enemy', [effect('armorDamage', 10)], { advanced: true }),
+  card('anchorprotocol', 'Anchor Protocol', 'Defend', 1, 'self', [effect('block', 9), effect('cleanse', 0)], { advanced: true, exhaust: true }),
+  card('causality', 'Causality Break', 'Time', 1, 'enemy', [effect('halveAttack', 0)], { advanced: true, exhaust: true }),
+  card('foresight', 'Future Sight', 'Utility', 1, 'self', [effect('draw', 2), effect('block', 4)], { advanced: true }),
+  card('paradoxshield', 'Paradox Shield', 'Defend', 2, 'self', [effect('block', 18), effect('draw', 1)], { advanced: true, exhaust: true })
 ].map(c => [c.id, c])));
 // 25 draftable definitions; basic Strike and Barrier are excluded.
-export const DRAFTABLE_CARDS = freeze(Object.keys(CARD_DATABASE).filter(id => !['strike', 'guard'].includes(id)));
+export const DRAFTABLE_CARDS = freeze(Object.keys(CARD_DATABASE).filter(id => !['strike', 'guard'].includes(id) && !CARD_DATABASE[id].advanced));
 export const STARTER_DECK = freeze(['strike', 'strike', 'strike', 'strike', 'guard', 'guard', 'guard', 'guard', 'delay', 'loop']);
 export const RELIC_DATABASE = freeze({
   reactor: { id: 'reactor', name: 'Auxiliary Reactor', description: '+1 energy each turn.', energy: 1 },
@@ -155,7 +161,7 @@ export class CombatState {
   }
   startTurn() {
     this.phase = 'player'; this.player.block = this.relicBonus('block');
-    this.energy = 3 + this.relicBonus('energy'); this.draw(5 + this.relicBonus('draw'));
+    this.energy = Math.max(0, 3 + this.relicBonus('energy') - (this.player.statuses.energyDebt || 0)); delete this.player.statuses.energyDebt; this.draw(5 + this.relicBonus('draw'));
   }
   damage(source, victim, amount, piercing = false) {
     let value = Math.max(0, amount + (source.statuses.strength || 0));
@@ -199,6 +205,12 @@ export class CombatState {
       const targets = definition.target === 'allEnemies' ? this.enemies.filter(e => e.hp > 0)
         : definition.target === 'enemy' ? this.enemies.filter(e => e.id === targetId && e.hp > 0) : [this.player];
       switch (fx.kind) {
+        case 'debt': this.player.statuses.energyDebt = (this.player.statuses.energyDebt || 0) + fx.amount; break;
+        case 'armorDamage': targets.forEach(t => this.damage(this.player, t, fx.amount * (t.block > 0 ? 2 : 1))); break;
+        case 'halveAttack': targets.forEach(t => {
+          const action = this.timeline.actions.filter(a => a.enemyId === t.id && a.intent.kind === 'attack').sort((a,b) => a.turn-b.turn)[0];
+          if (action) action.intent = { ...action.intent, amount: Math.floor(action.intent.amount / 2) };
+        }); break;
         case 'damage': targets.forEach(t => this.damage(this.player, t, fx.amount, fx.piercing)); break;
         case 'block': this.player.block += fx.amount; break;
         case 'heal': this.player.hp = Math.min(this.player.maxHp, this.player.hp + fx.amount); break;
@@ -291,9 +303,10 @@ export function generateNodeMap(seed = 'breach') {
   }
   return { seed: String(seed), floors, entryId: floors[0][0].id, exitId: floors[6][0].id };
 }
-export function draftCards(rng = new SeededRNG(), count = 3) {
-  if (!Number.isInteger(count) || count < 0 || count > DRAFTABLE_CARDS.length) throw new Error('Invalid draft size');
-  return rng.shuffle(DRAFTABLE_CARDS).slice(0, count).map(id => clone(CARD_DATABASE[id]));
+export function draftCards(rng = new SeededRNG(), count = 3, advanced = false) {
+  const pool = advanced ? [...DRAFTABLE_CARDS, ...Object.keys(CARD_DATABASE).filter(id => CARD_DATABASE[id].advanced)] : DRAFTABLE_CARDS;
+  if (!Number.isInteger(count) || count < 0 || count > pool.length) throw new Error('Invalid draft size');
+  return rng.shuffle(pool).slice(0, count).map(id => clone(CARD_DATABASE[id]));
 }
 /** Optional browser persistence. Storage is injectable for testing or IndexedDB adapters. */
 export const SaveSystem = {

@@ -1,9 +1,16 @@
+import { PROFILE_KEY, awardFirstClear, cooldown, useLastWord, startingDeck, rechargeProgress } from './progression.js';
+import { COLLECTIBLE_ART, exportCollectible } from './collectible.js';
 import { ACTS, campaignMap, campaignEncounter, advanceAct, eventVariant } from './campaign.js';
 import { CombatState, CARD_DATABASE as CARDS, STARTER_DECK, RELIC_DATABASE as RELICS, SeededRNG, draftCards } from './engine.js';
 import './display-ads.js';
 
 const $ = id => document.getElementById(id);
 const KEY = 'chronodeck-breach-run-v1';
+let profile = { version: 1 };
+try { const saved = JSON.parse(localStorage.getItem(PROFILE_KEY)); if (saved?.version === 1 && saved.collectible?.id && Number.isFinite(Date.parse(saved.collectible.earnedAt))) profile = saved; } catch {}
+function persistProfile() { try { localStorage.setItem(PROFILE_KEY, JSON.stringify(profile)); } catch { toast('Collectible could not be saved. Browser storage is unavailable.'); } }
+function ensureAward() { const updated = awardFirstClear(profile, run); if (updated !== profile) { profile = updated; persistProfile(); } }
+
 const icons = { Combat: '⚔', Elite: '◈', Shop: '◇', Rest: '✚', Event: '⌁' };
 const NODE_ART = Object.fromEntries(Object.keys(icons).map(type => [type, `./assets/nodes/${type.toLowerCase()}.png`]));
 function nodeArtwork(type) {
@@ -17,6 +24,7 @@ function nodeArtwork(type) {
 }
 const symbols = { Attack: '⟐', Defend: '⬡', Utility: '✧', Time: '◷' };
 const CARD_ART = {
+  borrowed: './assets/cards/accelerate.jpg', fracturepoint: './assets/cards/piercer.jpg', anchorprotocol: './assets/cards/cleanse.jpg', causality: './assets/cards/stasis-field.jpg', foresight: './assets/cards/scan.jpg', paradoxshield: './assets/cards/phase.jpg',
   rewind: './assets/cards/rewind.jpg',
   accelerate: './assets/cards/accelerate.jpg',
   echo: './assets/cards/echo.jpg',
@@ -45,6 +53,7 @@ const CARD_ART = {
   stasis: './assets/cards/stasis-field.jpg',
   finisher: './assets/cards/event-horizon.jpg'
 };
+let signatureSelected = false;
 let run, combat = null, selected = null, dragged = null, toastTimer;
 function text(tag, content, cls = '') { const el = document.createElement(tag); el.textContent = content; el.className = cls; return el; }
 function button(label, action, cls = '', disabled = false) { const el = text('button', label, cls); el.type = 'button'; el.disabled = disabled; el.addEventListener('click', action); return el; }
@@ -54,10 +63,11 @@ function save() {
   try { localStorage.setItem(KEY, JSON.stringify(run)); $('save-status').textContent = 'Progress saved locally'; }
   catch { $('save-status').textContent = 'Save unavailable'; toast('Browser storage unavailable. Keep this tab open to preserve your run.'); }
 }
-function newRun() {
+function newRun(advanced = !!profile.collectible) {
   const seed = `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
   combat = null; selected = null;
-  run = { version: 1, act: 1, clearedBefore: 0, seed, map: campaignMap(seed, 1), currentNodeId: null, completed: [], hp: 80, maxHp: 80, gold: 80, deck: [...STARTER_DECK], relics: ['anchor'], stage: 'map', combat: null, offers: null, shop: null };
+  signatureSelected = false;
+  run = { advanced: !!advanced && !!profile.collectible, signatureReadyAt: 0, version: 1, act: 1, clearedBefore: 0, seed, map: campaignMap(seed, 1), currentNodeId: null, completed: [], hp: 80, maxHp: 80, gold: 80, deck: startingDeck(profile, !!advanced && !!profile.collectible), relics: ['anchor'], stage: 'map', combat: null, offers: null, shop: null };
   save(); render(); showStage();
 }
 function load() {
@@ -65,11 +75,12 @@ function load() {
     const data = JSON.parse(localStorage.getItem(KEY));
     if (!data) return false;
     if (data.version !== 1 || !Array.isArray(data.deck) || data.deck.some(id => !CARDS[id]) || !data.map?.floors || !Array.isArray(data.completed) || !Array.isArray(data.relics) || data.relics.some(id => !RELICS[id]) || !Number.isFinite(data.hp)) throw Error('Invalid save');
-    if (!['map', 'combat', 'draft', 'shop', 'rest', 'event', 'intermission', 'victory', 'defeat'].includes(data.stage)) throw Error('Invalid stage');
+    if (!['map', 'combat', 'draft', 'shop', 'rest', 'event', 'eventResult', 'intermission', 'victory', 'defeat'].includes(data.stage)) throw Error('Invalid stage');
     data.act ??= 1; data.clearedBefore ??= 0;
     if (!Number.isInteger(data.act) || data.act < 1 || data.act > 3) throw Error('Invalid act');
     if (data.stage === 'victory' && data.act < 3) data.stage = 'intermission';
-    run = data; combat = data.combat ? CombatState.fromJSON(data.combat) : null;
+    data.advanced = data.advanced === true; data.signatureReadyAt = Number.isFinite(data.signatureReadyAt) ? data.signatureReadyAt : 0;
+    run = data; ensureAward(); combat = data.combat ? CombatState.fromJSON(data.combat) : null;
     if (run.stage === 'combat' && !combat) throw Error('Missing combat');
     render(); showStage(); return true;
   } catch { toast('The saved run could not be read. Starting a new timeline.'); return false; }
@@ -92,6 +103,9 @@ function intro(body, message) { body.append(text('p', message, 'overlay-intro'))
 function describe(card) {
   return card.effects.map(f => {
     switch (f.kind) {
+      case 'debt': return `Lose ${f.amount} energy next turn.`;
+      case 'armorDamage': return `Deal ${f.amount} damage; double against a target with block.`;
+      case 'halveAttack': return 'Halve the target’s next currently queued attack. No effect if no attack is queued.';
       case 'damage': return `Deal ${f.amount}${f.piercing ? ' piercing' : ''} damage${card.target === 'allEnemies' ? ' to all enemies' : ''}.`;
       case 'block': return `Gain ${f.amount} block.`;
       case 'energy': return `Gain ${f.amount} energy.`;
@@ -100,7 +114,7 @@ function describe(card) {
       case 'status': return `Apply ${f.amount} ${f.status}.`;
       case 'delay': return `Delay ${card.target === 'allEnemies' ? 'each enemy’s' : 'the enemy’s'} next action by ${f.amount} turns.`;
       case 'loop': return `Replay last turn’s last non-Loop card${f.amount > 1 ? ` ${f.amount} times` : ''}.`;
-      case 'cleanse': return 'Remove weak, vulnerable, and poison.';
+      case 'cleanse': return 'Remove Weak, Vulnerable, and Poison from yourself.';
       default: return '';
     }
   }).join(' ');
@@ -118,12 +132,13 @@ function cardElement(id, instanceId = null) {
   } else art.append(text('span', symbols[c.type], 'art-symbol'));
   const targets = { enemy: 'One enemy', allEnemies: 'All enemies', self: 'Self', none: 'Previous action' };
   el.append(text('span', String(c.cost), 'card-cost'), text('span', c.type, 'card-type'), art, text('h3', c.name, 'card-name'), text('p', describe(c), 'card-description'), text('small', c.exhaust ? 'Exhaust · this combat' : targets[c.target], 'card-bottom'));
+  if (c.advanced) el.append(text('small', 'ADVANCED ONLY', 'advanced-badge'));
   if (instanceId) {
     el.type = 'button'; el.draggable = true; el.dataset.instance = instanceId;
     el.classList.toggle('selected', selected === instanceId); el.setAttribute('aria-pressed', String(selected === instanceId));
     el.setAttribute('aria-label', `${c.name}, costs ${c.cost}. ${describe(c)}`);
-    el.addEventListener('click', () => { selected = selected === instanceId ? null : instanceId; render(); });
-    el.addEventListener('dragstart', e => { dragged = instanceId; selected = instanceId; e.dataTransfer.setData('text/plain', instanceId); e.dataTransfer.effectAllowed = 'move'; updateSelection(); });
+    el.addEventListener('click', () => { signatureSelected = false; selected = selected === instanceId ? null : instanceId; render(); });
+    el.addEventListener('dragstart', e => { signatureSelected = false; dragged = instanceId; selected = instanceId; e.dataTransfer.setData('text/plain', instanceId); e.dataTransfer.effectAllowed = 'move'; updateSelection(); });
     el.addEventListener('dragend', () => { dragged = null; updateSelection(); });
   }
   return el;
@@ -140,6 +155,8 @@ function intentText(action) {
 function render() {
   document.querySelector('.player-panel').classList.remove('player-impact');
   document.body.dataset.runStage = run.stage;
+  renderSignature();
+  $('collectible-button').hidden = !profile.collectible;
   const p = combat?.player || { hp: run.hp, maxHp: run.maxHp, block: 0, statuses: {} };
   $('hp-text').textContent = `${p.hp} / ${p.maxHp}`; $('hp-bar').style.width = `${Math.max(0, p.hp / p.maxHp * 100)}%`;
   $('block').textContent = p.block; $('gold').textContent = run.gold; statusElements($('player-status'), p);
@@ -148,7 +165,7 @@ function render() {
     el.title = r.description; el.append(text('span', '◈'), document.createTextNode(r.name), text('p', r.description, 'muted')); return el;
   }));
   $('energy').textContent = combat?.energy ?? '—'; $('turn-label').textContent = combat ? `TURN ${String(combat.turn).padStart(2, '0')}` : 'AWAITING ENCOUNTER';
-  $('mission').textContent = `ACT ${ACTS[run.act - 1].numeral} · FLOOR ${node(run.currentNodeId)?.floor || 1} / 7`;
+  $('mission').textContent = `${run.advanced ? 'ADVANCED · ' : ''}ACT ${ACTS[run.act - 1].numeral} · FLOOR ${node(run.currentNodeId)?.floor || 1} / 7`;
   $('hand-count').textContent = combat ? ` / ${combat.hand.length}` : '';
   for (const [pile, id] of [['drawPile', 'draw-count'], ['discardPile', 'discard-count'], ['exhaustPile', 'exhaust-count']]) $(id).textContent = combat?.[pile].length || 0;
   $('enemies').replaceChildren();
@@ -193,11 +210,15 @@ function render() {
 }
 function updateSelection() {
   const instance = combat?.hand.find(c => c.id === selected), c = instance && CARDS[instance.definitionId];
-  $('selection').textContent = c ? `${c.name} · ${c.target === 'enemy' ? 'choose an enemy' : 'ready to play'}` : 'Awaiting command';
+  $('selection').textContent = c ? `${c.name} · ${c.target === 'enemy' ? 'choose an enemy' : 'ready to play'}` : signatureSelected ? 'The Last Word · choose an enemy' : 'Awaiting command';
   $('play-button').disabled = !c || c.target === 'enemy' || run.stage !== 'combat';
-  document.querySelectorAll('.enemy').forEach(el => el.classList.toggle('targetable', !!c && c.target === 'enemy' && combat.enemies.find(e => e.id === el.dataset.enemy)?.hp > 0));
+  document.querySelectorAll('.enemy').forEach(el => el.classList.toggle('targetable', (signatureSelected || (!!c && c.target === 'enemy')) && combat.enemies.find(e => e.id === el.dataset.enemy)?.hp > 0));
 }
 function playSelected(target = null) {
+  if (signatureSelected && run.stage === 'combat') {
+    try { const before = captureCombatFX(); useLastWord(run, combat, target); signatureSelected = false; selected = null; finishCombatAction(before); }
+    catch(error) { toast(error.message); } return;
+  }
   if (!selected || run.stage !== 'combat') return;
   try { const before = captureCombatFX(); combat.playCard(selected, target); selected = null; finishCombatAction(before); } catch (error) { toast(error.message); }
 }
@@ -229,27 +250,33 @@ function finishCombatAction(before) {
 function resolveCombat() {
   if (combat.outcome === 'victory') {
     run.hp = combat.player.hp; run.gold += node(run.currentNodeId).type === 'Elite' ? 45 : 25;
-    run.offers = draftCards(new SeededRNG(`${run.seed}:${run.currentNodeId}:reward`)).map(c => c.id);
+    run.offers = draftCards(new SeededRNG(`${run.seed}:${run.currentNodeId}:reward`), 3, run.advanced).map(c => c.id);
     run.stage = 'draft'; run.combat = null; combat = null;
   } else if (combat.outcome === 'defeat') { run.hp = 0; run.stage = 'defeat'; }
   save(); render(); if (run.stage !== 'combat') showStage();
 }
 function enterNode(id) {
   if (run.stage !== 'map' || !available().includes(id)) return;
-  const n = node(id); run.currentNodeId = id; selected = null; run.shop = null; run.offers = null;
+  signatureSelected = false;
+  const n = node(id); run.eventResult = null; run.currentNodeId = id; selected = null; run.shop = null; run.offers = null;
   if (n.type === 'Combat' || n.type === 'Elite') {
-    combat = new CombatState({ seed: `${run.seed}:${id}`, deck: run.deck, relics: run.relics, player: { hp: run.hp, maxHp: run.maxHp }, enemies: campaignEncounter(n.type, n.floor, `${run.seed}:${run.act}:${id}`, run.act) }); run.stage = 'combat';
+    combat = new CombatState({ seed: `${run.seed}:${id}`, deck: run.deck, relics: run.relics, player: { hp: run.hp, maxHp: run.maxHp }, enemies: campaignEncounter(n.type, n.floor, `${run.seed}:${run.act}:${id}`, run.act, run.advanced) }); run.stage = 'combat';
   } else run.stage = n.type.toLowerCase();
   save(); render(); showStage();
 }
 function completeNode() {
+  signatureSelected = false;
   if (!run.completed.includes(run.currentNodeId)) run.completed.push(run.currentNodeId);
   run.combat = null; combat = null; run.offers = null; run.shop = null;
-  run.stage = run.currentNodeId === run.map.exitId ? (run.act < 3 ? 'intermission' : 'victory') : 'map'; save(); render(); showStage();
+  run.stage = run.currentNodeId === run.map.exitId ? (run.act < 3 ? 'intermission' : 'victory') : 'map'; ensureAward(); save(); render(); showStage();
 }
 function showMap(preview = false) {
   const body = openScreen(ACTS[run.act - 1].name, `ACT ${ACTS[run.act - 1].numeral} / III // SEVEN FLOORS`, preview, 'map');
   $('screen').dataset.act = run.act;
+  const tools = text('div', '', 'map-progression-tools');
+  tools.append(text('span', run.advanced ? 'ADVANCED MODE' : 'STANDARD MODE', 'eyebrow'), button('New timeline', showNewRun));
+  if (profile.collectible) tools.append(button('Your collectible', showCollectible));
+  body.append(tools);
   const descriptions = { Combat: 'Face Breach Drones. Win credits and draft a card.', Elite: 'Challenge a Chrono Sentinel. Earn greater rewards.', Shop: 'Buy cards and relics, or remove a card.', Rest: 'Repair up to 30% of your maximum hull.', Event: 'Investigate a damaged relay. Choose your reward and risk.' };
   const progress = text('div', '', 'route-progress');
   progress.append(text('span', `${run.completed.length} / 7 floors cleared`), text('span', `Hull ${run.hp}/${run.maxHp} · ${run.gold} credits`));
@@ -348,7 +375,7 @@ function showDraft() {
 function showShop() {
   if (!run.shop) {
     const rng = new SeededRNG(`${run.seed}:${run.currentNodeId}:shop`);
-    run.shop = { cards: draftCards(rng).map(c => ({ id: c.id, price: 40 + rng.int(3) * 10, sold: false })), relic: Object.keys(RELICS).find(id => !run.relics.includes(id)) || null, relicSold: false, trimmed: false }; save();
+    run.shop = { cards: draftCards(rng, 3, run.advanced).map(c => ({ id: c.id, price: 40 + rng.int(3) * 10, sold: false })), relic: Object.keys(RELICS).find(id => !run.relics.includes(id)) || null, relicSold: false, trimmed: false }; save();
   }
   const body = openScreen('The outpost', `SUPPLY EXCHANGE // ${run.gold} CREDITS`); intro(body, 'Purchase recovered technology or remove one card. Stock and purchases are saved immediately.');
   const grid = text('div', '', 'offer-grid');
@@ -377,9 +404,9 @@ function showRest() {
 function showEvent() {
   const variant = eventVariant(run);
   if (variant === 1) {
-    const body = openScreen('The stranded archivist', 'SURVIVOR SIGNAL');
+    const body = openScreen('The stranded archivist', 'SURVIVOR SIGNAL', false, 'aperture');
     intro(body, 'An archivist offers a shield schematic in exchange for a safe passage.');
-    body.append(button('Escort · pay 20 credits, gain Phase Armor and heal 12 HP', () => { if (run.gold < 20) return; run.gold -= 20; run.deck.push('phase'); run.hp = Math.min(run.maxHp, run.hp + 12); completeNode(); }, 'choice', run.gold < 20), button('Accept emergency supplies · gain 20 credits', () => { run.gold += 20; completeNode(); }, 'choice'));
+    body.append(button('Escort · pay 20 credits, gain Phase Armor and heal 12 HP', () => { if (run.gold < 20) return; run.gold -= 20; run.deck.push('phase'); run.hp = Math.min(run.maxHp, run.hp + 12); resolveEvent(); }, 'choice', run.gold < 20), button('Accept emergency supplies · gain 20 credits', () => { run.gold += 20; resolveEvent(); }, 'choice'));
     return;
   }
   if (variant === 2) {
@@ -399,18 +426,18 @@ function showEvent() {
       choice.append(image, copy); choices.append(choice);
     }
     apertureChoice('restore', 'RESTORE', 'Stabilize the aperture', 'Anchor the breach. Rebuild what remains.', CARD_ART.repair,
-      [['+5 maximum hull'], ['Heal 5 HP']], 'Stabilize', () => { run.maxHp += 5; run.hp += 5; completeNode(); });
+      [['+5 maximum hull'], ['Heal 5 HP']], 'Stabilize', () => { run.maxHp += 5; run.hp += 5; resolveEvent(); });
     apertureChoice('risk', 'RISK / REWARD', 'Reach into the fracture', 'Claim a weapon from a future that never was.', CARD_ART.fracture,
       [['−10 HP', 'cost'], ['Gain Temporal Fracture']], run.hp <= 10 ? 'Requires more than 10 HP' : 'Reach through',
-      () => { if (run.hp <= 10) return; run.hp -= 10; run.deck.push('fracture'); completeNode(); }, run.hp <= 10);
+      () => { if (run.hp <= 10) return; run.hp -= 10; run.deck.push('fracture'); resolveEvent(); }, run.hp <= 10);
     const preview = text('p', describe(CARDS.fracture), 'aperture-card-preview');
     preview.prepend(document.createTextNode('Temporal Fracture · '));
     choices.lastElementChild.querySelector('.aperture-effects').after(preview);
     body.append(choices);
     return;
   }
-  const body = openScreen('An echo in the static', 'UNKNOWN SIGNAL // EVENT'); intro(body, 'A derelict relay offers a fragment of tomorrow. Its power core remains unstable.'); body.append(text('div', '⌁', 'event-art'));
-  body.append(button('Extract the core · gain 65 credits', () => { if (run.hp <= 8) return; run.hp -= 8; run.gold += 65; completeNode(); }, 'choice', run.hp <= 8), text('p', 'Extraction costs 8 HP. You must survive the procedure.', 'muted'), button('Recover a safe fragment · gain Deep Scan', () => { run.deck.push('scan'); completeNode(); }, 'choice'), button('Leave the relay', completeNode, 'choice'));
+  const body = openScreen('An echo in the static', 'UNKNOWN SIGNAL // EVENT', false, 'aperture'); intro(body, 'A derelict relay offers a fragment of tomorrow. Its power core remains unstable.');
+  body.append(button('Extract the core · gain 65 credits · lose 8 HP', () => { if (run.hp <= 8) return; run.hp -= 8; run.gold += 65; resolveEvent(); }, 'choice', run.hp <= 8), text('p', 'Extraction costs 8 HP. You must survive the procedure.', 'muted'), button('Recover a safe fragment · gain Deep Scan', () => { run.deck.push('scan'); resolveEvent(); }, 'choice'), button('Leave the relay', () => resolveEvent('You leave the relay untouched.'), 'choice'));
 }
 function showIntermission() {
   const act = ACTS[run.act - 1], body = openScreen(`${act.boss} defeated`, `ACT ${act.numeral} COMPLETE`);
@@ -457,8 +484,12 @@ function showVictory() {
     metric.append(text('strong', String(value)), text('span', label)); summary.append(metric);
   });
   const actions = text('div', '', 'victory-actions');
-  actions.append(button('Inspect your deck', () => inspectPile()), button('Start a new run →', newRun, 'primary victory-start'));
-  body.append(celebration, hero, summary, text('p', 'Twenty-one floors behind you. One timeline reclaimed.', 'victory-epilogue'), actions,
+  actions.append(button('Your collectible', showCollectible), button('Inspect your deck', () => inspectPile()), button('Start Advanced run →', showNewRun, 'primary victory-start'));
+  const reward = text('div', '', 'first-clear-banner');
+  const art = document.createElement('img'); art.src = COLLECTIBLE_ART; art.alt = 'The Last Word collectible';
+  const rewardCopy = text('div', ''); rewardCopy.append(text('h2', 'The Last Word is yours'), text('p', 'First-clear collectible earned. Advanced mode unlocked, with new enemies and six exclusive cards.'), button('Reveal your card', showCollectible, 'primary'));
+  reward.append(art, rewardCopy);
+  body.append(celebration, hero, reward, summary, text('p', 'Twenty-one floors behind you. One timeline reclaimed.', 'victory-epilogue'), actions,
     text('p', 'Campaign complete. Your final deck and completed run are saved.', 'victory-save-note'));
 }
 function showStage() {
@@ -468,12 +499,13 @@ function showStage() {
     case 'draft': showDraft(); break;
     case 'shop': showShop(); break;
     case 'rest': showRest(); break;
-    case 'event': showEvent(); break;
+    case 'event': showEvent(); styleEventChoices(); break;
+    case 'eventResult': showEventResult(); break;
     case 'intermission': showIntermission(); break;
     case 'victory': showVictory(); break;
     case 'defeat': {
       const body = openScreen('Timeline collapsed', 'RUN ENDED');
-      intro(body, `${run.completed.length} nodes completed · ${run.deck.length} cards · ${run.gold} credits. A new timeline awaits.`); body.append(text('div', '⌁', 'event-art'), button('Start a new run', newRun, 'primary')); break;
+      intro(body, `${run.completed.length} nodes completed · ${run.deck.length} cards · ${run.gold} credits. A new timeline awaits.`); body.append(text('div', '⌁', 'event-art'), button('Start a new run', showNewRun, 'primary')); break;
     }
   }
 }
@@ -489,18 +521,92 @@ $('screen').addEventListener('cancel', e => { e.preventDefault(); if ($('screen'
 $('map-button').addEventListener('click', () => showMap(run.stage !== 'map'));
 $('deck-button').addEventListener('click', () => inspectPile());
 $('new-button').addEventListener('click', () => {
-  const body = openScreen('Start a new timeline?', 'CURRENT RUN WILL BE REPLACED', true); intro(body, 'Starting again replaces the saved run on this browser.'); body.append(button('Start new run', newRun, 'primary'), button('Keep playing', returnToStage));
+  showNewRun();
 });
 $('play-button').addEventListener('click', () => playSelected());
-$('end-turn').addEventListener('click', () => { if (!combat || run.stage !== 'combat') return; try { const before = captureCombatFX(); selected = null; combat.endTurn(); finishCombatAction(before); } catch (error) { toast(error.message); } });
+$('end-turn').addEventListener('click', () => { if (!combat || run.stage !== 'combat') return; try { const before = captureCombatFX(); selected = null; signatureSelected = false; combat.endTurn(); finishCombatAction(before); } catch (error) { toast(error.message); } });
 document.querySelectorAll('[data-pile]').forEach(el => el.addEventListener('click', () => inspectPile(el.dataset.pile)));
 // Non-enemy cards may be dropped anywhere on the arena or the play button.
 for (const area of [document.querySelector('.combat-area'), $('play-button')]) {
   area.addEventListener('dragover', e => { if (dragged) e.preventDefault(); });
   area.addEventListener('drop', e => { if (e.target.closest('.enemy')) return; e.preventDefault(); if (dragged) playSelected(); });
 }
-document.addEventListener('keydown', e => { if (e.key === 'Escape' && !$('screen').open) { selected = null; render(); } });
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && !$('screen').open) { selected = null; signatureSelected = false; render(); } });
 window.addEventListener('pagehide', () => { if (run) save(); });
+function showNewRun() {
+  const body = openScreen('Start a new timeline?', 'NEW RUN', true);
+  intro(body, 'Starting again replaces this browser’s current run. Your earned collectible remains unlocked.');
+  const label = text('label', '', 'mode-choice'), toggle = document.createElement('input');
+  toggle.type = 'checkbox'; toggle.id = 'advanced-mode'; toggle.checked = !!profile.collectible; toggle.disabled = !profile.collectible;
+  label.append(toggle, text('span', profile.collectible ? 'Advanced · stronger enemies, new patterns and exclusive cards' : 'Advanced · complete Act III to unlock'));
+  body.append(label, text('p', profile.firstClearDeck ? `Advanced starts with your first winning deck: ${profile.firstClearDeck.length} cards, including duplicates and prior removals. Standard starts fresh.` : 'No first-clear deck is saved yet. A surviving Standard Act III victory will preserve it; otherwise Advanced uses the starter deck.', 'muted'), button('Start new run', () => newRun(toggle.checked), 'primary'), button('Keep playing', returnToStage));
+}
+function renderSignature() {
+  const slot = $('signature-slot');
+  const resources = document.querySelector('.actions-panel'), handRow = document.querySelector('.hand-deck-row');
+  if (matchMedia('(min-width:1101px)').matches) {
+    if (slot.parentElement !== resources) resources.querySelector('[data-pile="exhaustPile"]').after(slot);
+  } else if (slot.parentElement !== handRow) handRow.prepend(slot);
+  slot.replaceChildren(); slot.hidden = !run.advanced;
+  if (!run.advanced) return;
+  const remaining = cooldown(run), charge = rechargeProgress(run);
+  const b = button('', () => {
+    signatureSelected = !signatureSelected; selected = null; render();
+  }, 'signature-button', run.stage !== 'combat' || !!remaining || !profile.collectible);
+  b.classList.toggle('signature-ready', !remaining);
+  b.style.setProperty('--charge', `${charge / 3 * 100}%`);
+  b.setAttribute('aria-pressed', String(signatureSelected));
+  const status = signatureSelected ? 'Choose an enemy…' : remaining ? `Recharging · ${charge}/3` : 'READY · choose a target';
+  b.setAttribute('aria-label', `The Last Word. ${status}. Erase one enemy; Act final bosses lose half their remaining HP, minimum 1. Recharges after three subsequent floors.`);
+  const art = text('span', '', 'signature-art'); art.setAttribute('aria-hidden', 'true');
+  for (const cls of ['signature-unfilled-art', 'signature-filled-art']) {
+    const img = document.createElement('img'); img.src = COLLECTIBLE_ART; img.alt = ''; img.className = cls; art.append(img);
+  }
+  const meter = text('span', '', 'signature-recharge'); meter.setAttribute('role', 'progressbar'); meter.setAttribute('aria-label', 'The Last Word recharge');
+  meter.setAttribute('aria-valuemin','0'); meter.setAttribute('aria-valuemax','3'); meter.setAttribute('aria-valuenow',String(charge));
+  for(let i=0;i<3;i++) meter.append(text('i', '', i < charge ? 'charged' : ''));
+  b.append(text('span', 'SIGNATURE / MYTHIC', 'signature-rarity'), art, text('strong', 'The Last Word', 'signature-name'),
+    text('span', 'Erase one enemy. Act final bosses lose half remaining HP; cannot finish them.', 'signature-description'), meter, text('span', status, 'signature-status'));
+  b.title = remaining > 3 ? 'Clear this encounter, then three subsequent floors to recharge.' : remaining ? `Clear ${remaining} more floors to recharge.` : 'Ready. Select this card, then a living enemy.';
+  slot.append(b);
+}
+function showCollectible() {
+  if (!profile.collectible) return;
+  const award = profile.collectible, body = openScreen('The Last Word', 'FIRST-CLEAR COLLECTIBLE', true, 'collectible');
+  const card = text('article', '', 'mythic-card');
+  const image = document.createElement('img'); image.src = COLLECTIBLE_ART; image.alt = 'A fractured gold chronometer orbiting a luminous cyan singularity.';
+  card.append(image, text('span','MYTHIC / FIRST CLEAR','mythic-rarity'), text('h2','The Last Word'), text('p','Erase one enemy. Act final bosses lose half their remaining HP. Recharges after 3 subsequent floors.'));
+  const copy = text('section', '', 'collectible-copy');
+  const name = document.createElement('input'); name.maxLength = 32; name.value = award.name || ''; name.id = 'collectible-name'; name.placeholder = 'Optional display name';
+  const label = text('label', 'Name included on your downloaded image'); label.htmlFor = name.id;
+  name.addEventListener('input', () => { award.name = name.value; persistProfile(); });
+  copy.append(text('h2','You earned the final word.'), text('p','Advanced is unlocked. Your signature card starts ready in every Advanced run. Sharing the art does not grant the ability.'), label, name,
+    text('p', `First clear: ${new Date(award.earnedAt).toLocaleDateString()} · ${award.id}`, 'collectible-id'),
+    text('p','This is a browser-local keepsake, not verified ownership. Keep this browser’s data to preserve your unlock.', 'muted'));
+  const actions = text('div','','collectible-actions');
+  const exportAction = (wallpaper, share) => exportCollectible(award, wallpaper, share).catch(error => toast(error.message));
+  actions.append(button('Download card', () => exportAction(false, false), 'primary'), button('Download phone wallpaper', () => exportAction(true, false)), button('Share card', () => exportAction(false, true)), button('Continue', returnToStage));
+  const layout = text('div','','collectible-layout'); layout.append(card,copy); body.append(layout,actions);
+}
+function resolveEvent(message = 'Your choice is sealed. Your hull, credits and deck have been updated.') {
+  if (run.stage !== 'event') return;
+  run.eventResult = message; run.stage = 'eventResult'; save(); render(); showEventResult();
+}
+function showEventResult() {
+  const body = openScreen('Signal resolved', 'EVENT COMPLETE', false, 'aperture');
+  intro(body, run.eventResult || 'The timeline has changed.');
+  body.append(text('p', `Hull ${run.hp}/${run.maxHp} · ${run.gold} credits · ${run.deck.length} cards`, 'event-outcome'), button('Continue to map', completeNode, 'primary'));
+}
+function styleEventChoices() {
+  const body = $('screen-body');
+  body.querySelectorAll(':scope > button.choice').forEach((b,i) => {
+    const image = document.createElement('img'); image.src = [CARD_ART.fracture,CARD_ART.scan,CARD_ART.phase][i % 3]; image.alt = ''; image.className = 'event-choice-art';
+    const caption = text('span', b.textContent); b.replaceChildren(image,caption); b.classList.add('event-choice');
+    if (b.disabled) b.append(text('small','Insufficient credits or HP; you must survive this choice.'));
+  });
+}
+matchMedia('(min-width:1101px)').addEventListener('change', () => { if (run) renderSignature(); });
+$('collectible-button').addEventListener('click', showCollectible);
 if (!load()) newRun();
 
 // Help has its own dialog so closing it returns to the exact current encounter.
