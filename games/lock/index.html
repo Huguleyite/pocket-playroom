@@ -36,7 +36,7 @@ window.roomComplete=(id,date)=>{if(!date){const d=new Date();date=d.getFullYear(
 <div class="proximity"><span>Getting warmer</span><progress id="heat" max="1" value="0" aria-label="Proximity to a remaining word"></progress></div>
 <div class="section-title">Today’s combinations</div><ul id="words" class="word-list"></ul>
 <p class="sub" id="bonus"></p><p id="storage" class="storage-note" hidden>Saving is unavailable. Progress will last for this visit only.</p>
-<footer>Swipe, use the arrow buttons, or focus a dial and press ↑ ↓.<br>A move is one letter step. New puzzle daily at 00:00 UTC.</footer>
+<footer>Swipe, use the arrow buttons, or focus a dial and press ↑ ↓.<br>A move is one letter step. New puzzle daily at local midnight.</footer>
 <noscript>Enable JavaScript to play LetterLock.</noscript>
 </main>
 <aside class="ad-anchor" aria-label="Advertisement"><div id="ad-anchor" class="ad-slot" data-ad-slot="anchor" aria-label="320 by 50 advertisement">ADVERTISEMENT · 320 × 50</div></aside>
@@ -140,7 +140,23 @@ window.LetterLockEmbedded = (() => {
 const CATEGORIES = Object.freeze([
   Object.freeze({ category: 'FRUIT', words: Object.freeze(['APPLE', 'GRAPE', 'MANGO', 'PEACH', 'LEMON', 'GUAVA']) }),
   Object.freeze({ category: 'SPACE', words: Object.freeze(['STAR', 'MOON', 'MARS', 'DUST', 'VOID']) }),
-  Object.freeze({ category: 'ANIMALS', words: Object.freeze(['TIGER', 'ZEBRA', 'HORSE', 'OTTER', 'CAMEL', 'LEMUR']) })
+  Object.freeze({ category: 'ANIMALS', words: Object.freeze(['TIGER', 'ZEBRA', 'HORSE', 'OTTER', 'CAMEL', 'LEMUR']) }),
+  ...Object.entries({
+    BIRDS: ['ROBIN','RAVEN','EAGLE','FINCH','HERON','GOOSE','CRANE','QUAIL'],
+    COLORS: ['GREEN','WHITE','BLACK','BROWN','AMBER','CORAL','IVORY','MAUVE'],
+    WEATHER: ['STORM','CLOUD','FROST','SLEET','SUNNY','WINDY','RAINY','SNOWY'],
+    TREES: ['MAPLE','BIRCH','CEDAR','ASPEN','BEECH','ALDER','ELDER','LARCH'],
+    MUSIC: ['PIANO','VIOLA','CELLO','FLUTE','BANJO','ORGAN','BUGLE','DRUMS'],
+    KITCHEN: ['PLATE','SPOON','KNIFE','GLASS','WHISK','LADLE','SIEVE','TIMER'],
+    OCEAN: ['CORAL','WHALE','SHARK','SQUID','REEFS','TIDES','WAVES','SHELL'],
+    SPORTS: ['RUGBY','GOALS','RACES','SKIER','BOXER','DIVER','RELAY','TEAMS'],
+    CLOTHES: ['SHIRT','SKIRT','SCARF','DRESS','JEANS','SOCKS','BOOTS','GLOVE'],
+    GARDEN: ['SEEDS','BULBS','BLOOM','PETAL','STEMS','ROOTS','SOILS','FERNS'],
+    BAKERY: ['BREAD','BAGEL','SCONE','DONUT','TORTE','ICING','CRUST','DOUGH'],
+    TOOLS: ['DRILL','CLAMP','PLANE','RULER','LEVEL','SCREW','BOLTS','FILES'],
+    TRAVEL: ['TRAIN','PLANE','FERRY','HOTEL','ROADS','ROUTE','TRIPS','BUSES'],
+    SHAPES: ['CUBES','CONES','OVALS','RINGS','LINES','POINT','EDGES','SIDES']
+  }).map(([category, words]) => Object.freeze({category, words:Object.freeze(words)}))
 ]);
 
 const BONUS_WORDS = ['STONE', 'NOTES', 'TONES', 'RATES', 'TEARS', 'STARE',
@@ -179,12 +195,18 @@ function shuffle(values, random) {
   return result;
 }
 
-/** All date decisions use the supplied date; default daily rollover is UTC.
+function localDay(now = new Date()) {
+  return `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
+}
+
+/** All date decisions use the supplied date; default rollover is local midnight.
  * Each puzzle has a single word length, so every target fits the same board.
  */
-function createDailyPuzzle(date = new Date().toISOString().slice(0, 10)) {
+function createDailyPuzzle(date = localDay()) {
   const random = createPRNG(date);
-  const entry = CATEGORIES[Math.floor(random() * CATEGORIES.length)];
+  // Calendar-day rotation guarantees variety across adjacent dates and time zones.
+  const day = Math.floor(Date.parse(`${date}T00:00:00Z`) / 86400000);
+  const entry = CATEGORIES[((day % CATEGORIES.length) + CATEGORIES.length) % CATEGORIES.length];
   const targets = shuffle(entry.words, random).slice(0, 3 + Math.floor(random() * 3));
   const columnCount = targets[0].length;
   const dials = Array.from({ length: columnCount }, (_, column) => {
@@ -215,7 +237,7 @@ function createGame(date, { bonusWords = BONUS_WORDS, savedState = null } = {}) 
   /** Defensive snapshots prevent callers from moving other columns accidentally. */
   function getState() {
     return {
-      date: puzzle.date, category: puzzle.category, columnCount: puzzle.columnCount,
+      puzzleVersion: 2, date: puzzle.date, category: puzzle.category, columnCount: puzzle.columnCount,
       targets: [...targets], dials: dials.map(dial => [...dial]),
       currentWord: getCurrentWord(), unlockedWords: [...unlocked], bonusWords: [...bonuses],
       remainingWords: [...targets].filter(word => !unlocked.has(word)),
@@ -270,7 +292,8 @@ function createGame(date, { bonusWords = BONUS_WORDS, savedState = null } = {}) 
   }
 
   // Restore rotations directly so loading never awards intermediate words.
-  if (savedState && savedState.date === puzzle.date) {
+  if (savedState && savedState.date === puzzle.date && savedState.puzzleVersion === 2 &&
+      savedState.category === puzzle.category && JSON.stringify(savedState.targets) === JSON.stringify(puzzle.targets)) {
     const rotations = dials.map((dial, i) => {
       const saved = savedState.dials?.[i];
       if (!Array.isArray(saved) || saved.length !== dial.length) return -1;
@@ -299,10 +322,10 @@ return { createGame };
 (async () => {
 const { createGame } = location.protocol === 'file:'
   ? window.LetterLockEmbedded
-  : await import('./engine.js').catch(() => window.LetterLockEmbedded);
+  : await import('./engine.js?v=2').catch(() => window.LetterLockEmbedded);
 
 const $ = id => document.getElementById(id);
-const today = () => new Date().toISOString().slice(0,10);
+const today = () => { const d=new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; };
 const date = today();
 const key = `letterlock:v1:${date}`;
 const historyKey = 'letterlock:v1:completed';
@@ -318,7 +341,7 @@ function write(key, value) {
   $('storage').hidden = storageOK;
 }
 let saved = read(key, null);
-if (!saved || typeof saved !== 'object' || saved.version !== 1 || saved.state?.date !== date) saved = null;
+if (!saved || typeof saved !== 'object' || saved.version !== 1 || saved.state?.date !== date || saved.state?.puzzleVersion !== 2) saved = null;
 const game = createGame(date, { savedState: saved?.state });
 let moves = Number.isSafeInteger(saved?.moves) && saved.moves >= 0 ? saved.moves : 0;
 let elapsed = Number.isFinite(saved?.elapsed) && saved.elapsed >= 0 ? saved.elapsed : 0;
@@ -421,7 +444,7 @@ function cancelGesture() {
 }
 const state=game.getState();
 $('category').textContent=state.category;
-$('date').textContent=new Date(`${date}T00:00:00Z`).toLocaleDateString(undefined,{month:'long',day:'numeric',year:'numeric',timeZone:'UTC'});
+$('date').textContent=new Date(`${date}T00:00:00Z`).toLocaleDateString(undefined,{month:'long',day:'numeric',year:'numeric',timeZone:'UTC'})+' · New safe at local midnight';
 for(let index=0;index<state.columnCount;index++) {
   const column=document.createElement('div'); column.className='column';
   const wheel=document.createElement('div'); wheel.className='wheel'; wheel.tabIndex=0;

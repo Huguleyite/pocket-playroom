@@ -5,7 +5,23 @@
 export const CATEGORIES = Object.freeze([
   Object.freeze({ category: 'FRUIT', words: Object.freeze(['APPLE', 'GRAPE', 'MANGO', 'PEACH', 'LEMON', 'GUAVA']) }),
   Object.freeze({ category: 'SPACE', words: Object.freeze(['STAR', 'MOON', 'MARS', 'DUST', 'VOID']) }),
-  Object.freeze({ category: 'ANIMALS', words: Object.freeze(['TIGER', 'ZEBRA', 'HORSE', 'OTTER', 'CAMEL', 'LEMUR']) })
+  Object.freeze({ category: 'ANIMALS', words: Object.freeze(['TIGER', 'ZEBRA', 'HORSE', 'OTTER', 'CAMEL', 'LEMUR']) }),
+  ...Object.entries({
+    BIRDS: ['ROBIN','RAVEN','EAGLE','FINCH','HERON','GOOSE','CRANE','QUAIL'],
+    COLORS: ['GREEN','WHITE','BLACK','BROWN','AMBER','CORAL','IVORY','MAUVE'],
+    WEATHER: ['STORM','CLOUD','FROST','SLEET','SUNNY','WINDY','RAINY','SNOWY'],
+    TREES: ['MAPLE','BIRCH','CEDAR','ASPEN','BEECH','ALDER','ELDER','LARCH'],
+    MUSIC: ['PIANO','VIOLA','CELLO','FLUTE','BANJO','ORGAN','BUGLE','DRUMS'],
+    KITCHEN: ['PLATE','SPOON','KNIFE','GLASS','WHISK','LADLE','SIEVE','TIMER'],
+    OCEAN: ['CORAL','WHALE','SHARK','SQUID','REEFS','TIDES','WAVES','SHELL'],
+    SPORTS: ['RUGBY','GOALS','RACES','SKIER','BOXER','DIVER','RELAY','TEAMS'],
+    CLOTHES: ['SHIRT','SKIRT','SCARF','DRESS','JEANS','SOCKS','BOOTS','GLOVE'],
+    GARDEN: ['SEEDS','BULBS','BLOOM','PETAL','STEMS','ROOTS','SOILS','FERNS'],
+    BAKERY: ['BREAD','BAGEL','SCONE','DONUT','TORTE','ICING','CRUST','DOUGH'],
+    TOOLS: ['DRILL','CLAMP','PLANE','RULER','LEVEL','SCREW','BOLTS','FILES'],
+    TRAVEL: ['TRAIN','PLANE','FERRY','HOTEL','ROADS','ROUTE','TRIPS','BUSES'],
+    SHAPES: ['CUBES','CONES','OVALS','RINGS','LINES','POINT','EDGES','SIDES']
+  }).map(([category, words]) => Object.freeze({category, words:Object.freeze(words)}))
 ]);
 
 const BONUS_WORDS = ['STONE', 'NOTES', 'TONES', 'RATES', 'TEARS', 'STARE',
@@ -44,12 +60,18 @@ function shuffle(values, random) {
   return result;
 }
 
-/** All date decisions use the supplied date; default daily rollover is UTC.
+export function localDay(now = new Date()) {
+  return `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
+}
+
+/** All date decisions use the supplied date; default rollover is local midnight.
  * Each puzzle has a single word length, so every target fits the same board.
  */
-export function createDailyPuzzle(date = new Date().toISOString().slice(0, 10)) {
+export function createDailyPuzzle(date = localDay()) {
   const random = createPRNG(date);
-  const entry = CATEGORIES[Math.floor(random() * CATEGORIES.length)];
+  // Calendar-day rotation guarantees variety across adjacent dates and time zones.
+  const day = Math.floor(Date.parse(`${date}T00:00:00Z`) / 86400000);
+  const entry = CATEGORIES[((day % CATEGORIES.length) + CATEGORIES.length) % CATEGORIES.length];
   const targets = shuffle(entry.words, random).slice(0, 3 + Math.floor(random() * 3));
   const columnCount = targets[0].length;
   const dials = Array.from({ length: columnCount }, (_, column) => {
@@ -80,7 +102,7 @@ export function createGame(date, { bonusWords = BONUS_WORDS, savedState = null }
   /** Defensive snapshots prevent callers from moving other columns accidentally. */
   function getState() {
     return {
-      date: puzzle.date, category: puzzle.category, columnCount: puzzle.columnCount,
+      puzzleVersion: 2, date: puzzle.date, category: puzzle.category, columnCount: puzzle.columnCount,
       targets: [...targets], dials: dials.map(dial => [...dial]),
       currentWord: getCurrentWord(), unlockedWords: [...unlocked], bonusWords: [...bonuses],
       remainingWords: [...targets].filter(word => !unlocked.has(word)),
@@ -135,7 +157,8 @@ export function createGame(date, { bonusWords = BONUS_WORDS, savedState = null }
   }
 
   // Restore rotations directly so loading never awards intermediate words.
-  if (savedState && savedState.date === puzzle.date) {
+  if (savedState && savedState.date === puzzle.date && savedState.puzzleVersion === 2 &&
+      savedState.category === puzzle.category && JSON.stringify(savedState.targets) === JSON.stringify(puzzle.targets)) {
     const rotations = dials.map((dial, i) => {
       const saved = savedState.dials?.[i];
       if (!Array.isArray(saved) || saved.length !== dial.length) return -1;

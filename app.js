@@ -21,7 +21,7 @@
   }
   function read(key){try{return JSON.parse(localStorage.getItem(key));}catch{return null;}}
   const completedVisits={};
-  function gameDay(id){const d=new Date();return ['lock','tide'].includes(id)?d.toISOString().slice(0,10):`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;}
+  function gameDay(id){const d=new Date();return id==='tide'?d.toISOString().slice(0,10):`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;}
   function completedToday(id){
     const day=gameDay(id);
     if(completedVisits[id]===day||read('room-for-play:completed:'+id)===day)return true;
