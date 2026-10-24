@@ -2,7 +2,7 @@
 (() => {
   if (window.parent === window) return;
   let mobile;
-  try { mobile = window.parent.matchMedia('(max-width:600px)'); } catch { return; }
+  try { mobile = window.parent.matchMedia('(max-width:1000px)'); } catch { return; }
   const update = () => document.documentElement.classList.toggle('room-mobile', mobile.matches);
   update();
   mobile.addEventListener('change', update);

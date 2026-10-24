@@ -26,7 +26,7 @@
   </style>
 <script>window.roomHaptic=()=>{try{navigator.vibrate?.(8);}catch{}};</script><script>
 window.roomComplete=(id,date)=>{if(!date){const d=new Date();date=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}try{localStorage.setItem('room-for-play:completed:'+id,JSON.stringify(date));}catch{}parent.postMessage({type:'room:completed',id,date},location.origin);};
-</script><script src="../../mobile-frame.js" defer></script><style>body{min-height:0;padding:0}main{padding:16px 12px 12px}main>header h1,main>header .intro,.ad-anchor,main>footer{display:none!important}</style></head>
+</script><script src="../../mobile-frame.js" defer></script><link rel="stylesheet" href="../../pocket-fit.css"><script src="../../pocket-fit.js" defer></script><style>body{min-height:0;padding:0}main{padding:16px 12px 12px}main>header h1,main>header .intro,.ad-anchor,main>footer{display:none!important}</style><link rel="stylesheet" href="../../house-promos.css"><script src="../../house-promos.js" defer></script></head>
 <body>
   <main>
     <header><div class="topline"><div class="brand-mark"><span class="live"></span>DAILY CIRCUIT / 6 × 6</div><button class="help" id="help-button" aria-label="How to play">?</button></div><h1>Signal<span> Flow</span></h1><p class="intro">One network. Three competing signals.<br>Shared junctions affect every color. Filters keep targets clean.</p></header>
@@ -388,7 +388,7 @@ window.roomComplete=(id,date)=>{if(!date){const d=new Date();date=d.getFullYear(
 <script>
 (() => {
  let last=0,queued=false;
- function measure(){queued=false;const main=document.querySelector('main');const height=Math.ceil((main?.getBoundingClientRect().bottom||document.body.getBoundingClientRect().height)+12);if(height!==last){last=height;parent.postMessage({type:'room:height',height},'*');}}
+ function measure(){queued=false;if(document.documentElement.classList.contains('pocket-fit'))return;const main=document.querySelector('main');const height=Math.ceil((main?.getBoundingClientRect().bottom||document.body.getBoundingClientRect().height)+12);if(height!==last){last=height;parent.postMessage({type:'room:height',height},'*');}}
  function update(){if(!queued){queued=true;requestAnimationFrame(measure);}}
  new ResizeObserver(update).observe(document.body);
  new MutationObserver(update).observe(document.body,{subtree:true,childList:true,attributes:true,characterData:true});

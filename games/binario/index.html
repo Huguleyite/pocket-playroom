@@ -7,7 +7,7 @@ html.room-mobile main>details,html.room-mobile #instruction,html.room-mobile .ki
 .binary-cell.hint{outline:3px solid var(--ink);outline-offset:2px}#hint-text{padding:10px;border:1px solid var(--edge);border-radius:10px;color:var(--ink);font-size:13px}
 </style><script>window.roomHaptic=()=>{try{navigator.vibrate?.(8);}catch{}};</script> <script src="../../night-frame.js" data-game="binario"></script><script>
 window.roomComplete=(id,date)=>{if(!date){const d=new Date();date=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}try{localStorage.setItem('room-for-play:completed:'+id,JSON.stringify(date));}catch{}parent.postMessage({type:'room:completed',id,date},location.origin);};
-</script><script src="../../mobile-frame.js" defer></script></head><body><main>
+</script><script src="../../mobile-frame.js" defer></script><link rel="stylesheet" href="../../pocket-fit.css"><script src="../../pocket-fit.js" defer></script><link rel="stylesheet" href="../../house-promos.css"><script src="../../house-promos.js" defer></script></head><body><main>
 <div class="mode"><div><strong>Neon Logic</strong><small>Play with Cyan and Magenta</small></div><button class="switch" id="mode" role="switch" aria-checked="true" aria-label="Neon Logic">On</button></div>
 <div class="kicker" id="edition"></div><h1 id="title">Neon <span>Logic.</span></h1><p class="sub" id="subtitle">Balance the energy. Complete the circuit.</p>
 <div class="metrics"><span><strong>6 × 6</strong>Matrix</span><span><strong id="filled"></strong>Filled</span><span><strong id="moves">0</strong>Moves</span><span><strong id="streak">0</strong>Day streak</span></div>
@@ -60,7 +60,7 @@ new MutationObserver(announceModal).observe($('complete'),{attributes:true,attri
 </script><script src="ads.js" defer></script><script>
 (() => {
  let last=0,queued=false;
- function measure(){queued=false;const main=document.querySelector('main');const height=Math.ceil((main?.getBoundingClientRect().bottom||document.body.getBoundingClientRect().height)+12);if(height!==last){last=height;parent.postMessage({type:'room:height',height},'*');}}
+ function measure(){queued=false;if(document.documentElement.classList.contains('pocket-fit'))return;const main=document.querySelector('main');const height=Math.ceil((main?.getBoundingClientRect().bottom||document.body.getBoundingClientRect().height)+12);if(height!==last){last=height;parent.postMessage({type:'room:height',height},'*');}}
  function update(){if(!queued){queued=true;requestAnimationFrame(measure);}}
  new ResizeObserver(update).observe(document.body);
  new MutationObserver(update).observe(document.body,{subtree:true,childList:true,attributes:true,characterData:true});

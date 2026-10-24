@@ -26,6 +26,9 @@
     @keyframes conflict { 0%,75% { background:#ffe0d9; color:#9a281e; box-shadow:inset 0 0 0 2px #bf5342; } }
     .sign { position:absolute; z-index:2; display:grid; place-items:center; width:22px; height:22px; background:#fffdf7; color:var(--ink); font-size:22px; font-weight:750; pointer-events:none; transform:translate(-50%,-50%); line-height:1; }
     .sign.down { transform:translate(-50%,-50%) rotate(90deg); }
+    .sign{font-size:0}
+    .sign::before{content:'';width:8px;height:8px;border-top:2px solid currentColor;border-right:2px solid currentColor;transform:translateX(-2px) rotate(45deg)}
+    .sign.less::before{transform:translateX(2px) rotate(225deg)}
     .status { min-height:42px; margin:16px 0 0; text-align:center; font-size:13px; color:var(--muted); line-height:1.5; }
     details { border-top:1px solid var(--line); margin-top:20px; padding-top:17px; font-size:13px; line-height:1.7; }
     summary { cursor:pointer; font-weight:650; }
@@ -67,8 +70,8 @@
   </style>
 <script>window.roomHaptic=()=>{try{navigator.vibrate?.(8);}catch{}};</script><script>
 window.roomComplete=(id,date)=>{if(!date){const d=new Date();date=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}try{localStorage.setItem('room-for-play:completed:'+id,JSON.stringify(date));}catch{}parent.postMessage({type:'room:completed',id,date},location.origin);};
-</script><script src="../../mobile-frame.js" defer></script><style>.room-futoshiki .digit-dock{position:static;width:100%;transform:none;box-shadow:none;padding:12px 0;margin-top:16px}.room-futoshiki .digits{max-width:100%}</style> <link rel="stylesheet" href="../../night-game.css"><script src="../../night-frame.js" data-game="futoshiki"></script><link rel="stylesheet" href="../../game-theme.css">
-</head>
+</script><script src="../../mobile-frame.js" defer></script><link rel="stylesheet" href="../../pocket-fit.css"><script src="../../pocket-fit.js" defer></script><style>.room-futoshiki .digit-dock{position:static;width:100%;transform:none;box-shadow:none;padding:12px 0;margin-top:16px}.room-futoshiki .digits{max-width:100%}</style> <link rel="stylesheet" href="../../night-game.css"><script src="../../night-frame.js" data-game="futoshiki"></script><link rel="stylesheet" href="../../game-theme.css">
+<link rel="stylesheet" href="../../house-promos.css"><script src="../../house-promos.js" defer></script></head>
 <body class="room-embedded room-futoshiki">
   <main>
     <header><div><div class="eyebrow">A little order, every day</div><h1>Futoshiki</h1></div><span class="tag">Daily · 5 × 5</span></header>
@@ -82,8 +85,8 @@ window.roomComplete=(id,date)=>{if(!date){const d=new Date();date=d.getFullYear(
     <details><summary>How to play</summary><p>Use 1–5 exactly once in every row and column. The open side of each sign faces the larger number. A vertical ∧ means the top number is smaller; ∨ means it is larger.</p><p>Tap a filled cell, then Erase or Clear selected cell to leave it blank. Starting clues stay fixed. Reset board clears all your entries and resets today’s timer and stats after confirmation. Keyboard: arrow keys to move, 1–5 to enter, and Backspace or Delete to erase. Conflicting entries stay editable and briefly glow red.</p><p>The daily puzzle changes at midnight in your local time. The timer counts time while this page is visible.</p></details>
     <noscript>This puzzle requires JavaScript. Enable it to play.</noscript>
   <footer class="digit-dock"><p class="dock-label" id="input-label">Select a cell to begin</p><div class="digits" role="group" aria-label="Enter a number"><button data-digit="1" disabled>1</button><button data-digit="2" disabled>2</button><button data-digit="3" disabled>3</button><button data-digit="4" disabled>4</button><button data-digit="5" disabled>5</button><button data-digit="0" disabled>Erase</button></div></footer></main>
-  
-  <aside class="anchor-ad" aria-label="Advertisement"><div id="ad-anchor" class="ad-slot" data-ad-slot>Advertisement</div></aside>
+
+
   <dialog id="victory" aria-labelledby="victory-title">
     <div class="eyebrow">Everything in its place</div><h2 id="victory-title">Beautifully balanced.</h2><p>You solved today’s Futoshiki.</p>
     <div class="stats"><div><strong id="final-time"></strong><span>Active time</span></div><div><strong id="final-moves"></strong><span>Entries</span></div><div><strong id="final-errors"></strong><span>Conflicts</span></div></div>
@@ -331,7 +334,7 @@ function generateDailyPuzzle(dateString, { inequalityCount = 12, clueCount = 7 }
       }
       for (const rule of puzzle.inequalities) {
         const sign = document.createElement('span');
-        sign.className = `sign ${rule.direction}`;
+        sign.className = `sign ${rule.direction}${rule.sign==='<'?' less':''}`;
         sign.textContent = rule.sign;
         const next = rule.direction === 'right' ? `column ${rule.col+2}` : `row ${rule.row+2}`;
         sign.setAttribute('role','img');
@@ -356,12 +359,16 @@ function generateDailyPuzzle(dateString, { inequalityCount = 12, clueCount = 7 }
       if (!document.hidden && date !== localDate()) { save(); location.reload(); }
     }
     function positionSigns() {
+      const board=$('board'),origin=board.getBoundingClientRect();
       [...$('board').querySelectorAll('.sign')].forEach((sign,i) => {
         const rule = puzzle.inequalities[i];
         const a = cells[rule.row*5+rule.col];
         const b = cells[(rule.row+(rule.direction==='down'?1:0))*5+rule.col+(rule.direction==='right'?1:0)];
-        sign.style.left = `${(a.offsetLeft+a.offsetWidth/2+b.offsetLeft+b.offsetWidth/2)/2}px`;
-        sign.style.top = `${(a.offsetTop+a.offsetHeight/2+b.offsetTop+b.offsetHeight/2)/2}px`;
+        const ar=a.getBoundingClientRect(),br=b.getBoundingClientRect();
+        const x=rule.direction==='right'?(ar.right+br.left)/2:(ar.left+ar.right+br.left+br.right)/4;
+        const y=rule.direction==='down'?(ar.bottom+br.top)/2:(ar.top+ar.bottom+br.top+br.bottom)/4;
+        sign.style.left = `${x-origin.left-board.clientLeft}px`;
+        sign.style.top = `${y-origin.top-board.clientTop}px`;
       });
     }
     function select(r,c) {
@@ -562,7 +569,7 @@ function generateDailyPuzzle(dateString, { inequalityCount = 12, clueCount = 7 }
 <script>
 (() => {
  let last=0,queued=false;
- function measure(){queued=false;const main=document.querySelector('main');const height=Math.ceil((main?.getBoundingClientRect().bottom||document.body.getBoundingClientRect().height)+12);if(height!==last){last=height;parent.postMessage({type:'room:height',height},'*');}}
+ function measure(){queued=false;if(document.documentElement.classList.contains('pocket-fit'))return;const main=document.querySelector('main');const height=Math.ceil((main?.getBoundingClientRect().bottom||document.body.getBoundingClientRect().height)+12);if(height!==last){last=height;parent.postMessage({type:'room:height',height},'*');}}
  function update(){if(!queued){queued=true;requestAnimationFrame(measure);}}
  new ResizeObserver(update).observe(document.body);
  new MutationObserver(update).observe(document.body,{subtree:true,childList:true,attributes:true,characterData:true});

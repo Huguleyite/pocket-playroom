@@ -59,3 +59,33 @@ body.neon-page{color-scheme:dark;--paper:#090d1b!important;--panel:#121a30;--ink
 .card-art .sandwich-mark{position:relative;width:96px;height:80px}
 .side-symbol .sandwich-mark{width:64px;height:auto}
 @media(max-width:600px){.card-art .sandwich-mark{width:72px;height:60px}}
+/* Pocket play prioritizes the board on cover screens and unfolded phones alike. */
+@media(max-width:1000px){
+ body[class*="game-"] .site-header{padding-top:10px;padding-bottom:9px}
+ body[class*="game-"] #main{padding-left:max(8px,env(safe-area-inset-left));padding-right:max(8px,env(safe-area-inset-right))}
+ body[class*="game-"] .night-controls{margin:7px 0 0;gap:6px;justify-content:flex-end}
+ body[class*="game-"] .night-toggle{min-height:44px;padding:7px 10px;font-size:12px}
+ body[class*="game-"] .back-link{min-height:32px;margin:0}
+ body[class*="game-"] .game-heading{padding:0 0 9px}
+ body[class*="game-"] .game-heading h1{font-size:28px;line-height:1.1;margin:3px 0}
+ body[class*="game-"] .game-heading .eyebrow,body[class*="game-"] .game-heading>p,
+ body[class*="game-"] .game-side,body[class*="game-"] .help{display:none!important}
+ body[class*="game-"] .game-layout{display:block}
+ body[class*="game-"] .game-well{width:100%;max-width:900px;margin:0 auto;border-radius:14px;box-shadow:2px 3px 0 var(--shadow)}
+ body[class*="game-"] .next-games,body[class*="game-"] .ad-space{margin-top:18px}
+}
+@media(max-width:1000px) and (min-width:580px){
+ body[class*="game-"] .game-heading{position:absolute;top:16px;left:20px;pointer-events:none}
+ body[class*="game-"] .game-heading h1{font-size:24px}
+ body[class*="game-"] #main{position:relative}
+ body[class*="game-"] .back-link{margin-bottom:7px}
+}
+@media(max-width:579px){
+ body[class*="game-"] .site-header{min-height:44px;padding-top:10px;padding-bottom:10px}
+ body[class*="game-"] .site-header nav{display:none}
+ body[class*="game-"] .wordmark{font-size:21px}
+}
+@media(min-width:580px) and (max-width:1000px){
+ body[class*="game-"] .wordmark{font-size:22px}
+ body[class*="game-"] .site-header nav{font-size:11px;gap:15px}
+}

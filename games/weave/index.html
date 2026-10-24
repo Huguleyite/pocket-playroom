@@ -21,8 +21,8 @@ body{padding-bottom:calc(82px + env(safe-area-inset-bottom))}
 </style>
 <script>window.roomHaptic=()=>{try{navigator.vibrate?.(8);}catch{}};</script><script>
 window.roomComplete=(id,date)=>{if(!date){const d=new Date();date=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}try{localStorage.setItem('room-for-play:completed:'+id,JSON.stringify(date));}catch{}parent.postMessage({type:'room:completed',id,date},location.origin);};
-</script><script src="../../mobile-frame.js" defer></script> <link rel="stylesheet" href="../../night-game.css"><script src="../../night-frame.js" data-game="weave"></script><link rel="stylesheet" href="../../game-theme.css">
-</head>
+</script><script src="../../mobile-frame.js" defer></script><link rel="stylesheet" href="../../pocket-fit.css"><script src="../../pocket-fit.js" defer></script> <link rel="stylesheet" href="../../night-game.css"><script src="../../night-frame.js" data-game="weave"></script><link rel="stylesheet" href="../../game-theme.css">
+<link rel="stylesheet" href="../../house-promos.css"><script src="../../house-promos.js" defer></script></head>
 <body class="room-embedded room-weave">
 <main>
 <header><div><h1>Weave <span>It to Me</span></h1><div class="date" id="date"></div></div><button class="icon" id="helpButton" aria-label="How to play">?</button></header>
@@ -418,7 +418,7 @@ setInterval(checkDate,30000);
 <script>
 (() => {
  let last=0,queued=false;
- function measure(){queued=false;const main=document.querySelector('main');const height=Math.ceil((main?.getBoundingClientRect().bottom||document.body.getBoundingClientRect().height)+12);if(height!==last){last=height;parent.postMessage({type:'room:height',height},'*');}}
+ function measure(){queued=false;if(document.documentElement.classList.contains('pocket-fit'))return;const main=document.querySelector('main');const height=Math.ceil((main?.getBoundingClientRect().bottom||document.body.getBoundingClientRect().height)+12);if(height!==last){last=height;parent.postMessage({type:'room:height',height},'*');}}
  function update(){if(!queued){queued=true;requestAnimationFrame(measure);}}
  new ResizeObserver(update).observe(document.body);
  new MutationObserver(update).observe(document.body,{subtree:true,childList:true,attributes:true,characterData:true});

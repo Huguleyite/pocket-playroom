@@ -1,0 +1,94 @@
+/* Real layout dimensions, never a scale transform: canvas and touch coordinates agree. */
+.pocket-fit{overflow:hidden;overflow-anchor:none}
+.pocket-fit body{min-height:0!important;padding:0!important;margin:0!important}
+.pocket-fit main{width:100%;max-width:none;margin:0!important;padding:8px 10px!important}
+.pocket-fit main>header{margin:0 0 6px!important;padding:0!important}
+.pocket-fit body.room-embedded main>header,.pocket-fit main>header{display:none!important}
+.pocket-fit main>header h1,.pocket-fit main>header .brand-mark,.pocket-fit main>header .eyebrow,
+.pocket-fit main>header .tag,.pocket-fit main>header .intro,.pocket-fit main>header .topline,
+.pocket-fit main>footer,.pocket-fit .anchor-ad,.pocket-fit .ad-anchor,.pocket-fit .ad-anchor-wrapper,
+.pocket-fit main>details,.pocket-fit main>.hint,.pocket-fit main>.help,.pocket-fit main>.foot,
+.pocket-fit main>.modeNote{display:none!important}
+.pocket-fit .pocket-stage{display:grid;grid-template-columns:minmax(0,1fr);gap:8px;align-items:start}
+.pocket-fit .pocket-stage.pocket-wide{grid-template-columns:minmax(0,1.25fr) minmax(220px,1fr);gap:18px}
+.pocket-fit .pocket-board-column,.pocket-fit .pocket-actions{min-width:0}
+.pocket-fit .pocket-actions{display:flex;flex-direction:column;gap:7px}
+.pocket-fit .pocket-actions>*{margin-top:0!important;margin-bottom:0!important}
+.pocket-fit .pocket-board-column>.board,.pocket-fit .pocket-board-column>.board-wrap,
+.pocket-fit .pocket-board-column>.binary-board{width:min(100%,var(--pocket-board-size,320px));margin:0 auto!important}
+.pocket-fit .pocket-board-column>.board-wrap>.board{width:100%;margin:0}
+.pocket-fit button,.pocket-fit select{min-height:44px}
+.pocket-fit .stats,.pocket-fit .metrics{margin:0 0 8px!important;padding:7px 0!important}
+.pocket-fit .stats strong,.pocket-fit .stats b{font-size:20px}
+.pocket-fit .stat{padding:2px 5px!important}
+.pocket-fit .message,.pocket-fit .feedback,.pocket-fit .status,.pocket-fit #status{min-height:28px;height:auto;padding:3px 0!important;font-size:12px;line-height:1.4}
+.pocket-fit .legend{gap:12px;flex-wrap:wrap;font-size:11px;margin:0}
+.pocket-fit dialog{max-height:min(var(--pocket-dialog-height,85dvh),calc(100dvh - 24px))!important;overflow:auto}
+.pocket-fit dialog[open]{position:fixed;inset:auto;top:var(--pocket-dialog-top,12px);left:50%;transform:translateX(-50%);margin:0}
+.pocket-fit .controls{gap:6px;flex-wrap:wrap}
+.pocket-fit .controls button{min-width:0;padding:8px;font-size:12px}
+.pocket-fit .wide{margin:0;min-height:44px}
+.pocket-fit #peekWord:empty,.pocket-fit #bonus:empty{display:none}
+.pocket-fit .words,.pocket-fit .history{margin-top:10px;max-height:110px;overflow:auto}
+.pocket-fit .details{font-size:11px;flex-wrap:wrap;gap:5px}
+.pocket-fit .room-weave .goal{font-size:12px;margin:0!important}
+.pocket-fit .room-weave .controls button{width:auto;flex:1;font-size:20px}
+.pocket-fit .room-weave .tile,.pocket-fit .room-tide .tile{min-height:0;min-width:0;padding:0;line-height:1;font-size:clamp(22px,calc(var(--pocket-board-size,300px)/9),36px)}
+.pocket-fit .room-tide .word-bar{font-size:13px;min-height:32px;padding:6px}
+.pocket-fit .room-tide .actions{display:flex;flex-wrap:wrap;gap:6px}
+.pocket-fit .room-tide .actions button{padding:8px;flex:1;font-size:12px}
+.pocket-fit .room-shift .stats{padding:5px 0!important}
+.pocket-fit .room-shift .pocket-actions{gap:5px}
+.pocket-fit .room-shift .stats strong{font-size:18px}
+.pocket-fit .room-shift .keyboard{display:grid;grid-template-columns:repeat(4,1fr);gap:5px;margin:0}
+.pocket-fit .room-shift .keyboard select{grid-column:1/-1}
+.pocket-fit .room-shift .keyboard button{padding:4px}
+.pocket-fit .room-shift .controls button{padding:7px}
+.pocket-fit .room-shift #shiftlock-answer{margin:0!important}
+.pocket-fit .room-lock main>.intro{margin:0 0 7px!important}
+.pocket-fit .room-lock .intro #date{display:block!important;letter-spacing:0;font-size:11px;margin-bottom:4px}
+.pocket-fit .room-lock .intro #category{padding:8px 16px!important;margin:4px auto!important;min-width:150px;border-width:3px;font-size:18px;letter-spacing:2px}
+.pocket-fit .room-lock .intro #category:before{inset:5px}
+.pocket-fit .room-lock .category-label{font-size:11px;margin:0}
+.pocket-fit .room-lock .safe{padding:12px 8px;border-radius:15px;--row:44px}
+.pocket-fit .room-lock .target-line{top:calc(12px + var(--row))}
+.pocket-fit .room-lock .letter{font-size:30px}
+.pocket-fit .room-lock .dial-buttons{margin-top:6px;gap:3px}
+.pocket-fit .room-lock .dial-buttons button{min-width:0;padding:3px;font-size:17px}
+.pocket-fit:has(.room-lock){--row:44px}
+.pocket-fit .room-lock .word-list{grid-template-columns:repeat(2,minmax(0,1fr));gap:5px;margin:0}
+.pocket-fit .room-lock .word-list li{padding:8px;letter-spacing:2px;font-size:12px;min-width:0}
+.pocket-fit .room-lock .section-title{font-size:11px}
+.pocket-fit .room-deli .roundControls{margin:0 0 8px}
+.pocket-fit .room-deli .ticket{padding:14px 8px;min-height:170px}
+.pocket-fit .room-deli .ticket h2{font-size:16px;margin:8px 0}
+.pocket-fit .room-deli .recipe{gap:4px;flex-wrap:wrap}
+.pocket-fit .room-deli .ingredientStep{padding:7px 2px;min-width:36px}
+.pocket-fit .room-deli .ingredientStep .emoji{font-size:24px}
+.pocket-fit .room-deli .counter{margin-top:8px}
+.pocket-fit .room-deli .tray,.pocket-fit .room-deli .tray.rush{grid-template-columns:repeat(4,minmax(0,1fr));gap:5px}
+.pocket-fit .room-deli .food,.pocket-fit .room-deli .tray.rush .food{min-height:64px;border-radius:10px}
+.pocket-fit .room-deli .food .emoji,.pocket-fit .room-deli .tray.rush .emoji{font-size:26px}
+.pocket-fit .room-deli .food small{font-size:10px}
+.pocket-fit .mode{display:none}
+.pocket-fit #edition,.pocket-fit #title,.pocket-fit #subtitle{display:none}
+.pocket-fit .binary-board{gap:5px;padding:7px}
+.pocket-fit .binary-cell{min-height:0}
+.pocket-fit #instruction{font-size:11px;margin:0}
+.pocket-fit .restart{font-size:11px}
+.pocket-fit .room-futoshiki .cell{min-height:0;min-width:0;padding:0;line-height:1;font-size:clamp(22px,calc(var(--pocket-board-size,300px)/10),32px)}
+.pocket-fit body.room-futoshiki .digit-dock{display:block!important;padding:0!important;margin:0!important;border:0}
+.pocket-fit .room-futoshiki .digits{gap:5px;grid-template-columns:repeat(5,minmax(0,1fr))}
+.pocket-fit .room-futoshiki .digits button{min-height:44px;font-size:21px}
+.pocket-fit .room-futoshiki .digits button:last-child{grid-column:1/-1;font-size:12px}
+.pocket-fit .room-futoshiki .dock-label{margin:0 0 5px}
+.pocket-fit .room-futoshiki .board-actions{gap:5px;flex-wrap:wrap}
+.pocket-fit .room-futoshiki .board-actions button{font-size:12px;padding:8px;flex:1}
+.pocket-fit .board-meta{font-size:10px;margin-bottom:7px}
+.pocket-fit .puzzle-actions{margin:0;gap:6px}
+.pocket-fit .puzzle-actions button{padding:8px;font-size:12px}
+.pocket-fit .answer-note{font-size:11px;margin:0}
+.pocket-fit .instruction{font-size:12px;line-height:1.4}
+.pocket-fit body[data-pocket-game="signal"] .pocket-actions>#instruction{display:none}
+@media(min-width:580px){.pocket-fit .room-lock .word-list{grid-template-columns:1fr}.pocket-fit .room-deli .tray,.pocket-fit .room-deli .tray.rush{grid-template-columns:repeat(3,minmax(0,1fr))}.pocket-fit .room-deli .food,.pocket-fit .room-deli .tray.rush .food{min-height:74px}}
+.pocket-fit .room-lock .intro #date{color:#cbd7dc!important}

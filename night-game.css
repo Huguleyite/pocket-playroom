@@ -11,6 +11,7 @@ html.night-play .tile.selected,html.night-play .futo-cell.selected{background:va
 html.night-play .tile.match,html.night-play .tile.tip{background:#365f49!important;color:#ecfff0!important}
 html.night-play .futo-cell.fixed{background:#363b54!important;color:#f1f1ff!important}
 html.night-play .inequality{color:var(--night-accent)!important}
+html.night-play .room-futoshiki .sign{background:#292e48!important;color:#f1cd7c!important}
 html.night-play .primary,html.night-play .keypad button{background:var(--night-accent)!important;color:#101820!important}
 html.night-play .ticket{background:#262530!important;border-color:#665040!important;box-shadow:0 6px 0 #382e29!important}
 html.night-play .ingredientStep,html.night-play .food{background:#30303b!important;border-color:#665040!important;color:#f7ece6!important}
