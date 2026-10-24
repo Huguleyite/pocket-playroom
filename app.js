@@ -57,6 +57,7 @@
   function nightOn(id=current){return id?typeof nightPrefs.overrides[id]==='boolean'?nightPrefs.overrides[id]:nightPrefs.global:nightPrefs.global;}
   function saveNight(){try{localStorage.setItem(nightKey,JSON.stringify(nightPrefs));localStorage.setItem('room-for-play:neon:mode',JSON.stringify(nightOn('binario')));}catch{}}
   function syncNightDiscovery(){
+    if(document.body.classList.contains('discover-page'))return;
     if(current)return;
     let discovery=document.getElementById('night-discovery');
     if(nightPrefs.global){
@@ -138,7 +139,25 @@
     document.querySelector('.help p').textContent=help;
     document.title=(enabled?'Neon Logic':'Binario')+' · Pocket Playroom';
   }
+  
+  function discoverPage(experience){
+    current=experience?'element-within':null;frame=null;document.body.className=experience?'discover-page game-element-within':'discover-page';
+    document.getElementById('mobile-ad-anchor').hidden=true;document.documentElement.removeAttribute('style');
+    document.title=(experience?'The Element Within':'Discover')+' · Pocket Playroom';
+    main.innerHTML=experience?
+      '<a class="back-link" href="#discover">← Back to Discover</a><header class="game-heading"><div class="eyebrow">Self-discovery · 3–4 minutes</div><h1>The Element Within</h1><p>A small doorway to something within.</p></header><div class="element-frame-wrap"><iframe id="game-frame" class="element-frame" title="Explore The Element Within" src="discover/element-within/experience.html" allow="web-share"></iframe></div><section class="discover-after"><h2>Leave a little room for reflection.</h2><p>Notice what resonated. Take what helps. You are more than one result.</p><a class="pill-link" href="#discover">Back to Discover →</a></section>':
+      '<section class="discover-intro"><div class="eyebrow">Discover · Self-discovery & reflection</div><h1>A little room<br><em>for you.</em></h1><p>Follow your curiosity. Explore your instincts.<br>See yourself from another angle.</p></section><section class="discover-feature" aria-labelledby="discover-feature-title"><div class="discover-symbols" aria-label="Water, earth, fire, and air">≋ &nbsp; ⬡ &nbsp; ♨ &nbsp; ༄</div><div class="discover-feature-copy"><div class="eyebrow">12 thoughtful choices · 3–4 minutes</div><h2 id="discover-feature-title">The Element Within</h2><p>Discover your natural element through a journey of instinct, pressure, and purpose.</p><a class="discover-action" href="discover/element-within/index.html">Explore yourself ↗</a><small>No timer. No wrong answers. No account needed.</small></div></section><section class="discover-note"><h2>Curiosity looks good on you.</h2><p>These experiences offer a starting point for reflection, not a fixed definition of who you are.</p></section><div class="ad-space" aria-label="House advertisement">Advertisement · From our family of sites</div>';
+    main.insertAdjacentHTML('afterbegin','<div class="night-controls"><button id="discover-night" class="night-toggle" role="switch" aria-checked="false">Night Play</button></div>');
+    document.getElementById('discover-night').onclick=()=>{const on=!nightOn();if(current)nightPrefs.overrides[current]=on;else nightPrefs.global=on;saveNight();updateDiscoverNight()};
+    if(experience){frame=document.getElementById('game-frame');frame.addEventListener('load',updateDiscoverNight)}
+    updateDiscoverNight();
+  }
+  function updateDiscoverNight(){applyNight();const toggle=document.getElementById('discover-night');if(toggle){toggle.setAttribute('aria-checked',String(nightOn()));toggle.textContent='☾ Night Play: '+(nightOn()?'On':'Off')}}
+
   async function route(){const version=++routeVersion;
+    const discovery=location.hash==='#discover'||location.hash==='#discover/element-within';
+    for(const id of ['all-link','big-screen-link','discover-link'])document.getElementById(id)?.removeAttribute('aria-current');
+    if(discovery){document.getElementById('discover-link').setAttribute('aria-current','page');discoverPage(location.hash.endsWith('/element-within'));window.scrollTo(0,0);main.focus({preventScroll:true});return;}
     const big=['#big-screen','#big-screen/chronodeck','#big-screen/lineage','#big-screen/hex-gambit','#big-screen/quantum-draft'].includes(location.hash);
     document.getElementById('all-link').toggleAttribute('aria-current',!big);
     document.getElementById('big-screen-link').toggleAttribute('aria-current',big);
@@ -157,3 +176,5 @@
   setInterval(refreshCompletion,15000);
   window.addEventListener('hashchange',route);route();
 })();
+
+
