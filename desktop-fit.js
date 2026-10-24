@@ -114,3 +114,17 @@
   new ResizeObserver(measure).observe(bar);
   measure();
 })();
+
+// Measure actual space below the header and board controls, including browser scaling.
+(() => {
+ if(document.body.dataset.playroomGame!=='hex-gambit')return;
+ const battle=document.querySelector('#battleView');
+ let pending=false;
+ const measure=()=>{pending=false;if(battle.hidden)return;const top=battle.getBoundingClientRect().top+scrollY;document.documentElement.style.setProperty('--hex-battle-height',Math.max(510,innerHeight-top-12)+'px');};
+ const schedule=()=>{if(!pending){pending=true;requestAnimationFrame(measure);}};
+ new ResizeObserver(schedule).observe(document.querySelector('.console>header'));
+ new ResizeObserver(schedule).observe(document.querySelector('.court-controls'));
+ new ResizeObserver(schedule).observe(document.querySelector('.playroom-tools'));
+ new MutationObserver(schedule).observe(battle,{attributes:true,attributeFilter:['hidden']});
+ window.addEventListener('resize',schedule);schedule();
+})();
