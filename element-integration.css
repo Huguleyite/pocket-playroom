@@ -5,3 +5,5 @@ body.game-element-within .game-heading{text-align:center;margin:20px auto 28px}b
 
 .personality-label{width:min(280px,100%);background:#fff6d9;color:#20231e;border:3px solid #20231e;border-radius:4px;overflow:hidden;transform:rotate(-3deg);box-shadow:6px 7px 0 #00000012;text-align:center;font-family:Arial,sans-serif}.personality-label strong{display:block;background:#f2ba48;border-bottom:3px solid #20231e;padding:10px 12px;font-size:32px;letter-spacing:4px;line-height:1.1}.personality-label>span{display:block;padding:17px 12px 14px;font-size:19px;line-height:1.35;font-weight:800;letter-spacing:.3px}.personality-label small{display:block;padding:0 10px 15px;font-size:10px;letter-spacing:1.4px}
 .discover-sign-art{padding:35px 24px}.discover-sign-art .personality-label{flex-shrink:0}
+.night-play .sign-discover-feature .discover-action{background:#dbbd83;color:#15292e}
+.night-play .discover-sign-art .personality-label small{color:#50563d}
