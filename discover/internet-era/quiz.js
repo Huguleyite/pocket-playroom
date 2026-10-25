@@ -59,7 +59,7 @@ readNight();applyNight();
 $('night').onclick=()=>{readNight();const enabled=root.classList.contains('er-night');nightPrefs.overrides['internet-era']=!enabled;try{localStorage.setItem('room-for-play:night',JSON.stringify(nightPrefs))}catch{}applyNight()};
 window.addEventListener('storage',event=>{if(event.key==='room-for-play:night'){readNight();applyNight()}});
 $('copy-link').onclick=async()=>{const invitation='What Internet Trend Era Are You Stuck In? Your feed moved on. Did you? '+quizUrl;try{await navigator.clipboard.writeText(invitation);$('status').textContent='Quiz link copied. Send it to someone who needs to take this.'}catch{$('copybox').value=invitation;$('copybox').hidden=false;$('copybox').focus();$('copybox').select();$('status').textContent='Copy the selected quiz invitation.'}};
-function mountAd(){if($('house-ad'))return;const ad=document.createElement('aside');ad.id='er-house-ad';ad.className='er-house-ad';ad.setAttribute('aria-label','House advertisement');ad.innerHTML='<div class="er-ad-label">Advertisement · From our family of sites</div><div data-ad-slot class="er-house-slot"></div>';$('result').append(ad)}
+function mountAd(){if($('house-ad'))return;const ad=document.createElement('aside');ad.id='er-house-ad';ad.className='er-house-ad';ad.setAttribute('aria-label','House advertisement');ad.innerHTML='<div class="er-ad-label">Advertisement · From our family of sites</div><div data-ad-slot class="er-house-slot"></div>';sharing.insertBefore(ad,sharing.querySelector('.er-share-links'))}
 
 // Read-only access for local verification.
 root.eraPreview={eras,questions,scores,getState:()=>({current,answers:answers.slice(),tieIds,winner})};
