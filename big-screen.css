@@ -70,3 +70,9 @@ body.big-screen-page.sanctuary-page{--accent:#e7cd8c;--muted:#b6cbc1;background:
 
 /* Sanctuary environment artwork; leave layout sizing unchanged. */
 .big-screen-page.sanctuary-page #main:before{background-image:linear-gradient(90deg,#091813e8 0%,#091813ae 30%,#09181322 66%,#09181308 100%),linear-gradient(0deg,#091813 0%,transparent 35%),url('assets/the-last-sanctuary/sanctuary-background-01.png');background-size:100% 100%,100% 100%,cover;background-position:center,center,center top;background-repeat:no-repeat}
+
+/* Frame Sanctuary artwork to the game section rather than the full viewport. */
+.big-screen-page.sanctuary-page #main:before{left:0;width:100%;height:610px;background-size:100% 100%,100% 100%,cover;background-position:center,center,right top;border-radius:0 0 16px 16px}
+.sanctuary-page .chrono-tagline{white-space:normal;width:auto;max-width:34rem}
+@media(max-width:1000px) and (min-width:601px){.big-screen-page.sanctuary-page #main:before{height:560px}}
+@media(max-width:600px){.big-screen-page.sanctuary-page #main:before{height:780px;background-position:center,center,65% top;opacity:1}}
