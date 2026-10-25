@@ -362,10 +362,11 @@ const utcDay = () => new Date().toISOString().slice(0,10);
 const date = utcDay();
 const game = createWordDrop(date);
 const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
-// Give each move seven seconds of readable animation, then finish at fast pace.
+// Begin at one second per word and smoothly accelerate over ten seconds.
 const wait = ms => {
- const normalTime = Math.min(ms, Math.max(0, 7000 - (performance.now() - cascadeStartedAt)));
- const delay = normalTime; // After seven seconds, finish without animation delays.
+ const remaining = Math.max(0, 10000 - (performance.now() - cascadeStartedAt));
+ const pace = (remaining / 10000) ** 2;
+ const delay = Math.min(remaining, (ms / 650) * 1000 * pace);
  return new Promise(resolve => setTimeout(resolve, reduced || skipCascade ? 0 : delay));
 };
 let storageOK = true;
@@ -552,7 +553,7 @@ async function animateWave(wave,n,result) {
  showBreakdown(result,n);
  message(n?`Cascade ${n}: falling or new tiles formed ${wave.matches.length} scoring word${wave.matches.length===1?'':'s'}. No multiplier.`:`Your word: ${result.word.length} × ${result.word.length} = ${wave.points} points.`);
  for(const match of wave.matches){
-  if(performance.now()-cascadeStartedAt>=7000)break;
+  if(performance.now()-cascadeStartedAt>=10000)break;
   cells.forEach(tile=>tile.classList.remove('scoring-word'));
   match.path.forEach(p=>cells[index(p)].classList.add('scoring-word'));
   $('word').textContent=`${match.word} · ${match.word.length} × ${match.word.length} = ${match.word.length**2}`;
