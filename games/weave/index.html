@@ -40,7 +40,7 @@ window.roomComplete=(id,date)=>{if(!date){const d=new Date();date=d.getFullYear(
 <p class="storage" id="storage" role="status"></p>
 <p class="foot">One puzzle a day. Make every move count.</p>
 </main>
-<dialog id="help"><button class="close" data-close="help" aria-label="Close instructions">×</button><h2>A little shift.</h2><p>Swipe horizontally to shift a row, or vertically to shift a column. Letters wrap to the opposite edge. Each swipe moves one space.</p><p>Make four-letter words from left to right or top to bottom. Matching lines clear together; letters fall and new ones arrive.</p><p>Each word earns 100 points. Consecutive cascade waves multiply that by 2, 3, and so on. Start with 60 seconds and find as many words as you can. Every word adds 10 seconds, including each word in a cascade. Repeated words count. The clock keeps running during hints, instructions, and time away from the game. The round ends at zero.</p><p>Tap a tile, then use the arrow buttons or your keyboard’s arrow keys. Green in your share grid means a cleared letter; yellow means a moved letter. Your progress stays in this browser.</p></dialog>
+<dialog id="help"><button class="close" data-close="help" aria-label="Close instructions">×</button><h2>A little shift.</h2><p>Swipe horizontally to shift a row, or vertically to shift a column. Letters wrap to the opposite edge. Each swipe moves one space.</p><p>Make four-letter words from left to right or top to bottom. Matching lines clear together; letters fall and new ones arrive.</p><p>Each word earns 100 points. Consecutive cascade waves multiply that by 2, 3, and so on. Start with 60 seconds and find as many words as you can. Every word adds 1 second, including each word in a cascade. Repeated words count. The clock keeps running during hints, instructions, and time away from the game. The round ends at zero.</p><p>Tap a tile, then use the arrow buttons or your keyboard’s arrow keys. Green in your share grid means a cleared letter; yellow means a moved letter. Your progress stays in this browser.</p></dialog>
 <dialog id="finished" aria-labelledby="finishTitle"><button class="close" data-close="finished" aria-label="Close results">×</button><h2 id="finishTitle">Beautifully woven.</h2><p id="finishStats"></p><pre class="summary" id="summary"></pre><button class="primary wide" id="share">Share result</button><button class="wide" id="copy">Copy summary</button><p id="shareStatus" role="status" aria-live="polite"></p></dialog>
 <aside class="ad-anchor" aria-label="Advertisement"><div id="ad-anchor" class="ad-slot" data-ad-slot="anchor" aria-label="320 by 50 advertisement"></div></aside>
 <script>
@@ -149,7 +149,7 @@ function peekCandidate(grid) {
 }
 
 const $ = id => document.getElementById(id);
-const VERSION = 2, START_MS = 60000, WORD_MS = 10000;
+const VERSION = 2, START_MS = 60000, WORD_MS = 1000;
 const dayString = (date = new Date()) => `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`;
 const day = dayString(), key = `wordweave:v${VERSION}:${day}`, streakKey = 'wordweave:completed:v1';
 const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
@@ -401,7 +401,7 @@ $('start').onclick=()=>{
   if(deadline!==null||completed||checkDate())return;
   deadline=Date.now()+START_MS; $('start').classList.add('hidden');
   document.querySelectorAll('[data-dir]').forEach(button=>button.disabled=false);
-  $('message').textContent='Keep weaving! Every word adds 10 seconds.';
+  $('message').textContent='Keep weaving! Every word adds 1 second.';
   save();paintClock();
 };
 $('start').classList.toggle('hidden',deadline!==null||completed);
