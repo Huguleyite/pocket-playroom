@@ -4,7 +4,17 @@
 .house-promo:focus-visible{outline:3px solid #b55330;outline-offset:-3px}
 .house-mark{display:grid;place-items:center;flex:none;width:34px;height:34px;border-radius:8px;background:#61407e;color:#fff;font-size:22px;font-weight:800}
 .house-copy{display:flex;flex:1;min-width:0;flex-direction:column;gap:2px}.house-copy small{font-size:9px;line-height:1.2}.house-copy strong{font-size:13px;line-height:1.2}.house-copy>span{font-size:11px}
-.house-slot[style*="50px"] .house-copy>span,.ad-space .house-copy>span,#ad-anchor .house-copy>span{display:none}
+.house-compact .house-copy>span,.ad-space .house-copy>span,#ad-anchor .house-copy>span{display:none}
 .house-slot .house-promo{margin:0!important}
 .house-tall .house-promo{flex-direction:column;justify-content:center;gap:14px;padding:18px;text-align:center}.house-tall .house-mark{width:64px;height:64px;font-size:36px}.house-tall .house-copy{flex:0;gap:8px}.house-tall .house-copy strong{font-size:20px}.house-tall .house-copy>span{font-size:13px}
 html.night-play .house-promo{background:#2e2443;color:#f6ebff!important;border-color:#806593}
+
+/* Original artwork stays intact and proportional in every placement. */
+.house-mark.house-brand{width:44px;height:44px;border-radius:0;background:transparent;overflow:hidden}
+.house-logo{display:block!important;width:100%!important;height:100%!important;max-width:100%;object-fit:contain!important;border:0!important;border-radius:0!important;margin:0!important}
+.house-tall .house-mark.house-brand{width:104px;height:104px;max-height:45%;flex-shrink:1}
+.house-wide .house-promo{flex-direction:row;text-align:left;gap:20px}
+.house-wide .house-mark.house-brand{width:52%;height:104px;max-height:100%;flex-shrink:0}
+.house-wide .house-copy{flex:1}
+
+.house-mark.house-brand{display:block;min-width:0;min-height:0}.house-logo{min-width:0;min-height:0;max-height:100%!important}

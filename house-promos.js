@@ -22,6 +22,12 @@
  {id:'frequency',title:'The Frequency',line:'Alabama and Chambers County. Tune in.',mark:'TF',url:'https://readtheroom.news/the-frequency/'},
  {id:'vibe',title:'VibeFrag',line:'Explore your next fragrance.',mark:'VF',url:'https://vibefrag.com/index.html'}
  ];
+ const branding={atlas:['atlas-valley.png'],helios:['helios-valley.png'],halloween:['helios-valley.png'],room:['read-the-room.png','read-the-room-banner.png'],vibe:['vibefrag.png','vibefrag-banner.png']};
+ const resize=new ResizeObserver(entries=>{for(const {target,contentRect} of entries){
+  const wide=contentRect.width>=580&&contentRect.height>=120;
+  target.classList.toggle('house-wide',wide);target.classList.toggle('house-compact',contentRect.height<=90);
+  const img=target.querySelector('.house-logo');if(img)img.src=wide&&img.dataset.banner?img.dataset.banner:img.dataset.logo;
+ }});
  let propertyCursor=Math.floor(Math.random()*properties.length);
  let cursor=Math.floor(Math.random()*catalogue.length);
  const selector='.ad-space,[data-ad-slot],[data-ad-placement],[data-display-ad]';
@@ -35,15 +41,16 @@
    const route=['chronodeck','hex-gambit','lineage','quantum-draft'].includes(g[0])?'big-screen/':'games/';
    const link=document.createElement('a');link.className='house-promo';link.href=new URL('index.html#'+route+g[0],base);link.href=property.url;link.target='_blank';link.rel='noopener noreferrer';
    const mark=document.createElement('span');mark.className='house-mark';mark.textContent=property.mark;
+   const art=branding[property.id];if(art){mark.textContent='';mark.classList.add('house-brand');const img=document.createElement('img');img.className='house-logo';img.alt=property.id==='halloween'?'Helios Valley':property.title;img.dataset.logo=new URL('assets/brands/'+art[0],base).href;if(art[1])img.dataset.banner=new URL('assets/brands/'+art[1],base).href;img.src=img.dataset.logo;img.decoding='async';mark.append(img);}
    const copy=document.createElement('span');copy.className='house-copy';
    const label=document.createElement('small');label.textContent='Advertisement · From our family of sites';
    const title=document.createElement('strong');title.textContent=property.title;
    const line=document.createElement('span');line.textContent=property.line;
    copy.append(label,title,line);const arrow=document.createElement('span');arrow.textContent='→';arrow.setAttribute('aria-hidden','true');
-   link.append(mark,copy,arrow);slot.replaceChildren(link);slot.dataset.houseFor=current;slot.classList.add('house-slot');
+   link.append(mark,copy,arrow);slot.replaceChildren(link);slot.dataset.houseFor=current;slot.classList.add('house-slot');resize.observe(slot);
    slot.classList.toggle('house-tall',parseFloat(getComputedStyle(slot).height)>120);
    slot.setAttribute('aria-label','Advertisement: '+property.title);
-   const wrapper=slot.closest('aside');if(wrapper)wrapper.setAttribute('aria-label','More from Pocket Playroom');
+   const wrapper=slot.closest('aside');if(wrapper)wrapper.setAttribute('aria-label','Advertisement: '+property.title);
    const labelNode=slot.parentElement?.querySelector(':scope > .ad-label');if(labelNode)labelNode.textContent='Advertisement · Our sites';
   });
  }
