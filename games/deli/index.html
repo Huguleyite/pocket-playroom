@@ -9,6 +9,38 @@
 :root{font-family:system-ui,-apple-system,sans-serif;color:#30251f;background:#fff6e7;--red:#bb3829;--green:#28784d}*{box-sizing:border-box}body{margin:0;padding:22px 18px max(24px,env(safe-area-inset-bottom));min-height:100svh;background:radial-gradient(ellipse at top,#ffe4b9,transparent 65%),#fff6e7}main{max-width:460px;margin:auto}header{display:flex;align-items:center;justify-content:space-between}h1{margin:0;font-size:34px;letter-spacing:-1.5px}h1 span{color:var(--red)}.eyebrow{text-transform:uppercase;letter-spacing:2px;font-size:10px;font-weight:800;color:#8c5b39;margin:5px 0 20px}.sound{min-height:44px;padding:8px 12px;border:1px solid #dbc4a7;border-radius:12px;background:#fff9ef;color:inherit;font:inherit;font-size:12px}button{cursor:pointer;touch-action:manipulation}button:focus-visible{outline:3px solid #236ea4;outline-offset:4px}.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:15px 0}.stat{background:#fffdf7;border:1px solid #ead7bb;border-radius:15px;text-align:center;padding:12px 3px}.stat b{font-size:26px;display:block;font-variant-numeric:tabular-nums}.stat small{font-size:10px;letter-spacing:1px;text-transform:uppercase;color:#80694e}.clock{height:7px;background:#e8d5b8;border-radius:8px;overflow:hidden;margin:0 0 22px}.clock div{width:100%;height:100%;background:var(--red);transform-origin:left;transition:transform .1s linear}.ticket{position:relative;background:#fffdf8;border:1px solid #e7d5bc;box-shadow:0 8px 0 #e9d5b6;border-radius:8px 8px 19px 19px;padding:23px 18px;text-align:center;min-height:208px}.ticket:before{content:'';position:absolute;top:-6px;left:30%;right:30%;height:12px;border-radius:4px;background:#d9b886}.ticketLabel{font-size:11px;letter-spacing:2px;color:#92775a;font-weight:750}h2{font-size:21px;margin:12px 0 18px}.recipe{display:flex;justify-content:center;gap:9px}.ingredientStep{position:relative;min-width:66px;background:#f4ecdf;border:2px solid transparent;border-radius:13px;padding:10px 5px 8px}.ingredientStep.next{border-color:#b88641;background:#fff2d8}.ingredientStep.done{background:#dcefdc;border-color:#78b68a}.ingredientStep .emoji{font-size:31px;display:block;line-height:1.2}.ingredientStep small{font-size:10px;display:block;margin-top:5px}.ingredientStep.done:after{content:'✓';position:absolute;right:-5px;top:-8px;background:var(--green);border-radius:50%;color:white;font-size:12px;width:20px;height:20px;line-height:20px}.counter{text-align:center;font-size:12px;margin-top:15px;color:#866b4c}.feedback{text-align:center;min-height:58px;display:flex;align-items:center;justify-content:center;font-weight:700;color:var(--green);font-size:16px;line-height:1.4;padding:12px 0}.tray{display:grid;grid-template-columns:repeat(3,1fr);gap:11px}.food{font:inherit;border:2px solid #dcc2a0;border-bottom-width:6px;border-radius:19px;background:#fffdf7;min-height:112px;color:#30251f;transition:transform .08s,background .12s}.food:active{transform:translateY(4px);border-bottom-width:2px}.food .emoji{font-size:43px;display:block}.food small{font-size:13px;font-weight:750;display:block;margin-top:5px}.food:disabled{opacity:.55;cursor:default}.help{text-align:center;font-size:12px;line-height:1.6;color:#856d54;margin:15px 0}.primary{font:inherit;font-weight:800;background:var(--red);color:white;width:100%;border:0;border-bottom:5px solid #8a271c;border-radius:15px;min-height:54px;padding:12px}.secondary{font:inherit;border:1px solid #d8c2a4;border-radius:12px;background:transparent;padding:10px 16px;min-height:44px;color:inherit}.footer{display:flex;justify-content:space-between;align-items:center;margin-top:18px;font-size:12px;color:#80694e}.hidden{display:none!important}.ticket.served{animation:pop .24s ease-out}.ticket.oops{animation:shake .2s ease-in-out}.urgent{color:var(--red)}dialog{border:1px solid #e0c7a2;background:#fff9ee;border-radius:23px;padding:27px;max-width:390px;width:calc(100% - 32px);color:inherit;text-align:center}dialog::backdrop{background:#30251f99}dialog h2{font-size:28px;margin:5px 0 10px}dialog p{font-size:14px;line-height:1.7}.resultNumber{font-size:60px;font-weight:850;color:var(--red);line-height:1.2}.resultLabel{font-size:12px;color:#856b4a;margin-bottom:22px}.close{margin-top:10px;width:100%}.notice{font-size:11px;color:#88623e;text-align:center;min-height:16px}@keyframes pop{50%{transform:scale(1.04);background:#edf8e7}}@keyframes shake{25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 .modePicker{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:13px;margin:6px 0 12px}.modePicker select{font:inherit;max-width:72%;padding:12px 8px;border:1px solid #dbc4a7;border-radius:12px;background:#fffdf7;color:inherit;min-height:44px}.tray.rush{grid-template-columns:repeat(4,minmax(0,1fr))}.tray.rush .food{min-height:98px}.tray.rush .emoji{font-size:34px}.patience{margin-top:17px;text-align:left;font-size:11px;color:#756044}.patience label{display:flex;justify-content:space-between;margin-bottom:6px}.patience progress{width:100%;height:12px;accent-color:var(--green)}.patience.urgent progress{accent-color:var(--red)}.ingredientStep{min-width:0;flex:1;max-width:78px}.recipe{gap:6px}.modeNote{font-size:12px;color:#80694e;line-height:1.5;margin:0 0 12px}
 .roundControls{display:flex;align-items:center;gap:12px;margin-bottom:22px}.roundControls .clock{flex:1;margin:0}.roundControls #pause{background:#30251f;color:#fff;border-color:#30251f;font-weight:750;min-width:100px}
+
+/* Expansion 1: illustrated pantry and three destinations. */
+body{background-color:#d9eee9;background-image:linear-gradient(180deg,#ffe7cbcc 0%,#fff5e9ee 68%,transparent 68%),repeating-conic-gradient(#b8604c 0% 25%,#f9e5c9 0% 50%);background-size:auto,56px 56px;background-attachment:fixed}
+body[data-menu="garden"]{background-color:#c1d5ae;background-image:repeating-linear-gradient(90deg,transparent 0 110px,#64896e55 110px 116px),repeating-linear-gradient(0deg,transparent 0 130px,#64896e55 130px 136px),radial-gradient(ellipse at 10% 80%,#759b62aa,transparent 45%),linear-gradient(#d9eee9,#f0efd6);--red:#386c46}
+body[data-menu="future"]{background-color:#101d38;background-image:radial-gradient(circle at 15% 20%,#83f1e6 0 2px,transparent 3px),radial-gradient(circle at 80% 35%,#fff 0 1px,transparent 2px),repeating-linear-gradient(90deg,transparent 0 110px,#63b6de22 110px 112px),linear-gradient(150deg,#14253d,#514473);background-size:210px 230px,150px 170px,auto,auto;--red:#664391}
+main{background:#fff8eeed;padding:18px;border:1px solid #fff9;border-radius:24px;box-shadow:0 18px 60px #30251f22;max-width:510px}body{padding:16px 10px}header{gap:8px}.eyebrow{margin-bottom:10px}.destination{display:flex;gap:10px;align-items:center;font-size:12px;font-weight:750}.destination select{flex:1;min-width:0;font:inherit;padding:10px;border:1px solid #cbb89f;border-radius:10px;background:#fffdf7;color:#30251f;min-height:44px}.scene{height:64px;overflow:hidden;border-radius:12px;background:linear-gradient(#8abfbe 60%,#c75147 60%);display:flex;align-items:center;justify-content:space-around;margin:10px 0;color:#fff5d8;text-shadow:0 2px #30251f55;font-size:13px;font-weight:850;letter-spacing:2px}.scene:before,.scene:after{content:'✦';font-size:30px}.scene.garden{background:repeating-linear-gradient(90deg,transparent 0 72px,#65876c88 72px 76px),linear-gradient(#b4d7c3 65%,#6b8854 65%);color:#254b37;text-shadow:none}.scene.future{background:radial-gradient(ellipse at 90% 100%,#9c7dce 0 22%,transparent 23%),linear-gradient(120deg,#12243b,#343b6a);color:#adfff2}.foodArt{width:64px;height:36px;display:block;margin:auto;filter:drop-shadow(0 3px 1px #30251f22)}.ingredientStep .foodArt{width:100%;max-width:50px;height:25px}.food small{font-size:12px}.tray.rush{grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}.tray.rush .food{min-height:78px}.stats{margin:10px 0}.stat{padding:6px}.stat b{font-size:23px}.roundControls{margin-bottom:14px}.ticket{padding:15px 10px;min-height:0}h2{margin:8px 0 12px;font-size:19px}.ingredientStep{padding:6px 2px}.ingredientStep small{font-size:9px;overflow-wrap:anywhere}.counter{margin-top:10px}.feedback{min-height:44px;padding:8px 0;font-size:14px}.help{margin:10px 0}.assembly{height:114px;position:relative;display:flex;flex-direction:column-reverse;align-items:center;justify-content:flex-start;padding-bottom:12px;margin-top:10px;border-bottom:4px solid #cfbca4;border-radius:0 0 50% 50%;background:radial-gradient(ellipse at 50% 100%,#e9ddca,transparent 65%)}.assembly:empty:after{content:'Your next masterpiece starts here';font-size:11px;color:#79624b;padding-bottom:20px}.assembly .foodArt{width:130px;height:26px;margin:-5px 0 0;flex-shrink:0;animation:land .18s ease-out}.assembly .foodArt:first-child{margin-bottom:0}.assembly .foodArt:last-child{transform:rotate(-2deg)}@keyframes land{from{translate:0 -16px;opacity:.3}to{translate:0 0;opacity:1}}@media(prefers-reduced-motion:reduce){.assembly .foodArt{animation:none}}@media(max-width:350px){main{padding:12px}.ingredientStep small{font-size:8px}.destination{gap:5px}.scene{height:50px}}
+
+/* Tactile counter, lit ingredients, and responsive interaction. */
+.food{position:relative;isolation:isolate;overflow:hidden;background:radial-gradient(ellipse at 50% 15%,#fff 5%,#fff4dc 65%,#eddbba);box-shadow:inset 0 2px 1px #fff,0 3px 0 #bc9970,0 7px 13px #53361819;transition:transform .18s ease,box-shadow .18s ease,border-color .18s ease}
+.food:before{content:'';position:absolute;inset:0;background:linear-gradient(115deg,transparent 20%,#fff9 45%,transparent 70%);transform:translateX(-140%);transition:transform .45s;pointer-events:none;z-index:-1}
+.food .foodArt{width:79px;height:45px;filter:drop-shadow(0 5px 3px #52301633);transition:transform .22s cubic-bezier(.2,.8,.3,1.6),filter .2s}.tray.rush .food{min-height:94px}.food small{margin:1px 0 4px;letter-spacing:.2px}
+@media(hover:hover){.food:enabled:hover{transform:translateY(-5px);border-color:#c79449;box-shadow:inset 0 2px 1px #fff,0 6px 0 #bc9970,0 12px 20px #53361830}.food:enabled:hover:before{transform:translateX(140%)}.food:enabled:hover .foodArt{transform:translateY(-3px) rotate(-7deg) scale(1.13);filter:drop-shadow(0 8px 4px #52301644)}.primary:hover,.secondary:enabled:hover,.sound:hover{filter:brightness(1.08);transform:translateY(-2px)}}
+.food:enabled:active{transform:translateY(3px) scale(.96);box-shadow:inset 0 2px 5px #60401d22,0 1px 0 #bc9970}.food:enabled:active .foodArt{transform:scale(.91) rotate(4deg)}.food:focus-visible{outline:3px solid var(--red);outline-offset:4px}.food.expected{border-color:#b98d44;box-shadow:inset 0 0 0 1px #f4d99b,0 3px 0 #bc9970,0 0 16px #d9af5333}.food.expected:after{content:'NEXT';position:absolute;top:5px;right:6px;font-size:8px;letter-spacing:1px;font-weight:850;color:#88601f}
+.ingredientStep.next{box-shadow:0 0 0 3px #dfb95b22,0 4px 10px #ad7e2922;background:linear-gradient(#fff8df,#ffe8ab)}.ingredientStep.done{background:linear-gradient(#eff9df,#d1e8bd)}
+.assembly{height:140px;background:radial-gradient(ellipse at 50% 100%,#c8ae8555,transparent 60%);border:0;padding-bottom:22px;isolation:isolate}.assembly:before{content:'';position:absolute;bottom:3px;left:8%;right:8%;height:26px;border-radius:50%;background:radial-gradient(ellipse,#faf9ed 45%,#d7dfdc 48%,#fff 55%,#c0cecb 60%,#fafbf1 64%);box-shadow:0 6px 7px #38201633;z-index:-1}.assembly .foodArt{width:156px;height:34px;margin:-12px 0 0;animation:none;filter:drop-shadow(0 3px 2px #46301a44)}.assembly .foodArt:last-child{transform:none}.assembly:empty:after{padding-bottom:31px}.assembly .foodArt:nth-child(even){rotate:2deg}.assembly .foodArt:nth-child(odd){rotate:-2deg}
+.ticket{background:linear-gradient(135deg,#fffef9,#fff7e7);box-shadow:0 6px 0 #d7be98,0 12px 22px #53361816}.scene{box-shadow:inset 0 0 0 2px #fff5,0 4px 10px #30251f20}.scene:before,.scene:after{filter:drop-shadow(0 0 7px currentColor)}body[data-menu="future"] .scene{box-shadow:inset 0 0 0 1px #a5fff677,0 0 18px #74c8e333}body[data-menu="future"] .food.expected{box-shadow:inset 0 0 0 1px #b9b2f7,0 3px 0 #bc9970,0 0 16px #a28bf755}
+.primary,.secondary,.sound{transition:transform .18s,filter .18s}.primary:active,.secondary:enabled:active,.sound:active{transform:scale(.97)}.spark{position:fixed;pointer-events:none;width:7px;height:7px;background:#e8b43f;border-radius:2px;z-index:20}.food.reject{animation:shake .22s}.scene{transition:background .3s}.stat{background:linear-gradient(#fffefa,#fff2da);box-shadow:inset 0 1px #fff,0 3px 8px #60401d0a}
+@media(prefers-reduced-motion:reduce){.food,.food .foodArt,.food:before,.primary,.secondary,.sound,.scene{transition:none}.food:enabled:hover,.food:enabled:hover .foodArt,.primary:hover,.secondary:enabled:hover,.sound:hover{transform:none}.spark{display:none}}
+
+/* Keep the diner sign above the red counter band. */
+.scene:not(.garden):not(.future){background:linear-gradient(#8abfbe 76%,#c75147 76%);font-size:14px;letter-spacing:1.5px;color:#fffdf2;text-shadow:0 1px 2px #284d4c,0 2px 5px #284d4c99;padding-bottom:7px;box-sizing:border-box}
+@media(max-width:350px){.scene:not(.garden):not(.future){font-size:12px;letter-spacing:1px;padding-bottom:6px}}
+
+/* Preserve the approved six-button pantry and themed setting in the collection. */
+html.pocket-fit body.room-deli .tray.rush{grid-template-columns:repeat(3,minmax(0,1fr))}
+html.pocket-fit body.room-deli .food .foodArt{max-width:100%}
+html.pocket-fit body.room-deli main{border-radius:12px;background:#fff8eeee}
+html.night-play body.room-deli main{background:#161c28ee;color:#edf0f7}
+html.night-play body.room-deli .assembly:empty:after{color:#d6c5ac}
+body.room-embedded.room-deli[data-menu="retro"]{background-color:#d9eee9!important;background-image:linear-gradient(180deg,#ffe7cbcc 0%,#fff5e9ee 68%,transparent 68%),repeating-conic-gradient(#b8604c 0% 25%,#f9e5c9 0% 50%)!important;background-size:auto,56px 56px!important;background-attachment:fixed!important}
+body.room-embedded.room-deli[data-menu="garden"]{background-color:#c1d5ae!important;background-image:repeating-linear-gradient(90deg,transparent 0 110px,#64896e55 110px 116px),repeating-linear-gradient(0deg,transparent 0 130px,#64896e55 130px 136px),radial-gradient(ellipse at 10% 80%,#759b62aa,transparent 45%),linear-gradient(#d9eee9,#f0efd6)!important}
+body.room-embedded.room-deli[data-menu="future"]{background-color:#101d38!important;background-image:radial-gradient(circle at 15% 20%,#83f1e6 0 2px,transparent 3px),radial-gradient(circle at 80% 35%,#fff 0 1px,transparent 2px),repeating-linear-gradient(90deg,transparent 0 110px,#63b6de22 110px 112px),linear-gradient(150deg,#14253d,#514473)!important;background-size:210px 230px,150px 170px,auto,auto!important}
 </style>
 <script>window.roomHaptic=()=>{try{navigator.vibrate?.(8);}catch{}};</script><script>
 window.roomComplete=(id,date)=>{if(!date){const d=new Date();date=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}try{localStorage.setItem('room-for-play:completed:'+id,JSON.stringify(date));}catch{}parent.postMessage({type:'room:completed',id,date},location.origin);};
@@ -18,10 +50,10 @@ window.roomComplete=(id,date)=>{if(!date){const d=new Date();date=d.getFullYear(
 <main>
 <header><div><h1 style="font-size:clamp(23px,6vw,31px)">Stack to <span>the Future</span></h1><div class="eyebrow">Tiny deli. Big sandwich energy.</div></div><button class="sound" id="sound" aria-pressed="false">Sound off</button></header>
 
-<p class="modeNote" id="modeNote">Four ingredients. Keep an eye on customer patience. Practice first!</p>
+<label class="destination" for="menu">Destination <select id="menu"><option value="retro">Retro Diner · 1956</option><option value="garden">Garden Café · Today</option><option value="future">Future Kitchen · 2186</option></select></label><div class="scene" id="scene" aria-label="Retro diner setting">THE DAILY BREAD · 1956</div><p class="modeNote" id="modeNote">Four ingredients. Keep an eye on customer patience. Practice first!</p>
 <section class="stats" aria-label="Round statistics"><div class="stat"><b id="time">60</b><small>Seconds</small></div><div class="stat"><b id="score">0</b><small>Points</small></div><div class="stat"><b id="combo">×1</b><small>Combo</small></div></section>
 <div class="roundControls"><div class="clock" aria-hidden="true"><div id="bar"></div></div><button id="pause" class="secondary" disabled aria-label="Pause game" aria-keyshortcuts="P Escape">Ⅱ Pause</button></div>
-<section class="ticket" id="ticket" aria-label="Current order"><div class="ticketLabel" id="ticketLabel">YOUR FIRST ORDER · NO TIMER YET</div><h2 id="orderTitle">Tap these ingredients in order</h2><div class="recipe" id="recipe"></div><div class="counter" id="counter">Left to right. You’ve got this.</div><div class="patience hidden" id="patience"><label for="patienceBar"><span>Customer patience</span><span id="patienceTime">12s</span></label><progress id="patienceBar" max="1" value="1" aria-label="Customer patience"></progress></div></section>
+<section class="ticket" id="ticket" aria-label="Current order"><div class="ticketLabel" id="ticketLabel">YOUR FIRST ORDER · NO TIMER YET</div><h2 id="orderTitle">Tap these ingredients in order</h2><div class="recipe" id="recipe"></div><div class="assembly" id="assembly" role="img" aria-label="Empty sandwich plate"></div><div class="counter" id="counter">Left to right. You’ve got this.</div><div class="patience hidden" id="patience"><label for="patienceBar"><span>Customer patience</span><span id="patienceTime">12s</span></label><progress id="patienceBar" max="1" value="1" aria-label="Customer patience"></progress></div></section>
 <div class="feedback" id="feedback" role="status" aria-live="polite">Tap the bread to start your practice order.</div>
 <div class="tray" id="tray" aria-label="Ingredients"><button class="food" data-food="0" aria-label="Add bread"><span class="emoji" aria-hidden="true">🍞</span><small>Bread</small></button><button class="food" data-food="1" aria-label="Add cheese"><span class="emoji" aria-hidden="true">🧀</span><small>Cheese</small></button><button class="food" data-food="2" aria-label="Add tomato"><span class="emoji" aria-hidden="true">🍅</span><small>Tomato</small></button><button class="food" data-food="3" aria-label="Add lettuce"><span class="emoji" aria-hidden="true">🥬</span><small>Lettuce</small></button></div>
 <p class="help">Match the ticket from left to right.<br>Wrong tap? Just try again. Your sandwich stays.</p>
@@ -35,12 +67,44 @@ window.roomComplete=(id,date)=>{if(!date){const d=new Date();date=d.getFullYear(
 (() => {
  'use strict';
  const $=id=>document.getElementById(id);
- const foods=[{name:'Bread',emoji:'🍞'},{name:'Cheese',emoji:'🧀'},{name:'Tomato',emoji:'🍅'},{name:'Lettuce',emoji:'🥬'}];
- const buttons=[...document.querySelectorAll('[data-food]')];
+ const foods=[
+ {name:'Sourdough',color:'#e9b565',shape:'bread'}, {name:'Cheese',color:'#f5c53e',shape:'cheese'},
+ {name:'Tomato',color:'#db5945',shape:'tomato'}, {name:'Lettuce',color:'#70a94f',shape:'leaf'},
+ {name:'Pickles',color:'#6a9251',shape:'pickle'}, {name:'Egg',color:'#fff7dc',shape:'egg'},
+ {name:'Avocado',color:'#b8cd66',shape:'avocado'}, {name:'Mushrooms',color:'#ac8464',shape:'mushroom'},
+ {name:'Pretzel bun',color:'#b87839',shape:'bun'}, {name:'Chicken',color:'#dcb17c',shape:'chicken'},
+ {name:'Onion',color:'#b07fa5',shape:'onion'}, {name:'Glow sauce',color:'#57cbb8',shape:'sauce'}];
+ const menus={retro:{label:'Retro Diner',scene:'THE DAILY BREAD · 1956',ids:[0,1,2,3,4,5],names:['A Gouda Day','Dill With It','Yolk Around the Clock']},garden:{label:'Garden Café',scene:'THYME TO UNWIND · TODAY',ids:[0,2,3,6,7,10],names:['Avo Nice Day','Room to Mushroom','Lettuce Take Our Thyme']},future:{label:'Future Kitchen',scene:'ORBITAL LUNCHROOM · 2186',ids:[8,1,4,9,10,11],names:['Bun Small Step','The Big Dipper','Ahead of the Lunch Curve']}};
+ let menu='retro',buttons=[];
+ let artSerial=0;
+ function art(id){
+   const f=foods[id],parts={
+   bread:'<path d="M10 26V15C2 3 23 0 32 6C45 0 64 5 55 16V26Z"/><path d="M18 11Q25 7 29 11M36 10Q43 6 48 11" fill="none" stroke="#a86a35"/>',
+   cheese:'<path d="M5 10L46 5L59 21L17 28Z"/><g fill="#d59a29" stroke="none"><circle cx="22" cy="15" r="3"/><circle cx="41" cy="20" r="3"/><circle cx="46" cy="11" r="2"/></g>',
+   tomato:'<ellipse cx="32" cy="17" rx="26" ry="11"/><ellipse cx="32" cy="17" rx="19" ry="7" fill="#f48b68"/><path d="M32 10V24M15 17H49" stroke="#ffe0a0"/>',
+   leaf:'<path d="M4 18Q0 6 12 10Q18 0 26 8Q36 0 42 9Q59 3 59 18Q65 29 47 26Q37 34 29 26Q12 34 12 25Q2 28 4 18Z"/><path d="M12 20L52 15" stroke="#d4e39d"/>',
+   pickle:'<ellipse cx="32" cy="17" rx="27" ry="10"/><ellipse cx="32" cy="17" rx="21" ry="6" fill="#c5d283"/><path d="M18 16L23 20M30 13L34 19M41 14L46 18" stroke="#648448"/>',
+   egg:'<path d="M5 19C-2 8 18 2 30 7C50 0 65 13 57 22C48 33 16 31 5 19Z"/><ellipse cx="32" cy="17" rx="11" ry="8" fill="#f5ba32"/>',
+   avocado:'<path d="M5 23Q29 -6 58 18Q51 36 5 23Z" fill="#5d8753"/><path d="M12 21Q31 1 51 18Q43 28 12 21Z"/><ellipse cx="35" cy="18" rx="8" ry="5" fill="#9c6c43"/>',
+   mushroom:'<path d="M25 15H39L42 29H22Z" fill="#eee0ca"/><path d="M5 18C8 -3 54 -3 59 18Z"/><path d="M17 13L47 13" stroke="#d2b18e"/>',
+   bun:'<path d="M5 22C1 -2 61 -2 59 22L54 28H11Z"/><path d="M14 13Q22 4 28 13T43 13T53 13" fill="none" stroke="#f5d197" stroke-width="3"/><path d="M16 24H48" stroke="#8f532a"/>',
+   chicken:'<path d="M5 22Q8 3 24 9Q38 0 55 10L59 23Q37 32 5 22Z"/><path d="M17 13L23 24M29 11L35 25M42 12L48 23" stroke="#a16e44" stroke-width="2"/>',
+   onion:'<ellipse cx="32" cy="17" rx="26" ry="11"/><ellipse cx="32" cy="17" rx="20" ry="7" fill="#f4e2ec"/><ellipse cx="32" cy="17" rx="13" ry="4"/><ellipse cx="32" cy="17" rx="8" ry="2" fill="#fff5e7"/>',
+   sauce:'<path d="M7 19Q13 5 22 17T39 16T57 16L55 23Q45 29 34 24T7 25Z"/><path d="M15 17Q20 12 25 20M41 19L48 15" stroke="#c5fff0" fill="none"/>'};
+   const uid='food-'+(++artSerial),gradient=uid+'-fill',shade=uid+'-shade';
+   const texture={bread:'<g fill="#fff2c3" opacity=".8"><circle cx="16" cy="18" r="1"/><circle cx="24" cy="22" r=".8"/><circle cx="43" cy="19" r="1.2"/><circle cx="36" cy="24" r=".8"/></g>',bun:'<g stroke="#ffe6ac" stroke-width="1.5" stroke-linecap="round"><path d="M16 8l2 1m10-4l1 2m11-1l-1 2m9 2l2 1"/></g>',leaf:'<path d="M15 23l8-8m3 10l8-11m8 9l5-10" stroke="#d6efa0" opacity=".7" fill="none"/>',tomato:'<g fill="#ffe5a8"><ellipse cx="23" cy="14" rx="1.5" ry=".8"/><ellipse cx="41" cy="20" rx="1.5" ry=".8"/><ellipse cx="22" cy="20" rx="1.5" ry=".8"/><ellipse cx="42" cy="14" rx="1.5" ry=".8"/></g>',chicken:'<path d="M10 21q8-5 14-2m10 3l8-2" fill="none" stroke="#ffdfa7" stroke-width="2"/>',sauce:'<g fill="#d9fff5"><circle cx="19" cy="19" r="1.5"/><circle cx="36" cy="22" r="1"/><circle cx="50" cy="17" r="1"/></g>'}[f.shape]||'';
+   return `<svg class="foodArt" viewBox="0 0 64 36" aria-hidden="true" focusable="false"><defs><linearGradient id="${gradient}" x1="0" y1="0" x2=".2" y2="1"><stop stop-color="#fff4c9"/><stop offset=".25" stop-color="${f.color}"/><stop offset=".75" stop-color="${f.color}"/><stop offset="1" stop-color="#80502f"/></linearGradient><linearGradient id="${shade}" x2="0" y2="1"><stop stop-color="#fff" stop-opacity=".5"/><stop offset=".5" stop-color="#fff" stop-opacity="0"/><stop offset="1" stop-color="#382016" stop-opacity=".25"/></linearGradient></defs><ellipse cx="32" cy="30" rx="24" ry="3" fill="#382016" opacity=".12"/><g transform="translate(0 2)" fill="#6b4226" stroke="#6b4226" stroke-width="1.5" stroke-linejoin="round">${parts[f.shape]}</g><g fill="url(#${gradient})" stroke="#845a35" stroke-width=".75" stroke-linejoin="round">${parts[f.shape]}${texture}</g><path d="M12 11Q26 2 46 9" fill="none" stroke="#fff8dc" stroke-width="1.5" stroke-linecap="round" opacity=".45"/></svg>`;
+
+ }
+ function setupMenu(){
+   document.body.dataset.menu=menu;$('scene').className='scene '+menu;$('scene').textContent=menus[menu].scene;
+   $('tray').innerHTML=menus[menu].ids.map((id,i)=>`<button class="food" data-food="${id}" aria-label="Add ${foods[id].name}" aria-keyshortcuts="${i+1}">${art(id)}<small>${foods[id].name}</small></button>`).join('');
+   buttons=[...document.querySelectorAll('[data-food]')];buttons.forEach(button=>button.onclick=()=>tap(Number(button.dataset.food)));
+ }
  let phase='practice',order=[0,1,2],step=0,score=0,served=0,perfect=0,chain=0,topCombo=1,mistakes=0,clean=true;
  let remaining=60000,deadline=0,frame=0,nextOrderTimer=0,best=0,sound=false,audio;
  let lost=0,patienceRemaining=12000,patienceDeadline=0,patienceBudget=12000;
- const bestKey=()=>'order-up:best:rush:v1';
+ const bestKey=()=>`order-up:best:expansion1:${menu}:v1`;
  function loadBest(){best=0;try{const stored=Number(localStorage.getItem(bestKey()));if(Number.isFinite(stored)&&stored>=0)best=stored;}catch{$('notice').textContent='Personal bests can’t be saved in this browser.';}}
  function paintPatience(){
    $('patienceBar').value=Math.max(0,patienceRemaining/patienceBudget);
@@ -49,13 +113,13 @@ window.roomComplete=(id,date)=>{if(!date){const d=new Date();date=d.getFullYear(
  }
  function practice(){
    clearTimeout(nextOrderTimer);cancelAnimationFrame(frame);phase='practice';
-   loadBest();order=[0,1,3,2];
+   setupMenu();loadBest();order=menus[menu].ids.slice(0,4);
    step=0;score=0;served=0;chain=0;remaining=60000;
    $('tray').classList.add('rush');buttons[3].classList.remove('hidden');
    buttons.forEach(button=>button.disabled=false);
-   $('modeNote').textContent='Four ingredients. Patience starts at 12 seconds per order and gently shortens. No points lost for missed orders.';
+   $('modeNote').textContent=`${menus[menu].label} · Six ingredients. Match layers from left to right. Keys 1–6 also work.`;
    $('ticketLabel').textContent='YOUR FIRST ORDER · NO TIMER YET';$('orderTitle').textContent='Tap these ingredients in order';
-   $('counter').textContent='Left to right. You’ve got this.';$('feedback').textContent='Tap the bread to start your practice order.';
+   $('counter').textContent='Left to right. You’ve got this.';$('feedback').textContent=`Tap ${foods[order[0]].name.toLowerCase()} to start your practice order.`;
    $('time').textContent=60;$('time').classList.remove('urgent');$('bar').style.transform='scaleX(1)';
    $('patience').classList.add('hidden');$('start').classList.add('hidden');$('pause').disabled=true;renderOrder();
  }
@@ -71,26 +135,37 @@ window.roomComplete=(id,date)=>{if(!date){const d=new Date();date=d.getFullYear(
  function renderOrder(){
    $('recipe').replaceChildren(...order.map((food,i)=>{
      const cell=document.createElement('div');cell.className='ingredientStep'+(i<step?' done':i===step?' next':'');
-     const emoji=document.createElement('span');emoji.className='emoji';emoji.textContent=foods[food].emoji;emoji.setAttribute('aria-hidden','true');
+     const emoji=document.createElement('span');emoji.innerHTML=art(food);
      const label=document.createElement('small');label.textContent=foods[food].name;cell.append(emoji,label);
      cell.setAttribute('aria-label',`${i+1}: ${foods[food].name}${i<step?', added':i===step?', next':''}`);return cell;
    }));
+   const stack=$('assembly');if(step===0)stack.replaceChildren();while(stack.children.length<step){const i=stack.children.length;stack.insertAdjacentHTML('beforeend',art(order[i]));}buttons.forEach(b=>b.classList.toggle('expected',phase==='practice'&&step<order.length&&Number(b.dataset.food)===order[step]));$('assembly').setAttribute('aria-label',step?'Sandwich layers, bottom to top: '+order.slice(0,step).map(id=>foods[id].name).join(', '):'Empty sandwich plate');
    $('score').textContent=score;$('combo').textContent=`×${multiplier()}`;
    $('best').textContent=`Personal best: ${best}`;
+ }
+ function flyLayer(food){
+   if(matchMedia('(prefers-reduced-motion: reduce)').matches)return;
+   const layer=$('assembly').lastElementChild,button=buttons.find(b=>Number(b.dataset.food)===food);
+   if(!layer||!button)return;
+   const from=button.querySelector('svg').getBoundingClientRect(),to=layer.getBoundingClientRect();
+   const dx=from.left+from.width/2-to.left-to.width/2,dy=from.top+from.height/2-to.top-to.height/2;
+   layer.animate([{transform:`translate(${dx}px,${dy}px) scale(.55) rotate(-15deg)`,opacity:.65},{transform:`translate(${dx*.3}px,${Math.min(-38,dy*.2)}px) scale(1.08) rotate(7deg)`,opacity:1,offset:.6},{transform:'translate(0,3px) scale(1.09,.82) rotate(-2deg)',offset:.84},{transform:'translate(0,0) scale(1) rotate(0deg)'}],{duration:420,easing:'cubic-bezier(.2,.7,.25,1)'});
+   if(step===order.length){
+     $('assembly').animate([{transform:'rotate(0deg)'},{transform:'rotate(-2deg)',offset:.4},{transform:'rotate(2deg)',offset:.7},{transform:'rotate(0deg)'}],{duration:500});
+     for(let i=0;i<8;i++){const dot=document.createElement('i');dot.className='spark';dot.setAttribute('aria-hidden','true');dot.style.left=(to.left+to.width/2)+'px';dot.style.top=(to.top+12)+'px';dot.style.background=['#e5ac3d','#78a869','#e98764'][i%3];document.body.append(dot);const a=dot.animate([{transform:'translate(0,0) scale(0)',opacity:0},{opacity:1,offset:.15},{transform:`translate(${Math.cos(i*Math.PI/4)*75}px,${Math.sin(i*Math.PI/4)*40-35}px) rotate(150deg) scale(.3)`,opacity:0}],{duration:600,easing:'ease-out'});a.onfinish=()=>dot.remove();}
+   }
  }
  function animate(name){$('ticket').classList.remove('served','oops');void $('ticket').offsetWidth;$('ticket').classList.add(name);}
  function newOrder(){
    step=0;clean=true;
    // The first three tickets stay simple; later tickets add one ingredient.
-   const length=served<3?2:served<8?3:4;
-   order=Array.from({length},()=>Math.floor(Math.random()*4));
-   // Introduce lettuce in the first live ticket, after guided practice.
-   if(served===0&&lost===0)order[length-1]=3;
-   patienceBudget=served<3?12000:served<8?10000:8000;
+   const length=served<3?3:served<8?4:5;
+   const ids=menus[menu].ids;order=[ids[0],...Array.from({length:length-2},()=>ids[1+Math.floor(Math.random()*5)]),ids[0]];
+   patienceBudget=served<3?14000:served<8?12000:10000;
    patienceRemaining=patienceBudget;patienceDeadline=performance.now()+patienceBudget;
    $('patience').classList.remove('hidden');paintPatience();
    $('ticketLabel').textContent=`ORDER ${served+1}`;
-   $('orderTitle').textContent=served<3?'You’re on a roll.':'Keep those sandwiches coming!';
+   $('orderTitle').textContent=menus[menu].names[(served+lost)%menus[menu].names.length];
    $('counter').textContent=`${served} served · ${3-chain%3} perfect orders to ${multiplier()<5?'the next combo':'keep the streak'}`;
    buttons.forEach(button=>button.disabled=false);renderOrder();
  }
@@ -110,13 +185,13 @@ window.roomComplete=(id,date)=>{if(!date){const d=new Date();date=d.getFullYear(
  }
  function start(){
    clearTimeout(nextOrderTimer);cancelAnimationFrame(frame);$('results').close();
-   phase='playing';score=0;served=0;perfect=0;chain=0;topCombo=1;mistakes=0;lost=0;remaining=60000;
+   $('menu').disabled=true;phase='playing';score=0;served=0;perfect=0;chain=0;topCombo=1;mistakes=0;lost=0;remaining=60000;
 
    $('start').classList.add('hidden');$('pause').disabled=false;
    $('feedback').textContent='Let’s cook! Match the ticket.';newOrder();deadline=performance.now()+remaining;tick();
  }
  function finish(){
-   phase='finished';window.roomComplete?.('deli');cancelAnimationFrame(frame);clearTimeout(nextOrderTimer);
+   phase='finished';$('menu').disabled=false;window.roomComplete?.('deli');cancelAnimationFrame(frame);clearTimeout(nextOrderTimer);
 
    buttons.forEach(button=>button.disabled=true);$('pause').disabled=true;
    $('start').textContent='Play another 60 seconds';$('start').classList.remove('hidden');
@@ -134,9 +209,9 @@ window.roomComplete=(id,date)=>{if(!date){const d=new Date();date=d.getFullYear(
    window.roomHaptic?.();if(food!==order[step]){
      clean=false;if(phase==='playing'){mistakes++;chain=0;}
      $('feedback').textContent=`Try ${foods[order[step]].name.toLowerCase()} next. No need to start over.`;
-     tone(false);animate('oops');renderOrder();return;
+     tone(false);animate('oops');const wrong=buttons.find(b=>Number(b.dataset.food)===food);if(!matchMedia('(prefers-reduced-motion: reduce)').matches)wrong?.animate([{transform:'translateX(0)'},{transform:'translateX(-5px)'},{transform:'translateX(5px)'},{transform:'translateX(0)'}],{duration:180});renderOrder();return;
    }
-   tone(true);step++;renderOrder();
+   tone(true);step++;renderOrder();flyLayer(food);
    if(step<order.length){$('feedback').textContent=`Nice! Now ${foods[order[step]].name.toLowerCase()}.`;return;}
    animate('served');buttons.forEach(button=>button.disabled=true);
    if(phase==='practice'){
@@ -174,8 +249,9 @@ window.roomComplete=(id,date)=>{if(!date){const d=new Date();date=d.getFullYear(
      else if(phase==='paused'&&event.key.toLowerCase()==='p'){event.preventDefault();resume();}
    }
  });
- document.addEventListener('keydown',event=>{if(event.repeat||document.querySelector('dialog[open]')||event.target.closest('select,input,textarea'))return;if(['1','2','3','4'].includes(event.key)){event.preventDefault();const button=buttons[Number(event.key)-1];if(!button.classList.contains('hidden'))button.click();}});
+ document.addEventListener('keydown',event=>{if(event.repeat||document.querySelector('dialog[open]')||event.target.closest('select,input,textarea'))return;if(['1','2','3','4','5','6'].includes(event.key)){event.preventDefault();const button=buttons[Number(event.key)-1];if(!button.classList.contains('hidden'))button.click();}});
 
+ $('menu').onchange=()=>{if(phase==='playing'||phase==='paused')return;menu=$('menu').value;practice();};
  practice();
 })();
 </script>
