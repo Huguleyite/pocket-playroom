@@ -2,7 +2,6 @@
 (() => {
  const base=new URL('./',document.currentScript.src);
  const catalogue=[
-  ['element-within','The Element Within','Discover your natural element.','◈'],
   ['binario','Binario','A fresh daily logic puzzle.','01'],
   ['futoshiki','Futoshiki','Make every inequality count.','<>'],
   ['weave','Weave It to Me','Good words come together.','W'],
