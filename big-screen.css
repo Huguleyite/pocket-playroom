@@ -54,3 +54,16 @@ html:has(.big-screen-page){--paper:#030b16;background-color:#030b16!important}
 
 /* Gameplay preview follows the shared Big Screen panel, with Quantum accents. */
 .quantum-preview{margin-top:24px;border-color:#35565e;background:linear-gradient(145deg,#10212c,#07111d 70%)}.quantum-preview h2{color:#86eee0}.quantum-preview>img{border:1px solid #29434e;border-bottom:0}
+
+/* Keep every game tab above decorative hero art. */
+.big-screen-page .big-game-tabs{position:relative;z-index:20;isolation:isolate;flex-wrap:wrap}
+.big-screen-page .chrono-hero{z-index:1}
+.big-screen-page .chrono-art{pointer-events:none}
+/* Sanctuary has a warm, ancient teal-and-brass stage. */
+body.big-screen-page.sanctuary-page{--accent:#e7cd8c;--muted:#b6cbc1;background:radial-gradient(ellipse at 75% 20%,#244a4055,transparent 55%),#091813}
+.big-screen-page.sanctuary-page #main:before{height:850px;background:radial-gradient(ellipse at 76% 35%,#4d806c66,transparent 50%),radial-gradient(ellipse at 85% 20%,#bd93432e,transparent 38%),linear-gradient(180deg,#102b24,#091813);background-size:100% 100%;background-position:center;background-repeat:no-repeat}
+.sanctuary-page .chrono-copy h1 span{background-image:linear-gradient(100deg,#e7cd8c,#80d5ba)}
+.sanctuary-page .chrono-kicker,.sanctuary-page .big-section-label,.sanctuary-page .chrono-preview h2{color:#e7cd8c}
+.sanctuary-page .chrono-play{background:linear-gradient(130deg,#f0dda7,#b99b58);border-color:#f1dfa9;color:#142b23}
+.sanctuary-page .chrono-preview{background:#102a24;border-color:#526d56}
+.sanctuary-gameplay{display:block;width:100%;height:auto;border-radius:8px 8px 0 0}
