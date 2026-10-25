@@ -382,3 +382,21 @@ body[data-playroom-game="hex-gambit"] .hex-hand-tray .cost-gem{top:6px;left:8px}
  body[data-playroom-game="hex-gambit"] .hex-inspect-row button{flex:1;min-width:0;padding:6px;font-size:11px}
  body[data-playroom-game="hex-gambit"] .court-controls{padding:6px 12px;margin-bottom:8px}
 }
+
+/* Roomy desktops retain the original table-above-horizontal-hand composition. */
+@media(min-width:1200px) and (min-height:1000px){
+ body[data-playroom-game="hex-gambit"] .battle-layout:not([hidden]){grid-template-columns:minmax(0,1fr) 250px;grid-template-rows:minmax(0,1fr) 390px;min-height:0;max-height:1250px}
+ body[data-playroom-game="hex-gambit"] .arena{grid-area:1/1}
+ body[data-playroom-game="hex-gambit"] .orders{grid-area:1/2}
+ body[data-playroom-game="hex-gambit"] .arena .court-stage>.board-wrap{width:min(100%,640px,calc(min(var(--hex-battle-height,1000px),1250px) - 530px))}
+ body[data-playroom-game="hex-gambit"] .hex-hand-tray{grid-area:2/1/3/3;gap:8px}
+ body[data-playroom-game="hex-gambit"] .hex-hand-tray .hand{grid-template-columns:repeat(3,minmax(0,230px));grid-template-rows:minmax(0,1fr);justify-content:center;gap:12px}
+ body[data-playroom-game="hex-gambit"] .hex-hand-tray .card{display:flex;flex-direction:column;gap:0;padding:12px}
+ body[data-playroom-game="hex-gambit"] .hex-hand-tray .card-art{width:100%;height:100px;min-height:100px;max-height:100px;margin:6px 0;flex:none}
+ body[data-playroom-game="hex-gambit"] .hex-hand-tray .card-top{padding-left:30px;min-height:24px;font-size:11px}
+ body[data-playroom-game="hex-gambit"] .hex-hand-tray .card strong{font-size:18px;margin:4px 0}
+ body[data-playroom-game="hex-gambit"] .hex-hand-tray .card .description{font-size:14px;line-height:1.4}
+ body[data-playroom-game="hex-gambit"] .hex-hand-tray .card .cost{font-size:11px;margin-top:auto;padding-top:8px}
+ body[data-playroom-game="hex-gambit"] .hex-inspect-row{justify-content:center;gap:10px}
+ body[data-playroom-game="hex-gambit"] .hex-inspect-row button{flex:0 1 auto;padding:6px 12px;font-size:13px}
+}
