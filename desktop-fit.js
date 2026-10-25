@@ -52,7 +52,7 @@
   const back = document.querySelector('body > .playroom-return');
   if (back) bar.append(back);
   const panels = {
-    'hex-gambit': [['.commander', 'Army'], ['.chronicle-panel', 'Chronicle'], ['.detail-block', 'Inspect'], ['.vip', 'Archmage']],
+    'hex-gambit': [['.commander', 'Army'], ['.chronicle-panel', 'Chronicle'], ['.vip', 'Archmage']],
     lineage: [['.house-column', 'House & favors'], ['.chronicle', 'Chronicle']],
     'quantum-draft': [['.recent-hands', 'Recent hands'], ['.terminal', 'Telemetry']],
     chronodeck: [['#relics', 'Relics']]

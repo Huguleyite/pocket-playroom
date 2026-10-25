@@ -400,3 +400,11 @@ body[data-playroom-game="hex-gambit"] .hex-hand-tray .cost-gem{top:6px;left:8px}
  body[data-playroom-game="hex-gambit"] .hex-inspect-row{justify-content:center;gap:10px}
  body[data-playroom-game="hex-gambit"] .hex-inspect-row button{flex:0 1 auto;padding:6px 12px;font-size:13px}
 }
+
+/* Selected piece abilities are primary play information, always inline. */
+body[data-playroom-game="hex-gambit"] .orders .detail-block{display:block;min-width:0;font-size:14px;padding:10px 0;border-top:1px solid #ba98dc33}
+body[data-playroom-game="hex-gambit"] .orders .detail-block .detail-title{font-size:18px;margin:0 0 8px}
+body[data-playroom-game="hex-gambit"] .orders .detail-block .detail-text{font-size:14px;line-height:1.45;margin-bottom:8px}
+body[data-playroom-game="hex-gambit"] .orders .detail-block .detail-hint{display:block;font-size:12px;line-height:1.4}
+body[data-playroom-game="hex-gambit"] .orders .detail-block .crest,body[data-playroom-game="hex-gambit"] .orders .detail-block .detail-art{display:none}
+body[data-playroom-game="hex-gambit"] .orders .detail-block{flex:none}
