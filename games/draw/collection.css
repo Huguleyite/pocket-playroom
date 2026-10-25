@@ -1,0 +1,2 @@
+body.room-embedded .intro,body.room-embedded footer{display:none}body.room-embedded main{padding-top:8px;padding-bottom:8px}body.room-embedded header>span>small{display:none}body.room-embedded #collection-meter{margin-bottom:10px}body.room-embedded #collection-remaining{font-size:9px}body.room-embedded #rules-dialog{max-height:calc(100dvh - 24px)}
+@media(max-width:579px){body.room-embedded .felt{padding:10px}body.room-embedded #status{min-height:29px;margin-top:8px}body.room-embedded .zone{padding:8px;margin-bottom:8px}body.room-embedded .layout{gap:8px}}

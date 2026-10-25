@@ -1,0 +1,38 @@
+const D=TheDraw,$=id=>document.getElementById(id);let g=D.start(),held=null,picked=[],past=[],lesson=-1,teaching=false;
+const names={1:'A',11:'J',12:'Q',13:'K'};
+function name(c){return`${names[c.rank]||c.rank}${D.suits[c.suit]}`}
+function card(c){return `<span class="rank">${names[c.rank]||c.rank}</span><span class="pip">${D.suits[c.suit]}</span><span class="corner">${names[c.rank]||c.rank}${D.suits[c.suit]}</span>`}
+function button(c,attr,cls=''){return `<button ${attr} class="card s${c.suit} ${cls}" aria-label="${name(c)}">${card(c)}</button>`}
+const lessons=[
+['Play one card.','Tap the highlighted 7♥ in your hand. Your hand is where you choose what to play.','[data-hand="0"]'],
+['Put it on the table.','Tap the highlighted empty space. You can place cards in any empty space; matching cards do not need to touch.','[data-slot="0"]'],
+['Choose what comes next.','After each play, draw a replacement. Take the face-up 9♥: you know exactly what you are getting. It can later join 8♥ in a run or flush.','[data-market="0"]'],
+['Build a pair.','Tap 7♠ in your hand. Two matching ranks make a pair, regardless of suit.','[data-hand="0"]'],
+['Play the second seven.','Put 7♠ in the highlighted empty space beside 7♥. Placing the cards does not claim them yet.','[data-slot="1"]'],
+['Try the unknown draw.','Tap the facedown deck. This gives you a surprise card instead of a visible choice. You get one replacement per turn.','#deck'],
+['Select cards to collect.','Tap 7♥ ON THE TABLE. A gold border marks your selection. You may collect combinations at any point.','[data-slot="0"]'],
+['Select its match.','Tap 7♠ too. These two selected cards have the same rank. The Collect button is now ready.','[data-slot="1"]'],
+['Collect your pair.','Tap Collect Pair. Earn 20 points and clear both spaces. Collect five combinations before the table jams to win.','#collect']
+];
+function say(s){$('status').textContent=s}
+function save(){past.push(JSON.stringify(g))}
+function render(){let result=D.status(g),k=D.kind(picked.map(i=>g.table[i]));$('hand').innerHTML=g.hand.map((c,i)=>button(c,`data-hand="${i}"`,held===i?'selected':'')).join('');$('table').innerHTML=g.table.map((c,i)=>c?button(c,`data-slot="${i}"`,picked.includes(i)?'selected':''):`<button data-slot="${i}" class="empty" aria-label="Empty table space ${i+1}">+</button>`).join('');$('market').innerHTML=g.market.map((c,i)=>c?button(c,`data-market="${i}"`):'<div class="depleted">Empty</div>').join('');$('deck-count').textContent=`${g.deck.length} in deck`;$('score').textContent=g.score;$('turn').textContent=g.phase==='draw'?'DRAW ONE CARD':'PLAY A CARD';$('collect').disabled=!k||result!=='playing';$('collect').textContent=k?`Collect ${k} +${{Pair:20,Run:40,Flush:30}[k]}`:'Collect combination';$('undo').disabled=!past.length||teaching;
+document.querySelectorAll('[data-hand]').forEach(b=>b.disabled=g.phase!=='play'||result!=='playing');document.querySelectorAll('[data-market],#deck').forEach(b=>b.disabled=g.phase!=='draw'||result!=='playing'||(b.id==='deck'&&!g.deck.length));$('market-zone').classList.toggle('active',g.phase==='draw');$('hand-zone').classList.toggle('active',g.phase==='play');
+if(result==='won')say(`Five combinations! You won with ${g.score} points in ${g.turns} plays.`);else if(result==='lost')say('The table is full with no combinations. Undo to rethink a move, or deal again.');else if(result==='finished')say(`Round complete: ${g.score} points. Deal again to try for five combinations.`);
+$('coach').hidden=!teaching;if(teaching){let s=lessons[lesson];$('lesson-title').textContent=s?s[0]:lesson<0?'A round together.':'Your first pair, collected.';$('lesson-copy').textContent=s?s[1]:lesson<0?'Play a card, choose your next draw, then collect pairs, runs, or flushes to keep the table clear. I will show each step.':'That is the loop: play, draw, collect. Runs need three consecutive ranks in any suits. Flushes need three of one suit. Ready for a fresh round?';$('lesson-number').textContent=s?`LEARN BY PLAYING · ${lesson+1} / 9`:'LEARN BY PLAYING';$('continue').hidden=!!s;$('continue').textContent=lesson<0?'Start tutorial':'Deal my round';$('demonstrate').hidden=!s;document.querySelectorAll('.guided').forEach(b=>b.classList.remove('guided'));if(s)document.querySelector(s[2])?.classList.add('guided');}window.DrawPolish?.update(g); }
+function reset(){g=D.start(Date.now()>>>0);held=null;picked=[];past=[];say('Choose a card from your hand, then tap an empty table space.');render()}
+function act(ev){let h=ev.target.closest('[data-hand]'),t=ev.target.closest('[data-slot]'),m=ev.target.closest('[data-market]');if(h){window.DrawPolish?.sound('select');held=+h.dataset.hand;picked=[];say('Tap any empty space to play this card.');render()}else if(t){let p=+t.dataset.slot;if(g.table[p]){held=null;picked=picked.includes(p)?picked.filter(x=>x!==p):[...picked,p];if(picked.length>3)picked=[p];say('Select two equal ranks, three consecutive ranks, or three matching suits.');render()}else if(held!==null){save();if(D.play(g,held,p)){window.DrawPolish?.sound('play');held=null;picked=[];say('Now take one face-up card, or try the unknown deck.');render()}else{past.pop();say('Draw a replacement before playing another card.')}}else say('Choose a card in your hand first.')}else if(m||ev.target.closest('#deck')){save();let c=D.draw(g,m?+m.dataset.market:'deck');if(c){window.DrawPolish?.sound('draw');held=null;picked=[];say(`You drew ${name(c)}. Choose your next play, or collect a combination.`);render()}else past.pop();}}
+$('hand').onclick=act;$('table').onclick=act;$('market').onclick=act;$('deck').onclick=act;
+$('collect').onclick=()=>{const origins=window.DrawPolish?.origins(picked)||[];save();let k=D.claim(g,picked);if(!k){past.pop();return}picked=[];held=null;say(`${k} collected. Space cleared! ${g.phase==='draw'?'Take your replacement card next.':'Choose your next play.'}`);render();window.DrawPolish?.celebrate(k,g.combos,origins)};
+$('undo').onclick=()=>{if(!past.length||teaching)return;g=JSON.parse(past.pop());held=null;picked=[];say('Last action undone.');render()};$('new').onclick=()=>{if(!teaching)reset()};
+$('hint').onclick=()=>{let ps=D.available(g);if(ps){held=null;picked=ps;render();say('These selected cards make a combination. Tap Collect.')}else say(g.phase==='draw'?'Choose a visible card that matches a rank or suit on your table, or try the deck.':'Try building a pair, a three-card run, or a flush. Keep space available.')};
+function tutorial(){say("Follow the lesson above. Start tutorial will highlight your first move.");teaching=true;lesson=-1;g=D.start();held=null;picked=[];past=[];render();$('coach').scrollIntoView({block:'start'})}
+$('tutorial').onclick=tutorial;function finishTutorial(){try{localStorage.setItem('the-draw-learned','yes')}catch{}teaching=false;reset()}$('exit').onclick=finishTutorial;$('continue').onclick=()=>{if(lesson<0){lesson=0;render()}else{finishTutorial()}};$('demonstrate').onclick=()=>{let s=lessons[lesson];if(s)document.querySelector(s[2]).click()};
+document.addEventListener('click',ev=>{if(!teaching)return;if(ev.target.closest('#tutorial,#exit,#continue,#demonstrate,#sound,#rules-button,#rules-dialog'))return;let s=lessons[lesson];if(s&&ev.target.closest(s[2])){queueMicrotask(()=>{lesson++;render()});return}ev.preventDefault();ev.stopImmediatePropagation();say('Follow the gold outline, or tap Show this move.');},true);
+let learned=false;try{learned=localStorage.getItem('the-draw-learned')==='yes'}catch{}if(learned&&!new URLSearchParams(location.search).has('tutorial')){teaching=false;reset()}else tutorial();
+
+
+
+
+
+

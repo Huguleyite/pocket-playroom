@@ -89,3 +89,7 @@ body.neon-page{color-scheme:dark;--paper:#090d1b!important;--panel:#121a30;--ink
  body[class*="game-"] .wordmark{font-size:22px}
  body[class*="game-"] .site-header nav{font-size:11px;gap:15px}
 }
+
+/* The Draw: direct pocket-game entry, with its own responsive table and controls. */
+.game-card[href="#games/draw"] .art-letter{font-family:Georgia,serif;font-size:24px;background:#fff4d9;min-width:48px;height:61px;border-color:#365e42}.game-card[href="#games/draw"] .draw-art-1,.game-card[href="#games/draw"] .draw-art-2{color:#b74e44}.game-draw .game-layout{display:block}.game-draw .game-side,.game-draw .game-heading,.game-draw .help{display:none}.game-draw .game-well{max-width:1000px;margin:auto;background:#112421}.game-draw .game-frame{height:780px}.game-draw .night-controls{margin:8px 0}.game-draw .back-link{min-height:36px}.game-draw .night-controls button{min-height:44px}@media(max-width:600px){.game-card[href="#games/draw"] .art-letter{font-size:19px;min-width:34px;height:44px}.game-draw .game-well{max-width:none}.game-draw .site-header nav{display:none}}
+@media(max-width:600px){body.game-draw #main{padding-left:8px;padding-right:8px}}
