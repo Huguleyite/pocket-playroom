@@ -1,0 +1,19 @@
+body[data-rendering]{background:#0c171b}
+body[data-rendering] .workspace{height:calc(100svh - 290px);max-height:880px}
+body[data-rendering] .battlefield{background:radial-gradient(ellipse at 40% 38%,#354c43 0%,#14292e 54%,#07141c 100%)}
+body[data-rendering] .battlefield:after{background:radial-gradient(ellipse at 49% 51%,transparent 37%,#020b1466 100%)}
+body[data-rendering] .board-heading h2{font-size:28px}
+.render-controls{position:absolute;right:22px;top:76px;z-index:3;display:flex;gap:5px;flex-wrap:wrap;max-width:245px;justify-content:flex-end}
+.render-controls button,.render-controls a{font:9px 'Segoe UI',sans-serif;padding:7px 9px;border:1px solid #d5bd7855;background:#101f25e8;color:#b9c7bf;border-radius:3px;text-decoration:none}
+.render-controls button[aria-pressed=true]{border-color:#d6bb7b;color:#f5e4ba;background:#384b3ce8}
+body[data-rendering=dusk] .battlefield{background:radial-gradient(ellipse at 48% 47%,#26383f,#0b1626 85%)}
+body[data-rendering=before] .battlefield{background:radial-gradient(ellipse at 50% 53%,#30423e,#111f25 80%)}
+@media(max-width:760px){body[data-rendering] .workspace{height:auto}body[data-rendering] .battlefield{height:440px}.render-controls{top:83px;right:14px;max-width:220px}body[data-rendering] .board-heading h2{font-size:21px}}
+@media(max-width:400px){body[data-rendering] .battlefield{height:400px}.render-controls{top:75px}.render-controls button,.render-controls a{font-size:8px;padding:6px 7px}}
+
+@media(min-width:761px) and (max-width:1500px){body[data-rendering] .board-heading{max-width:245px}body[data-rendering] .board-heading h2{font-size:24px}}
+@media(max-width:760px){.render-controls{top:91px}}
+
+@media(max-width:760px){.render-controls{top:104px;left:16px;right:16px;max-width:none;justify-content:flex-end}body[data-rendering] .battlefield{height:460px}}
+
+.battle-panel{margin:12px 0;padding:12px;border:1px solid #c7b37d66;background:#102324}.battle-panel strong{font:15px Georgia;color:#eddbac}.battle-panel p{font-size:10px;color:#bdcbbf;margin:8px 0}.battle-panel .commit{padding:8px}.enemy-label{border-color:#e4967b!important;color:#ffd1bc!important;background:#442723ed!important}body[data-play=skirmish] .board-heading h2{font-size:23px}body[data-play=skirmish] .battle-panel{grid-column:1/-1}
