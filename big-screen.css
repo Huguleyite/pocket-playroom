@@ -67,3 +67,6 @@ body.big-screen-page.sanctuary-page{--accent:#e7cd8c;--muted:#b6cbc1;background:
 .sanctuary-page .chrono-play{background:linear-gradient(130deg,#f0dda7,#b99b58);border-color:#f1dfa9;color:#142b23}
 .sanctuary-page .chrono-preview{background:#102a24;border-color:#526d56}
 .sanctuary-gameplay{display:block;width:100%;height:auto;border-radius:8px 8px 0 0}
+
+/* Sanctuary environment artwork; leave layout sizing unchanged. */
+.big-screen-page.sanctuary-page #main:before{background-image:linear-gradient(90deg,#091813e8 0%,#091813ae 30%,#09181322 66%,#09181308 100%),linear-gradient(0deg,#091813 0%,transparent 35%),url('assets/the-last-sanctuary/sanctuary-background-01.png');background-size:100% 100%,100% 100%,cover;background-position:center,center,center top;background-repeat:no-repeat}
