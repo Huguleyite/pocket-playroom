@@ -1,0 +1,63 @@
+{
+  "approvedOn": "2026-10-24",
+  "phase": "Terrain / connected water",
+  "status": "Approved for overall unified update; user stopping until morning",
+  "publishNow": false,
+  "assets": [
+    {
+      "path": "assets/terrain-meadow-06.png",
+      "bytes": 3371835,
+      "sha256": "E5568197DE2E0662CB21412F862F2354CA256FF90BC0FBF0078DFB4106511554"
+    },
+    {
+      "path": "assets/terrain-woodland-06.png",
+      "bytes": 3361206,
+      "sha256": "9808E1E63151F0A42E48840233466EBB3465C9EF3623F97E75891526FDA072FB"
+    },
+    {
+      "path": "assets/terrain-rocky-06.png",
+      "bytes": 3269261,
+      "sha256": "44EA2B7705CC2735AE6A319BD56AD61FDC8655A88A17B8B38BAC9287B968B59F"
+    },
+    {
+      "path": "assets/water-surface-07.png",
+      "bytes": 3141482,
+      "sha256": "2F29DA384F44B7C3706CD59E00F4F3AE451474197C8B0B2A2F23C2221D77F40B"
+    },
+    {
+      "path": "assets/shore-material-07.png",
+      "bytes": 4302315,
+      "sha256": "00B4AAF670DAC4FECDB721671D79B487A8F08315A487DE33CB3BEBAAFE145970"
+    },
+    {
+      "path": "water-topology.js",
+      "bytes": 2362,
+      "sha256": "C37DCE5D66A0963913A67C337565822511B6DFD536649485F553791DE81CF353"
+    },
+    {
+      "path": "connected-water.js",
+      "bytes": 3066,
+      "sha256": "AF1AB961225B1ABAFDCD79DB94B70A888D26E5B8D2E31A98FEF230996255AD6F"
+    },
+    {
+      "path": "terrain-assets.js",
+      "bytes": 2767,
+      "sha256": "6A75399D70C4A7573A07F1694DB42B9702DECFC3AB22C9E72E30DCF064FD720B"
+    },
+    {
+      "path": "water-study.html",
+      "bytes": 2610,
+      "sha256": "6AE0A754BD224ECEFCFFC5125224EDB4873F00D94069D7C5C5480829366070FA"
+    },
+    {
+      "path": "water-study.js",
+      "bytes": 7193,
+      "sha256": "D836E0B1B8873CC8139C6DB9823186D45468F6B8262F6B9452E28EB3A3096768"
+    },
+    {
+      "path": "water-study.css",
+      "bytes": 4549,
+      "sha256": "116AE3C91CE20DBBE13DE9FC4B14C5DFEF43DCC46E94AD477F86C237F6C86495"
+    }
+  ]
+}

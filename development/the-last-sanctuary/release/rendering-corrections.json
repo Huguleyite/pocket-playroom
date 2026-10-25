@@ -1,0 +1,69 @@
+{
+  "date": "2026-10-24",
+  "status": "Combat clarity and contextual decisions ready for local playtest",
+  "publishNow": false,
+  "files": [
+    {
+      "path": "architecture-assets.js",
+      "sha256": "F45F8532CC6538D19D0C08E15C4F4CEC1F480D483CA66A4C45DFC9858FD2B549"
+    },
+    {
+      "path": "assets/rampart-13.png",
+      "sha256": "289E73B0E279355AC2A3178ABD71493A53CE47F40165CC88A16C012552094F08"
+    },
+    {
+      "path": "battle-feedback.css",
+      "sha256": "1AD0753B78F36D56B6B813B83D796A26AE41099436D58157467A8F74889A0194"
+    },
+    {
+      "path": "battle-feedback.js",
+      "sha256": "0DEF35D76B19D0BE123D868D3B7B64AB2BFD21887A3749801DA6559A7F3EB4C2"
+    },
+    {
+      "path": "card-pieces.js",
+      "sha256": "0401944AC4D8554AF83877158E6026E78A67B0E3A32C8EC8A1D03220B160C285"
+    },
+    {
+      "path": "combat-layout.css",
+      "sha256": "F7E6D4924EDA028F8A62DCC46240263C9B1300D47436414AC7EB2254A53BEBF9"
+    },
+    {
+      "path": "compact-board.js",
+      "sha256": "2FF391FF8B8C08DC426D74F2298F8D349C15AAE183E1E8E8105DB24276E0D277"
+    },
+    {
+      "path": "drag-controls.js",
+      "sha256": "2C9CA4DFF233A736AE51CF251A58B8BC5D1EAACFE4F32115252CD5A47A760AB3"
+    },
+    {
+      "path": "index.html",
+      "sha256": "3878A0E949EB45FDC3929D47916810722CF912AAAA37792FACC7A7BE6C4E5FC3"
+    },
+    {
+      "path": "miniature-asset.js",
+      "sha256": "19CE985712284D67B11C90645BD3D8FB64D45B591E271F564CFD5E8EA51EC38A"
+    },
+    {
+      "path": "prototype.js",
+      "sha256": "994BFE5C349787036DC146112A2102057EC7D4541AA3F007A2EFE67FBD6881D9"
+    },
+    {
+      "path": "rendering.css",
+      "sha256": "F9AFC23CE7B4378E8B3AC75C6198161A06F6E97F807CD4E116598A2360AA52C2"
+    },
+    {
+      "path": "rendering.js",
+      "sha256": "D82AC0F2526CAFDCD5C00B3F2A7976467512A9BE090EFF67831775F4A030B0AA"
+    },
+    {
+      "path": "skirmish-rules.js",
+      "sha256": "D89D79C9C873BFFB57B61F6FB1E9BCDC08E8DF6A9059992BC3A610FAEB0A7208"
+    },
+    {
+      "path": "terrain-assets.js",
+      "sha256": "3E820A5130B443F7F45D9841923966F8ED45E56A65AD51FB55A756D777984D98"
+    }
+  ],
+  "revision": 15,
+  "notes": "Fix transparent layer ordering, lift bridge and standing height, force fresh runtime scripts."
+}

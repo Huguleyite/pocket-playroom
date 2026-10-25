@@ -1,0 +1,29 @@
+{
+  "createdOn": "2026-10-24",
+  "phase": "Architecture",
+  "status": "Approved October 24, 2026; saved for unified update",
+  "publishNow": false,
+  "assets": [
+    {
+      "path": "assets/architecture-bridge-08.png",
+      "bytes": 2150825,
+      "sha256": "428387F801AB00ED46DF13E7B1FE7173826A229DA90AA7D699B7509FAC9D43B3"
+    },
+    {
+      "path": "assets/architecture-shrine-08.png",
+      "bytes": 2501293,
+      "sha256": "908A0474E3C6B22272FD6E76CB24D3891A6E6F097EE01D677D7F179CB0C2FB15"
+    },
+    {
+      "path": "assets/architecture-cottage-08.png",
+      "bytes": 2924059,
+      "sha256": "CAC98835DB3AE0B1E0AF4B4D61C7805658B71F365CF4C787F908DB9DF91A52C2"
+    },
+    {
+      "path": "assets/architecture-ruins-08.png",
+      "bytes": 2363116,
+      "sha256": "DD9C0A75DAD2C491F3E5AEC9431D51998B5B91A15452A8800B516FED9D55B8B6"
+    }
+  ],
+  "approvedOn": "2026-10-24"
+}

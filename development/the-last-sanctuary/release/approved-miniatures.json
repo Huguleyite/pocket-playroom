@@ -1,0 +1,33 @@
+{
+  "approvedOn": "2026-10-24",
+  "phase": "Miniatures",
+  "status": "Approved; retain for unified release",
+  "publishNow": false,
+  "assets": [
+    {
+      "path": "assets/seren-miniature-study-03.png",
+      "bytes": 1943529,
+      "sha256": "3FB8E8B409C9B2EC63E8D1AFEDAA9E126F9CADE8E28EF9EC9DC2CA7A05C92264"
+    },
+    {
+      "path": "assets/guardian-miniature-04.png",
+      "bytes": 2063735,
+      "sha256": "3645D8E2F66523C686DC2F3C29F29C10388F260CB35A34D317AB37828DA78D98"
+    },
+    {
+      "path": "assets/commander-miniature-05.png",
+      "bytes": 1819316,
+      "sha256": "5368F1734FF4ACAF34C5DF053E7516DD963D0AEAF648EA615CF297D931796147"
+    },
+    {
+      "path": "assets/rider-miniature-05.png",
+      "bytes": 1942430,
+      "sha256": "CC5CF2CBAF76D1F59892290B1ACA7F5009C85C9BDDCCC0DA48D58032AB3D773F"
+    },
+    {
+      "path": "assets/ranger-miniature-04.png",
+      "bytes": 1730075,
+      "sha256": "DFDD121A470221559F3D8EC3854F2307163A4D4ACB17363A4A1F74EF4B89FDC9"
+    }
+  ]
+}
