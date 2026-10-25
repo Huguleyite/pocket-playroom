@@ -15,6 +15,7 @@ main{max-width:480px;margin:auto;padding:24px 20px max(24px,env(safe-area-inset-
 svg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:2;overflow:visible}#trace{fill:none;stroke:#c8df7e;stroke-width:8;stroke-linejoin:round;stroke-linecap:round;opacity:.75}.float{position:absolute;z-index:5;left:50%;top:42%;transform:translate(-50%,-50%);white-space:nowrap;pointer-events:none;background:var(--green);color:#fff;padding:8px 17px;border-radius:30px;font-size:19px;font-weight:800;box-shadow:0 5px 25px #203a3420;animation:float 850ms ease-out forwards}@keyframes float{0%{opacity:0;transform:translate(-50%,0) scale(.8)}20%{opacity:1}85%{opacity:1}100%{opacity:0;transform:translate(-50%,-100px) scale(1.05)}}
 #message{min-height:42px;text-align:center;font-size:12px;color:var(--muted);padding:12px 2px 6px}.actions{display:flex;gap:9px}.primary{background:var(--green);color:white;border:0;border-radius:12px;padding:12px 18px;font-weight:700;flex:1}.secondary{background:transparent;border:1px solid #cbd4c5;border-radius:12px;padding:10px 14px;font-size:13px}.details{display:flex;justify-content:space-between;color:var(--muted);font-size:11px;margin-top:15px}.history{list-style:none;padding:0;margin:14px 0;display:flex;gap:6px;flex-wrap:wrap}.history li{font-size:11px;background:#e5e9dd;padding:3px 8px;border-radius:7px}footer{font-size:10px;color:var(--muted);border-top:1px solid #d7ddd1;padding-top:13px;margin-top:19px;text-align:center}dialog{border:1px solid #d6ddcf;border-radius:24px;padding:27px;max-width:400px;width:calc(100% - 32px);background:var(--paper);color:var(--ink);box-shadow:0 20px 100px #10241e30}dialog::backdrop{background:#17372dcc;backdrop-filter:blur(5px)}dialog h2{font-size:30px;letter-spacing:-1px;margin:8px 0}dialog p{font-size:13px;color:var(--muted)}dialog textarea{width:100%;resize:none;border:1px solid #d4dacb;border-radius:12px;background:#fffef8;padding:12px;font:13px/1.65 system-ui;color:var(--ink);height:155px}dialog .actions{margin-top:13px}.badge{font-size:11px;letter-spacing:2px;color:var(--green);font-weight:800}.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}
 @media(max-width:360px){main{padding:16px 12px}h1{font-size:27px}:root{--gap:6px}.board{padding:8px}}@media(prefers-reduced-motion:reduce){:root{--drop:1ms}*,*::before,*::after{animation-duration:1ms!important;transition-duration:1ms!important}}
+.scoring{margin:14px 0;padding:12px;border:1px solid #cbd4c5;border-radius:12px;font-size:12px}.scoring p{margin:6px 0;color:var(--muted)}#scoreBreakdown>div{max-height:250px;overflow:auto;padding-right:6px}.scoring h2{font-size:15px;margin:0}.scoring ol{padding-left:22px;margin:8px 0}.scoring li{margin:7px 0}.scoring .active-wave{font-weight:750;color:var(--green)}.tile.scoring-word,.room-tide .tile.scoring-word{background:#ddec87!important;color:#203a34!important;outline:3px solid #245c49;outline-offset:-3px}.history li{width:100%}.history summary{cursor:pointer}.history ol{padding-left:20px}.history li li{background:transparent;padding:2px 0}.score-total{font-weight:750;border-top:1px solid #cbd4c5;padding-top:8px}
 </style>
 <script>window.roomHaptic=()=>{try{navigator.vibrate?.(8);}catch{}};</script><script>
 window.roomComplete=(id,date)=>{if(!date){const d=new Date();date=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}try{localStorage.setItem('room-for-play:completed:'+id,JSON.stringify(date));}catch{}parent.postMessage({type:'room:completed',id,date},location.origin);};
@@ -30,6 +31,8 @@ window.roomComplete=(id,date)=>{if(!date){const d=new Date();date=d.getFullYear(
  <div class="word-bar idle" id="word">Drag a word to get things moving</div>
  <div class="board-wrap" id="boardWrap"><div class="board" id="board" role="group" aria-label="Tile Tide letter board"></div><svg aria-hidden="true"><polyline id="trace"/></svg></div>
  <div id="message" role="status" aria-live="polite">Diagonal moves count. Each tile can be used once.</div>
+ <section class="scoring" aria-label="How scoring works"><details><summary>How do points and cascades work?</summary><p>Every word scores its letter count squared: 3 letters = 9 points, 4 = 16, 5 = 25.</p><p>After tiles clear, letters fall and refill the board. Straight words of 3–5 letters that touch a moved or new tile score automatically, horizontally, vertically or diagonally, in either direction. Each drop can trigger another cascade, up to 10 waves. Cascades cost no extra moves and have no multiplier.</p><p>Each distinct tile path scores once per wave. Overlapping words each earn points, but shared tiles clear only once. The same word on different paths can score more than once.</p></details></section>
+ <section class="scoring" id="scoreBreakdown" aria-label="Latest move scoring" hidden></section>
  <div style="text-align:center;margin:0 0 12px"><button class="secondary" id="hint">Hint · suggest a word</button></div>
  <div class="actions"><button class="secondary" id="clear">Clear</button><button class="primary" id="submit">Submit word</button><button class="secondary" id="finish">Finish early</button></div>
  <div class="details"><span id="best">Personal best · 0</span><span>Daily reset · 00:00 UTC</span></div>
@@ -359,7 +362,7 @@ const utcDay = () => new Date().toISOString().slice(0,10);
 const date = utcDay();
 const game = createWordDrop(date);
 const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
-const wait = ms => new Promise(resolve => setTimeout(resolve, reduced ? 0 : ms));
+const wait = ms => new Promise(resolve => setTimeout(resolve, reduced || skipCascade ? 0 : ms));
 let storageOK = true;
 let saved = { version:1, days:{} };
 try {
@@ -380,6 +383,7 @@ if(candidate && Array.isArray(candidate.paths)) {
  }
  record.finished = candidate.finished === true || game.getState().moves === 10;
 }
+let skipCascade = false;
 let busy = false, path = [], dragging = false, touchId = null, lastPoint = null;
 let soundOn = false, audio;
 const board = $('board');
@@ -429,7 +433,7 @@ function updateStats() {
  $('hint').disabled=busy || record.finished;
  $('finish').textContent=record.finished?'Complete':'Finish early';
  cells.forEach(tile=>{tile.disabled=busy || record.finished;});
- $('history').replaceChildren(...history.map(r=>{const li=document.createElement('li');li.textContent=`${r.word} +${r.points}`;return li;}));
+ $('history').replaceChildren(...history.map((r,i)=>{const li=document.createElement('li'),details=document.createElement('details'),summary=document.createElement('summary');summary.textContent=`Move ${i+1} · ${r.word} · +${r.points} points`;details.append(summary,buildBreakdown(r));li.append(details);return li;}));
 }
 function drawPath() {
  cells.forEach((cell,i)=>{const pos=path.findIndex(p=>index(p)===i);cell.classList.toggle('selected',pos!==-1);cell.classList.toggle('tip',pos===path.length-1&&pos!==-1);cell.setAttribute('aria-pressed',String(pos!==-1));});
@@ -503,8 +507,38 @@ async function tone(frequency) {
  } catch {soundOn=false;$('sound').textContent='Sound unavailable';$('sound').setAttribute('aria-pressed','false');}
 }
 function popup(text) {const el=document.createElement('div');el.className='float';el.textContent=text;$('boardWrap').append(el);setTimeout(()=>el.remove(),950);}
-async function animateWave(wave,n) {
+function buildBreakdown(result, through=result.waves.length-1) {
+ const content=document.createElement('div'),list=document.createElement('ol');
+ result.waves.slice(0,through+1).forEach((wave,n)=>{
+  const item=document.createElement('li'),title=document.createElement('strong');
+  title.textContent=`${n ? 'Cascade '+n : 'Your word'} · +${wave.points} points`;
+  item.append(title);
+  const words=document.createElement('ul');
+  wave.matches.forEach(match=>{const row=document.createElement('li');row.textContent=`${match.word} · ${match.word.length} × ${match.word.length} = ${match.word.length**2} points`;words.append(row);});
+  item.append(words);list.append(item);
+ });
+ const base=result.waves[0].points,earned=result.waves.slice(0,through+1).reduce((sum,w)=>sum+w.points,0),total=document.createElement('p');
+ total.className='score-total';total.textContent=`Your word ${base} + cascades ${earned-base} = ${earned} points${through<result.waves.length-1?' so far':' this move'}`;
+ content.append(list,total);
+ if(through===result.waves.length-1){const note=document.createElement('p');note.textContent=result.cascadeLimitReached?'Stopped at the 10-wave cascade limit. Remaining words stay on the board.':result.waves.length===1?'No automatic straight-line words matched after this drop.':'Cascade complete. No further automatic matches after the last drop.';content.append(note);}
+ return content;
+}
+function showBreakdown(result,through=result.waves.length-1) {
+ const panel=$('scoreBreakdown'),title=document.createElement('h2');title.textContent=`Move ${result.moves} · ${result.word}`;
+ panel.hidden=false;panel.replaceChildren(title,buildBreakdown(result,through));
+ if(busy && !skipCascade){const skip=document.createElement('button');skip.className='secondary';skip.textContent='Show final breakdown';skip.addEventListener('click',()=>{skipCascade=true;skip.disabled=true;skip.textContent='Finishing cascade…';});panel.append(skip);}
+}
+async function animateWave(wave,n,result) {
  renderBoard(wave.before);
+ showBreakdown(result,n);
+ message(n?`Cascade ${n}: falling or new tiles formed ${wave.matches.length} scoring word${wave.matches.length===1?'':'s'}. No multiplier.`:`Your word: ${result.word.length} × ${result.word.length} = ${wave.points} points.`);
+ for(const match of wave.matches){
+  cells.forEach(tile=>tile.classList.remove('scoring-word'));
+  match.path.forEach(p=>cells[index(p)].classList.add('scoring-word'));
+  $('word').textContent=`${match.word} · ${match.word.length} × ${match.word.length} = ${match.word.length**2}`;
+  $('word').classList.remove('idle');
+  await wait(650);
+ }
  wave.removed.forEach(p=>cells[index(p)].classList.add('pop'));
  tone(440+n*65); await wait(200);
  renderBoard(wave.after);
@@ -515,7 +549,8 @@ async function animateWave(wave,n) {
  // Force the starting transforms to commit before enabling the transitions.
  void board.offsetHeight;
  moving.forEach(tile=>{tile.classList.add('falling');tile.style.transform='translateY(0)';tile.style.opacity='1';});
- popup(n?`COMBO x${n+1}! +${wave.points}`:`+${wave.points}`);
+ popup(n?`Cascade ${n} · +${wave.points}`:`Your word · +${wave.points}`);
+ $('score').textContent=(result.score-result.points+result.waves.slice(0,n+1).reduce((sum,w)=>sum+w.points,0)).toLocaleString();
  await wait(450);
 }
 async function submit() {
@@ -526,11 +561,11 @@ async function submit() {
  if(!isValidWord(selectedWord())){clearPath();message('That word is not in our dictionary. Try another.');tone(180);return;}
  const result=game.processWordClear(chosen);
  if(!result.accepted){clearPath();message(result.reason);return;}
- busy=true;record.paths.push(chosen);history.push(result);
+ skipCascade=false;busy=true;record.paths.push(chosen);history.push(result);
  if(result.movesRemaining===0)record.finished=true;
  persist();clearPath();message(`${result.word} · +${result.points}${result.waves.length>1?' · bonus cascade!':''}`);
- try {for(let i=0;i<result.waves.length;i++)await animateWave(result.waves[i],i);}
- finally {busy=false;renderBoard();updateStats();if(record.finished)showResults();}
+ try {for(let i=0;i<result.waves.length;i++)await animateWave(result.waves[i],i,result);}
+ finally {busy=false;renderBoard();clearPath();showBreakdown(result);message(`${result.word}: ${result.waves[0].points} word + ${result.points-result.waves[0].points} cascade = ${result.points} points. Breakdown below.`);if(record.finished)showResults();}
  if(!storageOK)message('Progress is available this session, but browser storage is unavailable.');
 }
 function summaryText() {
@@ -575,6 +610,7 @@ resultsButton.addEventListener('click',showResults);document.querySelector('.act
 const observe=new MutationObserver(()=>{resultsButton.hidden=!record.finished;});observe.observe($('moves'),{childList:true});
 $('daily').textContent=`The daily word cascade · ${new Date(date+'T12:00:00Z').toLocaleDateString(undefined,{month:'short',day:'numeric',timeZone:'UTC'})}`;
 persist();renderBoard();drawPath();
+if(history.length)showBreakdown(history.at(-1));
 if(!storageOK)message('Browser storage is unavailable. Progress lasts for this session only.');
 if(record.finished)showResults();
 })();
