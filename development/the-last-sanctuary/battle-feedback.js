@@ -1,7 +1,7 @@
 /* Board-local feedback replays rule events without changing the rules engine. */
 'use strict';
 window.CrownFeedback=(()=>{
- const names={mage:'Seren',guardian:'Aldric',raider1:'Ash Raider I',raider2:'Ash Raider II'},clone=value=>JSON.parse(JSON.stringify(value));
+ const names={mage:'Seren',guardian:'Aldric',raider1:'Ash Raider I',raider2:'Ash Raider II',raider3:'Ash Bowman',raider4:'Ash Captain'},clone=value=>JSON.parse(JSON.stringify(value));
  function create({element,project,getUnit=()=>null,reduced=()=>false,applyFrame=()=>{},animateMove=null,animateDefeat=null}){
   if(!element||typeof project!=='function')throw new TypeError('Feedback needs a board element and a projection callback.');
   const overlay=document.createElement('div');overlay.className='battle-feedback';overlay.innerHTML='<svg class="feedback-lines" aria-hidden="true"><defs><marker id="feedback-arrow" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L7,3 z" fill="#ffe5a2"/></marker></defs><line marker-end="url(#feedback-arrow)" style="display:none"/></svg><div class="feedback-preview" role="status" hidden></div><div class="feedback-banner" role="status" hidden></div>';element.append(overlay);
@@ -26,7 +26,7 @@ window.CrownFeedback=(()=>{
   async function play(events,beforeState,afterState){const run=++generation;playing=true;lastEvents=[];clearPreview();setState(beforeState);try{
    for(const event of events){if(destroyed||run!==generation)return;lastEvents.push(event.type);const u=state.units[event.unit];
     if(event.type==='enemyTurn'){state.actionsLeft=0;frame(event);showBanner('Raiders’ turn','Watch each raider act.','enemy');await wait(ms(700,160));}
-    else if(event.type==='playerTurn'){state.round=event.round;state.actionsLeft=2;state.mana=3;showBanner('Your turn',`Round ${event.round} · 2 actions · 3 mana`);frame(event);await wait(ms(650,160));banner.hidden=true;}
+    else if(event.type==='playerTurn'){state.round=event.round;state.actionsLeft=event.frame?.actionsLeft??2;state.mana=3;showBanner('Your turn',`Round ${event.round} · ${state.actionsLeft} actions · 3 mana`);frame(event);await wait(ms(650,160));banner.hidden=true;}
     else if(event.type==='move'||event.type==='portal'){showBanner(`${name(event.unit)} ${event.type==='portal'?'folds the path':'moves'}`,u.team==='enemy'?'Raider advance':'Reposition');if(animateMove)await animateMove(event.unit,event.from,event.to,ms(520,80));else await wait(ms(520,80));u.key=event.to;if(u.team==='player'){state.actionsLeft--;if(event.type==='portal')state.mana-=2;}frame(event);banner.hidden=true;}
     else if(event.type==='attack'){
      const target=state.units[event.target];showBanner(`${name(event.unit)} attacks`,`${name(event.target)} · ${u.id==='mage'?'Arcane Bolt':u.id==='guardian'?'Shield Strike':'Raider strike'}`,u.team);
@@ -39,7 +39,7 @@ window.CrownFeedback=(()=>{
     else if(event.type==='brace'){u.braced=true;u.rooted=true;state.actionsLeft--;showBanner('Hold the Crossing','Aldric braces · cannot move this turn · blocks 1 damage');floating(event.unit,'BRACED','ward');frame(event);await wait(ms(750,180));banner.hidden=true;}
     else if(event.type==='rampart'){state.walls.push(event.key);state.mana--;state.actionsLeft--;frame(event);await wait(ms(350,90));}
     else if(event.type==='wallBroken'){state.walls=state.walls.filter(key=>key!==event.key);showBanner('A raider breaks the rampart');frame(event);await wait(ms(500,100));banner.hidden=true;}
-    else if(event.type==='won'||event.type==='lost'){state.status=event.type;showBanner(event.type==='won'?'Victory — crossing secured':'Your company has fallen','Restart the battle to try again.',event.type==='won'?'player':'enemy');frame(event);await wait(ms(900,220));}
+    else if(event.type==='won'||event.type==='lost'){state.status=event.type;showBanner(event.type==='won'?(state.roundLimit?'Victory — relic returned':'Victory — crossing secured'):(state.roundLimit?'The crossing is lost':'Your company has fallen'),'Restart the battle to try again.',event.type==='won'?'player':'enemy');frame(event);await wait(ms(900,220));}
    }
    if(!destroyed&&run===generation){setState(afterState);applyFrame(clone(afterState),{type:'complete'});if(afterState.status==='playing')banner.hidden=true;}
   }finally{if(run===generation)playing=false;}}

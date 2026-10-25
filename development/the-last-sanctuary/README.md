@@ -1,5 +1,7 @@
 # The Last Sanctuary
 
+**Play Battle I:** open `battle.html` on the local preview server. Recover the relic and bring it home across the full 35-hex board. See [mission design](design/BATTLE-I.md). This mission is a local playtest and is not published.
+
 Current review: **terrain.html** (terrain study 06). Approved miniatures are saved for the unified release; see release/PLAN.md. Normal index.html remains the original comparison board. New terrain test: index.html?miniature=company&terrain=illustrated.
 
 Connected-water review: **water-study.html** (study 07). Try straight and bent rivers, a junction, lake and island, or click hexes to build a new water layout. The illustrated game board now uses the same connected-water system.
@@ -97,3 +99,7 @@ Open `index.html?miniature=company&terrain=illustrated&architecture=illustrated&
 ## Current playtest · study15
 
 Open `index.html?miniature=company&terrain=illustrated&architecture=illustrated&render=final&board=compact&play=skirmish&revision=15`. Clear damage/health previews and ordered enemy actions, compact magic tray, and contextual Hold the Crossing / Press the Advantage cards. Mobile confirmation stays reachable while keeping action on the board. See design/STUDY-15.md. Local only.
+
+## Current interface · study16
+
+Open `index.html?miniature=company&terrain=illustrated&architecture=illustrated&render=final&board=compact&play=skirmish&revision=16`. Illustratedspellhand, tactilegold/bronzecontrols, polishedFieldDecisions and a cleanplayagainpanel. Mobilehandscrolls; confirmationdock and combatfeedbackremain. See design/STUDY-16.md. Localonly.
