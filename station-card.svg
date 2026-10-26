@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="300" height="140" viewBox="0 0 300 140" fill="none">
+<defs><pattern id="dots" width="16" height="16" patternUnits="userSpaceOnUse"><circle cx="2" cy="2" r=".7" fill="#a8c4c8" opacity=".17"/></pattern><filter id="glow"><feGaussianBlur stdDeviation="2"/></filter></defs>
+<rect x="10" y="6" width="280" height="128" rx="14" fill="#172f3c" stroke="#506974"/>
+<path d="M10 20Q78 4 70 43T60 94Q51 112 84 134H24a14 14 0 01-14-14Z" fill="#284653"/><path d="M290 15Q232 24 251 58T254 104L239 134H276a14 14 0 0014-14Z" fill="#294752"/>
+<rect x="11" y="7" width="278" height="126" rx="13" fill="url(#dots)"/>
+<path d="M62 70L138 34 232 48M62 70l87 37" stroke="#edc784" stroke-width="6" opacity=".2" filter="url(#glow)"/>
+<path d="M138 34l11 73 83-59-9 63-74-4" stroke="#95aeb8" stroke-width="1.5" stroke-dasharray="4 5"/>
+<path d="M62 70L138 34 232 48M62 70l87 37" stroke="#edc784" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+<g fill="#1c3644" stroke="#a8c1c6"><rect x="126" y="22" width="25" height="25" rx="7"/><rect x="220" y="36" width="25" height="25" rx="7"/><rect x="137" y="95" width="25" height="25" rx="7"/><rect x="211" y="99" width="25" height="25" rx="7"/></g>
+<g fill="#ecdec0"><circle cx="138.5" cy="34.5" r="3"/><circle cx="232.5" cy="48.5" r="3"/><circle cx="149.5" cy="107.5" r="3"/></g><circle cx="223.5" cy="111.5" r="3" stroke="#b2c8ca"/>
+<circle cx="62" cy="70" r="20" fill="#213c47" stroke="#edc784" stroke-width="1.5"/>
+<path d="M57 79l5-22 5 22M54 79h16M59 71h6M53 60q-7 8 0 15M71 60q7 8 0 15" stroke="#edc784" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+<text x="25" y="23" fill="#a2bbc0" font-family="system-ui,sans-serif" font-size="6" letter-spacing="1.5">FIELD CONNECTIONS</text><text x="265" y="122" fill="#edc784" font-family="system-ui,sans-serif" font-size="8">N ↑</text>
+</svg>
