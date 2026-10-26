@@ -52,12 +52,12 @@
   const back = document.querySelector('body > .playroom-return');
   if (back) bar.append(back);
   const panels = {
-    'hex-gambit': [['.commander', 'Army'], ['.chronicle-panel', 'Chronicle'], ['.vip', 'Archmage']],
+    'hex-gambit': [['.commander', 'Army'], ['.chronicle-panel', 'Chronicle'], ['.vip', 'Archmage'], ['.court-controls', 'Board settings', true], ['.orders .detail-block', 'Piece details', true]],
     lineage: [['.house-column', 'House & favors'], ['.chronicle', 'Chronicle']],
     'quantum-draft': [['.recent-hands', 'Recent hands'], ['.terminal', 'Telemetry']],
     chronodeck: [['#relics', 'Relics']]
   };
-  for (const [selector, label] of panels[game] || []) {
+  for (const [selector, label, compactOnly] of panels[game] || []) {
     const panel = document.querySelector(selector);
     if (!panel) continue;
     const originalPosition = document.createComment('Secondary panel position');
@@ -94,6 +94,17 @@
       arrangeRelics();
     }
     bar.append(toggle);
+    if (compactOnly) {
+      const compact = matchMedia('(min-width:621px) and (max-width:999px)');
+      const arrange = () => {
+        if (!compact.matches && dialog.open) dialog.close();
+        toggle.hidden = !compact.matches;
+        if (compact.matches) dialog.append(panel);
+        else originalPosition.after(panel);
+      };
+      compact.addEventListener('change', arrange);
+      arrange();
+    }
   }
   const full = document.createElement('button');
   full.textContent = 'Fullscreen';
@@ -127,4 +138,5 @@
  new ResizeObserver(schedule).observe(document.querySelector('.playroom-tools'));
  new MutationObserver(schedule).observe(battle,{attributes:true,attributeFilter:['hidden']});
  window.addEventListener('resize',schedule);schedule();
+ window.visualViewport?.addEventListener('resize',schedule);
 })();

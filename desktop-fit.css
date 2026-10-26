@@ -408,3 +408,47 @@ body[data-playroom-game="hex-gambit"] .orders .detail-block .detail-text{font-si
 body[data-playroom-game="hex-gambit"] .orders .detail-block .detail-hint{display:block;font-size:12px;line-height:1.4}
 body[data-playroom-game="hex-gambit"] .orders .detail-block .crest,body[data-playroom-game="hex-gambit"] .orders .detail-block .detail-art{display:none}
 body[data-playroom-game="hex-gambit"] .orders .detail-block{flex:none}
+
+/* Unfolded phones use their width for play instead of a long mobile stack. */
+@media(min-width:621px) and (max-width:999px){
+ body[data-playroom-game="hex-gambit"] .layout{display:block;padding:6px 8px}
+ body[data-playroom-game="hex-gambit"] .ad,body[data-playroom-game="hex-gambit"] .console>footer{display:none}
+ body[data-playroom-game="hex-gambit"] .console>header{height:auto;min-height:44px;margin:0 0 6px;padding:0 0 6px;gap:8px;flex-wrap:wrap}
+ body[data-playroom-game="hex-gambit"] .console>header h1{font-size:20px}
+ body[data-playroom-game="hex-gambit"] .console>header .muted{display:none}
+ body[data-playroom-game="hex-gambit"] .brand-mark{width:36px;height:36px}
+ body[data-playroom-game="hex-gambit"] .toolbar{width:auto;margin-left:auto;flex-wrap:wrap}
+ body[data-playroom-game="hex-gambit"] .toolbar button{min-height:44px}
+ body[data-playroom-game="hex-gambit"] .battle-layout:not([hidden]){display:grid;grid-template-columns:minmax(0,1fr) 210px;grid-template-rows:auto auto;gap:8px;min-height:0;height:auto;align-items:stretch}
+ body[data-playroom-game="hex-gambit"] .arena{grid-area:1/1;display:flex;flex-direction:column;padding:6px;gap:4px;min-width:0}
+ body[data-playroom-game="hex-gambit"] .battle-head{margin:0;gap:4px}
+ body[data-playroom-game="hex-gambit"] .battle-head .eyebrow{display:none}
+ body[data-playroom-game="hex-gambit"] .battle-head h2{font-size:16px}
+ body[data-playroom-game="hex-gambit"] .court-stage{padding:4px 0 16px;min-height:0;flex:1}
+ body[data-playroom-game="hex-gambit"] .arena .court-stage>.board-wrap{width:min(100%,max(390px,calc(var(--hex-battle-height,600px) - 180px)));padding:7px}
+ body[data-playroom-game="hex-gambit"] .court-stage .board{gap:1px;padding:1px}
+ body[data-playroom-game="hex-gambit"] .status{min-height:32px;padding:4px;margin:0;font-size:12px}
+ body[data-playroom-game="hex-gambit"] .hex-hand-tray{grid-area:1/2;display:flex;flex-direction:column;padding:8px;gap:6px}
+ body[data-playroom-game="hex-gambit"] .hex-hand-tray .hand-label{font-size:13px;margin:0}
+ body[data-playroom-game="hex-gambit"] .hex-hand-tray .hand-label span{display:none}
+ body[data-playroom-game="hex-gambit"] .hex-hand-tray .hand{display:grid;grid-template-columns:minmax(0,1fr);gap:6px;flex:1}
+ body[data-playroom-game="hex-gambit"] .hex-hand-tray .card{display:flex;min-height:100px;padding:7px;gap:2px}
+ body[data-playroom-game="hex-gambit"] .hex-hand-tray .card-art{display:none}
+ body[data-playroom-game="hex-gambit"] .hex-hand-tray .card-top{min-height:20px;font-size:10px;padding-left:28px}
+ body[data-playroom-game="hex-gambit"] .hex-hand-tray .card strong{font-size:15px;margin:0}
+ body[data-playroom-game="hex-gambit"] .hex-hand-tray .card .description{font-size:12px;line-height:1.3}
+ body[data-playroom-game="hex-gambit"] .hex-hand-tray .card .cost{font-size:10px;padding-top:3px}
+ body[data-playroom-game="hex-gambit"] .hex-inspect-row{display:flex;flex-wrap:wrap;gap:4px;margin:0}
+ body[data-playroom-game="hex-gambit"] .hex-inspect-row button{flex:1;min-width:44px;padding:4px;font-size:11px;min-height:44px}
+ body[data-playroom-game="hex-gambit"] .orders{grid-area:2/1/3/3;display:flex;flex-direction:row;flex-wrap:wrap;align-items:center;padding:8px;gap:8px}
+ body[data-playroom-game="hex-gambit"] .orders>h3,body[data-playroom-game="hex-gambit"] .orders>.divider{display:none}
+ body[data-playroom-game="hex-gambit"] .orders .mana-orb{width:54px;height:44px;position:static;margin:0;flex:none}
+ body[data-playroom-game="hex-gambit"] .mana-orb strong{font-size:24px}
+ body[data-playroom-game="hex-gambit"] .orders .intent{flex:1;min-height:44px;font-size:12px;padding:6px;margin:0}
+ body[data-playroom-game="hex-gambit"] .orders .mana{display:none}
+ body[data-playroom-game="hex-gambit"] .orders .battle-controls{position:static;display:flex;flex-direction:row;width:auto;gap:6px;padding:0;margin:0}
+ body[data-playroom-game="hex-gambit"] .battle-controls>small:last-child{display:none}
+ body[data-playroom-game="hex-gambit"] .battle-controls button{min-height:44px}
+ body[data-playroom-game="hex-gambit"] .table-inscription,body[data-playroom-game="hex-gambit"] .board-legend,body[data-playroom-game="hex-gambit"] .arena>.legend{display:none}
+}
+
