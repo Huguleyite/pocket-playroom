@@ -12,6 +12,19 @@
     {id:'futoshiki',name:'Futoshiki',category:'Daily · Number puzzle',line:'A little greater. A little wiser.',art:['2','<','5'],tile:'#e0e4ef',ink:'#4e6282',paper:'#f8f0e5',accent:'#aa493c',help:'Place 1–5 in every row and column, with no repeated number. Obey the greater-than and less-than signs. Select a square and use the number keys. A fresh daily puzzle arrives at local midnight.',note:'The open side of the sign faces the larger number.',symbol:'< >',subtitle:'The number workshop'}
     ,{id:'signal',name:'Signal Flow',nightOnly:true,category:'New · Night Play exclusive',line:'A new game comes to light.',art:['↳','✦','↱'],tile:'#14202f',ink:'#ffd563',paper:'#080c16',accent:'#ffd563',help:'Tap an interior prism to rotate it clockwise. Route Cyan, Magenta, and Gold beams to matching targets. All three colors share junctions. Route each color through filters to both matching targets. Wrong-color arrivals block completion.',note:'Some things only come to light after dark.',symbol:'✦',subtitle:'A Night Play discovery'}
   ];
+  const pocketCategories=['All','Word','Logic','Cards','Arcade'];
+  const pocketGenres={weave:'Word',tide:'Word',lock:'Word',shift:'Logic',binario:'Logic',futoshiki:'Logic',signal:'Logic',station:'Logic',draw:'Cards',deli:'Arcade'};
+  let pocketCategory='All';
+  function filterPocketGames(){
+    const grid=main.querySelector('.game-grid');if(!grid)return;
+    const available=games.filter(g=>!g.nightOnly||nightPrefs.global);
+    const selected=available.filter(g=>pocketCategory==='All'||(g.genre||pocketGenres[g.id])===pocketCategory);
+    grid.innerHTML=selected.filter(g=>pocketCategory!=='All'||!g.nightOnly).map(card).join('');
+    const discovery=document.getElementById('night-discovery');if(discovery)discovery.hidden=pocketCategory!=='All';
+    main.querySelectorAll('[data-pocket-category]').forEach(button=>button.setAttribute('aria-pressed',String(button.dataset.pocketCategory===pocketCategory)));
+    const count=document.getElementById('game-count');if(count)count.textContent=pocketCategory==='All'?available.length+' games · No account needed':selected.length+' '+pocketCategory.toLowerCase()+' game'+(selected.length===1?'':'s');
+    syncBinarioName();refreshCompletion();
+  }
   const main=document.getElementById('main'),info=document.getElementById('info');
   let current=null,frame=null;
   let routeVersion=0;
@@ -66,6 +79,7 @@
       if(!discovery){document.querySelector('.collection-top').insertAdjacentHTML('beforebegin',`<section id="night-discovery" aria-label="New game unlocked"><a class="signal-discovery" href="#games/signal" aria-label="Play Signal Flow, new Night Play exclusive"><div class="signal-discovery-inner"><div><span class="discovery-badge">✦ NEW GAME UNLOCKED</span><p class="discovery-exclusive">ONLY IN NIGHT PLAY</p><h2>Signal Flow<span>↗</span></h2><p class="discovery-copy">A new game comes to light.<br>Rotate prisms. Bring every signal home.</p><span class="discovery-cta">Enter the circuit →</span></div><svg class="signal-art" viewBox="0 0 160 130" aria-hidden="true"><g fill="#142132" stroke="#536176"><rect x="8" y="8" width="144" height="114" rx="17"/><path d="M56 8v114M104 8v114M8 46h144M8 84h144"/></g><g fill="none" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"><path stroke="#42e8ff" d="M8 27h72v38h72"/><path stroke="#ff5bd6" d="M32 122V65h96V8"/><path stroke="#ffd563" d="M8 103h72V27h72"/></g><g fill="#ffd563"><circle cx="8" cy="103" r="6"/><circle cx="152" cy="27" r="6"/></g></svg></div></a></section>`);}
     }else discovery?.remove();
     const count=document.getElementById('game-count');if(count)count.textContent=nightPrefs.global?'9 games · A new game unlocked':'8 games · No account needed';
+    filterPocketGames();
     refreshCompletion();
   }
   function syncBinarioName(){
@@ -84,11 +98,12 @@
   function theme(g){return `--game-tile:${g.tile};--game-ink:${g.ink}`;}
   function card(g){return `<a class="game-card" href="#games/${g.id}" style="${theme(g)}" aria-label="Play ${g.name}"><div class="card-art">${art(g)}</div><div class="card-body"><div class="card-category">${g.category}</div><h3>${g.name}</h3><p>${g.line}</p><div class="card-bottom"><span>${g.sample?'Playable sample':g.id==='draw'?'No timer. Just one more hand.':g.id==='deli'?'60-second rounds':'A fresh puzzle daily'}</span><span class="play-label">${g.sample?'Try it':'Play now'} ↗</span></div></div></a>`;}
   function home(){
-    current=null;frame=null;document.getElementById('mobile-ad-anchor').hidden=true;document.body.className='';document.documentElement.removeAttribute('style');
+    pocketCategory='All';current=null;frame=null;document.getElementById('mobile-ad-anchor').hidden=true;document.body.className='';document.documentElement.removeAttribute('style');
     const last=games.find(g=>g.id===read('room-for-play:last')?.id&&(!g.nightOnly||nightPrefs.global));
     document.title='Pocket Playroom · Big fun. Pocket edition.';
-    main.innerHTML=`<section class="home-hero"><div><div class="eyebrow">Independent games. A little everyday delight.</div><h1>Big fun.<br><em>Pocket edition.</em></h1><p class="hero-copy">A clever turn. A good word. One more sandwich.<br>Find your kind of fun and settle in.</p></div><div class="hero-toy" aria-hidden="true"><span>P</span><span>✳</span><span>0</span><span>1</span></div></section>${last?`<section class="resume" aria-label="Recently played"><p>Last time you were here<strong>${last.name}</strong></p><a class="pill-link" href="#games/${last.id}">Play again →</a></section>`:''}<div class="collection-top"><h2>Pick your little obsession.</h2><span id="game-count">8 games · No account needed</span></div><section class="game-grid" aria-label="Choose a game">${games.filter(g=>!g.nightOnly).map(card).join('')}</section><section class="home-note"><span class="asterisk" aria-hidden="true">✳</span><div><h2>There’s always room.</h2><p>For a fresh thought, a small victory, or a really good stack of cheese.</p></div></section>`;
+    main.innerHTML=`<section class="home-hero"><div><div class="eyebrow">Independent games. A little everyday delight.</div><h1>Big fun.<br><em>Pocket edition.</em></h1><p class="hero-copy">A clever turn. A good word. One more sandwich.<br>Find your kind of fun and settle in.</p></div><div class="hero-toy" aria-hidden="true"><span>P</span><span>✳</span><span>0</span><span>1</span></div></section>${last?`<section class="resume" aria-label="Recently played"><p>Last time you were here<strong>${last.name}</strong></p><a class="pill-link" href="#games/${last.id}">Play again →</a></section>`:''}<div class="collection-top"><h2>Pick your little obsession.</h2><span id="game-count">8 games · No account needed</span></div><div class="pocket-filters" role="group" aria-label="Filter pocket games">${pocketCategories.map(label=>`<button type="button" data-pocket-category="${label}" aria-pressed="${label===pocketCategory}">${label}</button>`).join('')}</div><section class="game-grid" aria-label="Choose a game">${games.filter(g=>!g.nightOnly).map(card).join('')}</section><section class="home-note"><span class="asterisk" aria-hidden="true">✳</span><div><h2>There’s always room.</h2><p>For a fresh thought, a small victory, or a really good stack of cheese.</p></div></section>`;
   }
+  main.addEventListener('click',event=>{const button=event.target.closest('[data-pocket-category]');if(!button)return;pocketCategory=button.dataset.pocketCategory;filterPocketGames();});
   function gamePage(g){
     document.getElementById('mobile-ad-anchor').hidden=g.id!=='binario';current=g.id;remember(g.id);document.body.className=`game-${g.id}${g.id==='draw'&&location.hash.endsWith('/scorecard')?' scorecard-page':''}`;
     for(const [key,value]of Object.entries({paper:g.paper,accent:g.accent,tile:g.tile,edge:g.ink}))document.documentElement.style.setProperty('--'+key,value);

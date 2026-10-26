@@ -97,3 +97,6 @@ body.game-draw #main{max-width:1240px}.game-draw .game-well{max-width:1160px}
 @media(min-width:580px){body.game-draw .night-controls{float:right;margin:5px 0 8px}body.game-draw .back-link{margin-top:5px;min-height:44px}body.game-draw .game-layout{clear:both}}
 
 @media(max-width:600px){body.scorecard-page .site-header{display:none}body.scorecard-page .night-controls{float:right;margin:4px 0}body.scorecard-page #instructions-button{display:none}body.scorecard-page .back-link{min-height:44px;margin-top:4px}body.scorecard-page .game-layout{clear:both}}
+
+/* Pocket Games category filters */
+.pocket-filters{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 20px}.pocket-filters button{min-height:44px;padding:10px 18px;border:2px solid var(--edge);border-radius:999px;background:var(--panel);color:var(--ink);font:700 14px/1.2 inherit;cursor:pointer}.pocket-filters button[aria-pressed="true"]{background:#56327f;border-color:#56327f;color:#fff}.pocket-filters button:focus-visible{outline:3px solid #a64b28;outline-offset:3px}html.night-play .pocket-filters button{background:#202b40;border-color:#657491;color:#eee7ff}html.night-play .pocket-filters button[aria-pressed="true"]{background:#d6b5ff;border-color:#d6b5ff;color:#271b3c}#night-discovery[hidden]{display:none}@media(max-width:350px){.pocket-filters{gap:6px}.pocket-filters button{padding:10px 13px}}
