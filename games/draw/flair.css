@@ -1,0 +1,27 @@
+/* A little card-room character, without adding controls or changing the rules. */
+.felt,.collection-night .felt{position:relative;background-image:radial-gradient(ellipse at 45% 25%,#49724d44,transparent 65%),radial-gradient(#c2cc9b0d .75px,transparent .75px);background-size:auto,5px 5px;border-color:#a59d67;box-shadow:inset 0 0 0 3px #142d22,inset 0 0 0 5px #a99a5b22,0 10px 25px #0003}
+.felt::before,.felt::after{content:'✦';position:absolute;font:15px Georgia,serif;color:#d3bf7c70;pointer-events:none}.felt::before{top:7px;left:7px}.felt::after{bottom:6px;right:7px}
+.felt>.label{padding-left:5px}.felt>.label>span{display:flex;align-items:center;gap:10px}#open-spaces{font-size:9px;font-weight:500;letter-spacing:0;border:1px solid #a5b18a66;padding:2px 7px;border-radius:20px;color:#cfdbb9;white-space:nowrap}
+#turn{background:#101f18;border:1px solid #ab9a5a88;border-radius:20px;padding:3px 9px;color:#efd18f;white-space:nowrap}
+.card{background-image:radial-gradient(ellipse at 26% 15%,#fffef7,#f3e7cc 65%,#ddcea8);border:1px solid #f6e7bf;box-shadow:inset 0 0 0 3px #fff6e088,0 4px 0 #aa9673,0 6px 12px #0004}
+.card::before{content:'';position:absolute;inset:4px;border:1px solid #ac946529;border-radius:5px;pointer-events:none}
+.court-card::after{content:attr(data-court);position:absolute;left:0;right:0;bottom:15%;text-align:center;font-size:8px;font-weight:800;letter-spacing:2px;color:#9f784d;pointer-events:none}
+#hand .card{transform-origin:50% 100%}
+.zone{border-color:#788867;background:linear-gradient(135deg,#243e2d,#182e24);box-shadow:inset 0 1px #b2c58c22,0 3px 12px #0003}
+.zone.active{background:radial-gradient(ellipse at 50% 0,#82945d33,transparent 80%),#2b442d;border-color:#d4bd75;box-shadow:inset 0 0 0 1px #d5bd6b33,0 4px 18px #0003}
+#deck{position:relative;background-image:repeating-linear-gradient(45deg,#a5b79814 0,#a5b79814 1px,transparent 1px,transparent 7px),repeating-linear-gradient(-45deg,#a5b79814 0,#a5b79814 1px,transparent 1px,transparent 7px),linear-gradient(135deg,#29443e,#183630);border-color:#c6ba83}
+#deck::before{content:'';position:absolute;inset:5px;border:1px solid #d3be7899;border-radius:4px;pointer-events:none}
+#deck .deck-glyph{display:grid;place-items:center;min-width:34px;aspect-ratio:1;line-height:1;border:1px solid #c5ae7388;border-radius:50%;margin:4px}
+#collect:enabled{background:linear-gradient(135deg,#fff0bf,#e6be66 70%,#d3a754);box-shadow:0 3px 0 #92703c,0 0 20px #f5d68333}
+.combination-ready #collect{animation:collect-glimmer 2.4s ease-in-out infinite}
+#collection-meter{background-image:radial-gradient(ellipse at 30% 0,#b6bd7133,transparent 75%),linear-gradient(120deg,#38543a,#213c31)}
+#collected-total{text-shadow:0 2px 0 #10291d}
+.empty{background-image:radial-gradient(ellipse at center,#91ab6c0d,transparent 70%);color:#819e6c}.empty.place-ready{background-image:radial-gradient(ellipse at center,#e3d3892b,transparent 80%)}
+@keyframes collect-glimmer{0%,100%{box-shadow:0 3px 0 #92703c,0 0 12px #f5d68322}50%{box-shadow:0 3px 0 #92703c,0 0 22px #f5d68366}}
+@keyframes card-land{0%{opacity:.3;transform:translateY(-18px) rotate(-5deg) scale(.93)}65%{transform:translateY(2px) rotate(1deg)}100%{opacity:1;transform:none}}
+@keyframes card-deal{0%{opacity:.3;transform:translateX(24px) rotate(8deg)}100%{opacity:1;transform:none}}
+.card-arrived{animation:card-land .32s ease-out}.card-drawn{animation:card-deal .35s ease-out}
+@media(hover:hover) and (pointer:fine){.card:not(:disabled):hover{transform:translateY(-5px);box-shadow:inset 0 0 0 3px #fff6e088,0 7px 0 #a79673,0 11px 18px #0004}.card.selected:hover{outline-color:#ffe9a1}#deck:not(:disabled):hover{box-shadow:inset 0 0 0 3px #263e46,0 5px 0 #152b25,0 0 20px #d2bd7044}}
+@media(max-width:579px){#open-spaces{font-size:8px;padding:1px 5px}.felt>.label>span{gap:5px}#turn{font-size:8px;padding:2px 6px}.court-card::after{font-size:6px;letter-spacing:1px;bottom:12%}}
+@media(prefers-reduced-motion:reduce){.card-arrived,.card-drawn,.combination-ready #collect{animation:none!important}.card:not(:disabled):hover{transform:none!important}}
+

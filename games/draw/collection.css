@@ -1,2 +1,51 @@
 body.room-embedded .intro,body.room-embedded footer{display:none}body.room-embedded main{padding-top:8px;padding-bottom:8px}body.room-embedded header>span>small{display:none}body.room-embedded #collection-meter{margin-bottom:10px}body.room-embedded #collection-remaining{font-size:9px}body.room-embedded #rules-dialog{max-height:calc(100dvh - 24px)}
 @media(max-width:579px){body.room-embedded .felt{padding:10px}body.room-embedded #status{min-height:29px;margin-top:8px}body.room-embedded .zone{padding:8px;margin-bottom:8px}body.room-embedded .layout{gap:8px}}
+/* Fit to the outer browser, not the iframe's content-driven vh. */
+body.room-embedded main{max-width:none;padding-left:16px;padding-right:16px}
+body.room-embedded.viewport-fit .layout{min-height:0;align-items:stretch}
+body.room-embedded.viewport-fit .felt{display:flex;flex-direction:column;justify-content:flex-start;padding:16px}
+body.room-embedded.viewport-fit #table{width:100%;max-width:min(100%,calc(var(--draw-card-height)*2.65));grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:10px auto}
+body.room-embedded.viewport-fit #table>.card,body.room-embedded.viewport-fit #table>.empty,body.room-embedded.viewport-fit #hand>.card,body.room-embedded.viewport-fit #market>.card{height:var(--draw-card-height);aspect-ratio:auto}
+body.room-embedded.viewport-fit #status{margin:10px 0;min-height:36px}
+body.room-embedded.viewport-fit .actions{margin-top:auto;padding-top:8px}
+body.room-embedded.viewport-fit .zone{padding:14px;margin-bottom:14px}
+body.room-embedded.viewport-fit #market-zone{margin-bottom:0}
+body.room-embedded.viewport-fit .caption{display:none}
+body.room-embedded.viewport-fit .card .pip{font-size:clamp(29px,calc(var(--draw-card-height)*.36),64px);line-height:1.1;margin-top:8px}
+body.room-embedded.viewport-fit #market .card .pip{font-size:clamp(25px,calc(var(--draw-card-height)*.32),51px);margin-top:7px;line-height:1.1}
+body.room-embedded.viewport-fit .card .rank{font-size:clamp(17px,calc(var(--draw-card-height)*.15),28px)}
+body.room-embedded.viewport-fit .card .corner{font-size:clamp(9px,calc(var(--draw-card-height)*.08),15px)}
+body.room-embedded.viewport-fit #deck .deck-glyph{font-size:clamp(25px,calc(var(--draw-card-height)*.26),48px)}
+body.room-embedded.viewport-fit #deck>span:not(.deck-glyph){font-size:12px}
+body.room-embedded.viewport-fit #deck-count{font-size:10px}
+body.room-embedded.viewport-fit .label{margin-bottom:8px}
+body.room-embedded.viewport-fit header{padding-bottom:10px}
+body.room-embedded.viewport-fit #collection-meter{padding:9px 16px;margin-top:9px}
+body.room-embedded.viewport-fit #coach{padding:12px 16px}
+body.room-embedded.viewport-fit #coach h2{font-size:23px;margin:7px 0}
+body.room-embedded.viewport-fit #coach p{font-size:13px;margin:7px 0 10px}
+body.room-embedded.coach-beside main{display:grid;grid-template-columns:minmax(220px,.7fr) minmax(0,2.3fr);gap:14px}
+body.room-embedded.coach-beside main>header,body.room-embedded.coach-beside #collection-meter{grid-column:1/-1;margin-bottom:0}
+body.room-embedded.coach-beside #coach{grid-column:1;grid-row:3;align-self:stretch;margin:0}
+body.room-embedded.coach-beside .layout{grid-column:2;grid-row:3;gap:14px}
+body.room-embedded.coach-beside .coach-top{flex-wrap:wrap}
+body.room-embedded.coach-beside #coach h2{font-size:27px;line-height:1.12;margin:18px 0 13px}
+body.room-embedded.coach-beside #coach p{font-size:14px;line-height:1.6}
+body.room-embedded.coach-beside #coach>button{width:100%;margin-top:10px}
+body.room-embedded.fit-tight .felt{padding:12px}
+body.room-embedded.fit-tight .zone{padding:10px;margin-bottom:10px}
+body.room-embedded.fit-tight #table{gap:9px;margin:4px auto}
+body.room-embedded.fit-tight #status{min-height:32px;font-size:11px;margin:6px 0}
+body.room-embedded.fit-tight #coach p{font-size:12px;line-height:1.4}
+body.room-embedded.fit-tight #collection-ticks{height:14px;margin-top:5px}
+body.room-embedded #rules-dialog{max-height:var(--draw-dialog-height,calc(100dvh - 24px))}
+@media(max-width:579px){body.room-embedded main{padding-left:9px;padding-right:9px}}
+body.room-embedded .rules{display:none}
+body.room-embedded.viewport-fit .draw-options{grid-template-columns:1fr;gap:10px}
+body.room-embedded.viewport-fit #deck{flex-direction:row;min-height:44px;gap:14px;padding:3px 12px}
+body.room-embedded.viewport-fit #deck .deck-glyph{font-size:23px;min-width:28px;width:28px;height:28px;margin:2px}
+body.room-embedded.viewport-fit #deck>span:not(.deck-glyph){font-size:12px}
+body.room-embedded.viewport-fit .card .pip{display:grid;place-items:center;position:absolute;inset:20px 4px 18px;margin:0}
+body.room-embedded.viewport-fit #market .card .pip{margin:0}
+@media(max-width:579px){body.room-embedded header{padding-bottom:5px}body.room-embedded #collection-meter{margin-bottom:6px}body.room-embedded .layout{gap:6px}body.room-embedded .zone{margin-bottom:6px}}
+body.room-embedded #rules-dialog{position:fixed;top:var(--draw-dialog-top,12px);bottom:auto;margin:0 auto;max-height:var(--draw-dialog-height,calc(100dvh - 24px))}
