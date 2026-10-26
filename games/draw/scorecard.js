@@ -25,3 +25,5 @@ function restart(isGuided){game=S.start(isGuided?42:Date.now()>>>0,isGuided);hel
 $('new').onclick=()=>restart(false);$('guided').onclick=()=>restart(true);$('dismiss').onclick=()=>{guided=false;$('coach').hidden=true};$('show-house').onclick=()=>{held=null;burning=false;picked=[0,1,2,3,4];say('Full house selected: three 7s and two 2s. Tap the gold Full house category for 100.');render()};$('rules').onclick=()=>$('help').showModal();$('sound').onclick=()=>{soundOn=!soundOn;$('sound').textContent=soundOn?'Sound on':'Sound off';$('sound').setAttribute('aria-pressed',soundOn);if(soundOn)tone()};restart(true);
 
 
+
+window.PocketShare.install({id:'draw-scorecard',title:'The Draw: Scorecard',container:'.felt',result:()=>`The Draw · Scorecard\n${game.score}/360 points\n${S.categories.map(c=>c.name+': '+(game.sheet[c.id]?.sacrificed?'Sacrificed':game.sheet[c.id]?.points??'Open')).join('\n')}`,available:()=>S.done(game)});

@@ -1,0 +1,9 @@
+.pocket-sharing{display:grid;gap:8px;margin:16px 0;width:100%;min-width:0;clear:both;text-align:center}
+.pocket-sharing[hidden],.pocket-sharing [hidden]{display:none!important}
+.pocket-sharing button{display:block;box-sizing:border-box;width:100%;min-height:44px;margin:0;padding:10px 12px;border-radius:12px;font:inherit;line-height:1.4;white-space:normal;cursor:pointer;touch-action:manipulation}
+.pocket-sharing .pocket-copy-link{border:1px solid var(--edge,#71808c);background:transparent;color:inherit}
+.pocket-share-status{font:13px/1.5 system-ui,sans-serif;white-space:normal;overflow-wrap:anywhere;margin:0}
+.pocket-share-status:empty{display:none}
+.pocket-sharing textarea{box-sizing:border-box;width:100%;min-width:0;min-height:120px;padding:10px;font:14px/1.5 system-ui,sans-serif;text-align:left;white-space:pre-wrap;overflow-wrap:anywhere}
+dialog.pocket-result-dialog{box-sizing:border-box;max-width:calc(100vw - 12px);max-height:90dvh;overflow:auto}
+.pocket-sharing button:focus-visible,.pocket-sharing textarea:focus-visible{outline:3px solid currentColor;outline-offset:2px}

@@ -71,7 +71,7 @@
 <script>window.roomHaptic=()=>{try{navigator.vibrate?.(8);}catch{}};</script><script>
 window.roomComplete=(id,date)=>{if(!date){const d=new Date();date=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}try{localStorage.setItem('room-for-play:completed:'+id,JSON.stringify(date));}catch{}parent.postMessage({type:'room:completed',id,date},location.origin);};
 </script><script src="../../mobile-frame.js" defer></script><link rel="stylesheet" href="../../pocket-fit.css"><script src="../../pocket-fit.js" defer></script><style>.room-futoshiki .digit-dock{position:static;width:100%;transform:none;box-shadow:none;padding:12px 0;margin-top:16px}.room-futoshiki .digits{max-width:100%}</style> <link rel="stylesheet" href="../../night-game.css"><script src="../../night-frame.js" data-game="futoshiki"></script><link rel="stylesheet" href="../../game-theme.css">
-<link rel="stylesheet" href="../../house-promos.css"><script src="../../house-promos.js" defer></script></head>
+<link rel="stylesheet" href="../../house-promos.css"><script src="../../house-promos.js" defer></script><link rel="stylesheet" href="../../pocket-share.css?v=1"><script src="../../pocket-share.js?v=1"></script></head>
 <body class="room-embedded room-futoshiki">
   <main>
     <header><div><div class="eyebrow">A little order, every day</div><h1>Futoshiki</h1></div><span class="tag">Daily · 5 × 5</span></header>
@@ -347,7 +347,8 @@ function generateDailyPuzzle(dateString, { inequalityCount = 12, clueCount = 7 }
       $('results').addEventListener('click',showVictory);
       $('clear-cell').addEventListener('click',() => enter(0));
       $('reset-board').addEventListener('click',resetBoard);
-      $('share').addEventListener('click',share);
+      window.PocketShare.install({id:'futoshiki',title:'Daily Futoshiki',container:'#victory',button:'#share',ad:'.completion-ad',back:'#close',result:resultText});
+$('share').addEventListener('click',share);
       document.addEventListener('keydown',onKey);
       document.addEventListener('visibilitychange',() => { lastTick=performance.now(); save(); checkDate(); });
       window.addEventListener('pagehide',() => { tick(); save(); });

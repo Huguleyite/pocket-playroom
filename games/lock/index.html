@@ -25,7 +25,7 @@ dialog{max-height:calc(100dvh - 24px);overflow:auto}
 <script>
 window.roomComplete=(id,date)=>{if(!date){const d=new Date();date=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}try{localStorage.setItem('room-for-play:completed:'+id,JSON.stringify(date));}catch{}parent.postMessage({type:'room:completed',id,date},location.origin);};
 </script><script src="../../mobile-frame.js" defer></script> <link rel="stylesheet" href="../../night-game.css"><script src="../../night-frame.js" data-game="lock"></script><link rel="stylesheet" href="../../game-theme.css">
-<link rel="stylesheet" href="../../pocket-fit.css"><script src="../../pocket-fit.js" defer></script><link rel="stylesheet" href="../../house-promos.css"><script src="../../house-promos.js" defer></script></head>
+<link rel="stylesheet" href="../../pocket-fit.css"><script src="../../pocket-fit.js" defer></script><link rel="stylesheet" href="../../house-promos.css"><script src="../../house-promos.js" defer></script><link rel="stylesheet" href="../../pocket-share.css?v=1"><script src="../../pocket-share.js?v=1"></script></head>
 <body class="room-embedded room-lock">
 <main>
 <header><h1>Letter<span class="brand">Lock</span></h1><button id="results" hidden>Results ↗</button><span id="daily" class="eyebrow">Daily safe</span></header>
@@ -489,6 +489,7 @@ for(let index=0;index<state.columnCount;index++) {
 }
 $('close').addEventListener('click',()=>$('victory').close());
 $('results').addEventListener('click',showVictory);
+window.PocketShare.install({id:'lock',title:'LetterLock',container:'#victory',button:'#share',ad:'.completion-ad',back:'#close',result:summary});
 $('share').addEventListener('click',async()=>{
   const text=summary();
   try {

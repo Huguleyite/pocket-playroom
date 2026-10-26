@@ -45,7 +45,7 @@ body.room-embedded.room-deli[data-menu="future"]{background-color:#101d38!import
 <script>window.roomHaptic=()=>{try{navigator.vibrate?.(8);}catch{}};</script><script>
 window.roomComplete=(id,date)=>{if(!date){const d=new Date();date=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}try{localStorage.setItem('room-for-play:completed:'+id,JSON.stringify(date));}catch{}parent.postMessage({type:'room:completed',id,date},location.origin);};
 </script><script src="../../mobile-frame.js" defer></script><link rel="stylesheet" href="../../pocket-fit.css"><script src="../../pocket-fit.js" defer></script> <link rel="stylesheet" href="../../night-game.css"><script src="../../night-frame.js" data-game="deli"></script><link rel="stylesheet" href="../../game-theme.css">
-<link rel="stylesheet" href="../../house-promos.css"><script src="../../house-promos.js" defer></script></head>
+<link rel="stylesheet" href="../../house-promos.css"><script src="../../house-promos.js" defer></script><link rel="stylesheet" href="../../pocket-share.css?v=1"><script src="../../pocket-share.js?v=1"></script></head>
 <body class="room-embedded room-deli">
 <main>
 <header><div><h1 style="font-size:clamp(23px,6vw,31px)">Stack to <span>the Future</span></h1><div class="eyebrow">Tiny deli. Big sandwich energy.</div></div><button class="sound" id="sound" aria-pressed="false">Sound off</button></header>
@@ -236,7 +236,8 @@ window.roomComplete=(id,date)=>{if(!date){const d=new Date();date=d.getFullYear(
    $('pauseDialog').close();phase='playing';if(step>=order.length)newOrder();else patienceDeadline=performance.now()+patienceRemaining;deadline=performance.now()+remaining;tick();
  }
  buttons.forEach(button=>button.addEventListener('click',()=>tap(Number(button.dataset.food))));
- $('start').onclick=start;$('again').onclick=start;$('pause').onclick=pause;$('resume').onclick=resume;
+ window.PocketShare.install({id:'deli',title:'Stack to the Future',container:'#results',back:'#again, #closeResults',result:()=>`Stack to the Future · ${menus[menu].label} · 60-second rush\n${score} points\n${$('finalStats').textContent}\nPersonal best: ${best}`});
+$('start').onclick=start;$('again').onclick=start;$('pause').onclick=pause;$('resume').onclick=resume;
  $('pauseDialog').addEventListener('cancel',event=>{event.preventDefault();resume();});
  $('closeResults').onclick=()=>$('results').close();
  $('sound').onclick=()=>{sound=!sound;$('sound').textContent=`Sound ${sound?'on':'off'}`;$('sound').setAttribute('aria-pressed',String(sound));if(sound)tone(true);};

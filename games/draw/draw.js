@@ -38,3 +38,5 @@ let learned=false;try{learned=localStorage.getItem('the-draw-learned')==='yes'}c
 
 
 
+
+window.PocketShare.install({id:'draw',title:'The Draw',container:'.felt',result:()=>`The Draw · Classic\n${D.status(g)==='won'?'Won':'Round complete'} · ${g.score} points\n${g.combos}/5 combinations · ${g.turns} plays`,available:()=>!teaching&&D.status(g)!=='playing'});
