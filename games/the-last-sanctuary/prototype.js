@@ -7,7 +7,7 @@
   const models=window.CrownModels, T=window.THREE;
   const tiles=[],units={},tileByKey=new Map(), highlights=new T.Group(),previewFX=new T.Group(),liveFX=new T.Group();
   const scenario=new URLSearchParams(location.search).get('play')==='battle',playing=scenario||new URLSearchParams(location.search).get('play')==='skirmish',foes={};
- const createBattle=(fresh=false)=>scenario?SanctuaryBattle.create(tiles,{mission:SanctuaryCampaign.current(),saved:fresh?null:SanctuaryCampaign.load()}):CrownSkirmish.create(tiles);let battle=null,battleDisplay=null,feedback=null;
+ const createBattle=(fresh=false)=>scenario?SanctuaryBattle.create(tiles,{mission:SanctuaryCampaign.current(),saved:fresh?null:SanctuaryCampaign.load()}):CrownSkirmish.create(tiles);let battle=null,battleDisplay=null,feedback=null,tacticalExecuting=false,boardCamera=null;
   const state={selected:'mage',card:null,target:null,mana:3,busy:false,ward:false,barriers:[],lastOrder:null};
   const cards={
     portal:{title:'Fold the Path',cost:2,copy:'Choose a distant, empty land hex. Seren will step through a portal to reach it.',detail:'2 mana · Seren moves · Range: 4 hexes',confirm:'Open the portal'},
@@ -133,7 +133,7 @@
   }
   function resize(){
     if(!renderer)return;const w=$('#scene').clientWidth,h=$('#scene').clientHeight;renderer.setSize(w,h,false);
-    const a=w/h,span=a<1.25?CrownBoard.view.mobileWidth/a:scenario?13.8:CrownRendering.enabled?10.5:11.6;camera.left=-span*a/2;camera.right=span*a/2;camera.top=span/2;camera.bottom=-span/2;camera.updateProjectionMatrix();updateLabels();feedback?.refresh();
+    if(boardCamera){boardCamera.fit();updateLabels();feedback?.refresh();return;}const a=w/h,span=a<1.25?CrownBoard.view.mobileWidth/a:scenario?13.8:CrownRendering.enabled?10.5:11.6;camera.left=-span*a/2;camera.right=span*a/2;camera.top=span/2;camera.bottom=-span/2;camera.updateProjectionMatrix();updateLabels();feedback?.refresh();
     if(miniRenderer&&$('#mini-dialog').open)resizeMini();
   }
   function castRay(e){const rect=renderer.domElement.getBoundingClientRect(),p=new T.Vector2((e.clientX-rect.left)/rect.width*2-1,-(e.clientY-rect.top)/rect.height*2+1),ray=new T.Raycaster();ray.setFromCamera(p,camera);return ray.intersectObjects([...Object.values(units).map(u=>u.model),...Object.values(foes).map(u=>u.model),...tiles.map(t=>t.mesh)],true);}
@@ -146,6 +146,8 @@
     setupCombatUI();if(scenario)setupScenario({scene,T,tileByKey,pos,units,chooseTile,isBusy:()=>state.busy,getBattle:()=>battleDisplay||battle.snapshot(),getTargets:()=>tiles.filter(t=>canTarget(t))});syncBattle({ok:true,events:[],state:battle.snapshot()});
   }
   function battleUI(){
+    if(document.querySelector('.enemy-targets')){const live=battle.snapshot();for(const b of document.querySelectorAll('.enemy-targets button')){const id=b.dataset.enemy,u=live.units[id],n=({raider1:'Scout',raider2:'Reaver',raider3:'Bowman',raider4:'Captain'})[id];b.hidden=!u.alive;b.disabled=state.busy||live.status!=='playing';const inRange=battle.legal('attack',state.selected,u.key);b.dataset.inRange=String(inRange);b.textContent=n+' · '+u.hp+' HP'+(inRange?' · Attack':' · Out of range');}}
+
     const b=battleDisplay||battle.snapshot(),selected=b.units[state.selected];$('#battle-status').textContent=state.busy?(b.phase==='enemy'?'Raiders’ turn — watch the board':`Round ${b.round} · resolving order`):b.status==='won'?'Victory — the crossing is yours.':b.status==='lost'?'Defeat — restart and try another approach.':`Round ${b.round} · ${b.actionsLeft} actions · ${b.mana} mana`;
     $('.board-foot>span').textContent=b.status==='playing'?`Round ${b.round} · ${b.actionsLeft} actions`:(b.status==='won'?'VICTORY':'DEFEAT');
     $('#battle-health').textContent=`Seren ${b.units.mage.hp}/${b.units.mage.maxHp} HP · Aldric ${b.units.guardian.hp}/${b.units.guardian.maxHp} HP`;
@@ -167,12 +169,15 @@
     state.mana=b.mana;state.ward=b.units.guardian.ward;if(!state.ward&&persistentWard){persistentWard.parent?.remove(persistentWard);persistentWard=null;}
     if(!b.units[state.selected].alive)state.selected=b.units.mage.alive?'mage':'guardian';
     state.barriers=state.barriers.filter(w=>{if(b.walls.includes(key(w.tile.q,w.tile.r)))return true;scene.remove(w.model);CrownCardPieces.dispose(w.model);w.tile.barrier=false;w.tile.blocked=false;return false;});
+    // Both board views restore the same persistent spell presentation, including saves.
+    for(const k of b.walls)if(!state.barriers.some(w=>key(w.tile.q,w.tile.r)===k)){const tile=tileByKey.get(k),model=CrownCardPieces.enabled?CrownCardPieces.rampart():models.rampart();model.position.copy(pos(tile));scene.add(model);tile.barrier=true;tile.blocked=true;state.barriers.push({tile,model});}
+    if(state.ward&&(!persistentWard||!persistentWard.parent))persistentWard=wardShape(liveFX,units.guardian,.16);
     updateLabels();battleUI();
   }
   async function syncBattle(result){
     if(!result.ok){notify(result.reason);return;}
     const before=battleDisplay||result.state;
-    if(feedback&&result.events.length){state.busy=true;state.card=null;state.target=null;state.attack=false;state.tactic=null;clearGroup(previewFX);clearGroup(highlights);updateUI();await feedback.play(result.events,before,result.state);}
+    if(window.sanctuaryTactical?.isPresenting()&&result.events.length){state.busy=true;state.card=null;state.target=null;state.attack=false;state.tactic=null;await window.sanctuaryTactical.play(result.events,before,result.state);}else if(feedback&&result.events.length){state.busy=true;state.card=null;state.target=null;state.attack=false;state.tactic=null;clearGroup(previewFX);clearGroup(highlights);updateUI();await feedback.play(result.events,before,result.state);}
     if(scenario)SanctuaryCampaign.save(result.state);applyBattleFrame(result.state);state.busy=false;feedback?.setState(result.state);
     const names={mage:'Seren',guardian:'Aldric',raider1:'Ash Raider I',raider2:'Ash Raider II',raider3:'Ash Bowman',raider4:'Ash Captain'};
     const messages=result.events.map(e=>e.type==='attack'?`${names[e.unit]} → ${names[e.target]}: ${e.damage} damage (${e.hpBefore} → ${e.hpAfter} HP).`:e.type==='wardBlocked'?'Echo Ward absorbs a hit.':e.type==='defeated'?`${names[e.unit]} falls.`:e.type==='brace'?'Aldric braces on the crossing.':e.type==='wallBroken'?'A raider breaks the rampart.':e.type==='enemyTurn'?'Raiders’ turn.':e.type==='playerTurn'?`Your turn · round ${e.round}.`:e.type==='move'&&foes[e.unit]?'A raider advances.':e.type==='relicClaimed'?`${names[e.unit]} picked up the relic. Walk back to sanctuary E2; carrying is automatic.`:e.type==='relicDropped'?'The relic fell! Move onto its glowing hex to recover it.':e.type==='won'?'Victory!':e.type==='lost'?'Defeat.':'').filter(Boolean);
@@ -193,15 +198,17 @@
     const history=document.createElement('details');history.className='battle-history';history.innerHTML='<summary>Battle history</summary><ol id="battle-history"></ol>';$('.battle-panel').append(history);
     const legend=document.createElement('div');legend.className='board-legend';legend.innerHTML='<span>○ Move</span><span>◎ Attack</span><span>▧ Enemy reach</span><span>◇ Protected</span>';$('#battlefield').append(legend);
     const project=(k,id)=>{const unit={...units,...foes}[id],tile=tileByKey.get(k),root=unit?.model;const base=root?root.position.clone():pos(tile),height=id==='mage'?2.65:id==='guardian'?2.55:2.15,rect=$('#scene').getBoundingClientRect();const point=base.clone().add(new T.Vector3(0,height*.42,0).applyQuaternion(camera.quaternion)).project(camera),head=base.clone().add(new T.Vector3(0,height*.96+.10,0).applyQuaternion(camera.quaternion)).project(camera);return {x:(point.x*.5+.5)*rect.width,y:(-point.y*.5+.5)*rect.height,headY:(-head.y*.5+.5)*rect.height};};
-    feedback=CrownFeedback.create({element:$('#battlefield'),project,reduced:()=>reduced.matches,applyFrame:applyBattleFrame,animateMove:async(id,from,to,duration)=>{if(units[id])return;const root=foes[id].model,a=root.position.clone(),b=pos(tileByKey.get(to));await visualTween(duration,p=>{root.position.lerpVectors(a,b,p);updateLabels();feedback?.refresh();});},animateDefeat:async(id,duration)=>{const model={...units,...foes}[id].model;await visualTween(duration,p=>{model.scale.setScalar(1-p*.35);model.traverse(o=>{if(o.isSprite)o.material.opacity=1-p;});});model.visible=false;}});
-    window.crownFeedback=feedback;
+    feedback=CrownFeedback.create({element:$('#battlefield'),project,getUnit:id=>({name:({mage:'Seren',guardian:'Aldric',raider1:'Scout',raider2:'Reaver',raider3:'Bowman',raider4:'Captain'})[id]}),onSelect:id=>{if(foes[id])chooseTile(foes[id].tile);else chooseUnit(id);},isBusy:()=>state.busy,reduced:()=>reduced.matches,applyFrame:applyBattleFrame,animateMove:async(id,from,to,duration)=>{if(units[id]&&!tacticalExecuting)return;const root=(units[id]||foes[id]).model,a=root.position.clone(),b=pos(tileByKey.get(to));await visualTween(duration,p=>{root.position.lerpVectors(a,b,p);updateLabels();feedback?.refresh();});},animateDefeat:async(id,duration)=>{const model={...units,...foes}[id].model;await visualTween(duration,p=>{model.scale.setScalar(1-p*.35);model.traverse(o=>{if(o.isSprite)o.material.opacity=1-p;});});model.visible=false;}});
+    window.crownFeedback=feedback;document.body.dataset.healthTitles='true';for(const u of Object.values({...units,...foes})){u.button.tabIndex=-1;u.button.setAttribute('aria-hidden','true');}
+    const targets=document.createElement('details');targets.className='enemy-targets';targets.open=true;targets.innerHTML='<summary>Enemy targets · choose by name</summary><div></div>';for(const [id,foe]of Object.entries(foes)){const b=document.createElement('button');b.type='button';b.dataset.enemy=id;b.onclick=()=>{if(state.busy)return;state.card=null;state.tactic=null;chooseTile(foe.tile);};targets.querySelector('div').append(b);}document.querySelector('.battle-panel').append(targets);
+
     $('#help-dialog ol').innerHTML+='<li>On-board health bars and damage previews show consequences. Warm ground marks enemy reach. Field decisions appear when their conditions are met.</li>';
   }
   function visualTween(duration,update){return new Promise(resolve=>{const start=performance.now();function tick(now){const p=Math.min(1,(now-start)/Math.max(1,duration));update(p);if(p<1)requestAnimationFrame(tick);else resolve();}requestAnimationFrame(tick);});}
   function setupDrag(){
     if(CrownCardPieces.enabled){const b=document.createElement('button');b.id='inspect-card-piece';b.className='text-button';b.textContent='Inspect Living Rampart';b.hidden=true;b.addEventListener('click',()=>CrownCardPieces.inspect());$('#order-detail').after(b);}
     function pickTile(e){const rect=renderer.domElement.getBoundingClientRect();if(e.clientX<rect.left||e.clientX>rect.right||e.clientY<rect.top||e.clientY>rect.bottom)return null;const p=new T.Vector2((e.clientX-rect.left)/rect.width*2-1,-(e.clientY-rect.top)/rect.height*2+1),ray=new T.Raycaster();scene.updateMatrixWorld(true);ray.setFromCamera(p,camera);return ray.intersectObjects(tiles.map(t=>t.mesh),true)[0]?.object.userData.tile||null;}
-    window.crownDrag=CrownDrag.setup({element:$('#battlefield'),pickUnit:e=>{const button=document.elementFromPoint(e.clientX,e.clientY)?.closest('.hex-hit');if(button)return button.dataset.unit||null;return castRay(e).find(h=>h.object.userData.unit)?.object.userData.unit||null;},pickTile,selectUnit:chooseUnit,chooseTile,isBusy:()=>state.busy,isValidDrop:(id,t)=>{if(playing&&(!battle.snapshot().units[id].alive||battle.snapshot().status!=='playing'))return false;if(playing)return battle.legal('attack',id,key(t.q,t.r))||battle.legal('move',id,key(t.q,t.r))||(id==='mage'&&battle.legal('portal',id,key(t.q,t.r)));if(!walkable(t)||occupied(t))return false;const d=dist(units[id].tile,t);return d===1||(id==='mage'&&d>1&&d<=4&&state.mana>=2);},imageForUnit:id=>CrownMiniatureStudy.get(id).image,labelForUnit:id=>id==='mage'?'Seren':'Aldric',notify});
+    window.crownDrag=CrownDrag.setup({element:$('#battlefield'),pickUnit:e=>{if(e.target.closest?.('.feedback-health,[data-board-camera]'))return null;const button=document.elementFromPoint(e.clientX,e.clientY)?.closest('.hex-hit');if(button)return button.dataset.unit||null;return castRay(e).find(h=>h.object.userData.unit)?.object.userData.unit||null;},pickTile,selectUnit:chooseUnit,chooseTile,isBusy:()=>state.busy,isValidDrop:(id,t)=>{if(playing&&(!battle.snapshot().units[id].alive||battle.snapshot().status!=='playing'))return false;if(playing)return battle.legal('attack',id,key(t.q,t.r))||battle.legal('move',id,key(t.q,t.r))||(id==='mage'&&battle.legal('portal',id,key(t.q,t.r)));if(!walkable(t)||occupied(t))return false;const d=dist(units[id].tile,t);return d===1||(id==='mage'&&d>1&&d<=4&&state.mana>=2);},imageForUnit:id=>CrownMiniatureStudy.get(id).image,labelForUnit:id=>id==='mage'?'Seren':'Aldric',notify});
     $('.board-heading p').textContent='Drag or tap to act.';
   }
   function onCanvasClick(e){if(state.busy)return;const hit=castRay(e)[0];if(!hit)return;if(hit.object.userData.foe)chooseTile(foes[hit.object.userData.foe].tile);else if(hit.object.userData.unit)chooseUnit(hit.object.userData.unit);else if(hit.object.userData.tile)chooseTile(hit.object.userData.tile);}
@@ -299,7 +306,7 @@
     $('#commit').disabled=!state.target||state.busy;$('#commit').textContent=state.busy?'The order unfolds…':state.target?c?c.confirm:'Move miniature':state.card==='ward'?'Choose Aldric':'Choose a destination';$('#cancel').hidden=(!state.card&&!state.target)||state.busy;
     if($('#inspect-card-piece'))$('#inspect-card-piece').hidden=state.card!=='rampart'&&state.lastOrder!=='rampart';
     if(playing)battleUI();
-    $('#reset').disabled=state.busy;$('#inspect-mini').disabled=state.busy;updateLabels();
+    $('#reset').disabled=state.busy;$('#inspect-mini').disabled=state.busy;updateLabels();window.sanctuaryCompact?.refresh();
   }
   let animation=null,persistentWard=null;
   function commit(){
@@ -340,7 +347,9 @@
     drawPreview();updateUI();notify('The table is reset. Your company has 3 mana again.');
   }
   function animate(now){
-    raf=requestAnimationFrame(animate);if(scenario)window.updateScenarioEffects?.(now,reduced.matches);if(document.hidden||now-lastFrame<1000/40)return;lastFrame=now;
+    raf=requestAnimationFrame(animate);if(document.hidden||document.body.dataset.tactical==='true'||now-lastFrame<1000/40)return;lastFrame=now;if(scenario)window.updateScenarioEffects?.(now,reduced.matches);
+    // No WebGL renders, material updates or idle effects while studying the map.
+    if(document.body.dataset.tactical==='true')return;
     if(animation){const a=animation,p=a.duration?Math.min(1,(now-a.start)/a.duration):1,e=p*p*(3-2*p);
       if(a.card==='portal'){
         const u=units[a.id];if(p<.44){u.model.position.copy(a.from);u.model.scale.setScalar(Math.max(.01,1-p/.44));}else{u.model.position.copy(a.to);u.model.scale.setScalar(Math.min(1,(p-.44)/.45));}
@@ -382,6 +391,16 @@
   // Read-only inspection surface for repeatable visual and interaction checks.
   window.crownStudy={snapshot:()=>({selected:state.selected,card:state.card,target:typeof state.target==='string'?state.target:state.target?.label||null,mana:state.mana,busy:state.busy,ward:state.ward,barriers:state.barriers.map(b=>b.tile.label),battle:playing?battle.snapshot():null,board:{id:CrownBoard.id,hexes:tiles.length},positions:Object.fromEntries(Object.entries(units).map(([id,u])=>[id,u.tile.label])),lastOrder:state.lastOrder}),hexes:()=>tiles.filter(t=>t.button).map(t=>({label:t.label,key:key(t.q,t.r),available:canTarget(t),distanceFromMage:dist(units.mage.tile,t)}))};
   setup();
+  if(playing&&window.SanctuaryCompact)SanctuaryCompact.mount();
+  if(camera&&renderer&&window.SanctuaryBoardCamera)boardCamera=SanctuaryBoardCamera.mount({T,camera,renderer,tiles,units,frame:CrownBoard.frame,refresh:()=>{if(state.ward&&persistentWard){persistentWard.parent?.remove(persistentWard);persistentWard=wardShape(liveFX,units.guardian,.16);}updateLabels();feedback?.refresh();},busy:()=>state.busy});
+  if(scenario&&battle&&window.SanctuaryTactical){
+    const planningTiles=tiles.map(t=>({key:key(t.q,t.r),q:t.q,r:t.r,type:t.type,label:t.label,blocked:!!t.blocked&&!t.barrier}));
+    SanctuaryTactical.mount({tiles:planningTiles,snapshot:()=>battle.snapshot(),busy:()=>state.busy||tacticalExecuting,distance:(a,b)=>battle.distance(a,b),clearPreview:cancel,endTurn:async()=>{if(state.busy||tacticalExecuting)return;tacticalExecuting=true;try{await syncBattle(battle.endTurn());}finally{tacticalExecuting=false;}},restart:reset,mission:()=>SanctuaryCampaign.current(),missions:SanctuaryCampaign.missions,progress:()=>SanctuaryCampaign.progress(),go:id=>{const url=new URL(location.href);url.searchParams.set('mission',id);url.searchParams.set('view','tactical');location.href=url.href;},
+      fork:saved=>SanctuaryBattle.create(planningTiles,{mission:SanctuaryCampaign.current(),saved}),
+      execute:async order=>{if(state.busy||!['move','attack','portal','rampart','ward','brace','press'].includes(order.type)||!battle.legal(order.type,order.unit,order.targetKey))return false;tacticalExecuting=true;state.selected=order.unit;state.card=null;state.target=null;state.attack=false;state.tactic=null;try{await syncBattle(battle.action(order));return true;}finally{tacticalExecuting=false;}}
+    });
+    if(new URLSearchParams(location.search).get('view')==='tactical'){document.querySelector('#mission-briefing')?.close();window.sanctuaryTactical.open();}
+  }
 })();
 
 
