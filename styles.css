@@ -95,3 +95,5 @@ body.neon-page{color-scheme:dark;--paper:#090d1b!important;--panel:#121a30;--ink
 @media(max-width:600px){body.game-draw #main{padding-left:8px;padding-right:8px}}
 body.game-draw #main{max-width:1240px}.game-draw .game-well{max-width:1160px}
 @media(min-width:580px){body.game-draw .night-controls{float:right;margin:5px 0 8px}body.game-draw .back-link{margin-top:5px;min-height:44px}body.game-draw .game-layout{clear:both}}
+
+@media(max-width:600px){body.scorecard-page .site-header{display:none}body.scorecard-page .night-controls{float:right;margin:4px 0}body.scorecard-page #instructions-button{display:none}body.scorecard-page .back-link{min-height:44px;margin-top:4px}body.scorecard-page .game-layout{clear:both}}

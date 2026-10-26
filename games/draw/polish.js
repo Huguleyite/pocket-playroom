@@ -5,12 +5,14 @@
  const tools=document.createElement('div');tools.className='header-tools';tools.append(byId('tutorial'));head.append(tools);
  const soundButton=document.createElement('button');soundButton.id='sound';tools.prepend(soundButton);
  const rulesButton=document.createElement('button');rulesButton.id='rules-button';rulesButton.textContent='Rules';tools.prepend(rulesButton);
+ const modeLink=document.createElement('a');modeLink.id='scorecard-link';modeLink.textContent='Scorecard ↗';modeLink.title='Start Scorecard mode; leaves the current round';modeLink.href=parent===window?'scorecard.html':'../../index.html#games/draw/scorecard';if(parent!==window)modeLink.target='_top';tools.insertBefore(modeLink,byId('tutorial'));
  const progress=document.createElement('section');progress.id='collection-meter';progress.setAttribute('aria-label','Round progress');progress.innerHTML='<div class="collection-heading"><span>COLLECTED</span><b id="collected-total" role="status" aria-live="polite" aria-atomic="true">0 <small>/ 5</small></b><span id="collection-remaining">Five to go</span></div><div id="collection-ticks" aria-hidden="true">'+Array.from({length:5},(_,i)=>`<span data-tick="${i}">♠</span>`).join('')+'</div>';
  head.after(progress);document.querySelector('.stats').lastElementChild.remove();
  const group=document.createElement('div');group.className='draw-options';byId('market').before(group);group.append(byId('market'),byId('deck'));
  byId('deck').innerHTML='<span class="deck-glyph" aria-hidden="true">✦</span><span>Unknown</span><small id="deck-count"></small>';
  const rules=document.createElement('dialog');rules.id='rules-dialog';rules.innerHTML='<form method="dialog"><button class="close-rules" aria-label="Close rules">Close ✕</button></form><h2>A little luck.<br>A better next move.</h2><p><b>1. Play.</b> Choose one card from your hand, then an empty table space.</p><p><b>2. Draw.</b> Take one face-up card or a surprise from the unknown deck.</p><p><b>3. Collect.</b> Select matching cards on the table, then tap Collect. They can be anywhere; they do not need to touch.</p><dl><dt>Pair · 20 points</dt><dd>Two cards of the same rank.</dd><dt>Run · 40 points</dt><dd>Three consecutive ranks, any suits. Aces are low: A–2–3 works; Q–K–A does not.</dd><dt>Flush · 30 points</dt><dd>Three cards of one suit. A hand that is also a run scores as a run.</dd></dl><h3>Full-table run · +100 bonus</h3><p>Fill all six spaces with consecutive ranks in reading order: <b>top-left → top-right, then bottom-left → bottom-right</b>. For example, <b>4 · 5 · 6 / 7 · 8 · 9</b>. Any suits. Aces are low. The bonus collects automatically, clears all six cards, and counts as one combination. It replaces the smaller claims for those cards.</p><p>Collect <b>five combinations</b> to win. If all six spaces fill with no combination, the round ends. Undo lets you rethink a move.</p><p>Sound can be muted at any time. Your device’s reduced-motion setting is respected.</p>';
  document.body.append(rules);rulesButton.onclick=()=>rules.showModal();rules.addEventListener('click',ev=>{if(ev.target===rules){const b=rules.getBoundingClientRect();if(ev.clientX<b.left||ev.clientX>b.right||ev.clientY<b.top||ev.clientY>b.bottom)rules.close()}});
+ const replay=document.createElement('button');replay.textContent='Replay Classic tutorial';replay.onclick=()=>{rules.close();byId('tutorial').click()};rules.append(replay);
  const toast=document.createElement('div');toast.id='combo-toast';toast.setAttribute('role','status');toast.setAttribute('aria-live','polite');document.body.append(toast);
  const effects=document.createElement('div');effects.id='celebrations';effects.setAttribute('aria-hidden','true');document.body.append(effects);
  let enabled=true,context=null,lastCount=0,toastTimer=null,toneSerial=0;try{enabled=localStorage.getItem('the-draw-sound')!=='off'}catch{}
@@ -32,6 +34,5 @@
  }
  window.DrawPolish={update,sound,celebrate,origins:positions=>positions.map(p=>{let el=document.querySelector(`[data-slot="${p}"]`),r=el.getBoundingClientRect();return{html:el.innerHTML,x:r.left,y:r.top,w:r.width,h:r.height}})};
 })();
-
 
 

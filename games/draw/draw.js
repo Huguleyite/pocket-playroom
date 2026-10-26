@@ -28,8 +28,9 @@ $('undo').onclick=()=>{if(!past.length||teaching)return;g=JSON.parse(past.pop())
 $('hint').onclick=()=>{let ps=D.available(g);if(ps){held=null;picked=ps;render();say('These selected cards make a combination. Tap Collect.')}else say(g.phase==='draw'?'Choose a visible card that matches a rank or suit on your table, or try the deck.':'Try building a pair, a three-card run, or a flush. Keep space available.')};
 function tutorial(){say("Follow the lesson above. Start tutorial will highlight your first move.");teaching=true;lesson=-1;g=D.start();held=null;picked=[];past=[];render();$('coach').scrollIntoView({block:'start'})}
 $('tutorial').onclick=tutorial;function finishTutorial(){try{localStorage.setItem('the-draw-learned','yes')}catch{}teaching=false;reset()}$('exit').onclick=finishTutorial;$('continue').onclick=()=>{if(lesson<0){lesson=0;render()}else{finishTutorial()}};$('demonstrate').onclick=()=>{let s=lessons[lesson];if(s)document.querySelector(s[2]).click()};
-document.addEventListener('click',ev=>{if(!teaching)return;if(ev.target.closest('#tutorial,#exit,#continue,#demonstrate,#sound,#rules-button,#rules-dialog'))return;let s=lessons[lesson];if(s&&ev.target.closest(s[2])){queueMicrotask(()=>{lesson++;render()});return}ev.preventDefault();ev.stopImmediatePropagation();say('Follow the gold outline, or tap Show this move.');},true);
+document.addEventListener('click',ev=>{if(!teaching)return;if(ev.target.closest('#tutorial,#exit,#continue,#demonstrate,#sound,#rules-button,#rules-dialog,#scorecard-link'))return;let s=lessons[lesson];if(s&&ev.target.closest(s[2])){queueMicrotask(()=>{lesson++;render()});return}ev.preventDefault();ev.stopImmediatePropagation();say('Follow the gold outline, or tap Show this move.');},true);
 let learned=false;try{learned=localStorage.getItem('the-draw-learned')==='yes'}catch{}if(learned&&!new URLSearchParams(location.search).has('tutorial')){teaching=false;reset()}else tutorial();
+
 
 
 

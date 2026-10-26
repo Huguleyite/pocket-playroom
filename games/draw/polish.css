@@ -11,5 +11,5 @@
 .header-tools button{min-width:44px}
 #market .card .pip{font-size:26px;line-height:1;margin-top:7px}#market .card .rank{font-size:16px}#market .card .corner{font-size:8px}@media(min-width:580px) and (max-height:800px){#market .card .pip{font-size:24px;margin-top:5px}}
 @media(min-width:580px) and (max-width:1000px){.rules{display:none}}@media(min-width:580px) and (max-height:650px){footer{display:none}}
-
+#scorecard-link{display:inline-flex;align-items:center;justify-content:center;min-height:44px;min-width:44px;border:1px solid #b6b87c;border-radius:9px;background:#445336;color:#fff0c9;text-decoration:none;font-size:11px;padding:8px 10px;white-space:nowrap}#scorecard-link:focus-visible{outline:3px solid #f4c46b;outline-offset:3px}@media(max-width:579px){.header-tools #tutorial{display:none}#scorecard-link{font-size:9px;padding:6px}.header-tools{gap:4px}}
 .collection-night body{background:#0b1917}.collection-night .felt{background:radial-gradient(ellipse at center,#233c30,#14281f)}
