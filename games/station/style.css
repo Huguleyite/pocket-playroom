@@ -9,11 +9,13 @@
 @media(max-height:450px){.station{height:auto;min-height:650px}}
 @media(min-width:600px) and (max-width:759px){.region-grid{grid-template-columns:repeat(3,1fr)}.level-grid{grid-template-columns:1fr 1fr}.level-grid strong{font-size:11px}.level-grid button{gap:8px}}
 
-/* Keep short routes exposed between station cards, even in short viewports. */
-.station{height:auto;min-height:100dvh;grid-template-rows:auto auto minmax(560px,1fr) auto}
-.map{min-height:560px}
+/* Fit the viewport; use the map's full height for station spacing. */
+.route-marker{fill:var(--water);stroke:#698792;stroke-width:1;pointer-events:none}
+.route-target{fill:transparent;pointer-events:all;cursor:pointer}
 @media(max-width:759px){
- .station{grid-template-rows:auto auto minmax(0,1fr) auto}
- .workspace{grid-template-rows:minmax(560px,1fr) auto}
- .map{min-height:560px}
+ .node{min-height:44px;padding:4px;row-gap:1px}
+ .node strong{font-size:10px}
+ .count{font-size:12px}
+ .count-divider{font-size:9px}
+ .home-label{bottom:4px}
 }
