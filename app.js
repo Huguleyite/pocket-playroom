@@ -1,6 +1,6 @@
 (() => {
   'use strict';
-  const games = [
+  const wilds={id:'wilds',name:'Little Wilds',category:'Gentle garden-restoration puzzle',help:'Restore ten gardens with water, sunlight, shade and little crossings. Best on laptop or tablet; phones supported.'};const games = [
     {id:'windows',name:'Window Lights',genre:'Logic',category:'Replayable · Picture logic',line:'Two ways to play: Window Lights & Deep Space Decoder.',art:['◈'],tile:'#e9dfc5',ink:'#405b69',paper:'#fff7e8',accent:'#8a6637',help:'Follow the numbered row and column clues to reveal pictures. Play Window Lights or Deep Space Decoder, each with 36 independent puzzles. Every completed puzzle adds a permanent piece to its grand image. Collect all 36 for downloadable artwork and a phone wallpaper. Compact and Desktop views preserve the same progress.',note:'72 pictures. Two worlds. Two grand images to collect.',symbol:'◈',subtitle:'Two ways to play'},
     {id:'station',name:'Signal Station',genre:'Logic',category:'Replayable · Deduction',line:'A little connection goes a long way.',art:['⌁'],tile:'#193440',ink:'#edc784',paper:'#f4eedb',accent:'#9a682e',help:'Tap routes to restore communications across six regions. Meet every station’s count and connect everyone to headquarters. Backup stations must survive one failed link.',note:'Six regions. Forty-eight small acts of connection.',symbol:'⌁',subtitle:'Your communications atlas'},
     {id:'draw',name:'The Draw',category:'Replayable · Cards & clever choices',line:'A little luck. A better next move.',art:['7♠','7♥','8♥'],tile:'#d3e6cf',ink:'#365e42',paper:'#fff7e8',accent:'#426546',help:'Play one card into an empty table space, then draw one visible card or try the unknown deck. Select table cards to collect pairs, three-card runs, or three-card flushes. Collect five combinations before the six-space table jams. Aces are low. Undo and the guided tutorial are always available.',note:'A fine pair of troublemakers. No timer. Just one more hand.',symbol:'♠ ♥',subtitle:'A little luck & a clever choice'},
@@ -107,6 +107,11 @@
   }
   main.addEventListener('click',event=>{const button=event.target.closest('[data-pocket-category]');if(!button)return;pocketCategory=button.dataset.pocketCategory;filterPocketGames();});
   function gamePage(g){
+if(g.id==='wilds'){
+current=g.id;document.body.className='game-wilds';document.title='Little Wilds · Playtest · Big Screen Games · Pocket Playroom';document.getElementById('mobile-ad-anchor').hidden=true;
+main.innerHTML='<a class="back-link" href="#big-screen/little-wilds">← Little Wilds overview</a><iframe id="game-frame" title="Play Little Wilds" src="games/wilds/index.html"></iframe>';
+frame=document.getElementById('game-frame');frame.onload=()=>applyNight();return;
+}
     if(g.id==='windows'){
       current=g.id;remember(g.id);document.body.className='game-windows';document.title='Window Lights & Deep Space Decoder · Pocket Playroom';document.getElementById('mobile-ad-anchor').hidden=true;
       const space=location.hash.endsWith('/space')||nightOn(g.id);
@@ -186,6 +191,11 @@
   function updateDiscoverNight(){applyNight();const toggle=document.getElementById('discover-night');if(toggle){toggle.setAttribute('aria-checked',String(nightOn()));toggle.textContent='☾ Night Play: '+(nightOn()?'On':'Off')}}
 
   async function route(){const version=++routeVersion;
+if(['#big-screen/little-wilds','#big-screen/little-wilds/play','#games/wilds'].includes(location.hash)){
+for(const id of ['all-link','big-screen-link','discover-link'])document.getElementById(id)?.removeAttribute('aria-current');document.getElementById('big-screen-link').setAttribute('aria-current','page');current='wilds';frame=null;document.getElementById('mobile-ad-anchor').hidden=true;
+if(location.hash==='#big-screen/little-wilds'){document.documentElement.classList.remove('night-play');document.documentElement.removeAttribute('style');document.body.className='big-screen-page wilds-page';window.renderWildsShowcase(main);document.title='Little Wilds · Playtest · Big Screen Games · Pocket Playroom';}
+else{gamePage(wilds);nightControl();}window.scrollTo(0,0);main.focus({preventScroll:true});return;
+}
     if(location.hash==='#discover/element-within'){location.replace('#discover');return;}
     const discovery=location.hash==='#discover';
     for(const id of ['all-link','big-screen-link','discover-link'])document.getElementById(id)?.removeAttribute('aria-current');

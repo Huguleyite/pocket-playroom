@@ -1,0 +1,13 @@
+export const practiceLevel={id:'practice',name:'A little practice garden',subtitle:'LEARN AT YOUR OWN PACE',chapter:'Guided practice',story:'A safe place to experiment. Your saved gardens stay untouched.',theme:'pond',n:5,map:['##I##','.....','..PP.','..PP.','A...B'].join('').split(''),inventory:{channel:8,reeds:4,tree:3,flowers:4,fern:3,bridge:3},decorations:{bench:0,pot:0,birdbath:0,lantern:0,stones:0},lesson:'Guided practice',guidance:'Follow the highlighted space. Your real gardens stay as you left them.',goals:[{key:'ponds',target:1,label:'Clean the practice pond',short:'Clean pond'},{key:'flowers',target:1,label:'Bloom a flower bed',short:'Flower bed'},{key:'ferns',target:1,label:'Unfurl a fern in moist shade',short:'Fern bed'},{key:'bridges',target:1,label:'Flow under a bridge',short:'Flowing bridge'},{key:'access',target:1,label:'Keep the walk open',short:'Open walk'}]};
+export const practiceSteps=[
+ {tool:'channel',cell:7,title:'Give the spring somewhere to go',text:'Choose Channel, then tap the glowing space below the spring. Water travels along shared edges and fills a connected pond.'},
+ {tool:'flowers',cell:8,title:'A little sunlight',text:'Choose Flowers and plant in the glowing moist space. Flowers need both water nearby and sunlight.'},
+ {tool:'channel',cell:6,title:'Make a branching waterway',text:'Add a Channel in the glowing space to the left. Water can turn corners through connected spaces; diagonal touches do not connect.'},
+ {tool:'channel',cell:5,title:'Reach another bank',text:'Add one more Channel at the end of this branch. The darker ground beside flowing water is moist.'},
+ {tool:'tree',cell:11,title:'Make room for shade',text:'Choose Tree and plant beside the flowing channel. A healthy tree shades its four neighboring spaces.'},
+ {tool:'fern',cell:10,title:'Cool green fronds',text:'Choose Ferns for the glowing space. It has water nearby AND shade from the tree, so its fronds will unfurl.'},
+ {tool:'reeds',cell:14,title:'Care for the pond',text:'Choose Reeds and plant on the glowing pond bank. One thriving reed bed helps, but a pond needs two.'},
+ {tool:'reeds',cell:19,title:'Clear water returns',text:'Plant a second Reeds bed in the glowing space. Two separate thriving reed beds clean this connected basin.'},
+ {tool:'channel',cell:22,title:'Water and walkers share a garden',text:'Place a Channel on the glowing part of the walk. It carries water from the pond, but an open channel blocks walkers. Watch the walk goal change.'},
+ {tool:'bridge',cell:22,title:'A way across',text:'Choose Bridge and replace that channel. The channel returns to your tray. Water passes below and walkers pass above.'}
+];
