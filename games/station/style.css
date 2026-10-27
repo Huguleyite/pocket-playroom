@@ -8,3 +8,12 @@
 @media(max-width:759px) and (max-height:650px){.station{min-height:570px;gap:6px;padding:8px}.brand-mark{display:none}.brand h1{font-size:24px}.brief{padding-top:6px}.brief h2{font-size:22px}.workspace{gap:6px;grid-template-rows:minmax(264px,1fr) auto}.map{min-height:264px}}
 @media(max-height:450px){.station{height:auto;min-height:650px}}
 @media(min-width:600px) and (max-width:759px){.region-grid{grid-template-columns:repeat(3,1fr)}.level-grid{grid-template-columns:1fr 1fr}.level-grid strong{font-size:11px}.level-grid button{gap:8px}}
+
+/* Keep short routes exposed between station cards, even in short viewports. */
+.station{height:auto;min-height:100dvh;grid-template-rows:auto auto minmax(560px,1fr) auto}
+.map{min-height:560px}
+@media(max-width:759px){
+ .station{grid-template-rows:auto auto minmax(0,1fr) auto}
+ .workspace{grid-template-rows:minmax(560px,1fr) auto}
+ .map{min-height:560px}
+}
