@@ -1,0 +1,70 @@
+:root{--pixel:#ffdc84;--accent:#e7bc71}.theme-link{color:#e9d6b1;font:13px Georgia;text-decoration:none;min-height:44px;display:flex;align-items:center;padding:0 10px}.view-tools{flex-wrap:wrap;gap:8px;padding:6px 10px}.journey{min-height:44px;display:flex;align-items:center;justify-content:center;gap:14px;padding:3px 12px;background:#091521;color:#d3c5aa;font:12px system-ui}.journey button{min-height:38px;padding:6px 15px;background:#142431;border:1px solid #75603d;border-radius:7px;color:#f5dfb6}.journey #puzzle-info{max-width:420px}.desktop .scene{width:min(100%,calc((100svh - 122px)*1.5))}.collection-label{font-size:2.5cqw}.collection-label #chapter-label{font-size:inherit;color:#f8dfa9}.collection button{min-width:0;padding:2px;border:1px solid #8c724e;background:#081725;box-shadow:inset 0 0 8px #000;border-radius:.6cqw;color:var(--pixel);font-size:3cqw}.collection button.current{border:2px solid var(--pixel);box-shadow:0 0 8px #ffdc8440}.collection svg{width:100%;height:100%;fill:var(--pixel);filter:drop-shadow(0 0 2px var(--pixel))}.desktop .collection button{font-size:1.6cqw}.desktop .collection-label{font-size:1.1cqw}.desktop .collection-label span{font-size:inherit}.given:after{content:'◆';position:absolute;right:4%;top:2%;font-size:.75cqw;color:#c6e8f5;pointer-events:none}.given{cursor:default}#reward-picture{width:120px;height:120px;margin:12px auto;background:#071724;border:1px solid var(--accent);padding:8px}#reward-picture svg{width:100%;height:100%;fill:var(--pixel)}#victory button+button{margin-top:10px}#archive{width:min(760px,calc(100% - 24px));overflow:auto}#archive h3{font-weight:normal;color:var(--pixel);margin:25px 0 12px}.archive-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:8px}.archive-grid .archive-picture{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:126px;padding:8px;font:12px system-ui;gap:8px}.archive-picture svg{width:64px;height:64px;fill:var(--pixel)}.archive-picture small{font-size:10px;color:#a1b2c1}.unknown{font-size:36px;color:#72869a}.archive-picture b{font-size:11px;font-weight:500}.window .mark{z-index:2}.desktop .given:after{font-size:.5cqw}
+body[data-theme=space]{--pixel:#a3f0ff;--accent:#62d5f0;color:#c9e9f3;background:#050f1c}body[data-theme=space] .scene{aspect-ratio:3/4;width:min(100%,480px)}body[data-theme=space] .columns{left:24%;top:20.7%;width:57.5%;height:4.3%;background:#091725}body[data-theme=space] .rows{left:18.5%;top:25%;width:5.5%;height:29.2%;background:#091725}body[data-theme=space] .board{left:24%;top:25%;width:57.5%;height:29.2%;background:#071626;border:1px solid #57a7b4;box-shadow:0 0 16px #54d6fb18}body[data-theme=space] .clue{font-size:2cqw;color:#b3cfda;border:1px solid #23445660}body[data-theme=space] .clue.done{color:#a3f0ff;text-shadow:0 0 5px #68dfff}body[data-theme=space] .window{border:1px solid #315369;background:linear-gradient(135deg,#112b40,#061322);isolation:isolate;font-size:4cqw}body[data-theme=space] .window:before{inset:5%}body[data-theme=space] .window.lit{background:#7ee3ff}body[data-theme=space] .window.lit:before{background:linear-gradient(135deg,#d3fbff,#76def8);box-shadow:0 0 6px #73dfff60}body[data-theme=space] .window.lit:after{background:none}body[data-theme=space] .room{display:none}body[data-theme=space] .toolbar{left:25%;top:59%;width:50%;height:5.1%;gap:1%}body[data-theme=space] .toolbar button{background:#0a1b29e0;font-size:2.15cqw;border-color:#42606e;color:#c5f0fb}body[data-theme=space] .toolbar button span{font-size:3cqw}body[data-theme=space] .collection-label{top:68.5%;left:22%;width:57%;font-size:2.1cqw}body[data-theme=space] .collection{top:70.5%;left:22%;width:57%;height:5.1%;gap:2%}body[data-theme=space] .collection-label #chapter-label{color:#c9f3ff}body[data-theme=space] .collection-label #status{font-size:1.8cqw}body[data-theme=space] .view-selector button[aria-pressed=true]{background:linear-gradient(#c4f6ff,#6abed8);color:#082232}body[data-theme=space].desktop .scene{aspect-ratio:3/2;width:min(100%,calc((100svh - 122px)*1.5))}body[data-theme=space].desktop .columns{left:40%;top:24%;width:25%;height:5%}body[data-theme=space].desktop .rows{left:36%;top:29%;width:4%;height:37.5%}body[data-theme=space].desktop .board{left:40%;top:29%;width:25%;height:37.5%}body[data-theme=space].desktop .clue{font-size:1.15cqw}body[data-theme=space].desktop .toolbar{left:34%;top:73%;width:35%;height:5.2%}body[data-theme=space].desktop .toolbar button{font-size:1.2cqw}body[data-theme=space].desktop .toolbar button span{font-size:1.8cqw}body[data-theme=space].desktop .collection-label{left:35%;top:82%;width:33%;font-size:1.1cqw}body[data-theme=space].desktop .collection-label #status{font-size:.9cqw}body[data-theme=space].desktop .collection{left:35%;top:85%;width:33%;height:7%}
+@media(max-width:600px){.view-tools{gap:2px}.theme-link{font-size:11px;min-height:30px}.view-tools button{min-width:72px;padding:6px 9px;font-size:12px}.journey{gap:6px;padding:3px 6px;flex-wrap:wrap}.journey #puzzle-info{order:3;flex-basis:100%;text-align:center;font-size:10px;padding:0 0 3px}.journey button{min-height:36px}.archive-grid{grid-template-columns:repeat(3,1fr)}.archive-grid .archive-picture{min-height:112px}body[data-theme=space] .clue{font-size:2.2cqw}}
+@media(max-height:400px) and (min-width:601px){.desktop .scene,body[data-theme=space].desktop .scene{width:min(100%,900px)}}
+
+/* Align the live display to the observatory's recessed screen. */
+body[data-theme=space].desktop .columns{left:39%;top:25%;width:26.5%;height:4%}body[data-theme=space].desktop .rows{left:34.7%;top:29%;width:4.3%;height:28.8%}body[data-theme=space].desktop .board{left:39%;top:29%;width:26.5%;height:28.8%}body[data-theme=space].desktop .toolbar{left:33%;top:63%;width:35%;height:5%}body[data-theme=space].desktop .collection-label{left:30%;top:71.8%;width:40%;font-size:1.2cqw}body[data-theme=space].desktop .collection{left:30%;top:74.5%;width:40%;height:4.4%}
+
+
+body[data-theme=space]:not(.desktop) .columns{left:25%;top:20.5%;width:57%;height:8.5%}body[data-theme=space]:not(.desktop) .rows{left:17.5%;top:29%;width:7.5%;height:40.5%}body[data-theme=space]:not(.desktop) .board{left:25%;top:29%;width:57%;height:40.5%}body[data-theme=space]:not(.desktop) .toolbar{left:25%;top:74.5%;width:50%;height:6.5%}body[data-theme=space]:not(.desktop) .collection-label{left:22%;top:86.5%;width:57%}body[data-theme=space]:not(.desktop) .collection{left:22%;top:89%;width:57%;height:5.5%}body[data-theme=home]:not(.desktop) .columns .clue{font-size:2cqw}body[data-theme=home]:not(.desktop) .rows .clue{font-size:2.3cqw}.desktop .columns .clue{font-size:clamp(6px,.65cqw,11px)}body[data-theme=space].desktop .columns .clue{font-size:clamp(6px,.65cqw,11px)}
+
+
+.collection{grid-template-rows:minmax(0,1fr)}.collection button{min-height:0;overflow:hidden}.collection svg{display:block;min-height:0}.collection button span{line-height:1}.desktop .collection button{font-size:1.2cqw}body[data-theme=space].desktop .collection{height:5.8%;top:74.1%}
+
+
+body[data-theme=home]:not(.desktop) .scene{width:min(100%,480px,calc((100svh - 155px)*1075/1463))}body[data-theme=space]:not(.desktop) .scene{width:min(100%,480px,calc((100svh - 155px)*.75))}@media(max-height:400px){body[data-theme=home]:not(.desktop) .scene,body[data-theme=space]:not(.desktop) .scene{width:min(100%,480px)}}
+
+
+body[data-theme=home]:not(.desktop) .columns .clue{font-size:3.1cqw}body[data-theme=home]:not(.desktop) .columns .clue[data-stack="3"]{font-size:2.3cqw}body[data-theme=home]:not(.desktop) .columns .clue[data-stack="4"]{font-size:1.9cqw}.desktop .columns .clue,body[data-theme=space].desktop .columns .clue{font-size:1.15cqw}.desktop .columns .clue[data-stack="3"],body[data-theme=space].desktop .columns .clue[data-stack="3"]{font-size:.85cqw}.desktop .columns .clue[data-stack="4"],body[data-theme=space].desktop .columns .clue[data-stack="4"]{font-size:.65cqw}
+
+/* Tactile feedback, shared by the warm street and cool receiver. */
+button,a{ -webkit-tap-highlight-color:transparent }
+.view-tools button,.theme-link,.journey button,.toolbar button,.picture,.archive-picture{transition:box-shadow .18s ease,border-color .18s ease,background-color .18s ease,filter .18s ease,transform .18s ease}
+button:focus-visible,a:focus-visible{outline:2px solid var(--pixel);outline-offset:3px}
+.window:focus-visible{outline-offset:-3px}
+.window.line-hover{box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--pixel) 28%,transparent)}
+.clue.line-hover{background:color-mix(in srgb,var(--pixel) 14%,#0a1722);box-shadow:inset 0 0 0 1px var(--accent);color:var(--pixel)}
+.window{transition:box-shadow .12s ease,filter .12s ease}
+#status{display:flex;align-items:center;gap:.45em}
+#status:before{content:'';display:block;width:.38em;height:.38em;border-radius:50%;background:var(--pixel);opacity:.45}
+#status.complete:before{opacity:1;box-shadow:0 0 6px var(--pixel)}
+#status.complete{color:var(--pixel)}
+.collection .earned svg{filter:drop-shadow(0 0 3px var(--pixel))}
+@media(hover:hover) and (pointer:fine){
+ .window:hover{z-index:2;box-shadow:inset 0 0 0 2px var(--pixel),inset 0 0 14px color-mix(in srgb,var(--pixel) 25%,transparent);filter:brightness(1.25)}
+ .window.given:hover{box-shadow:inset 0 0 0 1px var(--accent);filter:brightness(1.1)}
+ .toolbar button:not(:disabled):hover,.journey button:hover,.view-tools button:hover{border-color:var(--pixel);box-shadow:inset 0 0 14px color-mix(in srgb,var(--pixel) 16%,transparent),0 0 12px color-mix(in srgb,var(--pixel) 18%,transparent);filter:brightness(1.12)}
+ .theme-link:hover{color:var(--pixel);text-shadow:0 0 9px var(--accent)}
+ .picture:hover,.archive-grid .archive-picture:hover{border-color:var(--pixel);background:#183342;box-shadow:0 0 12px color-mix(in srgb,var(--pixel) 35%,transparent);transform:translateY(-2px)}
+}
+.toolbar button:not(:disabled):active,.journey button:active,.picture:active,.archive-picture:active{transform:translateY(1px);filter:brightness(1.3)}
+@media(prefers-reduced-motion:no-preference){
+ dialog[open]{animation:panel-arrive .22s ease-out}
+ #reward-picture{animation:reward-arrive .5s ease-out}
+ body[data-theme=space] #status:before{animation:receiver-pulse 3.8s ease-in-out infinite}
+ #status.complete:before{animation:none!important}
+ @keyframes panel-arrive{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+ @keyframes reward-arrive{from{opacity:.2;transform:scale(.88)}to{opacity:1;transform:scale(1)}}
+ @keyframes receiver-pulse{50%{opacity:1;box-shadow:0 0 5px var(--pixel)}}
+}
+@media(prefers-reduced-motion:reduce){button,a,.window{transition:none!important}}
+/* Grand-image keepsake: one independent tile per puzzle. */
+#grand-button{border-color:var(--accent);color:var(--pixel)}
+#piece-reward{padding:12px;background:#162d3b;border:1px solid var(--accent);border-radius:7px;color:var(--pixel)}
+#grand-image{width:min(1000px,calc(100% - 24px));padding:20px;overflow:auto}
+.grand-layout{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(240px,1fr);gap:28px;align-items:center;clear:both}
+.mosaic{aspect-ratio:2/3;display:grid;grid-template-columns:repeat(6,minmax(0,1fr));grid-template-rows:repeat(6,minmax(0,1fr));border:2px solid var(--accent);background:#06121d;box-shadow:0 0 25px #0006}
+#mosaic .mosaic-piece{width:100%;height:100%;min-height:0;padding:0;margin:0;border-radius:0;border:1px solid #3c5366;background-color:#0d2030;color:#a1b3bf;font:12px system-ui;display:grid;place-items:center;background-size:600% 600%}
+#mosaic .mosaic-piece.revealed{border:1px solid #ffffff10}
+#mosaic.finished .mosaic-piece{border-color:transparent}
+#mosaic .mosaic-piece:hover,#mosaic .mosaic-piece:focus-visible{box-shadow:inset 0 0 0 2px var(--pixel);filter:brightness(1.2);position:relative;z-index:1}
+.grand-copy .eyebrow{font:11px system-ui;letter-spacing:.14em;color:var(--pixel)}
+.grand-copy h2{margin-top:10px;line-height:1.2}
+#grand-meter{width:100%;height:7px;accent-color:var(--accent)}
+#award-info{overflow-wrap:anywhere;font-size:11px;color:#aec2ce}
+#export-tools button+button{margin-top:10px}
+#find-piece{margin-top:10px}
+#grand-image [hidden]{display:none!important}
+@media(max-width:650px){.grand-layout{grid-template-columns:1fr;gap:18px}.mosaic{width:min(100%,310px);margin:auto}.grand-copy h2{font-size:24px}.grand-copy p{font-size:12px;line-height:1.45}#grand-image{padding:14px}.journey{gap:5px}.journey button{padding:6px 9px;font-size:11px}}
+@media(min-width:651px) and (max-height:780px){.mosaic{max-height:68svh;width:auto;aspect-ratio:2/3;justify-self:center}.grand-layout{grid-template-columns:minmax(0,1fr) minmax(240px,1fr)}}
