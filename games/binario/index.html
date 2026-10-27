@@ -20,14 +20,15 @@ window.roomComplete=(id,date)=>{if(!date){const d=new Date();date=d.getFullYear(
 <script type="module">
 import {findDeduction,initializeGame,getBoard,restoreBoard,toggleCell,isSolved,checkMaxAdjacent,checkEqualCounts,checkUniqueLines} from './engine.js';
 const $=id=>document.getElementById(id),prefix='room-for-play:neon:',localDate=()=>{const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;},date=localDate();let round='daily',key=prefix+date;
-let clues,solution;let hint=null;let moves=0,history=[],won=false,neon=true,stats={days:[]},shareText='';
+let difficulty='balanced-v2';let clues,solution;let hint=null;let moves=0,history=[],won=false,neon=true,stats={days:[]},shareText='';
 function read(k){try{return JSON.parse(localStorage.getItem(k));}catch{return null;}}
 function write(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch{$('saving').textContent='Browser saving is unavailable. You can still play this visit.';}}
 function loadRound(next){
  round=next;key=prefix+(round==='extra'?'extra:':'')+date;
- ({clues,solution}=initializeGame(date,round));moves=0;history=[];won=false;clearHint();
- const saved=read(key);try{if(saved?.difficulty==='balanced-v1'){restoreBoard(saved.board.map((row,r)=>row.map((value,c)=>clues[r][c]??value)));moves=Number.isSafeInteger(saved.moves)&&saved.moves>=0?saved.moves:0;}}catch{$('saving').textContent='An invalid save was ignored.';}
- if(saved&&saved.difficulty!=='balanced-v1')$('saving').textContent='Today’s puzzle has been refreshed to a balanced difficulty. Your streak is preserved.';
+ const saved=read(key);difficulty=saved?.difficulty==='balanced-v1'?'balanced-v1':'balanced-v2';
+ ({clues,solution}=initializeGame(date,round,difficulty==='balanced-v1'?17:15));moves=0;history=[];won=false;clearHint();
+ try{if(['balanced-v1','balanced-v2'].includes(saved?.difficulty)){restoreBoard(saved.board.map((row,r)=>row.map((value,c)=>clues[r][c]??value)));moves=Number.isSafeInteger(saved.moves)&&saved.moves>=0?saved.moves:0;}}catch{$('saving').textContent='An invalid save was ignored.';}
+ if(saved&&!['balanced-v1','balanced-v2'].includes(saved.difficulty))$('saving').textContent='Today’s puzzle has been refreshed to the updated difficulty. Your streak is preserved.';
  $('complete').close();$('share-status').textContent='';$('copy-fallback').hidden=true;
  mode();if(isSolved(getBoard()))victory(false);
 }
@@ -43,7 +44,7 @@ function roundUI(){
 const prior=read(prefix+'stats');if(Array.isArray(prior?.days))stats.days=[...new Set(prior.days.filter(d=>typeof d==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(d)&&d<=date))];
 neon=document.documentElement.classList.contains('night-play');
 function streak(){const days=new Set(stats.days);let cursor=new Date(date+'T12:00:00Z'),n=0;if(!days.has(date))cursor.setUTCDate(cursor.getUTCDate()-1);while(days.has(cursor.toISOString().slice(0,10))){n++;cursor.setUTCDate(cursor.getUTCDate()-1);}return n;}
-function persist(){write(key,{board:getBoard(),moves,completed:won,difficulty:'balanced-v1'});}
+function persist(){write(key,{board:getBoard(),moves,completed:won,difficulty});}
 function tripleCells(b){const cells=new Set();for(let r=0;r<6;r++)for(let c=0;c<6;c++){const v=b[r][c];if(v===null)continue;if(c<4&&v===b[r][c+1]&&v===b[r][c+2])for(let d=0;d<3;d++)cells.add(`${r},${c+d}`);if(r<4&&v===b[r+1][c]&&v===b[r+2][c])for(let d=0;d<3;d++)cells.add(`${r+d},${c}`);}return cells;}
 function clearHint(){hint=null;$('hint-text').hidden=true;}
 function render(){const b=getBoard(),errors=tripleCells(b);$('filled').textContent=b.flat().filter(v=>v!==null).length+'/36';$('moves').textContent=moves;$('streak').textContent=streak();$('undo').disabled=!history.length||won;$('reset').disabled=won;$('hint').disabled=won;$('results').hidden=!won;

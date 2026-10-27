@@ -37,11 +37,11 @@ export function solveByDeduction(clues){
  while(isLegal(board)&&(step=findDeduction(board))){board[step.row][step.col]=step.value;steps.push(step);}
  return {board,steps,solved:isSolved(board)};
 }
-export function generatePuzzle(date,round='daily'){
+export function generatePuzzle(date,round='daily',clueTarget=15){
  if(round==='extra'){
   // A fixed offset gives the bonus its own deterministic seed without changing
   // existing daily boards. Guard against the rare identical solution as well.
-  const daily=generatePuzzle(date),seedDate=new Date(Date.parse(date+'T00:00:00Z')+86400000*7919).toISOString().slice(0,10),extra=generatePuzzle(seedDate);
+  const daily=generatePuzzle(date,'daily',clueTarget),seedDate=new Date(Date.parse(date+'T00:00:00Z')+86400000*7919).toISOString().slice(0,10),extra=generatePuzzle(seedDate,'daily',clueTarget);
   if(JSON.stringify(extra.solution)===JSON.stringify(daily.solution))for(const board of [extra.clues,extra.solution])for(const row of board)for(let c=0;c<SIZE;c++)if(row[c]!==null)row[c]=row[c]==='C'?'M':'C';
   return {...extra,date,round};
  }
@@ -49,7 +49,7 @@ export function generatePuzzle(date,round='daily'){
  const solution=generateSolution(date),clues=copy(solution),rng=mulberry32(dateSeed(date)^0x9E3779B9);
  let remaining=36;
  for(const i of shuffled(Array.from({length:36},(_,i)=>i),rng)){
-  if(remaining<=17)break;
+  if(remaining<=clueTarget)break;
   const r=Math.floor(i/SIZE),c=i%SIZE,v=clues[r][c];clues[r][c]=null;
   const distributed=groups(clues).flat().every(line=>line.filter(v=>v!==null).length>=2);
   if(!distributed||!solveByDeduction(clues).solved||solve(clues).count!==1)clues[r][c]=v;
@@ -59,7 +59,7 @@ export function generatePuzzle(date,round='daily'){
 }
 export function countSolutions(b){assertBoard(b);return solve(b).count;}
 let board=empty(),clues=empty();
-export function initializeGame(date,round='daily'){const puzzle=generatePuzzle(date,round);clues=copy(puzzle.clues);board=copy(clues);return {date,clues:copy(clues),board:copy(board),solution:copy(puzzle.solution)};}
+export function initializeGame(date,round='daily',clueTarget=15){const puzzle=generatePuzzle(date,round,clueTarget);clues=copy(puzzle.clues);board=copy(clues);return {date,clues:copy(clues),board:copy(board),solution:copy(puzzle.solution)};}
 export function getBoard(){return copy(board);}
 export function restoreBoard(saved){assertBoard(saved);if(clues.some((r,i)=>r.some((v,j)=>v!==null&&saved[i][j]!==v)))throw Error('Saved clues do not match');board=copy(saved);return getBoard();}
 export function toggleCell(row,col){if(!Number.isInteger(row)||!Number.isInteger(col)||row<0||row>=SIZE||col<0||col>=SIZE)throw Error('Invalid cell');if(clues[row][col]!==null)return false;const states=[null,'C','M'];board[row][col]=states[(states.indexOf(board[row][col])+1)%3];return true;}
