@@ -1,0 +1,25 @@
+/* Missing pieces are puzzle choices with full-size touch targets. */
+.grand-pick-actions{clear:both;margin:0 0 16px}
+#grand-image .grand-pick-actions #find-piece{min-height:52px;margin:0;font-size:17px;font-weight:700;background:#203c4c;border:2px solid var(--accent);color:var(--pixel)}
+#piece-picker{padding:0;width:min(640px,calc(100% - 12px));max-height:94svh;overflow:hidden}
+#piece-picker[open]{display:flex;flex-direction:column}
+.piece-picker-heading{display:flex;align-items:center;justify-content:space-between;flex:none;gap:12px;padding:14px 16px;background:#10212f;border-bottom:1px solid #56717d}
+.piece-picker-heading h2{margin:0;font-size:24px;line-height:1.2}
+.piece-picker-heading p{font:13px/1.45 system-ui;margin:8px 0 0;color:#bfcfd8}
+.piece-picker-heading .close{flex:none;min-width:44px;min-height:44px;padding:0;float:none}
+.piece-picker-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));grid-auto-rows:minmax(80px,auto);gap:10px;padding:14px;overflow-y:auto;min-height:0;overscroll-behavior:contain}
+#piece-picker .missing-piece-choice{min-width:0;min-height:80px;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;padding:8px;border:1px solid var(--accent);border-radius:9px;background:linear-gradient(#203a4a,#112331);color:var(--pixel)}
+.missing-piece-choice strong{font:700 26px/1 Georgia}
+.missing-piece-choice span{font:12px/1.2 system-ui;color:#d2e4eb}
+#piece-picker .missing-piece-choice:hover,#piece-picker .missing-piece-choice:focus-visible{background:#2b4b5b;box-shadow:inset 0 0 0 1px var(--pixel)}
+@media(max-width:480px){.piece-picker-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;padding:10px}.piece-picker-heading{padding:12px}.piece-picker-heading h2{font-size:22px}}
+@media(max-width:1100px){
+ #grand-image{width:min(720px,100%);max-width:100%;max-height:96svh;padding:10px 6px}
+ #grand-image .grand-layout{grid-template-columns:minmax(0,1fr);gap:18px}
+ #grand-image .mosaic{width:min(100%,480px);max-height:none;height:auto;margin:0 auto;justify-self:center}
+ #grand-image .mosaic-piece{font-size:clamp(14px,3.4vw,22px)}
+ #grand-image .grand-copy{padding:0 8px}
+}
+/* Background-art tiles have no intrinsic image width: give the grid an explicit width. */
+#grand-image .mosaic{width:100%;height:auto;max-height:none;min-width:0}
+@media(max-width:1100px){#grand-image .mosaic{width:min(100%,480px)}}
