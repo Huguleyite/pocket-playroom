@@ -168,7 +168,7 @@ const keyOf = ({ row, col }) => row * SIZE + col;
 const copyPath = path => path.map(({ row, col }) => ({ row, col }));
 
 /** Independent game instance. Same date + submissions => identical boards/refills.
- * Cascades: contiguous straight lines, both directions, length 3–5. A match must
+ * Cascades: contiguous straight lines, both directions, length 4–5. A match must
  * touch a moved/refilled cell. Overlapping matches clear their union once.
  * Each wave scores length² per distinct path; initial submission costs one move.
  */
@@ -199,7 +199,7 @@ export function createWordDrop(dateString = new Date().toISOString().slice(0, 10
           const r = row + dr * step, c = col + dc * step;
           if (r < 0 || r >= SIZE || c < 0 || c >= SIZE) break;
           path.push({ row: r, col: c });
-          if (path.length < 3 || !path.some(cell => changedCells.has(keyOf(cell)))) continue;
+          if (path.length < 4 || !path.some(cell => changedCells.has(keyOf(cell)))) continue;
           const forward = wordAt(path);
           for (const reverse of [false, true]) {
             const word = reverse ? [...forward].reverse().join('') : forward;
