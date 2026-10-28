@@ -179,10 +179,9 @@ const wrap=document.querySelector('.board-wrap'),actionBar=document.querySelecto
 function positionActions(){if(sideActions.matches)wrap.append(actionBar);else toolbox.append(actionBar);fitBoard();}
 sideActions.addEventListener('change',positionActions);
 function fitBoard(){
- const mobile=innerWidth<600,n=level().n,min=n*44+(mobile?6:8);
+ const mobile=matchMedia('(max-width:599px), (max-width:950px) and (max-height:500px)').matches,n=level().n,min=n*44+(mobile?6:8);
  const available=mobile?wrap.clientWidth:Math.min(wrap.clientWidth-(sideActions.matches?176:0),Math.max(0,wrap.clientHeight-12));
- const reserved=mobile?document.querySelector('.game').getBoundingClientRect().height-$('board').getBoundingClientRect().height:0;
- const size=Math.max(min,Math.floor(mobile?Math.min(available,innerHeight-reserved-6):available));
+ const size=Math.max(min,Math.floor(mobile?Math.min(available,420):available));
  $('board').style.width=size+'px';$('board').style.height=size+'px';
 }
 new ResizeObserver(fitBoard).observe(wrap);new ResizeObserver(fitBoard).observe($('board'));
