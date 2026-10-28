@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="en">
-<head><script>if(window.top===window){document.documentElement.style.visibility='hidden';location.replace(new URL('../../index.html#games/futoshiki',location.href));}</script>
+<head><script src="../../pocket-challenge.js"></script><script>if(window.top===window){document.documentElement.style.visibility='hidden';location.replace(new URL('../../index.html#games/futoshiki',location.href));}</script>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#f7f5ee">
@@ -69,9 +69,9 @@
     @media (max-height:700px) { main { padding-top:15px; } .metrics { margin-top:14px; } .intro { margin:10px 0; } }
   </style>
 <script>window.roomHaptic=()=>{try{navigator.vibrate?.(8);}catch{}};</script><script>
-window.roomComplete=(id,date)=>{if(!date){const d=new Date();date=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}try{localStorage.setItem('room-for-play:completed:'+id,JSON.stringify(date));}catch{}parent.postMessage({type:'room:completed',id,date},location.origin);};
+window.roomComplete=(id,date)=>{if(window.PocketChallenge.incoming)return;if(!date){const d=window.PocketChallenge.calendarDate();date=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}try{window.PocketChallenge.storage.setItem('room-for-play:completed:'+id,JSON.stringify(date));}catch{}parent.postMessage({type:'room:completed',id,date},location.origin);};
 </script><script src="../../mobile-frame.js" defer></script><link rel="stylesheet" href="../../pocket-fit.css"><script src="../../pocket-fit.js" defer></script><style>.room-futoshiki .digit-dock{position:static;width:100%;transform:none;box-shadow:none;padding:12px 0;margin-top:16px}.room-futoshiki .digits{max-width:100%}</style> <link rel="stylesheet" href="../../night-game.css"><script src="../../night-frame.js" data-game="futoshiki"></script><link rel="stylesheet" href="../../game-theme.css">
-<link rel="stylesheet" href="../../house-promos.css"><script src="../../house-promos.js" defer></script><link rel="stylesheet" href="../../pocket-share.css?v=1"><script src="../../pocket-share.js?v=1"></script></head>
+<link rel="stylesheet" href="../../house-promos.css?v=challenge1"><script src="../../house-promos.js?v=challenge1" defer></script><link rel="stylesheet" href="../../pocket-share.css?v=challenge1"><script src="../../pocket-share.js?v=challenge1"></script></head>
 <body class="room-embedded room-futoshiki">
   <main>
     <header><div><div class="eyebrow">A little order, every day</div><h1>Futoshiki</h1></div><span class="tag">Daily · 5 × 5</span></header>
@@ -279,7 +279,7 @@ function generateDailyPuzzle(dateString, { inequalityCount = 12, clueCount = 7 }
 
     const $ = id => document.getElementById(id);
     const localDate = () => {
-      const d = new Date();
+      const d = window.PocketChallenge.calendarDate();
       return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
     };
     const formatTime = seconds => `${Math.floor(seconds/60)}:${String(seconds%60).padStart(2,'0')}`;
@@ -292,7 +292,7 @@ function generateDailyPuzzle(dateString, { inequalityCount = 12, clueCount = 7 }
       puzzle = generateDailyPuzzle(date);
       state = { board:puzzle.board.map(row => row.slice()), moves:0, errors:0, elapsed:0, completed:false };
       try {
-        const saved = JSON.parse(localStorage.getItem(key));
+        const saved = JSON.parse(window.PocketChallenge.storage.getItem(key));
         // Restore only well-formed progress matching this exact generated puzzle.
         if (saved && saved.fingerprint === JSON.stringify(puzzle.board) &&
           Array.isArray(saved.board) && saved.board.length === 5 && saved.board.every((row,r) =>
@@ -309,7 +309,7 @@ function generateDailyPuzzle(dateString, { inequalityCount = 12, clueCount = 7 }
     }
 
     function save() {
-      try { localStorage.setItem(key,JSON.stringify({...state, fingerprint:JSON.stringify(puzzle.board)})); }
+      try { window.PocketChallenge.storage.setItem(key,JSON.stringify({...state, fingerprint:JSON.stringify(puzzle.board)})); }
       catch { $('storage').hidden = false; }
     }
     function tick() {
@@ -347,7 +347,7 @@ function generateDailyPuzzle(dateString, { inequalityCount = 12, clueCount = 7 }
       $('results').addEventListener('click',showVictory);
       $('clear-cell').addEventListener('click',() => enter(0));
       $('reset-board').addEventListener('click',resetBoard);
-      window.PocketShare.install({id:'futoshiki',title:'Daily Futoshiki',container:'#victory',button:'#share',ad:'.completion-ad',back:'#close',result:resultText});
+      window.PocketShare.install({id:'futoshiki',title:'Daily Futoshiki',container:'#victory',button:'#share',ad:'.completion-ad',back:'#close',result:resultText,challenge:()=>({day:date,value:state.moves})});
 $('share').addEventListener('click',share);
       document.addEventListener('keydown',onKey);
       document.addEventListener('visibilitychange',() => { lastTick=performance.now(); save(); checkDate(); });

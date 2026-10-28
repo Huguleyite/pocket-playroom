@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="en">
-<head><script>if(window.top===window){document.documentElement.style.visibility='hidden';location.replace(new URL('../../index.html#games/deli',location.href));}</script>
+<head><script src="../../pocket-challenge.js"></script><script>if(window.top===window){document.documentElement.style.visibility='hidden';location.replace(new URL('../../index.html#games/deli',location.href));}</script>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#fff6e7">
@@ -43,9 +43,9 @@ body.room-embedded.room-deli[data-menu="garden"]{background-color:#c1d5ae!import
 body.room-embedded.room-deli[data-menu="future"]{background-color:#101d38!important;background-image:radial-gradient(circle at 15% 20%,#83f1e6 0 2px,transparent 3px),radial-gradient(circle at 80% 35%,#fff 0 1px,transparent 2px),repeating-linear-gradient(90deg,transparent 0 110px,#63b6de22 110px 112px),linear-gradient(150deg,#14253d,#514473)!important;background-size:210px 230px,150px 170px,auto,auto!important}
 </style>
 <script>window.roomHaptic=()=>{try{navigator.vibrate?.(8);}catch{}};</script><script>
-window.roomComplete=(id,date)=>{if(!date){const d=new Date();date=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}try{localStorage.setItem('room-for-play:completed:'+id,JSON.stringify(date));}catch{}parent.postMessage({type:'room:completed',id,date},location.origin);};
+window.roomComplete=(id,date)=>{if(window.PocketChallenge.incoming)return;if(!date){const d=window.PocketChallenge.calendarDate();date=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}try{window.PocketChallenge.storage.setItem('room-for-play:completed:'+id,JSON.stringify(date));}catch{}parent.postMessage({type:'room:completed',id,date},location.origin);};
 </script><script src="../../mobile-frame.js" defer></script><link rel="stylesheet" href="../../pocket-fit.css"><script src="../../pocket-fit.js" defer></script> <link rel="stylesheet" href="../../night-game.css"><script src="../../night-frame.js" data-game="deli"></script><link rel="stylesheet" href="../../game-theme.css">
-<link rel="stylesheet" href="../../house-promos.css"><script src="../../house-promos.js" defer></script><link rel="stylesheet" href="../../pocket-share.css?v=1"><script src="../../pocket-share.js?v=1"></script></head>
+<link rel="stylesheet" href="../../house-promos.css?v=challenge1"><script src="../../house-promos.js?v=challenge1" defer></script><link rel="stylesheet" href="../../pocket-share.css?v=challenge1"><script src="../../pocket-share.js?v=challenge1"></script></head>
 <body class="room-embedded room-deli">
 <main>
 <header><div><h1 style="font-size:clamp(23px,6vw,31px)">Stack to <span>the Future</span></h1><div class="eyebrow">Tiny deli. Big sandwich energy.</div></div><button class="sound" id="sound" aria-pressed="false">Sound off</button></header>
@@ -75,7 +75,7 @@ window.roomComplete=(id,date)=>{if(!date){const d=new Date();date=d.getFullYear(
  {name:'Pretzel bun',color:'#b87839',shape:'bun'}, {name:'Chicken',color:'#dcb17c',shape:'chicken'},
  {name:'Onion',color:'#b07fa5',shape:'onion'}, {name:'Glow sauce',color:'#57cbb8',shape:'sauce'}];
  const menus={retro:{label:'Retro Diner',scene:'THE DAILY BREAD · 1956',ids:[0,1,2,3,4,5],names:['A Gouda Day','Dill With It','Yolk Around the Clock']},garden:{label:'Garden Café',scene:'THYME TO UNWIND · TODAY',ids:[0,2,3,6,7,10],names:['Avo Nice Day','Room to Mushroom','Lettuce Take Our Thyme']},future:{label:'Future Kitchen',scene:'ORBITAL LUNCHROOM · 2186',ids:[8,1,4,9,10,11],names:['Bun Small Step','The Big Dipper','Ahead of the Lunch Curve']}};
- let menu='retro',buttons=[];
+ let menu=window.PocketChallenge.incoming?.mode||'retro',buttons=[];
  let artSerial=0;
  function art(id){
    const f=foods[id],parts={
@@ -105,7 +105,7 @@ window.roomComplete=(id,date)=>{if(!date){const d=new Date();date=d.getFullYear(
  let remaining=60000,deadline=0,frame=0,nextOrderTimer=0,best=0,sound=false,audio;
  let lost=0,patienceRemaining=12000,patienceDeadline=0,patienceBudget=12000;
  const bestKey=()=>`order-up:best:expansion1:${menu}:v1`;
- function loadBest(){best=0;try{const stored=Number(localStorage.getItem(bestKey()));if(Number.isFinite(stored)&&stored>=0)best=stored;}catch{$('notice').textContent='Personal bests can’t be saved in this browser.';}}
+ function loadBest(){best=0;try{const stored=Number(window.PocketChallenge.storage.getItem(bestKey()));if(Number.isFinite(stored)&&stored>=0)best=stored;}catch{$('notice').textContent='Personal bests can’t be saved in this browser.';}}
  function paintPatience(){
    $('patienceBar').value=Math.max(0,patienceRemaining/patienceBudget);
    $('patienceTime').textContent=`${Math.ceil(patienceRemaining/1000)}s`;
@@ -160,7 +160,7 @@ window.roomComplete=(id,date)=>{if(!date){const d=new Date();date=d.getFullYear(
    step=0;clean=true;
    // The first three tickets stay simple; later tickets add one ingredient.
    const length=served<3?3:served<8?4:5;
-   const ids=menus[menu].ids;order=[ids[0],...Array.from({length:length-2},()=>ids[1+Math.floor(Math.random()*5)]),ids[0]];
+   const ids=menus[menu].ids;order=[ids[0],...Array.from({length:length-2},()=>ids[1+Math.floor(window.PocketChallenge.random()*5)]),ids[0]];
    patienceBudget=served<3?14000:served<8?12000:10000;
    patienceRemaining=patienceBudget;patienceDeadline=performance.now()+patienceBudget;
    $('patience').classList.remove('hidden');paintPatience();
@@ -183,7 +183,7 @@ window.roomComplete=(id,date)=>{if(!date){const d=new Date();date=d.getFullYear(
      }
    }
  }
- function start(){
+ function start(){window.PocketChallenge.seed();
    clearTimeout(nextOrderTimer);cancelAnimationFrame(frame);$('results').close();
    $('menu').disabled=true;phase='playing';score=0;served=0;perfect=0;chain=0;topCombo=1;mistakes=0;lost=0;remaining=60000;
 
@@ -191,11 +191,11 @@ window.roomComplete=(id,date)=>{if(!date){const d=new Date();date=d.getFullYear(
    $('feedback').textContent='Let’s cook! Match the ticket.';newOrder();deadline=performance.now()+remaining;tick();
  }
  function finish(){
-   phase='finished';$('menu').disabled=false;window.roomComplete?.('deli');cancelAnimationFrame(frame);clearTimeout(nextOrderTimer);
+   phase='finished';$('menu').disabled=!!window.PocketChallenge.incoming;window.roomComplete?.('deli');cancelAnimationFrame(frame);clearTimeout(nextOrderTimer);
 
    buttons.forEach(button=>button.disabled=true);$('pause').disabled=true;
    $('start').textContent='Play another 60 seconds';$('start').classList.remove('hidden');
-   const newBest=score>best;if(newBest){best=score;try{localStorage.setItem(bestKey(),String(best));}catch{$('notice').textContent='Your best score could not be saved.';}}
+   const newBest=score>best;if(newBest){best=score;try{window.PocketChallenge.storage.setItem(bestKey(),String(best));}catch{$('notice').textContent='Your best score could not be saved.';}}
    $('finalScore').textContent=score;$('finalStats').textContent=`${served} sandwiches served · ${perfect} perfect orders · best combo ×${topCombo} · ${mistakes} wrong taps · ${lost} customers lost`;
    $('bestMessage').textContent=newBest?'A new personal best!':`Personal best: ${best}. Another shift?`;
    $('feedback').textContent=`Shift complete! ${served} sandwiches served.`;
@@ -236,7 +236,7 @@ window.roomComplete=(id,date)=>{if(!date){const d=new Date();date=d.getFullYear(
    $('pauseDialog').close();phase='playing';if(step>=order.length)newOrder();else patienceDeadline=performance.now()+patienceRemaining;deadline=performance.now()+remaining;tick();
  }
  buttons.forEach(button=>button.addEventListener('click',()=>tap(Number(button.dataset.food))));
- window.PocketShare.install({id:'deli',title:'Stack to the Future',container:'#results',back:'#again, #closeResults',result:()=>`Stack to the Future · ${menus[menu].label} · 60-second rush\n${score} points\n${$('finalStats').textContent}\nPersonal best: ${best}`});
+ window.PocketShare.install({id:'deli',title:'Stack to the Future',container:'#results',back:'#again, #closeResults',challenge:()=>({mode:menu,value:score}),result:()=>`Stack to the Future · ${menus[menu].label} · 60-second rush\n${score} points\n${$('finalStats').textContent}\nPersonal best: ${best}`});
 $('start').onclick=start;$('again').onclick=start;$('pause').onclick=pause;$('resume').onclick=resume;
  $('pauseDialog').addEventListener('cancel',event=>{event.preventDefault();resume();});
  $('closeResults').onclick=()=>$('results').close();
@@ -252,8 +252,18 @@ $('start').onclick=start;$('again').onclick=start;$('pause').onclick=pause;$('re
  });
  document.addEventListener('keydown',event=>{if(event.repeat||document.querySelector('dialog[open]')||event.target.closest('select,input,textarea'))return;if(['1','2','3','4','5','6'].includes(event.key)){event.preventDefault();const button=buttons[Number(event.key)-1];if(!button.classList.contains('hidden'))button.click();}});
 
- $('menu').onchange=()=>{if(phase==='playing'||phase==='paused')return;menu=$('menu').value;practice();};
+ if(window.PocketChallenge.incoming){$('menu').value=menu;$('menu').disabled=true;}
+  $('menu').onchange=()=>{if(window.PocketChallenge.incoming||phase==='playing'||phase==='paused')return;menu=$('menu').value;practice();};
  practice();
+ if(window.PocketChallenge.incoming){
+   const saveChallenge=()=>{if(phase==='practice')return;try{PocketChallenge.storage.setItem('rush',JSON.stringify({phase,order,step,score,served,perfect,chain,topCombo,mistakes,clean,lost,remaining:phase==='playing'?Math.max(0,deadline-performance.now()):remaining,patienceRemaining:phase==='playing'?Math.max(0,patienceDeadline-performance.now()):patienceRemaining,patienceBudget,randomCount:PocketChallenge.randomCount()}));}catch{}};
+   try{const s=JSON.parse(PocketChallenge.storage.getItem('rush'));if(s&&Array.isArray(s.order)&&s.order.every(n=>menus[menu].ids.includes(n))){
+     ({order,step,score,served,perfect,chain,topCombo,mistakes,clean,lost,remaining,patienceRemaining,patienceBudget}=s);
+     PocketChallenge.restoreRandom(s.randomCount);renderOrder();$('score').textContent=score;$('combo').textContent='×'+multiplier();$('start').classList.add('hidden');$('pause').disabled=false;
+     if(s.phase==='finished'){finish();}else{phase='paused';$('time').textContent=Math.ceil(remaining/1000);$('patience').classList.remove('hidden');paintPatience();$('pauseDialog').showModal();}
+   }}catch{}
+   document.addEventListener('click',()=>queueMicrotask(saveChallenge));addEventListener('pagehide',saveChallenge);setInterval(saveChallenge,1000);
+ }
 })();
 </script>
 <script>

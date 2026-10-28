@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="en">
-<head><script>if(window.top===window){document.documentElement.style.visibility='hidden';location.replace(new URL('../../index.html#games/tide',location.href));}</script>
+<head><script src="../../pocket-challenge.js"></script><script>if(window.top===window){document.documentElement.style.visibility='hidden';location.replace(new URL('../../index.html#games/tide',location.href));}</script>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#f4f5ef">
@@ -18,9 +18,9 @@ svg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index
 .scoring{margin:14px 0;padding:12px;border:1px solid #cbd4c5;border-radius:12px;font-size:12px}.scoring p{margin:6px 0;color:var(--muted)}#scoreBreakdown .breakdown-body{max-height:250px;overflow:auto;padding-right:6px}#scoreBreakdown summary{cursor:pointer;font-size:13px;font-weight:750;min-height:44px;padding:10px 0;list-style-position:inside}#scoreBreakdown summary small{display:block;font-size:12px;font-weight:500;margin:4px 0 0 16px}#scoreBreakdown.cascade-highlight{border:2px solid #719143;background:#edf5d5;color:#203a34}#scoreBreakdown.cascade-highlight summary{color:#203a34}#scoreBreakdown.cascade-active{box-shadow:0 0 0 3px #71914330}#scoreBreakdown>button{margin-top:8px}.scoring h2{font-size:15px;margin:0}.scoring ol{padding-left:22px;margin:8px 0}.scoring li{margin:7px 0}.scoring .active-wave{font-weight:750;color:var(--green)}.tile.scoring-word,.room-tide .tile.scoring-word{background:#ddec87!important;color:#203a34!important;outline:3px solid #245c49;outline-offset:-3px}.history li{width:100%}.history summary{cursor:pointer}.history ol{padding-left:20px}.history li li{background:transparent;padding:2px 0}.score-total{font-weight:750;border-top:1px solid #cbd4c5;padding-top:8px}
 </style>
 <script>window.roomHaptic=()=>{try{navigator.vibrate?.(8);}catch{}};</script><script>
-window.roomComplete=(id,date)=>{if(!date){const d=new Date();date=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}try{localStorage.setItem('room-for-play:completed:'+id,JSON.stringify(date));}catch{}parent.postMessage({type:'room:completed',id,date},location.origin);};
+window.roomComplete=(id,date)=>{if(window.PocketChallenge.incoming)return;if(!date){const d=window.PocketChallenge.calendarDate();date=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}try{window.PocketChallenge.storage.setItem('room-for-play:completed:'+id,JSON.stringify(date));}catch{}parent.postMessage({type:'room:completed',id,date},location.origin);};
 </script><script src="../../mobile-frame.js" defer></script><link rel="stylesheet" href="../../pocket-fit.css"><script src="../../pocket-fit.js" defer></script> <link rel="stylesheet" href="../../night-game.css"><script src="../../night-frame.js" data-game="tide"></script><link rel="stylesheet" href="../../game-theme.css">
-<link rel="stylesheet" href="../../house-promos.css"><script src="../../house-promos.js" defer></script><link rel="stylesheet" href="../../pocket-share.css?v=1"><script src="../../pocket-share.js?v=1"></script></head>
+<link rel="stylesheet" href="../../house-promos.css?v=challenge1"><script src="../../house-promos.js?v=challenge1" defer></script><link rel="stylesheet" href="../../pocket-share.css?v=challenge1"><script src="../../pocket-share.js?v=challenge1"></script></head>
 <body class="room-embedded room-tide">
 <main>
  <header><div class="brand">tile<span>tide</span><span aria-hidden="true">↘</span></div><button class="icon" id="sound" aria-pressed="false">Sound off</button></header>
@@ -219,7 +219,7 @@ const copyPath = path => path.map(({ row, col }) => ({ row, col }));
  * touch a moved/refilled cell. Overlapping matches clear their union once.
  * Each wave scores length² per distinct path; initial submission costs one move.
  */
-function createWordDrop(dateString = new Date().toISOString().slice(0, 10)) {
+function createWordDrop(dateString = window.PocketChallenge.calendarDate().toISOString().slice(0, 10)) {
   const random = createDailyRandom(dateString);
   const pick = pool => pool[Math.floor(random() * pool.length)];
   const freshLetter = () => pick(random() < 0.4 ? VOWELS : CONSONANTS);
@@ -358,7 +358,7 @@ function findHint(grid) {
 
 const $ = id => document.getElementById(id);
 const STORAGE = 'worddrop:v1';
-const utcDay = () => new Date().toISOString().slice(0,10);
+const utcDay = () => window.PocketChallenge.calendarDate().toISOString().slice(0,10);
 const date = utcDay();
 const game = createWordDrop(date);
 const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -372,7 +372,7 @@ const wait = ms => {
 let storageOK = true;
 let saved = { version:1, days:{} };
 try {
- const data = JSON.parse(localStorage.getItem(STORAGE) || 'null');
+ const data = JSON.parse(window.PocketChallenge.storage.getItem(STORAGE) || 'null');
  if(data?.version === 1 && data.days && typeof data.days === 'object' && !Array.isArray(data.days)) saved = data;
 } catch { storageOK = false; }
 let record = { paths:[], finished:false };
@@ -419,7 +419,7 @@ function persist() {
  const state=game.getState();
  saved.days[date]={...record,score:state.score,movesRemaining:state.movesRemaining,history:history.map(r=>({word:r.word,points:r.points,combos:r.waves.length-1}))};
  saved.highScore=best(); saved.currentStreak=streak();
- try { localStorage.setItem(STORAGE,JSON.stringify(saved)); } catch {storageOK=false;}
+ try { window.PocketChallenge.storage.setItem(STORAGE,JSON.stringify(saved)); } catch {storageOK=false;}
 }
 function renderBoard(grid=game.getState().board) {
  cells.forEach((tile,i)=>{
@@ -617,7 +617,7 @@ $('finish').addEventListener('click',()=>{if(!busy&&!record.finished)$('confirmF
 $('keepPlaying').addEventListener('click',()=>$('confirmFinish').close());
 $('confirmEnd').addEventListener('click',()=>{$('confirmFinish').close();record.finished=true;clearPath();persist();updateStats();showResults();});
 $('closeResults').addEventListener('click',()=>$('results').close());
-window.PocketShare.install({id:'tide',title:'Tile Tide',container:'#results',button:'#share',back:'#closeResults',result:summaryText});
+window.PocketShare.install({id:'tide',title:'Tile Tide',container:'#results',button:'#share',back:'#closeResults',result:summaryText,challenge:()=>({day:date,value:game.getState().score})});
 $('share').addEventListener('click',async()=>{
  const text=summaryText();
  try {

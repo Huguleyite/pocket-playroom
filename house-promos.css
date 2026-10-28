@@ -1,20 +1,16 @@
-.house-slot{background:transparent!important;letter-spacing:normal!important;text-transform:none!important;border:0!important;max-width:100%;overflow:hidden}
+.house-slot{container-type:size;container-name:house-ad;background:transparent!important;letter-spacing:normal!important;text-transform:none!important;border:0!important;max-width:100%;overflow:hidden}
 .house-slot::before,.house-slot::after{display:none!important}
-.house-promo{box-sizing:border-box;display:flex!important;align-items:center;gap:10px;width:100%;height:100%;min-height:50px;padding:5px 10px;background:#eee3fa;color:#38244e!important;border:1px solid #bda4d1;border-radius:8px;text-decoration:none!important;text-align:left;font:13px/1.2 system-ui,sans-serif;overflow:hidden}
-.house-promo:focus-visible{outline:3px solid #b55330;outline-offset:-3px}
-.house-mark{display:grid;place-items:center;flex:none;width:34px;height:34px;border-radius:8px;background:#61407e;color:#fff;font-size:22px;font-weight:800}
-.house-copy{display:flex;flex:1;min-width:0;flex-direction:column;gap:2px}.house-copy small{font-size:9px;line-height:1.2}.house-copy strong{font-size:13px;line-height:1.2}.house-copy>span{font-size:11px}
-.house-compact .house-copy>span,.ad-space .house-copy>span,#ad-anchor .house-copy>span{display:none}
-.house-slot .house-promo{margin:0!important}
-.house-tall .house-promo{flex-direction:column;justify-content:center;gap:14px;padding:18px;text-align:center}.house-tall .house-mark{width:64px;height:64px;font-size:36px}.house-tall .house-copy{flex:0;gap:8px}.house-tall .house-copy strong{font-size:20px}.house-tall .house-copy>span{font-size:13px}
-html.night-play .house-promo{background:#2e2443;color:#f6ebff!important;border-color:#806593}
-
-/* Original artwork stays intact and proportional in every placement. */
-.house-mark.house-brand{width:44px;height:44px;border-radius:0;background:transparent;overflow:hidden}
-.house-logo{display:block!important;width:100%!important;height:100%!important;max-width:100%;object-fit:contain!important;border:0!important;border-radius:0!important;margin:0!important}
-.house-tall .house-mark.house-brand{width:104px;height:104px;max-height:45%;flex-shrink:1}
-.house-wide .house-promo{flex-direction:row;text-align:left;gap:20px}
-.house-wide .house-mark.house-brand{width:52%;height:104px;max-height:100%;flex-shrink:0}
-.house-wide .house-copy{flex:1}
-
-.house-mark.house-brand{display:block;min-width:0;min-height:0}.house-logo{min-width:0;min-height:0;max-height:100%!important}
+.house-promo.house-creative{--ad-accent:#a2f0e1;--ad-dark:#102f39;box-sizing:border-box;display:grid!important;grid-template-columns:38% 1fr;width:100%;height:100%;min-height:0;margin:0!important;padding:0;gap:0;background:var(--ad-dark)!important;color:#fff!important;border:1px solid #ffffff35;border-radius:10px;text-decoration:none!important;text-align:left;font:14px/1.25 system-ui,sans-serif;overflow:hidden}
+.house-creative.house-violet{--ad-accent:#e6c2ff;--ad-dark:#342447}.house-creative.house-botanical{--ad-accent:#dbef9b;--ad-dark:#23392b}
+.house-creative:focus-visible{outline:3px solid #e9a53b;outline-offset:-4px}
+.house-visual{position:relative;display:block;min-width:0;min-height:0;overflow:hidden;background:#f4f0e5}.house-visual img{display:block!important;width:100%!important;height:100%!important;max-width:none!important;max-height:none!important;object-fit:cover!important;object-position:center;border:0!important;border-radius:0!important;margin:0!important;opacity:.94}
+.house-free{position:absolute;top:10px;left:10px;padding:5px 8px;border-radius:5px;background:var(--ad-accent);color:var(--ad-dark);font:900 10px/1 system-ui;letter-spacing:.08em;box-shadow:0 2px 10px #0002}
+.house-copy{box-sizing:border-box;display:flex;min-width:0;flex-direction:column;justify-content:center;align-items:flex-start;gap:8px;padding:18px}.house-disclosure{display:block;font:700 8px/1.3 system-ui;letter-spacing:.11em;color:var(--ad-accent)}
+.house-headline,.house-short{display:block;font:750 23px/1.05 system-ui;letter-spacing:-.035em;color:#fff}.house-short{display:none}.house-description{display:block;font:13px/1.35 system-ui;color:#e1e9e8}.house-note{display:block;font:10px/1.3 system-ui;color:#c1d3cf}
+.house-cta{display:inline-flex;align-items:center;justify-content:center;min-height:32px;padding:0 12px;border-radius:6px;background:var(--ad-accent);color:var(--ad-dark);font:800 11px/1.2 system-ui;white-space:nowrap}
+@container house-ad (height <= 100px){.house-promo.house-creative{grid-template-columns:28% 1fr;border-radius:8px}.house-copy{padding:6px 10px;gap:3px}.house-headline{font-size:17px}.house-description,.house-note{display:none}.house-cta{font-size:10px;min-height:24px;padding:0 9px}.house-free{top:6px;left:6px;padding:4px 6px;font-size:8px}.house-disclosure{font-size:7px;letter-spacing:.06em}}
+@container house-ad (height <= 60px){.house-promo.house-creative{grid-template-columns:20% 1fr}.house-copy{display:grid;grid-template-columns:1fr auto;align-content:center;gap:2px 6px;padding:4px 7px}.house-disclosure{grid-column:1/3;font-size:6px}.house-headline{display:none}.house-short{display:block;font-size:12px;letter-spacing:-.02em;align-self:center}.house-cta{grid-column:2;grid-row:2;font-size:8px;min-height:23px;padding:0 6px}.house-free{display:none}}
+@container house-ad (width >= 600px) and (height <= 100px){.house-promo.house-creative{grid-template-columns:28% 1fr}.house-copy{display:grid;grid-template-columns:1fr auto;gap:5px 16px;padding:12px 20px}.house-disclosure{grid-column:1}.house-headline{grid-column:1;font-size:23px}.house-cta{grid-column:2;grid-row:1/3;min-height:40px;font-size:12px;padding:0 16px}.house-free{top:12px;left:12px}}
+@container house-ad (width <= 400px) and (height > 120px){.house-promo.house-creative{grid-template-columns:1fr;grid-template-rows:38% 1fr}.house-copy{padding:12px 15px;gap:5px}.house-headline{font-size:21px}.house-description{font-size:11px}.house-note{display:none}.house-cta{min-height:28px;font-size:10px}.house-free{top:10px;left:10px}}
+@container house-ad (width <= 200px) and (height >= 400px){.house-promo.house-creative{grid-template-rows:36% 1fr}.house-copy{padding:14px 12px;gap:10px;justify-content:flex-start}.house-headline{font-size:23px}.house-description{font-size:12px}.house-disclosure{font-size:7px}.house-note{display:block;font-size:10px}.house-cta{white-space:normal;text-align:center;min-height:40px;font-size:11px;width:100%;box-sizing:border-box}}
+@container house-ad (width >= 800px) and (height > 120px){.house-promo.house-creative{grid-template-columns:49% 1fr}.house-copy{padding:24px 30px;gap:12px}.house-headline{font-size:34px;max-width:340px}.house-description{font-size:15px}.house-cta{min-height:40px;font-size:13px;padding:0 18px}.house-free{top:18px;left:18px;font-size:12px}}

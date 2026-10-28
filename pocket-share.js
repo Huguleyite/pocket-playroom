@@ -1,11 +1,13 @@
 // Collection sharing only. Reading a result never changes a round or browser saves.
 (() => {
   'use strict';
-  function install({id, title, container, button, ad, back, result, available, beforeShare}) {
+  function install({id, title, container, button, ad, back, result, available, beforeShare, challenge}) {
     const host = document.querySelector(container);
     if (!host || host.querySelector('.pocket-sharing')) return;
     const route = id === 'draw-scorecard' ? 'draw/scorecard' : id;
-    const url = `https://pocketplayroom.com/#games/${route}`;
+    const gameUrl = new URL(`../../index.html#games/${route}`,location.href).href;
+    const challengeData=()=>{try{return challenge?.();}catch{return null;}};
+    const url=()=>{const data=challengeData();return data?PocketChallenge.link(id,data):gameUrl;};
     const group = document.createElement('section');
     group.className = 'pocket-sharing';
     group.setAttribute('aria-label', 'Share your result');
@@ -14,11 +16,11 @@
     const status = document.createElement('p');
     const fallback = document.createElement('textarea');
     share.type = link.type = 'button';
-    share.textContent = 'Share result';
+    share.textContent = challenge ? 'Challenge a friend' : 'Share result';
     share.classList.add('pocket-share-result');
     if (!button) share.classList.add('primary');
     link.className = 'pocket-copy-link';
-    link.textContent = 'Copy game link';
+    link.textContent = challenge ? 'Copy challenge link' : 'Copy game link';
     status.className = 'pocket-share-status';
     status.setAttribute('role', 'status');
     status.setAttribute('aria-live', 'polite');
@@ -31,7 +33,8 @@
     if (oldRow && host.contains(share)) {
       (oldRow.classList.contains('actions') ? oldRow : share).before(group);
     } else host.append(group);
-    group.append(share, link, status, fallback);
+    const comparison=document.createElement('p');comparison.className='pocket-challenge-comparison';comparison.setAttribute('role','status');
+    group.append(comparison, share, link, status, fallback);
     const advert = ad && document.querySelector(ad);
     if (advert) advert.after(group);
     let last = group;
@@ -63,14 +66,26 @@
       event.preventDefault(); event.stopImmediatePropagation();
       if (!ready() || (beforeShare && !beforeShare())) return;
       reset();
-      const text = `${result().trim()}\n\n${url}`;
+      const data=challengeData(),m=PocketChallenge.metric(id);
+      const invitation=data?`\n\n${m.lower?'Can you beat my result?':'Can you beat my score?'} ${data.value} ${m.unit}. Play my exact round:`:'';
+      const text = `${result().trim()}${invitation}\n\n${url()}`;
       if (navigator.share) {
         try { await navigator.share({title, text}); status.textContent = 'Result shared.'; return; }
         catch (error) { if (error.name === 'AbortError') return; }
       }
       await copy(text, 'result');
     }, true);
-    link.addEventListener('click', async () => { if (ready()) { reset(); await copy(url, 'link'); } });
+    link.addEventListener('click', async () => { if (ready()) { reset(); await copy(url(), 'link'); } });
+    function updateChallenge(){
+      const data=challengeData();
+      share.textContent=data?(PocketChallenge.incoming?'Challenge another friend':'Challenge a friend'):'Share result';
+      link.textContent=data?'Copy challenge link':'Copy game link';
+      comparison.textContent=data&&PocketChallenge.incoming?`${PocketChallenge.compare(id,data.value)} Target: ${PocketChallenge.incoming.target} ${PocketChallenge.metric(id).unit}. Your result: ${data.value}.`:'';
+    }
+    // Observe the game's result container, not this group, to avoid feedback loops.
+    const observer=new MutationObserver(records=>{if(records.some(r=>!group.contains(r.target)))updateChallenge();});
+    observer.observe(host,{childList:true,subtree:true,characterData:true,attributes:true,attributeFilter:['open']});
+    updateChallenge();
     if (host.tagName === 'DIALOG') {
       new MutationObserver(reset).observe(host, {attributes:true, attributeFilter:['open']});
     }

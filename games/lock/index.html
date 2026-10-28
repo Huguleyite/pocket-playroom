@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="en">
-<head><script>if(window.top===window){document.documentElement.style.visibility='hidden';location.replace(new URL('../../index.html#games/lock',location.href));}</script>
+<head><script src="../../pocket-challenge.js"></script><script>if(window.top===window){document.documentElement.style.visibility='hidden';location.replace(new URL('../../index.html#games/lock',location.href));}</script>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#151d27">
@@ -23,9 +23,9 @@ dialog{max-height:calc(100dvh - 24px);overflow:auto}
 .intro #category:after{content:'';position:absolute;inset:0;pointer-events:none;background:linear-gradient(90deg,#101a2b60,transparent 10%,transparent 90%,#101a2b60);box-shadow:inset 2px 0 2px #ffffff25,inset -2px 0 2px #0005}
 </style>
 <script>
-window.roomComplete=(id,date)=>{if(!date){const d=new Date();date=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}try{localStorage.setItem('room-for-play:completed:'+id,JSON.stringify(date));}catch{}parent.postMessage({type:'room:completed',id,date},location.origin);};
+window.roomComplete=(id,date)=>{if(window.PocketChallenge.incoming)return;if(!date){const d=window.PocketChallenge.calendarDate();date=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}try{window.PocketChallenge.storage.setItem('room-for-play:completed:'+id,JSON.stringify(date));}catch{}parent.postMessage({type:'room:completed',id,date},location.origin);};
 </script><script src="../../mobile-frame.js" defer></script> <link rel="stylesheet" href="../../night-game.css"><script src="../../night-frame.js" data-game="lock"></script><link rel="stylesheet" href="../../game-theme.css">
-<link rel="stylesheet" href="../../pocket-fit.css"><script src="../../pocket-fit.js" defer></script><link rel="stylesheet" href="../../house-promos.css"><script src="../../house-promos.js" defer></script><link rel="stylesheet" href="../../pocket-share.css?v=1"><script src="../../pocket-share.js?v=1"></script></head>
+<link rel="stylesheet" href="../../pocket-fit.css"><script src="../../pocket-fit.js" defer></script><link rel="stylesheet" href="../../house-promos.css?v=challenge1"><script src="../../house-promos.js?v=challenge1" defer></script><link rel="stylesheet" href="../../pocket-share.css?v=challenge1"><script src="../../pocket-share.js?v=challenge1"></script></head>
 <body class="room-embedded room-lock">
 <main>
 <header><h1>Letter<span class="brand">Lock</span></h1><button id="results" hidden>Results ↗</button><span id="daily" class="eyebrow">Daily safe</span></header>
@@ -195,7 +195,7 @@ function shuffle(values, random) {
   return result;
 }
 
-function localDay(now = new Date()) {
+function localDay(now = window.PocketChallenge.calendarDate()) {
   return `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
 }
 
@@ -325,18 +325,18 @@ const { createGame } = location.protocol === 'file:'
   : await import('./engine.js?v=2').catch(() => window.LetterLockEmbedded);
 
 const $ = id => document.getElementById(id);
-const today = () => { const d=new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; };
+const today = () => { const d=window.PocketChallenge.calendarDate(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; };
 const date = today();
 const key = `letterlock:v1:${date}`;
 const historyKey = 'letterlock:v1:completed';
 const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
 let storageOK = true;
 function read(key, fallback) {
-  try { const value = localStorage.getItem(key); return value ? JSON.parse(value) : fallback; }
+  try { const value = window.PocketChallenge.storage.getItem(key); return value ? JSON.parse(value) : fallback; }
   catch { storageOK = false; return fallback; }
 }
 function write(key, value) {
-  try { localStorage.setItem(key, JSON.stringify(value)); }
+  try { window.PocketChallenge.storage.setItem(key, JSON.stringify(value)); }
   catch { storageOK = false; }
   $('storage').hidden = storageOK;
 }
@@ -489,7 +489,7 @@ for(let index=0;index<state.columnCount;index++) {
 }
 $('close').addEventListener('click',()=>$('victory').close());
 $('results').addEventListener('click',showVictory);
-window.PocketShare.install({id:'lock',title:'LetterLock',container:'#victory',button:'#share',ad:'.completion-ad',back:'#close',result:summary});
+window.PocketShare.install({id:'lock',title:'LetterLock',container:'#victory',button:'#share',ad:'.completion-ad',back:'#close',result:summary,challenge:()=>({day:date,value:moves})});
 $('share').addEventListener('click',async()=>{
   const text=summary();
   try {

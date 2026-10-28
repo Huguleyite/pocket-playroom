@@ -1,59 +1,22 @@
-// Local catalogue fallback. Slots containing an advertiser link are left intact.
-(() => {
+// Free Helios pages; paid advertiser links retain priority.
+(()=>{
  const base=new URL('./',document.currentScript.src);
- const catalogue=[
-  ['binario','Binario','A fresh daily logic puzzle.','01'],
-  ['futoshiki','Futoshiki','Make every inequality count.','<>'],
-  ['weave','Weave It to Me','Good words come together.','W'],
-  ['tide','Tile Tide','Find words. Make waves.','≈'],
-  ['shift','Shift & Lock','Find your daily connection.','↔'],
-  ['lock','LetterLock','Crack your next word puzzle.','L'],
-  ['deli','Stack to the Future','Build your next great sandwich.','★'],
-  ['chronodeck','ChronoDeck: Breach','Explore a tactical card adventure.','✦'],
-  ['hex-gambit','Hex-Gambit','Step into a new tactical challenge.','⬡'],
-  ['lineage','Lineage: Kingdom Architect','Build a kingdom of your own.','♜'],
-  ['quantum-draft','Quantum Draft','Learn a new card game.','Q']
- ];
- const properties=[
- {id:'atlas',title:'Atlas Valley Books',line:'Find your next read.',mark:'AV',url:'https://www.atlasvalleybooks.com/'},
- {id:'helios',title:'Helios Valley',line:'Your next world is waiting for color.',mark:'HV',url:'https://www.atlasvalleybooks.com/helios/'},
- {id:'halloween',title:'Crow’s Hollow',line:'Find your shade of spooky.',mark:'CH',url:'https://www.atlasvalleybooks.com/helios/halloween/'},
- {id:'room',title:'Read the Room',line:'Politics, explained without the spin.',mark:'RTR',url:'https://readtheroom.news/'},
- {id:'frequency',title:'The Frequency',line:'Alabama and Chambers County. Tune in.',mark:'TF',url:'https://readtheroom.news/the-frequency/'},
- {id:'vibe',title:'VibeFrag',line:'Explore your next fragrance.',mark:'VF',url:'https://vibefrag.com/index.html'}
- ];
- const branding={atlas:['atlas-valley.png'],helios:['helios-valley.png'],halloween:['helios-valley.png'],room:['read-the-room.png','read-the-room-banner.png'],vibe:['vibefrag.png','vibefrag-banner.png']};
- const resize=new ResizeObserver(entries=>{for(const {target,contentRect} of entries){
-  const wide=contentRect.width>=580&&contentRect.height>=120;
-  target.classList.toggle('house-wide',wide);target.classList.toggle('house-compact',contentRect.height<=90);
-  const img=target.querySelector('.house-logo');if(img)img.src=wide&&img.dataset.banner?img.dataset.banner:img.dataset.logo;
- }});
- let propertyCursor=Math.floor(Math.random()*properties.length);
- let cursor=Math.floor(Math.random()*catalogue.length);
- const selector='.ad-space,[data-ad-slot],[data-ad-placement],[data-display-ad]';
- function fill(){
-  const current=location.hash.split('/').pop()||location.pathname.split('/').at(-2);
-  document.querySelectorAll(selector).forEach(slot=>{
-   if(slot.dataset.houseFor===current||slot.querySelector('a:not(.house-promo)'))return;
-   if(slot.closest('.anchor-ad,.ad-anchor,.ad-anchor-wrapper')&&window!==window.top)return;
-   const choices=catalogue.filter(g=>g[0]!==current),g=choices[cursor++%choices.length];
-   const property=properties[propertyCursor++%properties.length];
-   const route=['chronodeck','hex-gambit','lineage','quantum-draft'].includes(g[0])?'big-screen/':'games/';
-   const link=document.createElement('a');link.className='house-promo';link.href=new URL('index.html#'+route+g[0],base);link.href=property.url;link.target='_blank';link.rel='noopener noreferrer';
-   const mark=document.createElement('span');mark.className='house-mark';mark.textContent=property.mark;
-   const art=branding[property.id];if(art){mark.textContent='';mark.classList.add('house-brand');const img=document.createElement('img');img.className='house-logo';img.alt=property.id==='halloween'?'Helios Valley':property.title;img.dataset.logo=new URL('assets/brands/'+art[0],base).href;if(art[1])img.dataset.banner=new URL('assets/brands/'+art[1],base).href;img.src=img.dataset.logo;img.decoding='async';mark.append(img);}
-   const copy=document.createElement('span');copy.className='house-copy';
-   const label=document.createElement('small');label.textContent='Advertisement · From our family of sites';
-   const title=document.createElement('strong');title.textContent=property.title;
-   const line=document.createElement('span');line.textContent=property.line;
-   copy.append(label,title,line);const arrow=document.createElement('span');arrow.textContent='→';arrow.setAttribute('aria-hidden','true');
-   link.append(mark,copy,arrow);slot.replaceChildren(link);slot.dataset.houseFor=current;slot.classList.add('house-slot');resize.observe(slot);
-   slot.classList.toggle('house-tall',parseFloat(getComputedStyle(slot).height)>120);
-   slot.setAttribute('aria-label','Advertisement: '+property.title);
-   const wrapper=slot.closest('aside');if(wrapper)wrapper.setAttribute('aria-label','Advertisement: '+property.title);
-   const labelNode=slot.parentElement?.querySelector(':scope > .ad-label');if(labelNode)labelNode.textContent='Advertisement · Our sites';
-  });
- }
- fill();new MutationObserver(fill).observe(document.body,{childList:true,subtree:true});
- window.addEventListener('hashchange',fill);
+ const offers=[
+ {id:'landscapes',title:'Color a world beyond ours.',short:'Your next world. In color.',line:'Free alien landscapes to download and print.',art:'gps-bonus-detailed.webp',tone:'cosmic'},
+ {id:'creatures',title:'Meet your next coloring obsession.',short:'Creatures worth coloring.',line:'Free alien creature pages. Let your imagination loose.',art:'ufo-bonus-detailed.webp',tone:'violet'},
+ {id:'botanicals',title:'Let your imagination bloom.',short:'Something wild to color.',line:'Free alien botanical pages, ready for your colors.',art:'xenobotanica-bonus-detailed.webp',tone:'botanical'}];
+ let cursor=Math.floor(Math.random()*offers.length);
+ function fill(){const current=location.hash||location.pathname;
+ document.querySelectorAll('.ad-space,[data-ad-slot],[data-ad-placement],[data-display-ad]').forEach(slot=>{
+ if(slot.dataset.houseFor===current||slot.querySelector('a:not(.house-promo)'))return;
+ if(slot.closest('.anchor-ad,.ad-anchor,.ad-anchor-wrapper')&&window!==window.top)return;
+ const offer=offers.find(o=>o.id===slot.dataset.houseTheme)||offers[cursor++%offers.length];
+ const link=document.createElement('a');link.className='house-promo house-creative house-'+offer.tone;link.href='https://www.atlasvalleybooks.com/helios/#bonus-downloads';link.target='_blank';link.rel='noopener noreferrer';link.setAttribute('aria-label',offer.title+' Get free coloring pages from Helios Valley. Opens in a new tab.');
+ const visual=document.createElement('span');visual.className='house-visual';const image=document.createElement('img');image.src=new URL('assets/ads/'+offer.art,base).href;image.alt='Free '+offer.id+' coloring page preview';image.decoding='async';visual.append(image);
+ const badge=document.createElement('span');badge.className='house-free';badge.textContent='FREE';visual.append(badge);
+ const copy=document.createElement('span');copy.className='house-copy';
+ for(const [tag,cls,text]of [['small','house-disclosure','ADVERTISEMENT · HELIOS VALLEY'],['strong','house-headline',offer.title],['strong','house-short',offer.short],['span','house-description',offer.line],['span','house-note','Print at home. No email required.'],['span','house-cta','Get free pages ↗']]){const el=document.createElement(tag);el.className=cls;el.textContent=text;copy.append(el);}
+ link.append(visual,copy);slot.replaceChildren(link);slot.dataset.houseFor=current;slot.classList.add('house-slot');slot.setAttribute('aria-label','Advertisement: Free Helios Valley coloring pages');const wrapper=slot.closest('aside');if(wrapper)wrapper.setAttribute('aria-label','Advertisement: Free Helios Valley coloring pages');
+ });}
+ fill();new MutationObserver(fill).observe(document.body,{childList:true,subtree:true});addEventListener('hashchange',fill);
 })();

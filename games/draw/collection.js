@@ -34,7 +34,7 @@
  addEventListener('resize',queue);parent.addEventListener('resize',queue);parent.addEventListener('scroll',queue,{passive:true});parent.visualViewport?.addEventListener('resize',queue);
  addEventListener('load',queue);document.fonts?.ready.then(queue);
  addEventListener('message',event=>{if(event.source===parent&&event.origin===location.origin&&event.data?.type==='room:night')document.documentElement.classList.toggle('collection-night',event.data.enabled===true)});
- new MutationObserver(()=>{const n=Number(meter.dataset.collected);if(n<5)completed=false;if(n===5&&!completed){completed=true;const d=new Date(),date=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');parent.postMessage({type:'room:completed',id:'draw',date},location.origin)}}).observe(meter,{attributes:true,attributeFilter:['data-collected']});queue();
+ new MutationObserver(()=>{const n=Number(meter.dataset.collected);if(n<5)completed=false;if(n===5&&!completed){completed=true;const d=new Date(),date=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');if(!window.PocketChallenge.incoming)parent.postMessage({type:'room:completed',id:'draw',date},location.origin)}}).observe(meter,{attributes:true,attributeFilter:['data-collected']});queue();
 })();
 
 
