@@ -68,3 +68,28 @@ button:focus-visible,a:focus-visible{outline:2px solid var(--pixel);outline-offs
 #grand-image [hidden]{display:none!important}
 @media(max-width:650px){.grand-layout{grid-template-columns:1fr;gap:18px}.mosaic{width:min(100%,310px);margin:auto}.grand-copy h2{font-size:24px}.grand-copy p{font-size:12px;line-height:1.45}#grand-image{padding:14px}.journey{gap:5px}.journey button{padding:6px 9px;font-size:11px}}
 @media(min-width:651px) and (max-height:780px){.mosaic{max-height:68svh;width:auto;aspect-ratio:2/3;justify-self:center}.grand-layout{grid-template-columns:minmax(0,1fr) minmax(240px,1fr)}}
+
+
+/* Separate groups with an explicit dot; completed clues use solid contrast. */
+body[data-theme] .clue{font-variant-numeric:tabular-nums;min-width:0;position:relative}
+body[data-theme] .rows .clue{gap:.12em;white-space:nowrap}
+body[data-theme] .clue-separator{font-size:.65em;line-height:.5;opacity:.85;flex-shrink:0}
+body[data-theme] .columns .clue{gap:0}
+body[data-theme] .clue-number{line-height:1;flex-shrink:0}
+body[data-theme] .clue.done{background:#ffdc84;color:#251b09;text-shadow:none;box-shadow:inset 0 0 0 1px #fff1c4;font-weight:800}
+body[data-theme=space] .clue.done{background:#a3f0ff;color:#062532;box-shadow:inset 0 0 0 1px #e3fbff}
+body[data-theme] .clue.done .clue-number{text-decoration:line-through;text-decoration-thickness:1px}
+.clue[role=button]{cursor:pointer;touch-action:none;user-select:none;-webkit-touch-callout:none}
+.clue[role=button]:focus-visible{outline:2px solid white;outline-offset:-2px}
+.clue.holding{box-shadow:inset 0 0 0 2px white}
+.window{-webkit-touch-callout:none;user-select:none}
+
+body[data-theme=home].desktop .rows{left:33.8%;width:5.2%;background:#121820}
+body[data-theme].desktop .rows .clue{font-size:1.15cqw}
+body[data-theme] .rows .clue[data-stack="4"],body[data-theme] .rows .clue[data-stack="5"]{font-size:1.65cqw}
+body[data-theme].desktop .rows .clue[data-stack="4"],body[data-theme].desktop .rows .clue[data-stack="5"]{font-size:.85cqw}
+
+body[data-theme] .columns .clue-separator{display:none}
+body[data-theme] .columns .clue{min-height:0;gap:.08em}
+body.focus[data-theme]:not(.desktop) .columns .clue{gap:.02em}
+body[data-theme=home].desktop .columns{top:21%;height:6%}body[data-theme=space].desktop .columns{top:23%;height:6%}
