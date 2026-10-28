@@ -16,7 +16,7 @@ export const puzzles=[
 
 
 puzzles[0].nodes.forEach((n,i)=>{[n.x,n.y]=[[18,22],[53,22],[84,22],[53,69],[18,69]][i];});
-puzzles[1].nodes.forEach((n,i)=>{[n.x,n.y]=[[15,18],[15,72],[39,45],[85,18],[85,72],[61,45]][i];});
+puzzles[1].nodes.forEach((n,i)=>{[n.x,n.y]=[[15,18],[15,72],[27,36],[85,18],[85,72],[73,36]][i];});
 
 puzzles.forEach((p,i)=>{p.region=0;p.difficulty=i<2?"Training":i<5?"Gentle":"Thoughtful";});
 puzzles.push(...regionalPuzzles);
