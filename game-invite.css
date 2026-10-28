@@ -1,0 +1,9 @@
+.game-invite-bar{display:flex;align-items:center;justify-content:space-between;gap:10px;position:relative;clear:both;margin:0 0 8px;color:inherit}
+.game-invite-bar>.back-link{margin:0;min-width:0}.game-invite-bar>.playroom-return{flex:1;min-width:0;margin:0}
+.game-invite-area{position:relative;flex:none;text-align:right;color:inherit}
+.game-invite-button{display:inline-flex!important;align-items:center;justify-content:center;gap:7px;min-height:44px!important;height:44px!important;padding:8px 9px!important;background:transparent!important;border:1px solid transparent!important;box-shadow:none!important;border-radius:8px;color:inherit!important;font:600 12px/1.25 system-ui,sans-serif!important;letter-spacing:0;text-transform:none;cursor:pointer;white-space:nowrap;opacity:.78}
+.game-invite-button:hover,.game-invite-button:focus-visible{opacity:1;border-color:currentColor!important}.game-invite-button:focus-visible{outline:2px solid currentColor;outline-offset:2px}
+.game-invite-status{display:block;font:11px/1.3 system-ui,sans-serif;max-width:160px}.game-invite-status:empty{display:none}
+.game-invite-area input{box-sizing:border-box;max-width:180px;font:12px system-ui;min-height:36px}.game-invite-area input[hidden]{display:none!important}
+body>.game-invite-bar{margin:0;background:#101d28;color:#e4edf0;padding-right:12px}
+@media(max-width:370px){.game-invite-button{font-size:11px!important;gap:5px;padding:8px 5px!important}.game-invite-bar{gap:5px}}
