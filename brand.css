@@ -1,0 +1,9 @@
+/* Pocket Playroom Logo */
+.site-header .wordmark{display:inline-flex;align-items:center;gap:9px}
+.brand-logo{width:48px;height:53px;object-fit:contain;flex:none}
+.brand-name{white-space:nowrap}
+.site-footer .footer-brand{display:inline-flex;align-items:center;gap:8px}
+.footer-logo{width:32px;height:35px;object-fit:contain}
+@media(max-width:600px){.site-header .wordmark{gap:6px}.brand-logo{width:34px;height:38px}}
+@media(max-width:360px){.site-header .wordmark{font-size:22px;letter-spacing:-1px}.brand-logo{width:28px;height:31px}}
+.site-header .wordmark>.brand-name{font-style:normal;color:var(--ink)}
