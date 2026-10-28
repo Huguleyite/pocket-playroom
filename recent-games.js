@@ -10,6 +10,7 @@
   draw:['The Draw','#games/draw'],'draw-scorecard':['The Draw: Scorecard','#games/draw/scorecard'],
   chronodeck:['ChronoDeck: Breach','#big-screen/chronodeck'],lineage:['Lineage: Kingdom Architect','#big-screen/lineage'],
   'hex-gambit':['Hex-Gambit: Rogue Checkers','#big-screen/hex-gambit'],'quantum-draft':['Quantum Draft','#big-screen/quantum-draft'],
+  'frequency-1984':['Frequency: 1984','#big-screen/frequency-1984'],
   'little-wilds':['Little Wilds','#big-screen/little-wilds/play']
  };
  function resolve(id,route){
