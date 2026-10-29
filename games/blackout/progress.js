@@ -1,0 +1,16 @@
+/* Checkpoint saves, with a versioned schema and graceful storage failure. */
+(() => {
+const key='blackout.progress.v1';let nextSave=0;
+window.Progress={available:true,
+ snapshot(){return {version:1,checkpoint,time,deaths,won,campaign:window.Campaign?.snapshot(),rewardHeard:!!window.FinaleReward?.heard,fuse:!!window.ChapterAbilities?.fuse,bossDefeated:!!window.ChapterAbilities?.defeated,doors:grid.doors.map(d=>d.open),generators:grid.generators.map(g=>g.on),absorbed:grid.absorbed,bestChain:grid.bestChain}},
+ valid(s){if(!s||typeof s!=='object')return false;if(window.Campaign&&(!Campaign.valid(s.campaign)||s.campaign&&s.won&&!s.campaign.completed[s.campaign.chapter]))return false;if(s.rewardHeard!==undefined&&typeof s.rewardHeard!=='boolean')return false;if(s.fuse!==undefined&&typeof s.fuse!=='boolean'||s.bossDefeated!==undefined&&typeof s.bossDefeated!=='boolean')return false;return !(s.version!==1||!Number.isInteger(s.checkpoint)||s.checkpoint<0||s.checkpoint>=checkpoints.length||!Number.isFinite(s.time)||s.time<0||!Number.isInteger(s.deaths)||s.deaths<0||typeof s.won!=='boolean'||!Array.isArray(s.doors)||s.doors.length!==grid.doors.length||!Array.isArray(s.generators)||s.generators.length!==grid.generators.length||![...s.doors,...s.generators].every(v=>typeof v==='boolean'));},
+ clear(){nextSave=0;try{localStorage.removeItem(key)}catch{this.available=false}},
+ save(){if(!active&&!won)return;try{localStorage.setItem(key,JSON.stringify({version:1,checkpoint,time,deaths,won,campaign:window.Campaign?.snapshot(),rewardHeard:!!window.FinaleReward?.heard,fuse:!!window.ChapterAbilities?.fuse,bossDefeated:!!window.ChapterAbilities?.defeated,doors:grid.doors.map(d=>d.open),generators:grid.generators.map(g=>g.on),absorbed:grid.absorbed,bestChain:grid.bestChain}))}catch{this.available=false}},
+ tick(){if(time>=nextSave){nextSave=time+5;this.save()}},
+ restore(){try{const raw=localStorage.getItem(key);if(!raw)return false;const s=JSON.parse(raw);if(!this.valid(s))return false;if(window.FinaleReward)FinaleReward.heard=!!s.rewardHeard;
+  window.Campaign?.restore(s.campaign,s.won);grid.doors.forEach((d,i)=>d.open=s.doors[i]);grid.generators.forEach((g,i)=>g.on=s.generators[i]);checkpoint=s.checkpoint;time=s.time;deaths=s.deaths;grid.absorbed=Number.isFinite(s.absorbed)?Math.max(0,s.absorbed):0;grid.bestChain=Number.isFinite(s.bestChain)?Math.max(0,s.bestChain):0;spawn();if(window.ChapterAbilities){ChapterAbilities.fuse=!!s.fuse;ChapterAbilities.defeated=!!s.bossDefeated||s.won}nextSave=time+5;
+  if(s.won){p.x=2980;p.y=266;$('#overlay h2').textContent=window.Campaign?.index===3?'You brought the morning.':'Chapter complete.';$('#overlay p').textContent=window.Campaign?.level.ending||'Your completed chapter is saved.';$('#start').textContent=window.Campaign&&Campaign.index<3?'Continue the journey →':'New journey →';won=true}else{$('#overlay h2').textContent='Your route is waiting.';$('#overlay p').textContent=`Chapter ${(window.Campaign?.index||0)+1} · Continue from checkpoint ${checkpoint+1}. Powered doors and generators are saved.`;$('#start').textContent='Continue delivery →'}return true;
+ }catch{this.available=false;return false}}
+};
+addEventListener('pagehide',()=>Progress.save());Progress.restore();
+})();
