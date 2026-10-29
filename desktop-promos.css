@@ -1,0 +1,46 @@
+/* A reserved strip, in document flow. Never cover the board or game controls. */
+.desktop-promo{box-sizing:border-box;display:flex;align-items:center;gap:8px;width:100%;min-width:0;min-height:64px;padding:5px 12px;margin:0;background:#102332;color:#f4f8fc;border:1px solid #526579;border-radius:6px;font:13px/1.25 system-ui,sans-serif;letter-spacing:normal;text-transform:none;text-align:left}
+.desktop-promo *{box-sizing:border-box}
+.desktop-promo .desktop-ad-link{display:flex;align-items:center;gap:12px;flex:1;min-width:0;min-height:52px;color:inherit;text-decoration:none;padding:0;margin:0;background:none;border:0}
+.desktop-promo .desktop-ad-art{flex:0 0 80px;width:80px;height:48px;object-fit:contain;background:#fff;border-radius:4px;margin:0}
+.desktop-promo .desktop-ad-copy{display:flex;flex-direction:column;gap:3px;min-width:0;flex:1}
+.desktop-promo .desktop-ad-label{font:700 9px/1.2 system-ui,sans-serif;letter-spacing:.06em;color:#c0e7f3}
+.desktop-promo .desktop-ad-headline{font:700 16px/1.2 system-ui,sans-serif;color:#fff}
+.desktop-promo .desktop-ad-disclosure{font:10px/1.2 system-ui,sans-serif;color:#e0e7ee}
+.desktop-promo .desktop-ad-cta{display:flex;align-items:center;justify-content:center;min-height:44px;padding:7px 14px;background:#b8eade;color:#102c2e;border-radius:5px;font:700 12px/1.2 system-ui,sans-serif;white-space:nowrap}
+.desktop-promo .desktop-ad-next{flex:0 0 auto;min-width:44px;min-height:44px;padding:6px 10px;margin:0;background:#21374a;color:#fff;border:1px solid #8aa3b8;border-radius:5px;font:12px system-ui,sans-serif;cursor:pointer;touch-action:manipulation}
+.desktop-promo a:focus-visible,.desktop-promo button:focus-visible{outline:3px solid #ffe6a4;outline-offset:1px}
+.playroom-tools>.desktop-promo{flex:1 0 100%;order:10}
+@media(min-width:1000px){.playroom-tools>.desktop-promo{flex:1 1 460px;width:auto;max-width:760px;margin-left:auto}}
+@media(min-width:1000px) and (max-width:1199px){
+ .playroom-tools>.desktop-promo{flex-basis:330px;gap:5px;padding:5px 7px}
+ .playroom-tools .desktop-ad-art{display:none}
+ .playroom-tools .desktop-ad-headline{font-size:12px}
+ .playroom-tools .desktop-ad-label{font-size:8px}
+ .playroom-tools .desktop-ad-cta{font-size:10px;padding:5px 7px;white-space:normal;max-width:90px}
+ .playroom-tools .desktop-ad-next{font-size:10px;padding:5px}
+}
+body.big-screen-page #main>.desktop-promo{margin-bottom:16px}
+body[data-desktop-ad-game="blackout"]>main{height:calc(100dvh - var(--desktop-ad-height,64px));min-height:400px}
+@media(min-width:1000px){body[data-desktop-ad-game="hex-gambit"] .battle-layout:not([hidden]){min-height:440px}}
+@media(min-width:700px){body[data-desktop-ad-game="chronodeck"] .hand{box-sizing:border-box;min-height:0}}
+@media(min-width:1101px){
+ body[data-desktop-ad-game="chronodeck"] .hand-deck-row{height:calc(100% - 24px);padding-top:0}
+ body[data-desktop-ad-game="chronodeck"] .hand-deck-row>.hand{height:100%;padding-top:8px}
+}
+@media(min-width:1000px) and (min-height:720px){
+ body[data-desktop-ad-game="lineage"] .console{height:calc(var(--playroom-height) - 20px);grid-template-rows:50px 47px 28px minmax(245px,1fr) 185px;gap:5px}
+ body[data-desktop-ad-game="lineage"] .event{min-height:0;align-self:stretch}
+ body[data-desktop-ad-game="lineage"] .event-art{min-height:0;height:100%}
+ body[data-desktop-ad-game="lineage"] .council-hand{height:auto;min-height:0;align-self:stretch}
+}
+@media(min-width:1650px) and (min-height:1000px){
+ body[data-desktop-ad-game="lineage"] .console{grid-template-rows:100px 78px 43px minmax(300px,1fr) 270px}
+ body[data-desktop-ad-game="lineage"] .event{display:grid;grid-template-columns:38% minmax(0,1fr);grid-template-rows:auto auto auto;gap:8px 13px}
+ body[data-desktop-ad-game="lineage"] .event-art{grid-column:1;grid-row:1/3;margin:0}
+ body[data-desktop-ad-game="lineage"] .event>p:not(.last-resolution){grid-column:2;grid-row:1;margin:0}
+ body[data-desktop-ad-game="lineage"] .event .choices{grid-column:2;grid-row:2;margin:0}
+ body[data-desktop-ad-game="lineage"] .decision-actions{grid-column:1/3;grid-row:3}
+}
+@media(max-width:600px){.desktop-promo{padding:5px 6px;gap:5px}.desktop-promo .desktop-ad-art{flex-basis:48px;width:48px;height:44px}.desktop-promo .desktop-ad-link{gap:7px}.desktop-promo .desktop-ad-headline{font-size:12px}.desktop-promo .desktop-ad-label{font-size:8px}.desktop-promo .desktop-ad-cta{padding:5px 7px;font-size:10px;white-space:normal;max-width:90px}.desktop-promo .desktop-ad-disclosure{font-size:9px}.desktop-promo .desktop-ad-next{font-size:10px;padding:5px}}
+@media(max-width:390px){.desktop-promo .desktop-ad-art{display:none}.desktop-promo .desktop-ad-cta{max-width:76px}}

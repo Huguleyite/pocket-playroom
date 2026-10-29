@@ -253,7 +253,7 @@ body[data-playroom-game] .playroom-drawer{width:min(720px,calc(100vw - 24px));he
 @media(max-width:699px){body[data-playroom-game="lineage"] .council-hand{order:8}body[data-playroom-game="lineage"] .strategy{order:9}}
 
 /* Roomy desktop command deck; compact laptop rules remain height-aware. */
-@media(min-width:1400px) and (min-height:850px){
+@media(min-width:1400px) and (min-height:950px){
  body[data-playroom-game="chronodeck"] .desktop-stage{max-width:2400px;padding:0 clamp(18px,2vw,48px)}
  body[data-playroom-game="chronodeck"] .dashboard{grid-template-columns:minmax(0,1fr) 310px;grid-template-rows:54px minmax(270px,1fr) 154px clamp(300px,29dvh,390px);gap:14px;padding:10px 0}
  body[data-playroom-game="chronodeck"] .combat-area{grid-area:2/1/3/3}
@@ -290,7 +290,7 @@ body[data-playroom-game] .playroom-drawer{width:min(720px,calc(100vw - 24px));he
  body[data-playroom-game="chronodeck"] .end-turn{grid-area:6/1/7/3;font-size:15px}
 }
 /* Desktop framing follows the original operator / field / resources composition. */
-@media(min-width:1400px) and (min-height:850px){
+@media(min-width:1400px) and (min-height:950px){
  body[data-playroom-game="chronodeck"] .dashboard{grid-template-columns:clamp(205px,13vw,280px) minmax(0,1fr) clamp(250px,16vw,320px);grid-template-rows:minmax(280px,1fr) 154px clamp(300px,31dvh,420px);gap:16px;padding:16px 0}
  body[data-playroom-game="chronodeck"] .player-panel{grid-area:1/1/4/2;display:flex;flex-direction:column;align-items:stretch;padding:24px 20px;gap:0}
  body[data-playroom-game="chronodeck"] .player-panel>.eyebrow,body[data-playroom-game="chronodeck"] .portrait,body[data-playroom-game="chronodeck"] .player-panel>h1,body[data-playroom-game="chronodeck"] .player-panel>p,body[data-playroom-game="chronodeck"] .player-panel>.section-label,body[data-playroom-game="chronodeck"] .operator-note,body[data-playroom-game="chronodeck"] #save-status{display:block}

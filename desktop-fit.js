@@ -83,7 +83,7 @@
     });
     dialog.addEventListener('close', () => toggle.focus());
     if (game === 'chronodeck') {
-      const roomy = matchMedia('(min-width:1400px) and (min-height:850px)');
+      const roomy = matchMedia('(min-width:1400px) and (min-height:950px)');
       const arrangeRelics = () => {
         if (dialog.open) return;
         if (roomy.matches) originalPosition.after(panel);
@@ -131,7 +131,7 @@
  if(document.body.dataset.playroomGame!=='hex-gambit')return;
  const battle=document.querySelector('#battleView');
  let pending=false;
- const measure=()=>{pending=false;if(battle.hidden)return;const top=battle.getBoundingClientRect().top+scrollY;document.documentElement.style.setProperty('--hex-battle-height',Math.max(510,innerHeight-top-12)+'px');};
+ const measure=()=>{pending=false;if(battle.hidden)return;const top=battle.getBoundingClientRect().top+scrollY;document.documentElement.style.setProperty('--hex-battle-height',Math.max(document.body.dataset.desktopAdGame?440:510,innerHeight-top-12)+'px');};
  const schedule=()=>{if(!pending){pending=true;requestAnimationFrame(measure);}};
  new ResizeObserver(schedule).observe(document.querySelector('.console>header'));
  new ResizeObserver(schedule).observe(document.querySelector('.court-controls'));
