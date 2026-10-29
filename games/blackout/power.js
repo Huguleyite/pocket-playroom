@@ -13,15 +13,15 @@ class PowerGrid {
   this.generators=[{x:1010,y:420,checkpoint:1,on:false},{x:1780,y:320,checkpoint:2,on:false},{x:2400,y:360,checkpoint:3,on:false},{x:2980,y:300,checkpoint:4,on:false}];
   this.message='Find the cyan power cabinet. Touch it to absorb a charge.';this.messageTime=6;this.absorbed=0;this.chain=0;this.bestChain=0;
  }
- respawn(){for(const source of this.sources)source.drained=false;this.chain=0}
+ respawn(){for(const source of this.sources){source.drained=false;source.cooldown=undefined};this.chain=0}
  say(text){this.message=text;this.messageTime=3.5}
  nearby(p,o,r=48){return Math.hypot(p.x+9-o.x,p.y+17-(o.y-(o.checkpoint?22:0)))<r}
  target(p){return this.doors.find(d=>!d.open&&Math.abs(p.x+9-(d.x+12))<65&&p.y+p.h>d.y&&p.y<d.y+d.h)||this.generators.find(g=>!g.on&&this.nearby(p,g,58))}
- update(p,dt,interact,onCheckpoint,onBurst){this.messageTime=Math.max(0,this.messageTime-dt);if(p.ground)this.chain=0;
+ update(p,dt,interact,onCheckpoint,onBurst){this.messageTime=Math.max(0,this.messageTime-dt);if(p.ground)this.chain=0;for(const s of this.sources)if(s.drained&&s.recharge){s.cooldown=(s.cooldown??s.recharge)-dt;if(s.cooldown<=0){s.drained=false;s.cooldown=undefined}}
   for(const s of this.sources)if(!s.drained&&(p.charges===undefined?!p.charge:p.charges<(p.capacity||1))&&this.nearby(p,s,s.type==='node'?29:32)){
-   s.drained=true;if(p.charges!==undefined)p.charges++;p.charge=true;this.absorbed++;if(!p.ground){this.chain++;this.bestChain=Math.max(this.bestChain,this.chain)}onBurst(s.x,s.y,18);this.say(s.type==='node'?'MID AIR RECHARGE · Release Shift, then dash again.':'CHARGE ABSORBED · This source is now dark.');
+   s.drained=true;s.cooldown=s.recharge;if(p.charges!==undefined)p.charges++;p.charge=true;this.absorbed++;if(!p.ground){this.chain++;this.bestChain=Math.max(this.bestChain,this.chain)}onBurst(s.x,s.y,18);this.say(s.type==='node'?'MID AIR RECHARGE · Release Shift, then dash again.':'CHARGE ABSORBED · This source is now dark.');
   }
-  if(!interact)return;const target=this.target(p);if(!target)return;if(!p.charge){this.say('NO CHARGE · Find a cyan source, then return.');return}
+  if(!interact)return;const target=this.target(p);if(!target)return;if(window.Combat2D?.blockPower(target))return;if(!p.charge){this.say('NO CHARGE · Find a cyan source, then return.');return}
   if(p.charges!==undefined)p.charges=Math.max(0,p.charges-1);p.charge=(p.charges||0)>0;onBurst(target.x,target.y,28);
   if('open'in target){target.open=true;this.say('DOOR POWERED · Your charge opened the route.')}else{target.on=true;onCheckpoint(target.checkpoint);this.say(target.checkpoint===4?'RELAY RESTORED':target.checkpoint===1?'GENERATOR ONLINE · Two slots unlocked. Store two charges, then T / teleport to blink farther.':'GENERATOR ONLINE · Checkpoint saved. Nearby windows restored.')}
  }

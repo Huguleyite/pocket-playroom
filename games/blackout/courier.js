@@ -2,7 +2,7 @@
 (() => {
 const palette={outline:'#111622',hair:'#171622',hairMid:'#302333',hairLight:'#4b3242',skin:'#a66b4d',shade:'#754535',light:'#c68b62',jacket:'#b6543c',red:'#e58157',darkRed:'#713d38',pants:'#263549',pantsLight:'#405269',shoe:'#192333',sole:'#c3c8c4',cyan:'#6cffe7'};
 const cache=new Map();
-const states=['idle','run','rise','fall','wall','hang','climb','dash','land'];
+const states=['idle','run','rise','fall','wall','hang','climb','dash','land','shoot','shield'];
 function make(state,frame,charged,variant='profile'){
  const cv=document.createElement('canvas');cv.width=72;cv.height=92;const c=cv.getContext('2d'),P=palette;
  const box=(x,y,w,h,col)=>{c.fillStyle=col;c.fillRect(Math.round(x),Math.round(y),w,h)};
@@ -13,6 +13,7 @@ function make(state,frame,charged,variant='profile'){
  if(state==='run'){const s=Math.sin(phase);backK=[31-s*12,67-Math.max(0,-s)*6];backF=[31-s*20,80-Math.max(0,-s)*13];frontK=[36+s*12,67-Math.max(0,s)*5];frontF=[36+s*19,80-Math.max(0,s)*13];lean=5}
  if(state==='rise'){backK=[23,65];backF=[16,75];frontK=[45,60];frontF=[48,70];lean=4}
  if(state==='fall'){backK=[27,68];backF=[22,78];frontK=[44,69];frontF=[48,81];lean=-2}
+ if(state==='shoot'){lean=3;frontK=[44,70];frontF=[47,82];backK=[25,70];backF=[22,82]}
  if(state==='dash'){backK=[15,62];backF=[3,61];frontK=[37,70];frontF=[25,77];lean=13}
  if(state==='wall'||state==='hang'){backK=[38,68];backF=[48,73];frontK=[46,60];frontF=[52,66];lean=-4}
  if(state==='climb'){frontK=[49,49];frontF=[58,58];backK=[24,68];backF=[21,79];lean=7}
@@ -58,6 +59,8 @@ function make(state,frame,charged,variant='profile'){
  limb([43+lean,36],[23+lean,57],4,'#251f26');limb([43+lean,36],[23+lean,57],2,'#9b7855');box(17+lean,51,14,15,P.outline);box(18+lean,52,12,12,'#68503e');box(19+lean,53,10,5,'#947050');box(23+lean,56,4,4,'#d5b07e');box(24+lean,57,2,2,'#473b31');
  // Near powered arm follows the pose instead of remaining rigid.
  const sh=[26+lean,39];let elbow=[18+lean,49],wrist=[18+lean,61];
+ if(state==='shoot'){elbow=[44+lean,40];wrist=[61+lean,40]}
+ if(state==='shield'){elbow=[33,43];wrist=[43,27]}
  if(state==='run'){elbow=[23-Math.sin(phase)*10,46];wrist=[19-Math.sin(phase)*14,49-Math.cos(phase)*8]}
  if(state==='rise'){elbow=[18,43];wrist=[14,32]}
  if(state==='fall'){elbow=[18,43];wrist=[9,50]}
