@@ -1,6 +1,8 @@
 // Collection-owned advertising. Games and saved progress stay independent.
 (() => {
   'use strict';
+  // Welcome/showcase pages never carry desktop ads, even with a cached script tag.
+  if (!document.body.dataset.desktopAdGame) return;
   if (window.PocketDesktopAds) return;
   const base = new URL('./', document.currentScript.src);
   const games = ['chronodeck', 'lineage', 'hex-gambit', 'quantum-draft', 'frequency-1984', 'blackout'];
@@ -28,8 +30,7 @@
   }
   function sync() {
     const game=document.body.dataset.desktopAdGame;
-    const showcase=!game&&/^#big-screen(?:\/|$)/.test(location.hash);
-    const key=game||(showcase?(location.hash.split('/')[1]||'chronodeck'):'');
+    const key=game;
     if(!games.includes(key)){host?.remove();host=null;route='';return;}
     const parent=game?document.body:document.getElementById('main');
     if(!parent)return;
