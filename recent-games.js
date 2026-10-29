@@ -3,6 +3,7 @@
  'use strict';
  const base=new URL('./',document.currentScript.src),key='room-for-play:last';
  const games={
+  aether:['Aether & Ash','#games/aether'],
   windows:['Window Lights','#games/windows'], 'windows-space':['Deep Space Decoder','#games/windows/space'],
   weave:['Weave It to Me','#games/weave'],tide:['Tile Tide','#games/tide'],shift:['Shift & Lock','#games/shift'],
   lock:['LetterLock','#games/lock'],deli:['Stack to the Future','#games/deli'],binario:['Binario / Neon Logic','#games/binario'],
