@@ -10,6 +10,9 @@ window.BlackoutAudio={context:null,enabled:true,volume:1,musicVolume:.7,effectsV
  voice(hz,at,length,shape,level,bus='music',end=hz,attack=.012,pan=0){if(!this.context)return;const c=this.context,o=c.createOscillator(),g=c.createGain(),filter=c.createBiquadFilter(),panner=c.createStereoPanner();o.type=shape;o.frequency.setValueAtTime(Math.max(20,hz),at);if(end!==hz)o.frequency.exponentialRampToValueAtTime(Math.max(20,end),at+length);filter.type='lowpass';filter.frequency.value=bus==='music'?1900:6000;panner.pan.value=pan;g.gain.setValueAtTime(0,at);g.gain.linearRampToValueAtTime(level,at+Math.min(attack,length*.4));g.gain.exponentialRampToValueAtTime(.0001,at+length);o.connect(filter);filter.connect(g);g.connect(panner);panner.connect(bus==='music'?this.musicInput:this.effectsBus);o.start(at);o.stop(at+length+.03)},
  noiseHit(at,length,level,hz=1800,bus='effects'){if(!this.context)return;const c=this.context,n=c.createBufferSource(),g=c.createGain(),f=c.createBiquadFilter();n.buffer=this.noise;f.type='bandpass';f.frequency.value=hz;f.Q.value=.6;g.gain.setValueAtTime(level,at);g.gain.exponentialRampToValueAtTime(.0001,at+length);n.connect(f);f.connect(g);g.connect(bus==='music'?this.musicInput:this.effectsBus);n.start(at);n.stop(at+length)},
  effect(kind){if(!this.context||!this.enabled)return;const t=this.context.currentTime+.004;
+  if(kind==='bossLock'){this.voice(430,t,.12,'triangle',.065,'effects',620);this.voice(620,t+.12,.14,'sine',.07,'effects',850)}
+  if(kind==='bossStrike'){this.noiseHit(t,.2,.12,900);this.voice(90,t,.2,'triangle',.09,'effects',35)}
+  if(kind==='coreOpen'){this.voice(660,t,.3,'sine',.075,'effects',880);this.voice(990,t+.09,.35,'sine',.065,'effects',1320)}
   if(kind==='jump'){this.voice(180,t,.12,'sine',.09,'effects',330);this.noiseHit(t,.045,.025,1400)}
   if(kind==='land'){this.voice(78,t,.10,'sine',.12,'effects',32);this.noiseHit(t,.065,.045,700)}
   if(kind==='step')this.noiseHit(t,.04,.035,950);
