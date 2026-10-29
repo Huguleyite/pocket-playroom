@@ -21,3 +21,9 @@ body.desktop{background:#07121e}.desktop .facade{display:none}.desktop .desktop-
 .desktop .note{margin:4px 0 8px}
 @media(max-width:480px){.view-tools{padding:7px 6px;gap:6px}.view-tools button{font-size:12px;min-width:76px;padding:7px 11px}.view-tools #help{min-width:90px}}
 @media(max-height:400px) and (min-width:601px){.desktop .scene{width:min(100%,900px)}}
+
+/* Keep text scaling from stretching grid tracks into the controls. */
+.board{grid-template-columns:repeat(10,minmax(0,1fr));grid-template-rows:repeat(10,minmax(0,1fr))}
+.rows{grid-template-rows:repeat(10,minmax(0,1fr))}
+.columns{grid-template-columns:repeat(10,minmax(0,1fr))}
+.board .window,.rows .clue{min-height:0}
