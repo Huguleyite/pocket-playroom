@@ -6,6 +6,9 @@
   const game=window.PocketRecent?.currentGame();
   if(!game)return;
   const existing=document.querySelector('.game-invite-area'),barHost=document.querySelector('.game-invite-bar');
+  // Signal Station's top controls share one wrapping row with the invitation.
+  const night=document.querySelector('body.game-station .night-controls');
+  if(barHost&&night&&night.parentElement!==barHost)barHost.append(night);
   if(existing&&barHost){const destination=document.querySelector('dialog[open] .overlay-tools')||barHost;if(existing.parentElement!==destination)destination.append(existing);return;}
   const anchor=document.querySelector('#main > .back-link,#main > .picture-return > .back-link,.playroom-return');
   if(!anchor||anchor.closest('.game-invite-bar'))return;
@@ -16,6 +19,7 @@
   const status=document.createElement('span');status.className='game-invite-status';status.setAttribute('role','status');
   const fallback=document.createElement('input');fallback.type='text';fallback.readOnly=true;fallback.hidden=true;fallback.setAttribute('aria-label','Game link to copy');
   area.append(button,status,fallback);bar.append(area);
+  if(night)bar.append(night);
   button.onclick=async()=>{
    const active=window.PocketRecent.currentGame()||game,url=new URL('index.html'+active.route,base).href;
    status.textContent='';fallback.hidden=true;
