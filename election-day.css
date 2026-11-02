@@ -1,0 +1,10 @@
+#election-day-reminder{box-sizing:border-box;max-width:1072px;margin:18px auto 0;padding:18px 20px;display:flex;align-items:center;gap:18px;border:2px solid #243d63;border-top:5px solid #ae4347;border-radius:16px;background:#fff7e8;color:#243d63;box-shadow:3px 4px 0 #e0d5c6;font-family:'DM Sans',system-ui,sans-serif}
+.vote-sticker{flex:none;display:grid;place-items:center;width:76px;min-height:70px;border:2px solid #ae4347;border-radius:13px;transform:rotate(-5deg);background:#fffdf7;color:#ae4347;font-weight:900;font-size:17px;line-height:1.25;padding:8px}
+.vote-sticker small{font-size:11px;letter-spacing:1px;color:#243d63}
+.vote-copy{flex:1;min-width:0}.vote-copy strong{font-family:Outfit,system-ui,sans-serif;font-size:23px;line-height:1.2}.vote-copy p{font-size:14px;line-height:1.5;margin:6px 0 0}
+#election-day-reminder .vote-link{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:11px 15px;border:2px solid #243d63;border-radius:11px;background:#243d63;color:#fffdf7;font-size:14px;font-weight:700;text-decoration:none;text-align:center}
+#election-day-reminder .vote-link:hover{text-decoration:underline}#election-day-reminder .vote-link:focus-visible{outline:3px solid #ae4347;outline-offset:4px}
+html.election-day .site-header{border-bottom-color:#ae4347}
+html.night-play #election-day-reminder{background:#202b40;color:#fff7e8;border-color:#9cb7df;border-top-color:#e99c9e;box-shadow:3px 4px 0 #101a2b}
+@media(max-width:1120px){#election-day-reminder{margin-left:24px;margin-right:24px}}
+@media(max-width:600px){#election-day-reminder{margin:12px 12px 0;padding:14px;gap:12px;flex-wrap:wrap}.vote-sticker{width:62px;min-height:62px;font-size:14px}.vote-copy strong{font-size:20px}.vote-copy p{font-size:13px}#election-day-reminder .vote-link{width:100%}}
