@@ -1,7 +1,7 @@
 /* Versioned round identities. No changes to the browser clock or native storage API. */
 (() => {
   'use strict';
-  const VERSION = '1', ids = ['weave','tide','shift','lock','deli','binario','futoshiki','signal','draw','draw-scorecard'];
+  const VERSION = '1', ids = ['weave','tide','shift','lock','deli','binario','futoshiki','signal','draw','draw-scorecard','daily-stars'];
   const raw = new URLSearchParams(location.search).get('challenge');
   let incoming = null, invalid = false, roundSeed = crypto.getRandomValues(new Uint32Array(1))[0], rng, randomCount=0;
   function decode(value) {
@@ -14,6 +14,7 @@
     const modes={binario:['daily','extra'],deli:['retro','garden','future'],draw:['classic'],'draw-scorecard':['scorecard','guided']};
     if (!(modes[c.id] || ['daily']).includes(c.mode)) throw Error('Invalid mode');
     if(c.variant!==undefined && (c.id!=='binario'||!['balanced-v1','balanced-v2'].includes(c.variant)))throw Error('Invalid puzzle edition');
+    if(c.id==='daily-stars'&&(c.edition!=='stars-1'||!Number.isSafeInteger(c.hints)||c.hints<0||c.hints>1000000))throw Error('Invalid Stars challenge');
     return c;
   }
   if (raw) { try { incoming=decode(raw); } catch { invalid=true; } }
@@ -37,9 +38,9 @@
     d.getFullYear=()=>d.getUTCFullYear();d.getMonth=()=>d.getUTCMonth();d.getDate=()=>d.getUTCDate();
     return d;
   }
-  function metric(id) { return ['weave','tide','deli','draw','draw-scorecard'].includes(id) ? {unit:'points',lower:false} : {unit:'moves',lower:true}; }
+  function metric(id) { return id==='daily-stars'?{unit:'seconds',lower:true}:['weave','tide','deli','draw','draw-scorecard'].includes(id) ? {unit:'points',lower:false} : {unit:'moves',lower:true}; }
   function link(id,data) {
-    const c={v:VERSION,id,day:data.day||incoming?.day||localDay(),seed:roundSeed,mode:data.mode||'daily',target:data.value,...(data.variant?{variant:data.variant}:{})};
+    const c={v:VERSION,id,day:data.day||incoming?.day||localDay(),seed:roundSeed,mode:data.mode||'daily',target:data.value,...(data.variant?{variant:data.variant}:{}),...(id==='daily-stars'?{edition:'stars-1',hints:data.hints||0}:{})};
     decode(encode(c));
     const url=new URL('../../index.html',location.href);
     url.search='';url.hash=`challenge/${encode(c)}`;
@@ -51,7 +52,7 @@
     return (metric(id).lower ? value<incoming.target : value>incoming.target) ? 'You beat the challenge!' : 'Challenge complete.';
   }
   function banner() {
-    if (!incoming) return;
+    if (!incoming || incoming.id==='daily-stars') return;
     const box=document.createElement('section');box.className='pocket-challenge-banner';
     const h=document.createElement('strong');h.textContent=`Beat ${incoming.target} ${metric(incoming.id).unit}`;
     const p=document.createElement('p');p.textContent=`${incoming.day} · ${incoming.mode} · Separate challenge save`;

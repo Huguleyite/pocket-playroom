@@ -102,3 +102,38 @@ body.game-draw #main{max-width:1240px}.game-draw .game-well{max-width:1160px}
 .pocket-filters{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 20px}.pocket-filters button{min-height:44px;padding:10px 18px;border:2px solid var(--edge);border-radius:999px;background:var(--panel);color:var(--ink);font:700 14px/1.2 inherit;cursor:pointer}.pocket-filters button[aria-pressed="true"]{background:#56327f;border-color:#56327f;color:#fff}.pocket-filters button:focus-visible{outline:3px solid #a64b28;outline-offset:3px}html.night-play .pocket-filters button{background:#202b40;border-color:#657491;color:#eee7ff}html.night-play .pocket-filters button[aria-pressed="true"]{background:#d6b5ff;border-color:#d6b5ff;color:#271b3c}#night-discovery[hidden]{display:none}@media(max-width:350px){.pocket-filters{gap:6px}.pocket-filters button{padding:10px 13px}}
 
 .challenge-launch{padding:24px 28px;margin:28px 0;background:#173e42;color:#f4fff7;border-radius:20px;border:1px solid #639f97}.challenge-launch-tag{display:inline-block;font:800 10px/1.4 system-ui;letter-spacing:.12em;color:#b7f2c9}.challenge-launch h2{font-size:clamp(24px,4vw,34px);line-height:1.1;letter-spacing:-.035em;margin:10px 0}.challenge-launch p{font-size:15px;line-height:1.6;max-width:700px;margin:10px 0;color:#e2eee8}.challenge-launch small{display:block;font-size:12px;line-height:1.5;color:#c3d9ce}@media(max-width:500px){.challenge-launch{padding:22px 20px}}
+
+/* Daily Stars uses its own responsive board/actions layout inside the collection. */
+body.game-daily-stars .game-layout{display:block}
+body.game-daily-stars .game-well{max-width:760px;width:100%;margin:auto}
+body.game-daily-stars .game-side,body.game-daily-stars .game-heading{display:none!important}
+body.game-daily-stars .night-controls{margin-top:4px;margin-bottom:6px}
+body.game-daily-stars .back-link{margin-top:4px;margin-bottom:6px}
+body.game-daily-stars{background-image:url('games/daily-stars/assets/celestial-atlas.webp');background-size:cover;background-position:center;background-attachment:fixed}
+html.night-play body.game-daily-stars{background:linear-gradient(#07142122,#07142133),url('games/daily-stars/assets/prismatic-constellations.webp') center/cover fixed!important}
+body.game-daily-stars .game-well{background:transparent!important;border-color:#a98a536e;box-shadow:0 16px 50px #152b3940}
+body.game-daily-stars .game-frame{background:transparent}
+body.game-daily-stars .site-header,body.game-daily-stars .site-footer{background:#fff9edeb;border-radius:0 0 18px 18px;backdrop-filter:blur(10px)}
+body.game-daily-stars .back-link,body.game-daily-stars .share-game-button{color:#263c49;text-shadow:0 1px 6px #fff}
+body.game-daily-stars .next-games{padding:16px 20px;background:#fff9edee;border:1px solid #a98a536e;border-radius:18px}
+html.night-play body.game-daily-stars .site-header,html.night-play body.game-daily-stars .site-footer,html.night-play body.game-daily-stars .next-games{background:#102333ed;border-color:#ddc58c66}
+html.night-play body.game-daily-stars .back-link,html.night-play body.game-daily-stars .share-game-button{color:#f5e6c6;text-shadow:0 1px 6px #071421}
+body.game-daily-stars .game-invite-area{color:#263c49}
+html.night-play body.game-daily-stars .game-invite-area{color:#f5e6c6}
+/* Board scenes follow only the active Daily Stars iframe. */
+html[data-stars-board="prismatic"] body.game-daily-stars{background:linear-gradient(#091c2c22,#091c2c22),url('games/daily-stars/assets/prismatic-constellations.webp') center/cover fixed!important}
+html[data-stars-board="moonstone"] body.game-daily-stars{background:url('games/daily-stars/assets/moonstone-scene.webp') center/cover fixed!important}
+html[data-stars-board="aurora"] body.game-daily-stars{background:url('games/daily-stars/assets/aurora-scene.webp') center/cover fixed!important}
+html[data-stars-board="orrery"] body.game-daily-stars{background:url('games/daily-stars/assets/orrery-scene.webp') center/cover fixed!important}
+html[data-stars-board="starforge"] body.game-daily-stars{background:url('games/daily-stars/assets/starforge-scene.webp') center/cover fixed!important}
+html[data-stars-board="nebula"] body.game-daily-stars{background:url('games/daily-stars/assets/nebula-scene.webp') center/cover fixed!important;color:#f5efdf!important}
+html[data-stars-board="nebula"] body.game-daily-stars .site-header,html[data-stars-board="nebula"] body.game-daily-stars .site-footer,html[data-stars-board="nebula"] body.game-daily-stars .next-games{background:#07152699;color:#f5efdf;backdrop-filter:none;border-color:#c5d5e980}
+html[data-stars-board="nebula"] body.game-daily-stars .back-link,html[data-stars-board="nebula"] body.game-daily-stars .game-invite-area{color:#f5efdf;text-shadow:0 1px 4px #000}
+.game-card[href="#games/daily-stars"] .card-art{padding:0;position:relative;overflow:hidden;background:#142238}
+.starboard-card-art{display:block;width:100%;height:100%;object-fit:cover;object-position:center;transition:transform .45s ease}
+.game-card[href="#games/daily-stars"] .card-art:after{content:'';position:absolute;inset:0;background:linear-gradient(110deg,transparent 20%,#fff5 50%,transparent 80%);transform:translateX(-140%);transition:transform .65s ease;pointer-events:none}
+.game-card[href="#games/daily-stars"]:is(:hover,:focus-visible) .starboard-card-art{transform:scale(1.05)}
+.game-card[href="#games/daily-stars"]:is(:hover,:focus-visible) .card-art:after{transform:translateX(140%)}
+@media(prefers-reduced-motion:reduce){.starboard-card-art{transition:none!important;transform:none!important}.game-card[href="#games/daily-stars"] .card-art:after{display:none}}
+html[data-stars-board]:not([data-stars-board="classic"]) body.game-daily-stars .back-link,html[data-stars-board]:not([data-stars-board="classic"]) body.game-daily-stars .game-invite-area{color:#fff3dc;text-shadow:0 1px 5px #091625}
+html[data-stars-board="nebula"] body.game-daily-stars .site-header .brand-name{color:#f5efdf}html[data-stars-board="nebula"] body.game-daily-stars .site-header .brand-name span{color:#f7df9d}html[data-stars-board="nebula"] body.game-daily-stars .site-header nav a{color:#f5efdf}
