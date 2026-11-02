@@ -8,16 +8,22 @@ const line=(c,x,y,x2,y2,color,width=1)=>{c.strokeStyle=color;c.lineWidth=width;c
 function glow(c,x,y,radius,color){const g=c.createRadialGradient(x,y,0,x,y,radius);g.addColorStop(0,color);g.addColorStop(1,'transparent');c.fillStyle=g;c.fillRect(x-radius,y-radius,radius*2,radius*2)}
 window.CityScene={setReducedMotion(value){reduced=value||matchMedia('(prefers-reduced-motion: reduce)').matches},
  background(c,W,H,cam,t){const sky=c.createLinearGradient(0,0,0,H);sky.addColorStop(0,'#121a31');sky.addColorStop(.7,'#24364b');sky.addColorStop(1,'#0b1424');c.fillStyle=sky;c.fillRect(0,0,W,H);
-  if(image.complete&&image.naturalWidth){const ih=Math.max(H,530),iw=ih*image.naturalWidth/image.naturalHeight;c.globalAlpha=.85;const off=-(cam*.16)%iw;c.drawImage(image,off,H-ih,iw,ih);if(off+iw<W)c.drawImage(image,off+iw,H-ih,iw,ih);c.globalAlpha=1}
+  if(image.complete&&image.naturalWidth){const ih=Math.max(H,530),iw=ih*image.naturalWidth/image.naturalHeight;c.globalAlpha=.58;const off=-(cam*.16)%iw;c.drawImage(image,off,H-ih,iw,ih);if(off+iw<W)c.drawImage(image,off+iw,H-ih,iw,ih);c.globalAlpha=1}
   else for(let i=0;i<45;i++){const x=i*87-cam*.16,y=90+noise(i)*210;r(c,x,y,65,H,'#17263c');for(let a=0;a<4;a++)for(let b=0;b<10;b++)if(noise(i*60+a*11+b)>.8)r(c,x+8+a*13,y+12+b*21,3,5,'#9d7956')}
+  c.fillStyle='#09162628';c.fillRect(0,0,W,H);
   // Elevated railway, overhead electrical line, distant signal lamps.
   const ty=H-230;for(let i=0;i<16;i++){const x=i*175-cam*.35; r(c,x,ty,3,250,'#111d2d');line(c,x,ty,x+175,ty,'#304154',4);line(c,x,ty+15,x+175,ty+15,'#152338',3);line(c,x,ty+15,x+175,ty+60,'#1d2d40');if(i%3===0)r(c,x+2,ty-12,3,4,'#c98e64')}
  },
- rooftops(c,platforms,grid,t){for(let i=0;i<platforms.length;i++){const b=platforms[i],powered=grid.generators.some(g=>g.on&&Math.abs(g.x-(b.x+b.w/2))<450);
+ rooftops(c,platforms,grid,t,cam=-Infinity,W=Infinity){for(let i=0;i<platforms.length;i++){const b=platforms[i];if(b.x+b.w<cam-100||b.x>cam+W+100)continue;const powered=grid.generators.some(g=>g.on&&Math.abs(g.x-(b.x+b.w/2))<450);
    const palette=window.Campaign?.index>=4?['#34313c','#2c3940','#343743','#38303b'][Campaign.index-4]:null;const facade=palette||(i%2?'#253041':'#2c303e');r(c,b.x,b.y+10,b.w,b.h,facade);
+   // Collision starts exactly at the lit upper edge; dressing remains below it.
+   const steel=i%4===2,concrete=i%4===1;if(b.optional){r(c,b.x,b.y,b.w,3,'#b4e7e4');r(c,b.x,b.y+3,b.w,9,'#3d6675');continue}
+   if(steel){r(c,b.x,b.y+15,b.w,34,'#293e4b');for(let sx=b.x+8;sx<b.x+b.w-12;sx+=48){line(c,sx,b.y+18,sx+28,b.y+44,'#597184',2);r(c,sx,b.y+19,3,3,'#9aa9ad')}}
+   if(concrete){r(c,b.x,b.y+15,b.w,18,'#47505b');for(let sx=b.x+28;sx<b.x+b.w;sx+=70)r(c,sx,b.y+16,2,17,'#252d3b')}
+
    for(let yy=b.y+17;yy<b.y+b.h;yy+=12){r(c,b.x,yy,b.w,1,'#182334');for(let xx=b.x+(Math.floor(yy/12)%2)*15;xx<b.x+b.w;xx+=30){r(c,xx,yy-11,1,11,'#192537');if(noise(xx+yy*2)>.5)r(c,xx+2,yy-10,12+noise(xx)*12,1,'#4e515b');if(noise(xx*2+yy)>.6)r(c,xx+4,yy-3,7,1,'#202c3b')}}
    for(let yy=b.y+46;yy<b.y+b.h;yy+=70)for(let xx=b.x+20;xx<b.x+b.w-23;xx+=48){r(c,xx-3,yy-3,25,36,'#141d2c');r(c,xx,yy,19,28,powered?'#b17c51':noise(xx+yy)>.84?'#735b48':'#1b2a3a');r(c,xx+9,yy,2,28,'#182435');r(c,xx,yy+13,19,2,'#182435');r(c,xx-4,yy+29,27,3,'#465061')}
-   r(c,b.x,b.y,b.w,5,'#778c9d');r(c,b.x,b.y+5,b.w,5,'#3c5365');r(c,b.x,b.y+10,b.w,2,'#111d2b');r(c,b.x,b.y+12,b.w,3,'#101b2880');for(let sx=b.x;sx<b.x+b.w;sx+=32){r(c,sx,b.y,1,5,'#344b5a');r(c,sx+2,b.y+1,26,1,'#afc1c5')}r(c,b.x+2,b.y-2,b.w-4,2,'#577180');for(let px=b.x+30;px<b.x+b.w-20;px+=79){r(c,px,b.y-4,24,2,'#456c77');r(c,px+3,b.y-3,16,1,'#72999c');if(powered)r(c,px+5,b.y+7,11,1,'#6ee5d1')}
+   r(c,b.x,b.y,b.w,5,'#778c9d');r(c,b.x,b.y+5,b.w,5,'#3c5365');r(c,b.x,b.y+10,b.w,2,'#111d2b');r(c,b.x,b.y+12,b.w,5,'#080f1cc9');r(c,b.x,b.y,b.w,2,'#c4d9db');r(c,b.x,b.y+5,b.w,2,'#667f8d');for(let sx=b.x;sx<b.x+b.w;sx+=32){r(c,sx,b.y,1,5,'#344b5a');r(c,sx+2,b.y+1,26,1,'#afc1c5')}r(c,b.x+2,b.y-2,b.w-4,2,'#577180');for(let px=b.x+30;px<b.x+b.w-20;px+=79){r(c,px,b.y-4,24,2,'#456c77');r(c,px+3,b.y-3,16,1,'#72999c');if(powered)r(c,px+5,b.y+7,11,1,'#6ee5d1')}
    for(let j=0;j<Math.floor(b.w/45);j++){const px=b.x+12+j*43;r(c,px,b.y+2,18+noise(j+i)*17,1,powered?'#d7a675':'#9ebbc5');if(j%2===0)r(c,px,b.y+1,10,1,'#bad7da')}
    // Pipework and a fire escape below the playable edge.
    if(b.w>150){r(c,b.x+b.w-18,b.y+15,3,b.h,'#526072');r(c,b.x+b.w-20,b.y+32,7,3,'#75808a');for(let y=b.y+80;y<b.y+b.h;y+=70){r(c,b.x+38,y,55,3,'#111b29');r(c,b.x+38,y-22,2,22,'#536071');r(c,b.x+91,y-22,2,22,'#536071');line(c,b.x+39,y,b.x+91,y+60,'#3e4c60',2)}}
