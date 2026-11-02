@@ -1,0 +1,7 @@
+.streak-celebration{display:grid;gap:6px;margin:12px 0;padding:12px;border:1px solid currentColor;border-radius:14px;text-align:center;overflow-wrap:anywhere}
+.streak-celebration strong{font-size:clamp(18px,5vw,26px)}
+.streak-celebration span{font-size:14px;line-height:1.4}
+.streak-celebration.milestone{background:linear-gradient(120deg,#e5c66b25,#a6d9cd25)}
+.streak-celebration.celebrate{animation:streak-bloom 700ms ease-out}
+@keyframes streak-bloom{0%{opacity:.35;transform:scale(.94)}65%{transform:scale(1.02)}100%{opacity:1;transform:scale(1)}}
+@media(prefers-reduced-motion:reduce){.streak-celebration.celebrate{animation:none}}

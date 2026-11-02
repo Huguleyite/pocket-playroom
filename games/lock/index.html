@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="en">
-<head><script src="../../recent-games.js?v=recent1" defer></script><script src="../../pocket-challenge.js"></script><script>if(window.top===window){document.documentElement.style.visibility='hidden';location.replace(new URL('../../index.html#games/lock',location.href));}</script>
+<head><link rel="stylesheet" href="../../streak-celebrations.css?v=1"><script src="../../streak-celebrations.js?v=1"></script><script src="../../daily-clock.js?v=eastern1"></script><script src="../../recent-games.js?v=recent1" defer></script><script src="../../pocket-challenge.js?v=eastern-streaks1"></script><script>if(window.top===window){document.documentElement.style.visibility='hidden';location.replace(new URL('../../index.html#games/lock',location.href));}</script>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#151d27">
@@ -23,7 +23,7 @@ dialog{max-height:calc(100dvh - 24px);overflow:auto}
 .intro #category:after{content:'';position:absolute;inset:0;pointer-events:none;background:linear-gradient(90deg,#101a2b60,transparent 10%,transparent 90%,#101a2b60);box-shadow:inset 2px 0 2px #ffffff25,inset -2px 0 2px #0005}
 </style>
 <script>
-window.roomComplete=(id,date)=>{if(window.PocketChallenge.incoming)return;if(!date){const d=window.PocketChallenge.calendarDate();date=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}try{window.PocketChallenge.storage.setItem('room-for-play:completed:'+id,JSON.stringify(date));}catch{}parent.postMessage({type:'room:completed',id,date},location.origin);};
+window.roomComplete=(id,date)=>{if(window.PocketChallenge.incoming)return;if(!date){const d=window.PocketChallenge.calendarDate();date=window.PocketDay.today(d);}try{window.PocketChallenge.storage.setItem('room-for-play:completed:'+id,JSON.stringify(date));}catch{}parent.postMessage({type:'room:completed',id,date},location.origin);};
 </script><script src="../../mobile-frame.js" defer></script> <link rel="stylesheet" href="../../night-game.css"><script src="../../night-frame.js" data-game="lock"></script><link rel="stylesheet" href="../../game-theme.css">
 <link rel="stylesheet" href="../../pocket-fit.css"><script src="../../pocket-fit.js" defer></script><link rel="stylesheet" href="../../house-promos.css?v=freepages2"><script src="../../house-promos.js?v=freepages2" defer></script><link rel="stylesheet" href="../../pocket-share.css?v=challenge1"><script src="../../pocket-share.js?v=challenge1"></script><link rel="stylesheet" href="../../game-invite.css?v=invite1"><script src="../../game-invite.js?v=invite1" defer></script></head>
 <body class="room-embedded room-lock">
@@ -36,7 +36,7 @@ window.roomComplete=(id,date)=>{if(window.PocketChallenge.incoming)return;if(!da
 <div class="proximity"><span>Getting warmer</span><progress id="heat" max="1" value="0" aria-label="Proximity to a remaining word"></progress></div>
 <div class="section-title">Today’s combinations</div><ul id="words" class="word-list"></ul>
 <p class="sub" id="bonus"></p><p id="storage" class="storage-note" hidden>Saving is unavailable. Progress will last for this visit only.</p>
-<footer>Swipe, use the arrow buttons, or focus a dial and press ↑ ↓.<br>A move is one letter step. New puzzle daily at local midnight.</footer>
+<footer>Swipe, use the arrow buttons, or focus a dial and press ↑ ↓.<br>A move is one letter step. New puzzle daily at midnight Eastern.</footer>
 <noscript>Enable JavaScript to play LetterLock.</noscript>
 </main>
 <aside class="ad-anchor" aria-label="Advertisement"><div id="ad-anchor" class="ad-slot" data-ad-slot="anchor" aria-label="320 by 50 advertisement">ADVERTISEMENT · 320 × 50</div></aside>
@@ -196,10 +196,10 @@ function shuffle(values, random) {
 }
 
 function localDay(now = window.PocketChallenge.calendarDate()) {
-  return `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
+  return window.PocketDay.today(now);
 }
 
-/** All date decisions use the supplied date; default rollover is local midnight.
+/** All date decisions use the supplied date; default rollover is midnight Eastern.
  * Each puzzle has a single word length, so every target fits the same board.
  */
 function createDailyPuzzle(date = localDay()) {
@@ -325,7 +325,7 @@ const { createGame } = location.protocol === 'file:'
   : await import('./engine.js?v=2').catch(() => window.LetterLockEmbedded);
 
 const $ = id => document.getElementById(id);
-const today = () => { const d=window.PocketChallenge.calendarDate(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; };
+const today = () => { const d=window.PocketChallenge.calendarDate(); return window.PocketDay.today(d); };
 const date = today();
 const key = `letterlock:v1:${date}`;
 const historyKey = 'letterlock:v1:completed';
@@ -394,6 +394,7 @@ function showVictory() {
   $('victory-stats').textContent=`${moves} moves · ${Math.round(elapsedNow())} seconds · ${streak()} day streak`;
   $('solved').textContent=game.getState().unlockedWords.join(' · ');
   $('summary').textContent=summary();
+  window.celebrateStreak('lock',date,streak(),$('victory'));
   if (!$('victory').open) $('victory').showModal();
 }
 function finish() {
@@ -444,7 +445,7 @@ function cancelGesture() {
 }
 const state=game.getState();
 $('category').textContent=state.category;
-$('date').textContent=new Date(`${date}T00:00:00Z`).toLocaleDateString(undefined,{month:'long',day:'numeric',year:'numeric',timeZone:'UTC'})+' · New safe at local midnight';
+$('date').textContent=new Date(`${date}T00:00:00Z`).toLocaleDateString(undefined,{month:'long',day:'numeric',year:'numeric',timeZone:'UTC'})+' · New safe at midnight Eastern';
 for(let index=0;index<state.columnCount;index++) {
   const column=document.createElement('div'); column.className='column';
   const wheel=document.createElement('div'); wheel.className='wheel'; wheel.tabIndex=0;
@@ -521,5 +522,5 @@ render(); persist(); if(state.complete) finish();
  window.addEventListener('load',update);window.addEventListener('resize',update);update();
 })();
 </script>
-</body>
+<script>(()=>{const opened=PocketDay.today();const check=()=>{if(!PocketChallenge.incoming&&PocketDay.today()!==opened)location.reload();};addEventListener('focus',check);document.addEventListener('visibilitychange',()=>{if(!document.hidden)check();});setInterval(check,15000);})();</script></body>
 </html>

@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="en">
-<head><script src="../../recent-games.js?v=recent1" defer></script><script src="../../pocket-challenge.js"></script><script>if(window.top===window){document.documentElement.style.visibility='hidden';location.replace(new URL('../../index.html#games/tide',location.href));}</script>
+<head><script src="../../daily-clock.js?v=eastern1"></script><script src="../../recent-games.js?v=recent1" defer></script><script src="../../pocket-challenge.js?v=eastern-streaks1"></script><script>if(window.top===window){document.documentElement.style.visibility='hidden';location.replace(new URL('../../index.html#games/tide',location.href));}</script>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#f4f5ef">
@@ -18,7 +18,7 @@ svg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index
 .scoring{margin:14px 0;padding:12px;border:1px solid #cbd4c5;border-radius:12px;font-size:12px}.scoring p{margin:6px 0;color:var(--muted)}#scoreBreakdown .breakdown-body{max-height:250px;overflow:auto;padding-right:6px}#scoreBreakdown summary{cursor:pointer;font-size:13px;font-weight:750;min-height:44px;padding:10px 0;list-style-position:inside}#scoreBreakdown summary small{display:block;font-size:12px;font-weight:500;margin:4px 0 0 16px}#scoreBreakdown.cascade-highlight{border:2px solid #719143;background:#edf5d5;color:#203a34}#scoreBreakdown.cascade-highlight summary{color:#203a34}#scoreBreakdown.cascade-active{box-shadow:0 0 0 3px #71914330}#scoreBreakdown>button{margin-top:8px}.scoring h2{font-size:15px;margin:0}.scoring ol{padding-left:22px;margin:8px 0}.scoring li{margin:7px 0}.scoring .active-wave{font-weight:750;color:var(--green)}.tile.scoring-word,.room-tide .tile.scoring-word{background:#ddec87!important;color:#203a34!important;outline:3px solid #245c49;outline-offset:-3px}.history li{width:100%}.history summary{cursor:pointer}.history ol{padding-left:20px}.history li li{background:transparent;padding:2px 0}.score-total{font-weight:750;border-top:1px solid #cbd4c5;padding-top:8px}
 </style>
 <script>window.roomHaptic=()=>{try{navigator.vibrate?.(8);}catch{}};</script><script>
-window.roomComplete=(id,date)=>{if(window.PocketChallenge.incoming)return;if(!date){const d=window.PocketChallenge.calendarDate();date=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}try{window.PocketChallenge.storage.setItem('room-for-play:completed:'+id,JSON.stringify(date));}catch{}parent.postMessage({type:'room:completed',id,date},location.origin);};
+window.roomComplete=(id,date)=>{if(window.PocketChallenge.incoming)return;if(!date){const d=window.PocketChallenge.calendarDate();date=window.PocketDay.today(d);}try{window.PocketChallenge.storage.setItem('room-for-play:completed:'+id,JSON.stringify(date));}catch{}parent.postMessage({type:'room:completed',id,date},location.origin);};
 </script><script src="../../mobile-frame.js" defer></script><link rel="stylesheet" href="../../pocket-fit.css"><script src="../../pocket-fit.js" defer></script> <link rel="stylesheet" href="../../night-game.css"><script src="../../night-frame.js" data-game="tide"></script><link rel="stylesheet" href="../../game-theme.css">
 <link rel="stylesheet" href="../../house-promos.css?v=freepages2"><script src="../../house-promos.js?v=freepages2" defer></script><link rel="stylesheet" href="../../pocket-share.css?v=challenge1"><script src="../../pocket-share.js?v=challenge1"></script><link rel="stylesheet" href="../../game-invite.css?v=invite1"><script src="../../game-invite.js?v=invite1" defer></script></head>
 <body class="room-embedded room-tide">
@@ -35,7 +35,7 @@ window.roomComplete=(id,date)=>{if(window.PocketChallenge.incoming)return;if(!da
  <section class="scoring" id="scoreBreakdown" aria-label="Latest move scoring" hidden></section>
  <div style="text-align:center;margin:0 0 12px"><button class="secondary" id="hint">Hint · suggest a word</button></div>
  <div class="actions"><button class="secondary" id="clear">Clear</button><button class="primary" id="submit">Submit word</button><button class="secondary" id="finish">Finish early</button></div>
- <div class="details"><span id="best">Personal best · 0</span><span>Daily reset · 00:00 UTC</span></div>
+ <div class="details"><span id="best">Personal best · 0</span><span>Daily reset · midnight Eastern</span></div>
  <ul class="history" id="history" aria-label="Submitted words"></ul>
  <footer>One board a day · Same starting letters for everyone<br>Prototype word list · Tap tiles or drag; keyboard: Tab, Enter, Submit</footer>
 </main>
@@ -219,7 +219,7 @@ const copyPath = path => path.map(({ row, col }) => ({ row, col }));
  * touch a moved/refilled cell. Overlapping matches clear their union once.
  * Each wave scores length² per distinct path; initial submission costs one move.
  */
-function createWordDrop(dateString = window.PocketChallenge.calendarDate().toISOString().slice(0, 10)) {
+function createWordDrop(dateString = window.PocketDay.today()) {
   const random = createDailyRandom(dateString);
   const pick = pool => pool[Math.floor(random() * pool.length)];
   const freshLetter = () => pick(random() < 0.4 ? VOWELS : CONSONANTS);
@@ -358,7 +358,7 @@ function findHint(grid) {
 
 const $ = id => document.getElementById(id);
 const STORAGE = 'worddrop:v1';
-const utcDay = () => window.PocketChallenge.calendarDate().toISOString().slice(0,10);
+const utcDay = () => window.PocketDay.today();
 const date = utcDay();
 const game = createWordDrop(date);
 const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -647,5 +647,5 @@ if(record.finished)showResults();
  window.addEventListener('load',update);window.addEventListener('resize',update);update();
 })();
 </script>
-</body>
+<script>(()=>{const opened=PocketDay.today();const check=()=>{if(!PocketChallenge.incoming&&PocketDay.today()!==opened)location.reload();};addEventListener('focus',check);document.addEventListener('visibilitychange',()=>{if(!document.hidden)check();});setInterval(check,15000);})();</script></body>
 </html>

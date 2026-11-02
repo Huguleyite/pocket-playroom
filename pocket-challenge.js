@@ -18,7 +18,7 @@
     return c;
   }
   if (raw) { try { incoming=decode(raw); } catch { invalid=true; } }
-  const localDay=()=>{const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;};
+  const localDay=()=>{const d=new Date();return new Intl.DateTimeFormat('en-CA',{timeZone:'America/New_York',year:'numeric',month:'2-digit',day:'2-digit'}).format(d);};
   function encode(c) { return btoa(JSON.stringify(c)).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,''); }
   const storage = {
     getItem(key) { return localStorage.getItem(incoming ? `pocket:challenge:${raw}:${key}` : key); },

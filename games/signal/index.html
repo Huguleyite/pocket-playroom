@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="en">
-<head><script src="../../recent-games.js?v=recent1" defer></script><script src="../../pocket-challenge.js"></script><script>if(window.top===window){document.documentElement.style.visibility='hidden';location.replace(new URL('../../index.html#games/signal',location.href));}</script>
+<head><script src="../../daily-clock.js?v=eastern1"></script><script src="../../recent-games.js?v=recent1" defer></script><script src="../../pocket-challenge.js?v=eastern-streaks1"></script><script>if(window.top===window){document.documentElement.style.visibility='hidden';location.replace(new URL('../../index.html#games/signal',location.href));}</script>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#080c16">
@@ -25,7 +25,7 @@
     @media(prefers-reduced-motion:reduce){.rotor{transition:none}*{scroll-behavior:auto!important}}@media(max-width:360px){body{padding-left:12px;padding-right:12px}.stats{padding:14px 8px}.legend{gap:12px}dialog{padding:22px}#victory{padding-top:16px;padding-bottom:16px}}
   </style>
 <script>window.roomHaptic=()=>{try{navigator.vibrate?.(8);}catch{}};</script><script>
-window.roomComplete=(id,date)=>{if(window.PocketChallenge.incoming)return;if(!date){const d=window.PocketChallenge.calendarDate();date=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}try{window.PocketChallenge.storage.setItem('room-for-play:completed:'+id,JSON.stringify(date));}catch{}parent.postMessage({type:'room:completed',id,date},location.origin);};
+window.roomComplete=(id,date)=>{if(window.PocketChallenge.incoming)return;if(!date){const d=window.PocketChallenge.calendarDate();date=window.PocketDay.today(d);}try{window.PocketChallenge.storage.setItem('room-for-play:completed:'+id,JSON.stringify(date));}catch{}parent.postMessage({type:'room:completed',id,date},location.origin);};
 </script><script src="../../mobile-frame.js" defer></script><link rel="stylesheet" href="../../pocket-fit.css"><script src="../../pocket-fit.js" defer></script><style>body{min-height:0;padding:0}main{padding:16px 12px 12px}main>header h1,main>header .intro,.ad-anchor,main>footer{display:none!important}</style><link rel="stylesheet" href="../../house-promos.css?v=freepages2"><script src="../../house-promos.js?v=freepages2" defer></script><link rel="stylesheet" href="../../pocket-share.css?v=challenge1"><script src="../../pocket-share.js?v=challenge1"></script><link rel="stylesheet" href="../../game-invite.css?v=invite1"><script src="../../game-invite.js?v=invite1" defer></script></head>
 <body>
   <main>
@@ -38,7 +38,7 @@ window.roomComplete=(id,date)=>{if(window.PocketChallenge.incoming)return;if(!da
     <div class="puzzle-actions" aria-label="Puzzle actions"><button class="secondary" id="restart-button">Restart puzzle</button><button class="secondary result-button" id="results-button" disabled>Daily results</button><button class="secondary" id="answer-button" aria-describedby="answer-note">Show answer</button></div>
     <p class="answer-note" id="answer-note">Showing the answer marks today’s puzzle as assisted.</p>
     <p class="status" id="status" role="status" aria-live="polite"></p>
-    <footer class="footer"><span>One circuit. Every day.</span><span>Resets at local midnight</span></footer>
+    <footer class="footer"><span>One circuit. Every day.</span><span>Resets at midnight Eastern</span></footer>
   </main>
   <dialog id="victory" aria-labelledby="victory-title"><div class="success">● ALL SYSTEMS CONNECTED</div><h2 id="victory-title">You found the flow.</h2><p>Every signal is right where it belongs.</p><div class="modal-stats"><div><strong id="final-moves">0</strong><span class="label">Moves</span></div><div><strong id="final-streak">0</strong><span class="label">Day streak</span></div></div><textarea id="share-text" readonly rows="8" aria-label="Shareable puzzle result" spellcheck="false"></textarea><p class="hint">🟩 Connected target · ⬜ Multiple signals · ⬛ Inactive</p><div class="actions"><button class="primary" id="share-button">Copy result</button><button class="secondary" id="close-victory">Back to circuit</button></div><div id="share-status" role="status" aria-live="polite"></div><aside class="completion-ad" aria-label="Advertisement"><div class="ad-slot" id="ad-completion-slot" data-ad-slot data-ad-width="300" data-ad-height="250"></div></aside></dialog>
   <dialog id="help" aria-labelledby="help-title"><div class="brand-mark">OPERATOR’S GUIDE</div><h2 id="help-title">Follow the signal.</h2><ul><li><span class="help-symbol">▲ Source:</span> fixed on the edge, sending light inward.</li><li><span class="help-symbol">◎ Target:</span> receive only the matching color. A wrong-color arrival turns the ring red and blocks completion.</li><li><span class="help-symbol">│ Straight / └ corner:</span> connect the visible ports to carry or bend light.</li><li><span class="help-symbol">┬ Splitter:</span> sends light through both other connected ports.</li><li><span class="help-symbol">◇ Filter:</span> required at every target; passes only its own color.</li><li>All three colors share junctions. Rotating one can disconnect several signals at once.</li></ul><p>Tap any of the 16 interior prisms for a clockwise quarter turn. Every tap counts as one move. Edge cells stay fixed. You can also use Tab and Enter or Space.</p><p>Solve daily to build your streak. Progress is saved in this browser when storage is available.</p><button class="primary" id="close-help">Let’s connect</button></dialog>
@@ -58,7 +58,7 @@ window.roomComplete=(id,date)=>{if(window.PocketChallenge.incoming)return;if(!da
       const legacyCompletions=new Set();
       let storageAvailable = true, lastTouch = -Infinity;
       const rotors = new Map(), buttons = new Map(), angles = new Map(), targetRings = new Map();
-      const localDate = () => { const d = window.PocketChallenge.calendarDate(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; };
+      const localDate = () => { const d = window.PocketChallenge.calendarDate(); return window.PocketDay.today(d); };
       const previousDate = day => new Date(Date.parse(day + 'T00:00:00Z') - 86400000).toISOString().slice(0,10);
       function storageWarning() { storageAvailable = false; $('status').textContent = 'Browser storage is unavailable. This session works, but progress may not be saved.'; }
       function load() {
@@ -396,5 +396,5 @@ $('share-button').addEventListener('click',async()=>{
  window.addEventListener('load',update);window.addEventListener('resize',update);update();
 })();
 </script>
-</body>
+<script>(()=>{const opened=PocketDay.today();const check=()=>{if(!PocketChallenge.incoming&&PocketDay.today()!==opened)location.reload();};addEventListener('focus',check);document.addEventListener('visibilitychange',()=>{if(!document.hidden)check();});setInterval(check,15000);})();</script></body>
 </html>
