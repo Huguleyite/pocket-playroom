@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Glyph Lock | Pocket Playroom</title>
+<meta name="description" content="A daily puzzle in the Veth script from The Ladder by Atlas Valley. Read the glyphs. Lock the line.">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Lora:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#05080f;--bg2:#0f1625;--gold:#c9a84c;--gold2:#e8c96a;--parch:#f0e6cc;--dim:#b8a882;--mute:#7a6e58;--teal:#5a9daf;--bad:#c4584a}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{background:radial-gradient(ellipse at 50% 0%,#14122a 0%,var(--bg) 60%);color:var(--parch);font-family:'Lora',Georgia,serif;-webkit-tap-highlight-color:transparent;overflow-x:hidden;padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom)}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+#app{max-width:560px;margin:0 auto;padding:14px 14px 28px;min-height:100%;display:flex;flex-direction:column}
+header{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:4px 0 10px;border-bottom:1px solid rgba(201,168,76,.18)}
+.brand{font-family:'Cinzel',serif;font-weight:700;letter-spacing:.2em;color:var(--gold);font-size:1.05rem}
+.brand small{display:block;font-weight:400;font-size:.52rem;letter-spacing:.3em;color:var(--teal);margin-top:2px}
+.hbtns{display:flex;gap:6px}
+.hb{font-family:'Cinzel',serif;font-size:.58rem;letter-spacing:.18em;text-transform:uppercase;color:var(--dim);border:1px solid rgba(201,168,76,.3);padding:.5rem .7rem;border-radius:2px;transition:.2s}
+.hb:hover,.hb:focus-visible{color:var(--gold);border-color:var(--gold)}
+.hb.gift{color:var(--gold2);border-color:var(--gold);animation:giftp 2.6s ease-in-out infinite}
+@keyframes giftp{0%,100%{box-shadow:0 0 0 rgba(232,201,106,0)}50%{box-shadow:0 0 14px rgba(232,201,106,.45)}}
+.meta{display:flex;align-items:center;justify-content:space-between;padding:12px 2px 4px;font-family:'Cinzel',serif;font-size:.62rem;letter-spacing:.24em;text-transform:uppercase;color:var(--teal)}
+.nav button{color:var(--dim);padding:0 .5rem;font-size:.9rem}.nav button[disabled]{opacity:.25;cursor:default}
+.rungs{display:flex;gap:6px;justify-content:center;padding:10px 0 4px}
+.rung{width:30px;height:5px;border-radius:3px;background:linear-gradient(#fff3c8,#c8932e);box-shadow:0 0 8px rgba(232,201,106,.5);transition:.4s}
+.rung.lost{background:#2a2438;box-shadow:none;transform:translateY(3px) rotate(6deg);opacity:.7}
+#board{flex:1;display:flex;flex-direction:column;justify-content:center;gap:14px;padding:14px 0;min-height:200px}
+.line{display:flex;flex-wrap:wrap;justify-content:center;gap:12px 20px}
+.word{display:flex;gap:4px}
+.cell{width:var(--cw,38px);padding:5px 0 3px;border:1px solid rgba(201,168,76,.22);border-radius:4px;background:rgba(201,168,76,.04);display:flex;flex-direction:column;align-items:center;gap:2px;transition:background .3s,border-color .3s,box-shadow .3s}
+.cell svg{width:80%;height:auto;overflow:visible;display:block;filter:drop-shadow(0 0 3px rgba(255,215,122,.25))}
+.cell .l{font-family:'Cinzel',serif;font-weight:600;font-size:calc(var(--cw,38px)*.36);height:1.2em;line-height:1.2em;color:transparent;transition:color .4s}
+.cell.sel{border-color:var(--gold2);background:rgba(232,201,106,.13);box-shadow:0 0 0 1px var(--gold2)}
+.cell.same{background:rgba(232,201,106,.07)}
+.cell.lock{border-color:rgba(232,201,106,.55);background:rgba(232,201,106,.1);box-shadow:0 0 14px rgba(232,201,106,.22)}
+.cell.lock .l{color:var(--parch)}
+.cell.pop{animation:pop .55s ease-out}
+@keyframes pop{0%{transform:scale(1);box-shadow:0 0 0 rgba(255,236,170,0)}35%{transform:scale(1.14);box-shadow:0 0 22px rgba(255,236,170,.9)}100%{transform:scale(1)}}
+.cell.shake{animation:shake .4s;border-color:var(--bad)}
+@keyframes shake{20%,60%{transform:translateX(-4px)}40%,80%{transform:translateX(4px)}}
+#reading{min-height:2.6em;text-align:center;font-style:italic;font-size:.9rem;color:var(--dim);padding:2px 8px 10px}
+#reading b{font-family:'Cinzel',serif;font-style:normal;font-weight:600;letter-spacing:.14em;font-size:.68rem;color:var(--gold);text-transform:uppercase}
+#kb{display:flex;flex-direction:column;gap:7px;align-items:center}
+.kr{display:flex;gap:5px;justify-content:center;width:100%}
+.k{flex:1;max-width:46px;height:50px;border:1px solid rgba(201,168,76,.3);border-radius:5px;background:rgba(15,22,37,.9);font-family:'Cinzel',serif;font-weight:600;font-size:1rem;color:var(--parch);transition:.15s}
+.k.wide{max-width:68px;flex:1.5}
+.k:active{background:rgba(232,201,106,.25)}
+.k.no{opacity:.22}
+.k.got{border-color:rgba(232,201,106,.5);color:var(--gold2)}
+.ov{position:fixed;inset:0;background:rgba(3,5,10,.88);backdrop-filter:blur(6px);display:none;align-items:flex-start;justify-content:center;overflow:auto;padding:22px 14px;z-index:20}
+.ov.on{display:flex}
+.card{width:100%;max-width:520px;background:linear-gradient(#0f1625,#0a0e1a);border:1px solid rgba(201,168,76,.35);border-radius:6px;padding:22px 20px;margin:auto 0;box-shadow:0 20px 60px rgba(0,0,0,.7);animation:rise .5s ease-out}
+@keyframes rise{from{opacity:0;transform:translateY(14px)}}
+.card h2{font-family:'Cinzel',serif;font-weight:700;color:var(--gold);letter-spacing:.16em;font-size:1.05rem;text-align:center;margin-bottom:6px;text-transform:uppercase}
+.card .sub{text-align:center;font-style:italic;color:var(--dim);font-size:.9rem;margin-bottom:14px;line-height:1.55}
+.card p{font-size:.92rem;line-height:1.65;color:var(--parch);margin:8px 0}
+.answer{font-family:'Cinzel',serif;color:var(--parch);text-align:center;font-size:1.15rem;line-height:1.5;letter-spacing:.06em;margin:12px 0 4px;text-transform:uppercase;text-shadow:0 0 24px rgba(232,201,106,.4)}
+.src{text-align:center;font-style:italic;font-size:.8rem;color:var(--mute);margin-bottom:14px}
+.btn{display:block;width:100%;text-align:center;text-decoration:none;font-family:'Cinzel',serif;font-weight:700;font-size:.72rem;letter-spacing:.16em;text-transform:uppercase;padding:.95rem 1rem;margin-top:10px;border:2px solid var(--gold);background:var(--gold);color:#05080f;transition:.25s;border-radius:2px}
+.btn:hover{background:transparent;color:var(--gold)}
+.btn.ghost{background:transparent;color:var(--gold)}.btn.ghost:hover{background:var(--gold);color:#05080f}
+.rules{list-style:none;margin:10px 0}.rules li{font-size:.88rem;line-height:1.55;color:var(--dim);padding:6px 0 6px 14px;border-left:2px solid rgba(201,168,76,.35);margin:6px 0}
+.rules b{color:var(--gold);font-family:'Cinzel',serif;font-size:.7rem;letter-spacing:.12em;text-transform:uppercase}
+.cx{display:grid;grid-template-columns:repeat(6,1fr);gap:7px;margin:14px 0}
+.cxt{border:1px solid rgba(201,168,76,.18);border-radius:4px;padding:6px 0 4px;text-align:center;background:rgba(201,168,76,.03)}
+.cxt svg{width:55%;height:auto;display:block;margin:0 auto;opacity:.35;filter:grayscale(.6)}
+.cxt span{display:block;font-family:'Cinzel',serif;font-size:.8rem;color:transparent;height:1.2em}
+.cxt.got{border-color:rgba(232,201,106,.5);background:rgba(232,201,106,.08)}
+.cxt.got svg{opacity:1;filter:drop-shadow(0 0 4px rgba(255,215,122,.5))}.cxt.got span{color:var(--parch)}
+.gh{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.gh .btn{margin-top:6px}
+.cnt{text-align:center;font-family:'Cinzel',serif;color:var(--teal);letter-spacing:.2em;font-size:.65rem;text-transform:uppercase}
+#bhForm{margin-top:6px;border-radius:4px;overflow:hidden;min-height:0}#bhForm iframe{display:block;border:0;max-width:100%}
+.mail{display:flex;gap:6px;margin-top:8px}.mail input{flex:1;background:#0a0e1a;border:1px solid rgba(201,168,76,.35);color:var(--parch);padding:.8rem;font:inherit;border-radius:2px;min-width:0}
+.mail button{border:2px solid var(--gold);background:var(--gold);color:#05080f;font-family:'Cinzel',serif;font-weight:700;font-size:.65rem;letter-spacing:.14em;text-transform:uppercase;padding:0 1rem}
+/* short mode: 9:16 capture */
+body.short{background:#05080f}
+body.short #app{max-width:none;padding:0;height:100vh;position:relative}
+body.short header,body.short #kb,body.short .meta,body.short #reading,body.short .rungs{display:none}
+body.short #board{position:absolute;inset:0;justify-content:center;padding:0 5vw}
+#shortUI{display:none}
+body.short #shortUI{display:flex;position:absolute;inset:0;flex-direction:column;align-items:center;justify-content:space-between;padding:9vh 6vw 7vh;pointer-events:none;text-align:center}
+#shortUI .t{font-family:'Cinzel',serif;font-weight:700;letter-spacing:.24em;color:var(--gold);font-size:clamp(1.3rem,5vw,2rem)}
+#shortUI .t small{display:block;font-size:.5em;letter-spacing:.3em;color:var(--teal);margin-top:.5em}
+#shortUI .ans{font-family:'Cinzel',serif;color:var(--parch);font-size:clamp(1.1rem,4.4vw,1.9rem);line-height:1.5;letter-spacing:.06em;opacity:0;transition:opacity .8s;text-transform:uppercase;text-shadow:0 0 30px rgba(232,201,106,.5);min-height:3em}
+#shortUI .ans.on{opacity:1}
+#shortUI .cta{font-style:italic;color:var(--dim);font-size:clamp(.85rem,3.2vw,1.2rem)}
+body.short .cell{--cw:clamp(36px,9vw,68px)}
+@media (prefers-reduced-motion:reduce){.rung,.cell,.card,.hb.gift{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs><linearGradient id="gl-gold" gradientUnits="userSpaceOnUse" x1="0" y1="4" x2="0" y2="56"><stop offset="0" stop-color="#fff3c8"/><stop offset=".38" stop-color="#ecc56c"/><stop offset=".72" stop-color="#c8932e"/><stop offset="1" stop-color="#8a5f1c"/></linearGradient></defs></svg>
+<div id="app">
+  <header>
+    <div class="brand">GLYPH LOCK<small>A POCKET PLAYROOM PUZZLE &middot; FROM THE LADDER</small></div>
+    <div class="hbtns"><button class="hb gift" id="bGift" hidden>The Register</button><button class="hb" id="bCodex">Codex</button><button class="hb" id="bHelp">?</button></div>
+  </header>
+  <div class="meta"><span id="mTitle">Line 1</span><span class="nav"><button id="bPrev" aria-label="Earlier line">&lsaquo;</button><button id="bNext" aria-label="Later line">&rsaquo;</button></span></div>
+  <div class="rungs" id="rungs" aria-label="Rungs left"></div>
+  <div id="board"></div>
+  <div id="reading"></div>
+  <div id="kb"></div>
+  <div id="shortUI"><div class="t">GLYPH LOCK<small id="sNum"></small></div><div class="ans" id="sAns"></div><div class="cta">Can you read it? Play free at pocketplayroom.com</div></div>
+</div>
+
+<div class="ov" id="ovHelp"><div class="card"><h2>How to read Veth</h2>
+<p class="sub">Every glyph is one sound. Read the line, tap a glyph, and name its letter to lock it in.</p>
+<ul class="rules">
+<li><b>The rail.</b> Every glyph stands on a vertical rail. Marks hang off it at three heights: top, middle, low.</li>
+<li><b>Stops</b> are brackets. Left of the rail is unvoiced, right is voiced. Low, middle, top are the lips, the tongue, the throat.</li>
+<li><b>Waves</b> are soft, sliding sounds. <b>Curls</b> are the humming ones. <b>Arcs</b> that sweep open are vowels.</li>
+<li><b>A foot-bead</b> marks a borrowed sound.</li>
+<li>Tap a glyph and the reading line gives you a clue. The right letter locks every matching glyph at once.</li>
+<li>A wrong guess costs a rung. Lose them all and the line stays shut.</li>
+</ul>
+<button class="btn" data-close>Start reading</button></div></div>
+
+<div class="ov" id="ovCodex"><div class="card"><h2>The Codex</h2>
+<p class="sub">Every glyph you lock is written here for good.</p>
+<div class="cnt" id="cxCount"></div><div class="cx" id="cx"></div>
+<button class="btn ghost" data-close>Close</button></div></div>
+
+<div class="ov" id="ovEnd"><div class="card" id="endCard"></div></div>
+
+<script>
+var G={"A":["M20,4 L20,56","M20,58.6 L20,58.7","M20,48 C27,48 35,43 37,33","M20,48 C13,48 5,43 3,33"],"E":["M20,4 L20,56","M20,58.6 L20,58.7","M20,32 C13,32 5,27 3,17"],"I":["M20,4 L20,56","M20,58.6 L20,58.7","M20,12 C27,12 35,17 37,27","M20,12 C13,12 5,17 3,27"],"O":["M20,4 L20,56","M20,58.6 L20,58.7","M20,19.5 A8.5,10.5 0 1,0 20.01,19.5"],"U":["M20,4 L20,56","M20,58.6 L20,58.7","M20,28 C27,28 35,33 37,43"],"P":["M20,4 L20,56","M20,58.6 L20,58.7","M14,38 L4,38 L4,52 L14,52"],"B":["M20,4 L20,56","M20,58.6 L20,58.7","M26,38 L36,38 L36,52 L26,52"],"T":["M20,4 L20,56","M20,58.6 L20,58.7","M14,23 L4,23 L4,37 L14,37"],"D":["M20,4 L20,56","M20,58.6 L20,58.7","M26,23 L36,23 L36,37 L26,37"],"K":["M20,4 L20,56","M20,58.6 L20,58.7","M14,8 L4,8 L4,22 L14,22"],"G":["M20,4 L20,56","M20,58.6 L20,58.7","M26,8 L36,8 L36,22 L26,22"],"F":["M20,4 L20,56","M20,58.6 L20,58.7","M5,48 C11,37 16,37 20,45 C24,53 29,53 35,42"],"V":["M20,4 L20,56","M20,58.6 L20,58.7","M5,48 C11,37 16,37 20,45 C24,53 29,53 35,42","M11,56 L11,56.1","M29,56 L29,56.1"],"S":["M20,4 L20,56","M20,58.6 L20,58.7","M5,33 C11,22 16,22 20,30 C24,38 29,38 35,27"],"H":["M20,4 L20,56","M20,58.6 L20,58.7","M5,18 C11,7 16,7 20,15 C24,23 29,23 35,12"],"M":["M20,4 L20,56","M20,58.6 L20,58.7","M20,37 C32,34 38,46 31,52 C27,55 22,51 25,48"],"N":["M20,4 L20,56","M20,58.6 L20,58.7","M20,22 C32,19 38,31 31,37 C27,40 22,36 25,33"],"L":["M20,4 L20,56","M20,58.6 L20,58.7","M20,22 C8,19 2,31 9,37 C13,40 18,36 15,33"],"R":["M20,4 L20,56","M20,58.6 L20,58.7","M20,7 C8,4 2,16 9,22 C13,25 18,21 15,18"],"Y":["M20,4 L20,56","M20,58.6 L20,58.7","M20,12 C27,12 35,17 37,27","M20,12 C13,12 5,17 3,27","M11,47 L11,47.1"],"W":["M20,4 L20,56","M20,58.6 L20,58.7","M20,28 C27,28 35,33 37,43","M11,47 L11,47.1"],"C":["M20,4 L20,56","M20,58.6 L20,58.7","M14,8 L4,8 L4,22 L14,22","M11,47 L11,47.1"],"X":["M20,4 L20,56","M20,58.6 L20,58.7","M14,8 L4,8 L4,22 L14,22","M5,41 C11,30 16,30 20,38 C24,46 29,46 35,35"],"#":["M20,4 L20,56","M20,58.6 L20,58.7","M5,26 C11,15 16,15 20,23 C24,31 29,31 35,20","M5,40 C11,29 16,29 20,37 C24,45 29,45 35,34"]};
+var START="2026-11-13",RELEASE="2026-11-13",AMAZON="https://link.amazon/B0dfBrgHz",SITE="https://www.atlasvalleybooks.com/the-ladder/";
+var GIFT={phone:"assets/ladder/The-Ladder-Wallpaper-B-Fire-in-Glass-Phone-1290x2796.png",desktop:"assets/ladder/The-Ladder-Wallpaper-B-Fire-in-Glass-Desktop-3840x2160.png"};
+var BEEHIIV_FORM="853b1ef5-d4ee-460e-8d63-12f6586bbe34",SIGNUP_URL="https://atlas-valley.beehiiv.com/subscribe";
+var BANK=["THE LAWN NEEDED CUTTING","VELARA WAS IN THE GARDEN","THIS WAS NOT POSSIBLE","THERE WERE TWO MOONS","THE SKY WAS THE WRONG COLOR","HE HAD NEVER SEEN THE LADDER","WE GO UP TOGETHER","THE MAPLE SHUDDERED IN A SMALL WIND","THERE WAS A LADDER ON THE RETAINING WALL","IT WAS BOLTED TO THE WALL IN FOUR PLACES","HE COULD NOT PLACE THEM","PAIN WAS HOT AND HAD A LOCATION","THE GRAVITY WAS LIGHTER","THE WORD FELL BETWEEN THEM","SHE WAS STILL LOOKING AT THE LADDER","THE SENSATION WAS LIKE BEING UNMADE","THE CROSSING TOOK THAT FROM HIM","AFTERNOON UNDER BOTH SUNS","THE ARCH ON THE PLAIN ANSWERED","THE DAY THE ARCH WOKE","THIS WAS A PERSON","IT WORKS ON ITS OWN SCHEDULE","THEY WERE COMPLETELY SILENT","THE WORD SETTLED EVERYTHING","WE LOOK FOR SOMEONE WHO KNOWS THAT ARCH","A CHORD OF VIBRATION RATHER THAN A NOTE","REGISTER OF CROSSINGS THE MEMORY COURT","CLOSED BEHIND THEM","NAEVARA OF THE MEMORY COURT NOTIFIED"];
+var REGISTER={id:"register",title:"The Register",rungs:8,keys:3,lines:["EXPECTED TWO MEN AND A CHILD","RECEIVED TWO","THE THIRD CROSSING IS ON THE READING","IT IS RECORDED AS NOT YET"],src:"From the Memory Court register, in The Ladder."};
+var HINT={A:"Vowel",E:"Vowel",I:"Vowel",O:"Vowel",U:"Vowel",P:"Stop · low rail",B:"Stop · low rail",T:"Stop · middle rail",D:"Stop · middle rail",K:"Stop · top rail",G:"Stop · top rail",F:"Wave · low rail",V:"Wave · low rail",S:"Wave · middle rail",H:"Wave · top rail","#":"Doubled wave",M:"Curl · low rail",N:"Curl · middle rail",L:"Curl · middle rail",R:"Curl · top rail",Y:"Vowel with a foot-bead",W:"Vowel with a foot-bead",C:"Stop with a foot-bead",X:"A stop and a wave together"};
+var ORDER="AEIOUPBTDKGFVSH#MNLRYWCX".split("");
+var $=function(s){return document.querySelector(s)};
+var short=/[?&]short=1/.test(location.search);
+var store={get:function(k,d){try{var v=localStorage.getItem("gl:"+k);return v==null?d:JSON.parse(v)}catch(e){return d}},set:function(k,v){try{localStorage.setItem("gl:"+k,JSON.stringify(v))}catch(e){}}};
+function nyToday(){return new Date().toLocaleDateString("en-CA",{timeZone:"America/New_York"})}
+function dayNum(d){var a=Date.UTC.apply(null,START.split("-").map(function(x,i){return i==1?x-1:+x})),b=Date.UTC.apply(null,d.split("-").map(function(x,i){return i==1?x-1:+x}));return Math.max(1,Math.floor((b-a)/864e5)+1)}
+function tok(s){return s.replace(/TH/g,"#")}
+function svg(k){var d=G[k];if(!d)return"";return '<svg viewBox="-2 0 44 60" aria-hidden="true">'+d.map(function(p){return '<path d="'+p+'" fill="none" stroke="url(#gl-gold)" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"/>'}).join("")+"</svg>"}
+function pretty(s){return s.toLowerCase().replace(/^./,function(c){return c.toUpperCase()})}
+
+var P=null,S=null,cells=[],selIdx=-1,pendT=false,codex=store.get("codex",[]);
+var TODAY=dayNum(nyToday()),cur=TODAY;
+function puzzleFor(n){if(n==="register")return REGISTER;var t=BANK[(n-1)%BANK.length];return{id:n,title:"Line "+n,rungs:6,keys:2,lines:[t],src:"From The Ladder by Atlas Valley."}}
+function load(n){
+  P=puzzleFor(n);var sid=P.id==="register"?"register":"d"+n;
+  S=store.get("s:"+sid,null);
+  var glyphs=[];P.lines.forEach(function(l){tok(l).split(" ").forEach(function(w){w.split("").forEach(function(g){glyphs.push(g)})})});
+  if(!S){
+    var freq={};glyphs.forEach(function(g){freq[g]=(freq[g]||0)+1});
+    var dist=Object.keys(freq).sort(function(a,b){return freq[b]-freq[a]||(a<b?-1:1)});
+    S={locked:dist.slice(0,P.keys),lost:0,done:false,won:false,wrong:{}};
+    S.locked.forEach(learn);save();
+  }
+  render();
+}
+function save(){store.set("s:"+(P.id==="register"?"register":"d"+P.id),S)}
+function learn(g){if(codex.indexOf(g)<0){codex.push(g);store.set("codex",codex)}}
+function render(){
+  cur=P.id==="register"?"register":P.id;
+  $("#mTitle").textContent=P.id==="register"?"The Register":"Line "+P.id+(P.id===TODAY?" · Today":"");
+  $("#bPrev").disabled=P.id==="register"||P.id<=1;$("#bNext").disabled=P.id==="register"||P.id>=TODAY;
+  var b=$("#board");b.innerHTML="";cells=[];
+  P.lines.forEach(function(l){
+    var ln=document.createElement("div");ln.className="line";
+    tok(l).split(" ").forEach(function(w){
+      var wd=document.createElement("div");wd.className="word";
+      w.split("").forEach(function(g){
+        var c=document.createElement("button");c.className="cell";c.dataset.g=g;c.setAttribute("aria-label","Glyph");
+        c.innerHTML=svg(g)+'<span class="l">'+(g==="#"?"TH":g)+"</span>";
+        c.addEventListener("click",function(){select(cells.indexOf(c))});
+        wd.appendChild(c);cells.push(c)});
+      ln.appendChild(wd)});
+    b.appendChild(ln)});
+  var vw=Math.min(window.innerWidth,560);
+  b.style.setProperty("--cw",(P.lines.length>1?Math.max(22,Math.min(32,Math.floor((vw-30)/16.5))):Math.max(32,Math.min(48,Math.floor((vw-40)/8.4)-5)))+"px");
+  paint();rungs();
+  if(!S.done){var f=cells.findIndex(function(c){return S.locked.indexOf(c.dataset.g)<0});select(f)}else{select(-1);}
+}
+function paint(){cells.forEach(function(c){c.classList.toggle("lock",S.locked.indexOf(c.dataset.g)>=0)})}
+function rungs(){var r=$("#rungs");r.innerHTML="";for(var i=0;i<P.rungs;i++){var e=document.createElement("div");e.className="rung"+(i>=P.rungs-S.lost?" lost":"");r.appendChild(e)}}
+function select(i){
+  selIdx=i;pendT=false;
+  cells.forEach(function(c,j){c.classList.remove("sel","same");if(j===i)c.classList.add("sel");else if(i>=0&&c.dataset.g===cells[i].dataset.g&&S.locked.indexOf(c.dataset.g)<0)c.classList.add("same")});
+  var g=i>=0?cells[i].dataset.g:null;
+  $("#reading").innerHTML=S.done?"":g?(S.locked.indexOf(g)>=0?'<b>Locked</b> &nbsp;'+(g==="#"?"TH":g):'<b>Reading</b> &nbsp;'+HINT[g]):"Tap a glyph.";
+  keys(g);
+}
+function keys(g){
+  var kb=$("#kb");if(!kb.dataset.built){
+    var rows=[["W","E","R","T","Y","U","I","O","P"],["A","S","D","F","G","H","K","L"],["TH","C","V","B","N","M","X"]];
+    rows.forEach(function(r){var d=document.createElement("div");d.className="kr";r.forEach(function(k){var b=document.createElement("button");b.className="k"+(k==="TH"?" wide":"");b.textContent=k;b.dataset.k=k==="TH"?"#":k;b.addEventListener("click",function(){guess(b.dataset.k)});d.appendChild(b)});kb.appendChild(d)});
+    kb.dataset.built=1}
+  [].forEach.call(kb.querySelectorAll(".k"),function(b){var k=b.dataset.k;b.classList.toggle("no",!!(g&&S.wrong[g]&&S.wrong[g].indexOf(k)>=0));b.classList.toggle("got",codex.indexOf(k)>=0)});
+}
+function nextOpen(from){for(var k=1;k<=cells.length;k++){var j=(from+k)%cells.length;if(S.locked.indexOf(cells[j].dataset.g)<0)return j}return -1}
+function guess(k){
+  if(S.done||selIdx<0)return;
+  var c=cells[selIdx],g=c.dataset.g;if(S.locked.indexOf(g)>=0){select(nextOpen(selIdx));return}
+  if(k===g){
+    S.locked.push(g);learn(g);paint();
+    cells.forEach(function(x,j){if(x.dataset.g===g){setTimeout(function(){x.classList.remove("pop");void x.offsetWidth;x.classList.add("pop")},j*40)}});
+    var left=cells.some(function(x){return S.locked.indexOf(x.dataset.g)<0});
+    save();
+    if(!left){finish(true)}else select(nextOpen(selIdx));
+  }else{
+    S.wrong[g]=S.wrong[g]||[];if(S.wrong[g].indexOf(k)<0){S.wrong[g].push(k);S.lost++;rungs();c.classList.remove("shake");void c.offsetWidth;c.classList.add("shake")}
+    save();keys(g);
+    if(S.lost>=P.rungs)finish(false);
+  }
+}
+document.addEventListener("keydown",function(e){
+  if(e.ctrlKey||e.metaKey||e.altKey)return;
+  if(document.querySelector(".ov.on")){if(e.key==="Escape")closeAll();return}
+  var k=e.key.toUpperCase();if(!/^[A-IK-PR-Y]$/.test(k)&&k!=="C")return;
+  var g=selIdx>=0?cells[selIdx].dataset.g:null;
+  if(g==="#"){if(k==="T"){pendT=true;return}if(k==="H"&&pendT){pendT=false;guess("#");return}pendT=false;guess(k);return}
+  guess(k);
+});
+function finish(win){
+  S.done=true;S.won=win;
+  if(P.id!=="register"){var st=store.get("streak",{n:0,last:0,best:0});if(win){st.n=(st.last===P.id-1||st.last===P.id)?st.n+(st.last===P.id?0:1):1;st.last=P.id;st.best=Math.max(st.best,st.n)}else if(P.id>=st.last){st.n=0}store.set("streak",st)}
+  if(P.id==="register"&&win)store.set("gift",true);
+  save();cells.forEach(function(c){c.classList.add("lock")});
+  [].forEach.call(document.querySelectorAll(".cell"),function(x,j){setTimeout(function(){x.classList.add("pop")},j*25)});
+  $("#reading").innerHTML="";
+  setTimeout(function(){endCard(win)},900);giftBtn();
+}
+function pad(s){return s}
+function shareText(){var n=P.id==="register"?"The Register":"Glyph Lock #"+P.id;var r="";for(var i=0;i<P.rungs;i++)r+=i<P.rungs-S.lost?"▮":"▯";return (P.id==="register"?"Glyph Lock · The Register ":"Glyph Lock #"+P.id+" ")+(S.won?"🔓 ":"🔒 ")+r+"\nCan you read it? pocketplayroom.com"}
+function ctaBook(pre){var released=nyToday()>=RELEASE;return '<a class="btn" href="'+AMAZON+'" target="_blank" rel="noopener">'+(released?'Get The Ladder on Amazon':'Preorder the Ebook today')+'</a>'+(released?'':'<div class="cnt" style="margin-top:8px">Releases Friday, November 13</div>')}
+function endCard(win){
+  var h="",ans=P.lines.join("<br>");
+  if(P.id==="register"&&win){
+    h='<h2>Unlocked</h2><p class="sub">You read the Memory Court register. The reading is yours.</p><div class="answer">'+P.lines.map(pretty).join(".<br>")+'.</div><div class="src">'+P.src+'</div>'
+     +'<p style="text-align:center;color:var(--gold2);font-family:Cinzel,serif;letter-spacing:.14em;font-size:.8rem;text-transform:uppercase;margin-top:16px">Your gift: Fire in Glass</p><div class="gh"><a class="btn" href="'+GIFT.phone+'" download>Phone</a><a class="btn" href="'+GIFT.desktop+'" download>Desktop</a></div>'
+     +ctaBook()+'<p class="sub" style="margin-top:16px">Want the next gift first? Join the Atlas Valley list.</p><div id="bhForm"></div><a class="cnt" style="display:block;margin-top:6px;color:var(--dim)" href="'+SIGNUP_URL+'" target="_blank" rel="noopener">Or join on Beehiiv</a>';
+  }else if(win){
+    h='<h2>Line locked</h2><div class="answer">'+pretty(P.lines[0])+'.</div><div class="src">'+P.src+'</div><div class="cnt">Rungs left '+(P.rungs-S.lost)+' of '+P.rungs+'</div>'+streakLine()
+     +'<button class="btn" id="shareB">Share result</button>'+(P.id<TODAY?'<button class="btn ghost" id="nextB">Next line</button>':'')+giftNudge()+ctaBook();
+  }else{
+    h='<h2>The line stays shut</h2><p class="sub">Out of rungs. Here is what it said.</p><div class="answer">'+(P.id==="register"?P.lines.map(pretty).join(".<br>")+".":pretty(P.lines[0])+".")+'</div><div class="src">'+P.src+'</div><button class="btn" id="retryB">Try again</button>'+ctaBook();
+  }
+  $("#endCard").innerHTML=h;$("#ovEnd").classList.add("on");mountBeehiiv();
+  var sb=$("#shareB");if(sb)sb.onclick=function(){var t=shareText();if(navigator.share){navigator.share({text:t}).catch(function(){})}else if(navigator.clipboard){navigator.clipboard.writeText(t);sb.textContent="Copied"}};
+  var nb=$("#nextB");if(nb)nb.onclick=function(){closeAll();load(P.id+1)};
+  var rb=$("#retryB");if(rb)rb.onclick=function(){store.set("s:"+(P.id==="register"?"register":"d"+P.id),null);closeAll();load(P.id==="register"?"register":P.id)};
+}
+function mountBeehiiv(){var m=$("#bhForm");if(!m)return;
+  try{var s=document.createElement("script");s.async=true;s.src="https://subscribe-forms.beehiiv.com/v3/loader.js";s.setAttribute("data-beehiiv-form",BEEHIIV_FORM);m.appendChild(s);
+  }catch(e){}}
+function streakLine(){var s=store.get("streak",{n:0});return s.n>1?'<div class="cnt" style="margin-top:6px">'+s.n+' day streak</div>':""}
+function giftNudge(){return store.get("gift",false)?"":'<button class="btn ghost" id="toReg" onclick="closeAll();load(\'register\')">Read The Register for a gift</button>'}
+function giftBtn(){var b=$("#bGift");b.hidden=false;b.textContent=store.get("gift",false)?"Your gift":"The Register"}
+function closeAll(){[].forEach.call(document.querySelectorAll(".ov"),function(o){o.classList.remove("on")})}
+[].forEach.call(document.querySelectorAll("[data-close]"),function(b){b.onclick=closeAll});
+[].forEach.call(document.querySelectorAll(".ov"),function(o){o.addEventListener("click",function(e){if(e.target===o)closeAll()})});
+$("#bHelp").onclick=function(){$("#ovHelp").classList.add("on")};
+$("#bCodex").onclick=function(){
+  var cx=$("#cx");cx.innerHTML="";ORDER.forEach(function(g){var d=document.createElement("div");d.className="cxt"+(codex.indexOf(g)>=0?" got":"");d.innerHTML=svg(g)+"<span>"+(g==="#"?"TH":g)+"</span>";cx.appendChild(d)});
+  $("#cxCount").textContent=codex.length+" of "+ORDER.length+" glyphs known";$("#ovCodex").classList.add("on")};
+$("#bGift").onclick=function(){if(store.get("gift",false)){var s=store.get("s:register",null);load("register");if(s&&s.won)endCard(true)}else load("register")};
+$("#bPrev").onclick=function(){if(P.id>1)load(P.id-1)};
+$("#bNext").onclick=function(){if(P.id<TODAY)load(P.id+1)};
+window.addEventListener("resize",function(){if(P)render()});
+
+function runShort(){
+  document.body.classList.add("short");P=puzzleFor(TODAY);$("#sNum").textContent="DAILY LINE "+TODAY;
+  var gl=[];tok(P.lines[0]).replace(/ /g,"").split("").forEach(function(g){if(gl.indexOf(g)<0)gl.push(g)});
+  S={locked:[],lost:0,done:false,won:false,wrong:{}};render();
+  var ans=$("#sAns");ans.textContent=pretty(P.lines[0])+".";
+  (function loop(){
+    S.locked=[];paint();ans.classList.remove("on");cells.forEach(function(c){c.classList.remove("pop")});
+    var t=3200;gl.forEach(function(g){setTimeout(function(){S.locked.push(g);paint();cells.forEach(function(c,j){if(c.dataset.g===g){c.classList.remove("pop");void c.offsetWidth;c.classList.add("pop")}})},t);t+=520});
+    setTimeout(function(){ans.classList.add("on")},t+400);setTimeout(loop,t+4600);
+  })();
+}
+if(short){runShort()}else{
+  var q=location.search.match(/[?&]p=register/);
+  if(q)load("register");else load(TODAY);
+  if(store.get("gift",false)||store.get("s:d"+TODAY,null)&&store.get("s:d"+TODAY,null).done||true)giftBtn();
+  if(!store.get("seen",false)){store.set("seen",true);$("#ovHelp").classList.add("on")}
+}
+</script>
+</body>
+</html>
