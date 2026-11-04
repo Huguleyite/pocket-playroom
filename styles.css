@@ -139,7 +139,7 @@ html[data-stars-board]:not([data-stars-board="classic"]) body.game-daily-stars .
 html[data-stars-board="nebula"] body.game-daily-stars .site-header .brand-name{color:#f5efdf}html[data-stars-board="nebula"] body.game-daily-stars .site-header .brand-name span{color:#f7df9d}html[data-stars-board="nebula"] body.game-daily-stars .site-header nav a{color:#f5efdf}
 
 /* Temporary collaboration, scoped to the homepage hero. Gold matched to the supplied game. */
-.home-hero .glyph-feature{--glyph-gold:#c9a84c;grid-column:1/-1;display:grid;grid-template-columns:1.5fr 1fr;gap:42px;align-items:center;padding:36px;background:linear-gradient(140deg,#17263f,#0c1526);color:#fff7e8;border:2px solid var(--glyph-gold);border-radius:20px;box-shadow:inset 0 2px 0 #fff0b955,0 8px 0 #72572e,0 13px 0 #a18a57,0 24px 32px #30241535}
+.home-hero .glyph-feature{--glyph-gold:#c9a84c;grid-column:1/-1;display:grid;grid-template-columns:1.5fr 1fr;gap:42px;align-items:center;padding:36px;background:radial-gradient(ellipse at 88% 15%,#33244c 0%,#14122a 58%,#0c0b19 100%);color:#fff7e8;border:2px solid var(--glyph-gold);border-radius:20px;box-shadow:inset 0 2px 0 #fff0b955,0 8px 0 #72572e,0 13px 0 #a18a57,0 24px 32px #30241535}
 .glyph-feature .glyph-label,.glyph-feature .glyph-limited{color:#e8c96a;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;font-weight:700}
 .glyph-feature .glyph-author{font:clamp(28px,4vw,43px)/1.2 Georgia,serif;text-transform:uppercase;color:#e8c96a;margin:16px 0}
 .glyph-feature .glyph-intro{color:#e4dccd;margin:0 0 8px}
@@ -148,10 +148,22 @@ html[data-stars-board="nebula"] body.game-daily-stars .site-header .brand-name{c
 .glyph-feature .glyph-play{display:inline-flex;align-items:center;min-height:50px;padding:12px 24px;background:linear-gradient(#e8c96a,var(--glyph-gold));color:#111d32;border:1px solid #e8c96a;border-radius:12px;font-weight:700;box-shadow:inset 0 2px 0 #fff0b9,0 6px 0 #997439,0 9px 0 #51401f,0 14px 18px #0006;transition:transform .16s,box-shadow .16s,filter .16s}
 .glyph-feature .glyph-play:hover,.glyph-feature .glyph-play:focus-visible{transform:translateY(-3px);filter:brightness(1.1);box-shadow:inset 0 2px 0 #fff0b9,0 9px 0 #997439,0 12px 0 #51401f,0 18px 24px #c9a84c40;outline:3px solid #e8c96a;outline-offset:5px}
 .glyph-feature .glyph-play:active{transform:translateY(5px);box-shadow:inset 0 2px 0 #fff0b9,0 1px 0 #997439,0 3px 0 #51401f}
-.glyph-feature .glyph-art{display:grid;place-items:center;min-height:280px;background:#091426;color:var(--glyph-gold);border:1px solid var(--glyph-gold);border-radius:12px;font:clamp(26px,3vw,40px)/1.2 Georgia,serif;text-align:center;box-shadow:inset 0 2px 0 #e8c96a66,0 7px 0 #8f703c,0 16px 20px #0008;transition:transform .16s,box-shadow .16s}
+.glyph-feature .glyph-art{display:grid;place-items:center;min-height:280px;background:radial-gradient(ellipse at 50% 16%,#382954 0%,#14122a 60%,#0c0b19 100%);color:var(--glyph-gold);border:1px solid var(--glyph-gold);border-radius:12px;font:clamp(26px,3vw,40px)/1.2 Georgia,serif;text-align:center;box-shadow:inset 0 2px 0 #e8c96a66,0 7px 0 #8f703c,0 16px 20px #0008;transition:transform .16s,box-shadow .16s}
 .glyph-feature .glyph-art:hover,.glyph-feature .glyph-art:focus-visible{transform:translateY(-3px);box-shadow:inset 0 2px 0 #e8c96a66,0 10px 0 #8f703c,0 16px 28px #c9a84c40;outline:3px solid #e8c96a;outline-offset:5px}
 .glyph-feature .glyph-limited{text-align:center;margin:24px 0 0}
 @media(max-width:650px){.home-hero .glyph-feature{grid-template-columns:1fr;padding:24px;gap:30px}.glyph-feature .glyph-art{min-height:180px}}
 @media(prefers-reduced-motion:reduce){.glyph-feature .glyph-play,.glyph-feature .glyph-art{transition:none}}
 
-.game-card[href="/glyph-lock/"] .card-art{background:#05080f;color:#c9a84c}.game-card[href="/glyph-lock/"] .card-art:before{display:none}.glyph-card-title{font:26px/1.2 Georgia,serif;text-align:center}
+.game-card[href="/glyph-lock/"] .card-art{background:radial-gradient(ellipse at 50% 0%,#382954,#14122a 65%,#0c0b19);color:#c9a84c}.game-card[href="/glyph-lock/"] .card-art:before{display:none}.glyph-card-title{font:26px/1.2 Georgia,serif;text-align:center}
+
+/* Authentic Veth strokes taken from Glyph Lock; its purple and gold palette. */
+.glyph-feature .glyph-art{position:relative;overflow:hidden;display:flex;flex-direction:column;justify-content:center;gap:20px;padding:30px 22px;background-color:#14122a}
+.glyph-feature .glyph-art::before{content:"";position:absolute;inset:12px;border:1px solid #c9a84c30;border-radius:7px;pointer-events:none}
+.glyph-feature .glyph-veth{width:100%;max-width:300px;height:auto;filter:drop-shadow(0 0 12px #e8c96a65)}
+.glyph-feature .glyph-art>span{font-size:clamp(26px,3vw,38px);letter-spacing:.035em;text-shadow:0 2px 18px #0009}
+.glyph-feature .glyph-art small{font:italic 14px/1.5 Georgia,serif;color:#e0d3b6;letter-spacing:.025em}
+.game-card[href="/glyph-lock/"] .card-art{flex-direction:column;gap:8px;padding:12px}
+.glyph-card-veth{display:block;width:160px;max-width:88%;height:auto;max-height:60px;filter:drop-shadow(0 0 6px #e8c96a55)}
+.game-card[href="/glyph-lock/"] .glyph-card-title{font-size:23px;letter-spacing:.02em}
+@media(max-width:650px){.glyph-feature .glyph-art{min-height:240px;gap:18px;padding:28px 20px}.glyph-feature .glyph-veth{max-width:270px}}
+@media(max-width:600px){.game-card[href="/glyph-lock/"] .card-art{gap:4px;padding:8px}.glyph-card-veth{max-height:40px}.game-card[href="/glyph-lock/"] .glyph-card-title{font-size:18px}}
