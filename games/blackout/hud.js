@@ -53,6 +53,8 @@
    else if(!grid.messageTime)hint='Move toward the next lit rooftop edge';
   }
   const lesson=window.AbilityCoach?.lesson();if(lesson&&grid.messagePriority<2&&!current){$('#objective').textContent=lesson.title;hint=lesson.tip}else if(!lesson&&!current&&grid.messagePriority<2&&window.CopperRow?.hint())hint=CopperRow.hint();
+  if(!lesson&&!current&&!context&&p.charges>0&&grid.messagePriority<2&&window.Districts?.hint())hint=Districts.hint();
+  if(ca?.boss&&window.EncounterPatterns&&!ca.encounterState().coreOpen)hint=ca.encounterState().recovering?'Hit confirmed. Recover energy and prepare for the next attack.':EncounterPatterns.tip(ca.boss);
   const pad=window.Controller?.exportBindings();
   if($('#input-mode').textContent.startsWith('CONTROLLER')&&pad){
    const names=['A','B','X','Y','LB','RB','LT','RT','View','Menu'];
