@@ -1,32 +1,37 @@
 const $=s=>document.querySelector(s),NS='http://www.w3.org/2000/svg',KEY='pocket-worlds-village-shaded-v1',MOTION_KEY='pocket-worlds-motion';
-const standardPalette = [
- ['Cream','#f6eedb'],['Gold','#eab94f'],['Coral','#ee826a'],['Sage','#a6b681'],
- ['Forest green','#507650'],['Brown','#a77448'],['Lavender','#b79ad5'],['Teal','#4f9796']
-];
-const legacyBookshop = VILLAGE_DATA.pictures.find(picture => picture.id === 'bookshop');
-for (const picture of VILLAGE_DATA.pictures) picture.palette = standardPalette;
+const REGION_MAP = 3;
 
-function migrateBookshop(stored) {
- const saved = stored?.pictures?.bookshop;
- if (KEY !== 'pocket-worlds-village-shaded-v1' || stored?.bookshopMap === 2 || !Array.isArray(saved?.filled)) return;
- const legacy = new Set(saved.filled.filter(i => Number.isInteger(i) && i >= 0 && i < legacyBookshop.regions.length));
- const completed = legacy.size === legacyBookshop.regions.length;
- saved.filled = BOOKSHOP_TEST.regions.flatMap((region, index) => {
-  const covered = BOOKSHOP_TEST.legacyOverlap[index].reduce((sum, [i, pixels]) => sum + (legacy.has(i) ? pixels : 0), 0);
-  return completed || covered >= region.area * .95 ? [index] : [];
- });
+function migrateRegions(stored) {
+ if (stored?.regionMap === REGION_MAP) return;
+ for (const picture of VILLAGE_DATA.pictures) {
+  if (picture.id === 'bookshop' && stored?.bookshopMap === 2) continue;
+  const saved = stored?.pictures?.[picture.id];
+  if (!Array.isArray(saved?.filled)) continue;
+
+  const legacy = new Set(saved.filled.filter(i => Number.isInteger(i) && i >= 0 && i < picture.legacyRegionCount));
+  if (legacy.size === picture.legacyRegionCount) {
+   saved.filled = picture.regions.map((_, index) => index);
+   continue;
+  }
+  saved.filled = picture.regions.flatMap((region, index) => {
+   const covered = picture.legacyOverlap[index].reduce((sum, [i, pixels]) => sum + (legacy.has(i) ? pixels : 0), 0);
+   return covered >= region.area * .95 ? [index] : [];
+  });
+  if (picture.id !== 'bookshop') {
+   const filled = new Set(saved.filled);
+   saved.selected = picture.regions.find((_, index) => !filled.has(index))?.c ?? 1;
+  }
+ }
 }
 
 let stored=null;try{stored=JSON.parse(localStorage.getItem(KEY)||'null')}catch{}
-migrateBookshop(stored);
-legacyBookshop.regions = BOOKSHOP_TEST.regions;
-legacyBookshop.palette = BOOKSHOP_TEST.palette;
+migrateRegions(stored);
 const progress=new VillageProgress(VILLAGE_DATA,stored),art=$('#art'),scene=$('#scene'),defs=$('#artDefs');
 let scenePreview=false;
 let regions=[],filled=new Set(),mode='coloring',history={},view={x:0,y:0,w:640,h:600},epoch=0,timers=[],fitFrame=0;
 const reduce=window.matchMedia('(prefers-reduced-motion: reduce)');let motion=true;try{motion=localStorage.getItem(MOTION_KEY)!=='off'}catch{}
 function node(tag,attrs){const n=document.createElementNS(NS,tag);Object.entries(attrs).forEach(([k,v])=>n.setAttribute(k,v));return n}
-function persist(){try{localStorage.setItem(KEY,JSON.stringify({...progress.serialize(),bookshopMap:2}))}catch{say('Progress cannot be saved in this browser; keep this tab open.')}}
+function persist(){try{localStorage.setItem(KEY,JSON.stringify({...progress.serialize(),bookshopMap:2,regionMap:REGION_MAP}))}catch{say('Progress cannot be saved in this browser; keep this tab open.')}}
 function currentScene(){return VILLAGE_DATA.scenes.find(item=>item.id===progress.sceneId())}
 function say(text){$('#status').textContent=text}
 function stopSequence(){epoch++;timers.forEach(clearTimeout);timers=[];if(fitFrame)cancelAnimationFrame(fitFrame);fitFrame=0;document.querySelectorAll('.painted-flight').forEach(e=>e.remove());$('#toast').classList.remove('visible')}
@@ -44,6 +49,7 @@ function svgCrop(crop,gray=false,href=VILLAGE_DATA.image){return `<svg viewBox="
 function renderUI(){const p=progress.picture(),entry=progress.entry();$('#title').textContent=p.title;$('#eyebrow').textContent=currentScene().title;updateCollectionButtons();$('#percent').textContent=Math.round(entry.filled.size/p.regions.length*100)+'%';$('#bar').style.width=$('#percent').textContent;$('#count').textContent=`${entry.filled.size} of ${p.regions.length} regions brought to life`;
  if(mode==='coloring')regions.forEach((r,i)=>{const done=entry.filled.has(i);r.color.setAttribute('opacity',done?'1':'0');r.p.classList.toggle('match',!done&&r.c===entry.selected);r.p.setAttribute('aria-label',`${r.name}, color ${r.c}${done?', colored':''}`);r.t.textContent=done?'':r.c});
  const palette = $('#palette');
+ palette.style.setProperty('--swatch-columns', Math.max(4, Math.ceil(p.palette.length / 2)));
  const counts = p.palette.map(() => 0);
  regions.forEach((region, index) => { if (!entry.filled.has(index)) counts[region.c - 1]++; });
  const previousFocus = [...palette.children].indexOf(document.activeElement);

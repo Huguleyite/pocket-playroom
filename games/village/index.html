@@ -40,7 +40,7 @@ body.gallery header,body.gallery .side{display:none}body.gallery main{display:bl
   body.gallery.tools-hidden .scene-title{display:none}
 }
 
-#palette{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:6px;padding:4px 0 8px}
+#palette{display:grid;grid-template-columns:repeat(var(--swatch-columns, 8),minmax(0,1fr));gap:6px;padding:4px 0 8px}
 #palette .swatch{min-height:40px;height:40px;width:min(100%,42px);font-size:16px}
 .swatch.selected{outline-offset:0}
 
@@ -106,4 +106,4 @@ body.canvas-expanded:not(.gallery) #collection{display:block}
 </dialog>
 <dialog id="helpDialog"><div class="dialoghead"><h2>Bring the village to life</h2><button data-close>Close</button></div><p>Choose a numbered color and tap its matching regions. Use your mouse wheel, pinch, or the + / − buttons to zoom. Drag anywhere to move around a zoomed picture.</p><p>Use Expand canvas for more room to color. Drag to reach the edges of the painting, or use Fit to see the full storefront.</p></dialog>
 <dialog id="resetDialog"><h2>Restart this picture?</h2><p id="resetNote">Only this picture’s progress will be cleared.</p><button id="confirmReset">Restart picture</button><button data-close>Keep my picture</button></dialog>
-<script src="data.js?v=world-20261105"></script><script src="bookshop-data.js?v=my-pictures-1"></script><script src="progress.js?v=my-pictures-1"></script><script src="village.js?v=my-pictures-1"></script></html>
+<script src="data.js?v=world-colors-1"></script><script src="progress.js?v=my-pictures-1"></script><script src="village.js?v=world-colors-1"></script></html>
