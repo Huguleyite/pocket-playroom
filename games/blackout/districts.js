@@ -25,7 +25,7 @@ window.Districts={
   }
  },
  hint(){if(!Campaign.index||ChapterAbilities.boss||ChapterAbilities.defeated)return null;return this.themes[Campaign.index].tip},
- draw(){const i=Campaign.index,t=this.themes[i];if(!t)return;ctx.save();
+ draw(){if(window.WorldArt){WorldArt.details();return}const i=Campaign.index,t=this.themes[i];if(!t)return;ctx.save();
   for(const b of platforms){const nearest=grid.generators.findIndex(g=>g.x>=b.x),on=grid.generators[nearest<0?3:nearest]?.on,c=on?t.light:'#304654';
    // Fixtures sit on the facade, below the collidable rim.
    if(i===1){rect(b.x+12,b.y+46,b.w-24,7,t.ink);for(let x=b.x+26;x<b.x+b.w-24;x+=60){rect(x,b.y+54,36,32,'#18313c');rect(x+3,b.y+57,30,on?22:3,c)}}

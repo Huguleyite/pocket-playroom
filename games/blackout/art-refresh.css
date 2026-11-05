@@ -1,0 +1,7 @@
+/* Compact desktop instruments leave the new scenery visible; touch layout stays accessible. */
+@media(min-width:901px){
+ .hud{left:16px;right:16px;transform:none;width:auto;max-width:none;padding:10px 14px;display:grid;grid-template-columns:auto minmax(0,1fr);column-gap:24px;align-items:center;background:#0a1b29ed;border-color:#6b858d;border-radius:7px}
+ .vitals{gap:12px;flex-wrap:nowrap}#hud-portrait{width:36px;height:38px;flex-basis:36px}.health-block,.energy-block{min-width:110px}.hud-label{font-size:10px}#health-slots i{width:23px;height:16px}#energy-slots i{width:23px;height:23px;font-size:21px;line-height:21px}#status{font-size:10px;max-width:150px;min-width:100px}
+ .mission{border-top:0;border-left:1px solid #546b73;margin:0;padding:0 0 0 18px;grid-template-columns:1fr;gap:2px}.mission .hud-label{display:none}#objective{font-size:18px}#hint{grid-column:1;font-size:12px;line-height:1.4}.hud #boss-feedback{grid-column:1/-1;margin-top:6px;font-size:12px}.hud #boss-feedback[hidden]{display:none}
+}
+@media(max-width:900px){.hud{background:#0a1b29ed;border-color:#6b858d}}

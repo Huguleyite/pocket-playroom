@@ -15,6 +15,8 @@ document.querySelectorAll('[data-bind]').forEach(button=>button.onclick=()=>Cont
 
 document.querySelector('#preview-score').onclick=async function(){await BlackoutAudio.start();BlackoutAudio.preview=!BlackoutAudio.preview;this.textContent=BlackoutAudio.preview?'Stop soundtrack preview':'Listen to soundtrack'};
 document.querySelector('#score-intensity').onchange=function(){Soundtrack.previewScene=this.value};
+const scorePicker=document.querySelector('#score-intensity');
+for(const music of Soundtrack.districtMusic){const option=document.createElement('option');option.value='district'+(music.chapter+1);option.textContent=(music.chapter+1)+' / '+music.level;scorePicker.add(option,scorePicker.querySelector('[value="boss"]'))}
 document.querySelectorAll('[data-sound]').forEach(button=>button.onclick=async()=>{await BlackoutAudio.start();BlackoutAudio.effect(button.dataset.sound)});
 
 const movementLabel=document.createElement('label');movementLabel.textContent='Teleport recovery';const movementSelect=document.createElement('select');movementSelect.id='teleport-recovery';movementSelect.innerHTML='<option value="quick">Quick control return (test)</option><option value="classic">Original timing</option>';movementSelect.value=MovementOptions.quickTeleport?'quick':'classic';movementSelect.onchange=()=>{MovementOptions.quickTeleport=movementSelect.value==='quick';storeSettings()};movementLabel.append(movementSelect);settingsDialog.append(movementLabel);
