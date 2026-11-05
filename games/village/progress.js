@@ -5,8 +5,15 @@ class VillageProgress{
  entry(id=this.active){return this.entries[id]}
  select(id){if(!this.entries[id])return false;this.active=id;return true}
  complete(id=this.active){return this.entry(id).filled.size===this.picture(id).regions.length}
- sceneComplete(){return this.data.pictures.every(p=>this.complete(p.id))}
- completedCount(){return this.data.pictures.filter(p=>this.complete(p.id)).length}
+ sceneId(){return this.picture().sceneId??'village'}
+ scenePictures(sceneId=this.sceneId()){return this.data.pictures.filter(p=>(p.sceneId??'village')===sceneId)}
+ sceneComplete(sceneId=this.sceneId()){
+  const pictures=this.scenePictures(sceneId)
+  return pictures.length>0&&pictures.every(p=>this.complete(p.id))
+ }
+ completedCount(sceneId=this.sceneId()){return this.scenePictures(sceneId).filter(p=>this.complete(p.id)).length}
+ completedScenes(){return (this.data.scenes??[{id:'village'}]).filter(scene=>this.sceneComplete(scene.id)).length}
+ worldComplete(){return this.completedScenes()===(this.data.scenes?.length??1)}
  fill(index){const p=this.picture(),e=this.entry();if(!p.regions[index]||e.filled.has(index)||p.regions[index].c!==e.selected)return false;e.filled.add(index);return true}
  undo(index){return this.entry().filled.delete(index)}
  reset(){this.entry().filled.clear()}
