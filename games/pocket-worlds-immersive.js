@@ -3,6 +3,7 @@
  const expandButton = document.querySelector('#expandCanvas');
  const hideButton = document.querySelector('#hideColorControls');
  const showButton = document.querySelector('#restoreColorControls');
+ const fullButton = document.querySelector('#fullColorScreen');
  const canvas = document.querySelector('#art');
 
  function expanded() {
@@ -28,6 +29,22 @@
  });
  document.querySelector('#showTools').addEventListener('click', () => {
   if (mode === 'picture') resetView();
+ });
+
+ fullButton.hidden = !document.fullscreenEnabled;
+ fullButton.addEventListener('click', async () => {
+  try {
+   if (document.fullscreenElement) await document.exitFullscreen();
+   else {
+    if (!expanded()) expandButton.click();
+    await document.documentElement.requestFullscreen();
+   }
+  } catch {
+   fullButton.hidden = true;
+  }
+ });
+ document.addEventListener('fullscreenchange', () => {
+  fullButton.textContent = document.fullscreenElement ? 'Exit full screen' : 'Full screen';
  });
 
  document.addEventListener('keydown', event => {
