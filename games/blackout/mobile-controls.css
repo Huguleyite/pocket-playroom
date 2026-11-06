@@ -1,3 +1,5 @@
+main:not(.mobile-test) .touch { display:none }
+
 main.mobile-test {
   position:relative;
   width:100%;

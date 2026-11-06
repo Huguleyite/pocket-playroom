@@ -1,8 +1,8 @@
 (() => {
   const params=new URLSearchParams(location.search);
   const touchMode=params.get('touch');
-  const mobileViewport=matchMedia('(any-pointer: coarse), (max-width: 700px)').matches;
-  if(touchMode!=='1'&&touchMode!=='fold'&&!mobileViewport)return;
+  const primaryTouch=matchMedia('(pointer: coarse) and (hover: none)').matches;
+  if(touchMode!=='1'&&touchMode!=='fold'&&!primaryTouch)return;
 
   const shell=document.querySelector('main');
   const deck=document.querySelector('.touch');
