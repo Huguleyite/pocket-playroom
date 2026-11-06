@@ -1,0 +1,105 @@
+main.mobile-test {
+  position:relative;
+  width:100%;
+  height:100dvh!important;
+  min-height:0!important;
+  padding:0;
+  gap:0;
+}
+.mobile-test header { display:none }
+.mobile-test .stage {
+  width:100%;
+  height:auto!important;
+  min-height:0;
+  flex:1;
+  border:0;
+}
+.mobile-test .hud {
+  left:max(8px,env(safe-area-inset-left));
+  right:max(8px,env(safe-area-inset-right));
+  width:auto;
+  transform:none;
+  padding:5px 8px;
+}
+.mobile-test .vitals { gap:8px; flex-wrap:nowrap }
+.mobile-test #hud-portrait,.mobile-test .mission .hud-label { display:none }
+.mobile-test .mission { display:block; margin:4px 0 0; padding:3px 0 0; border:0 }
+.mobile-test #objective,.mobile-test #hint { font-size:12px }
+.mobile-test #status { max-width:none; width:auto; margin-left:auto }
+.mobile-test footer { padding:2px; min-height:18px }
+.mobile-test footer #progress { font-size:10px }
+.mobile-test .touch {
+  --key-size:clamp(42px,7vw,57px);
+  position:absolute;
+  display:grid;
+  grid-template-columns:auto minmax(0,1fr) auto;
+  align-items:end;
+  inset:auto 0 19px!important;
+  width:100%;
+  transform:none;
+  padding:4px max(6px,env(safe-area-inset-right)) max(5px,env(safe-area-inset-bottom)) max(6px,env(safe-area-inset-left));
+  pointer-events:none;
+}
+.mobile-test .mobile-grip { display:grid; justify-items:center; gap:3px; pointer-events:auto }
+.mobile-test .mobile-menu { display:grid; justify-items:center; gap:3px; padding-bottom:4px }
+.mobile-test .touch button {
+  min-height:36px;
+  min-width:0;
+  padding:3px;
+  pointer-events:auto;
+  font-size:11px;
+  border-radius:7px;
+}
+.mobile-test .mobile-grip > button { width:100% }
+.mobile-test .mobile-dpad,.mobile-test .mobile-face {
+  display:grid;
+  grid-template:repeat(3,var(--key-size))/repeat(3,var(--key-size));
+  touch-action:none;
+  user-select:none;
+}
+.mobile-test .mobile-dpad {
+  background:linear-gradient(#233649,#233649) center / 34% 100% no-repeat,
+             linear-gradient(#233649,#233649) center / 100% 34% no-repeat;
+}
+.mobile-test .mobile-dpad span {
+  display:grid;
+  place-items:center;
+  background:#233649;
+  border:1px solid #557083;
+  border-radius:6px;
+  font-size:19px;
+}
+.mobile-test .mobile-dpad.up span:nth-child(1),
+.mobile-test .mobile-dpad.left span:nth-child(2),
+.mobile-test .mobile-dpad.right span:nth-child(3),
+.mobile-test .mobile-dpad.down span:nth-child(4),
+.mobile-test .touch button:active { background:#98f1cc; color:#101d28 }
+.mobile-test .mobile-dpad span:nth-child(1),.mobile-test .mobile-face button:nth-child(1) { grid-area:1/2 }
+.mobile-test .mobile-dpad span:nth-child(2),.mobile-test .mobile-face button:nth-child(2) { grid-area:2/1 }
+.mobile-test .mobile-dpad span:nth-child(3),.mobile-test .mobile-face button:nth-child(3) { grid-area:2/3 }
+.mobile-test .mobile-dpad span:nth-child(4),.mobile-test .mobile-face button:nth-child(4) { grid-area:3/2 }
+.mobile-test .mobile-face button { border-radius:50%; line-height:1.05 }
+.mobile-test .mobile-face b { display:block; font-size:16px }
+.mobile-test .mobile-face button:nth-child(1) b { color:#ffd39c }
+.mobile-test .mobile-face button:nth-child(2) b { color:#acd9ff }
+.mobile-test .mobile-face button:nth-child(3) b { color:#ffafab }
+.mobile-test .mobile-face button:nth-child(4) b { color:#9ff3d8 }
+.mobile-test.mobile-fold { --game-height:50dvh; --controls-top:50dvh }
+.mobile-test.mobile-fold .stage { flex:none; height:var(--game-height)!important }
+.mobile-test.mobile-fold .touch {
+  inset:var(--controls-top) 0 0!important;
+  align-items:center;
+  background:#142434;
+}
+.mobile-test.mobile-fold footer { bottom:calc(100dvh - var(--game-height)); }
+.mobile-test.mobile-segmented {
+  --game-height:env(viewport-segment-bottom 0 0, 50dvh);
+  --controls-top:env(viewport-segment-top 0 1, 50dvh);
+}
+@media(max-width:370px) {
+  .mobile-test .touch { --key-size:39px }
+}
+@media(max-height:430px) {
+  .mobile-test.mobile-fold .touch { --key-size:clamp(35px,10dvh,45px) }
+  .mobile-test.mobile-fold .touch button { min-height:30px }
+}

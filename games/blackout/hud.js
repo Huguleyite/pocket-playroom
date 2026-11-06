@@ -1,6 +1,7 @@
 /* Readable player status and contextual mission UI. Gameplay rules stay in their systems. */
 (() => {
  const $=s=>document.querySelector(s),healthSlots=[...$('#health-slots').children],energySlots=[...$('#energy-slots').children];
+ if(window.StationSquare){const slot=document.createElement('i');slot.textContent='ϟ';slot.hidden=true;$('#energy-slots').append(slot);energySlots.push(slot)}
  const energyCaption=document.createElement('span');energyCaption.id='energy-caption';$('.energy-block').append(energyCaption);let lastEnergy=null,energyUntil=0,energyChange='';
  const portrait=$('#hud-portrait').getContext('2d');const feedback=document.createElement('div');feedback.id='boss-feedback';feedback.setAttribute('role','status');feedback.setAttribute('aria-live','polite');$('.hud').append(feedback);
  let previousHealth=null,previousDeaths=0,damageUntil=0,damageStart=3;
@@ -11,13 +12,14 @@
  // Essential pause, sound and fullscreen controls remain directly accessible.
  $('header .eyebrow').textContent='RAIN / ROOFTOPS / ONE LAST DELIVERY';
  const objectives=()=>{
+  if(window.PlatformNine)return PlatformNine.objective();if(window.UnderRiverEscape)return UnderRiverEscape.objective();
   const b=window.ChapterAbilities?.boss;
-  if(b)return 'Disable '+Campaign.level.boss;
+  if(b)return window.StationSquare?.sequence?'Restore the departure board':'Disable '+Campaign.level.boss;
   if(window.ChapterAbilities?.defeated)return 'Power the final relay';
   const next=grid.generators.find(g=>!g.on);
   if(!next)return 'Reach the delivery point';
   if(grid.doors.some(d=>!d.open&&d.x>p.x-65&&d.x<next.x))return 'Find energy and open the route';
-  if(next.checkpoint===4)return 'Reach the rooftop guardian';
+  if(next.checkpoint===4)return window.StationSquare?'Reach the station controls':'Reach the rooftop guardian';
   const enemy=window.Combat2D?.enemies.find(e=>e.relay===next.checkpoint&&e.hp>0);
   if(enemy&&Math.abs(enemy.x-p.x)<350)return 'Clear the guard protecting the next generator';
   const r=window.Combat2D?.receiver;
@@ -55,6 +57,7 @@
   const lesson=window.AbilityCoach?.lesson();if(lesson&&grid.messagePriority<2&&!current){$('#objective').textContent=lesson.title;hint=lesson.tip}else if(!lesson&&!current&&grid.messagePriority<2&&window.CopperRow?.hint())hint=CopperRow.hint();
   if(!lesson&&!current&&!context&&p.charges>0&&grid.messagePriority<2&&window.Districts?.hint())hint=Districts.hint();
   if(ca?.boss&&window.EncounterPatterns&&!ca.encounterState().coreOpen)hint=ca.encounterState().recovering?'Hit confirmed. Recover energy and prepare for the next attack.':EncounterPatterns.tip(ca.boss);
+  if(window.PlatformNine)hint=PlatformNine.hint();else if(window.UnderRiverEscape)hint=UnderRiverEscape.hint();
   const pad=window.Controller?.exportBindings();
   if($('#input-mode').textContent.startsWith('CONTROLLER')&&pad){
    const names=['A','B','X','Y','LB','RB','LT','RT','View','Menu'];
