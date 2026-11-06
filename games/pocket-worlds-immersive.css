@@ -1,0 +1,33 @@
+[hidden]{display:none!important}
+.world-switch{display:flex;justify-content:center;gap:4px;grid-column:1/-1}
+.world-switch a{display:inline-flex;align-items:center;justify-content:center;min-height:40px;padding:4px 14px;border-radius:10px;color:#273746;text-decoration:none;font-weight:750;font-size:13px;border:1px solid #20334740}
+.world-switch a[aria-current]{background:#26384c;color:#fff8ed}
+body:not(.gallery):not(.canvas-expanded)>header{display:grid;grid-template-columns:auto auto;gap:4px;align-content:center;height:94px;padding-block:2px}
+body:not(.gallery):not(.canvas-expanded)>main{height:calc(100dvh - 94px)}
+.village-header-actions a{display:inline-flex}
+.canvas-modes{display:flex;gap:4px;flex-wrap:wrap}
+.canvas-modes button{flex:1;font-size:12px;padding:4px 8px;white-space:nowrap}
+body.canvas-expanded:not(.gallery)>main,
+body.gallery.tools-hidden>main{position:fixed;inset:0;display:block;width:100%;height:100dvh;max-width:none;min-height:0;padding:0;overflow:hidden}
+body.canvas-expanded:not(.gallery) .picture,
+body.gallery.tools-hidden .picture{position:absolute;inset:0;height:100%;width:100%;padding:0;min-height:0;border:0;border-radius:0}
+body.canvas-expanded:not(.gallery) .side{display:grid;position:absolute;bottom:max(6px,env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);width:min(600px,calc(100% - 12px));padding:6px;gap:4px;grid-template-columns:1fr;z-index:4;background:#fff8eff2;border:1px solid #4235505e;border-radius:12px;box-shadow:0 3px 18px #1b142a44}
+body.canvas-expanded:not(.gallery) .side>:not(#palette):not(.actions):not(.canvas-modes){display:none}
+body.canvas-expanded:not(.gallery) #palette,
+body.canvas-expanded:not(.gallery) .actions,
+body.canvas-expanded:not(.gallery) .canvas-modes{grid-column:1/-1}
+body.canvas-expanded:not(.gallery) .actions button{min-height:40px;padding:4px}
+body.canvas-expanded:not(.gallery) .canvas-modes button{min-height:40px}
+body.canvas-expanded.controls-hidden:not(.gallery) .side{display:none}
+body.gallery.tools-hidden .scene-title{display:none}
+body.gallery #restoreColorControls{display:none}
+#restoreColorControls,body.gallery.tools-hidden #showTools{position:fixed;z-index:6;right:max(6px,env(safe-area-inset-right));bottom:max(6px,env(safe-area-inset-bottom));background:#211b30e8;color:#fff8ef;border:1px solid #f0deef8a;padding:6px 10px;border-radius:9px;font-size:12px;min-height:44px}
+@media(max-width:760px){
+ body:not(.gallery):not(.canvas-expanded)>header{padding-inline:8px}
+ .village-header-actions{gap:3px}
+ .village-header-actions a{font-size:11px}
+}
+@media(max-height:500px) and (orientation:landscape){
+ body.canvas-expanded:not(.gallery) .side{left:auto;right:6px;transform:none;width:min(350px,47vw)}
+ body.canvas-expanded:not(.gallery) .canvas-modes button{min-height:36px}
+}

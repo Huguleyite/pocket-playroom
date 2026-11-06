@@ -367,7 +367,7 @@ expand.onclick = () => {
  frameView(expanded);
 };
 window.addEventListener('resize', () => {
- if (canvasFilled && mode === 'coloring') frameView(true);
+ if (canvasFilled && (mode === 'coloring' || mode === 'picture')) frameView(true);
 });
 $('#zoom').onclick = $('#plus').onclick = () => zoom(.8);
 $('#out').onclick = $('#minus').onclick = () => zoom(1.25);
