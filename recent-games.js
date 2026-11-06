@@ -5,6 +5,7 @@
  const games={
   'daily-stars':['Daily Stars','#games/daily-stars'],
   aether:['Aether & Ash','#games/aether'],
+  'hidden-magic':['Hidden Magic','#games/hidden-magic'],
   windows:['Window Lights','#games/windows'], 'windows-space':['Deep Space Decoder','#games/windows/space'],
   weave:['Weave It to Me','#games/weave'],tide:['Tile Tide','#games/tide'],shift:['Shift & Lock','#games/shift'],
   lock:['LetterLock','#games/lock'],deli:['Stack to the Future','#games/deli'],binario:['Binario / Neon Logic','#games/binario'],
