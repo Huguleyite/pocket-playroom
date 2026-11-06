@@ -70,33 +70,53 @@ main.mobile-test {
   border-radius:7px;
 }
 .mobile-test .mobile-grip > button { width:100% }
-.mobile-test .mobile-dpad,.mobile-test .mobile-face {
+.mobile-test .mobile-face {
   display:grid;
   grid-template:repeat(3,var(--key-size))/repeat(3,var(--key-size));
   touch-action:none;
   user-select:none;
 }
-.mobile-test .mobile-dpad {
-  background:linear-gradient(#233649,#233649) center / 34% 100% no-repeat,
-             linear-gradient(#233649,#233649) center / 100% 34% no-repeat;
-}
-.mobile-test .mobile-dpad span {
+.mobile-test .mobile-stick {
+  position:relative;
   display:grid;
   place-items:center;
-  background:#233649;
-  border:1px solid #557083;
-  border-radius:6px;
-  font-size:19px;
+  width:calc(3 * var(--key-size));
+  height:calc(3 * var(--key-size));
+  border:1px solid #7793a980;
+  border-radius:20px;
+  background:#14243485;
+  color:#d1e4e9;
+  font-size:11px;
+  touch-action:none;
+  user-select:none;
 }
-.mobile-test .mobile-dpad.up span:nth-child(1),
-.mobile-test .mobile-dpad.left span:nth-child(2),
-.mobile-test .mobile-dpad.right span:nth-child(3),
-.mobile-test .mobile-dpad.down span:nth-child(4),
+.mobile-test .mobile-stick.engaged span { visibility:hidden }
+.mobile-test .mobile-stick.engaged::after,.mobile-test .mobile-stick.engaged i {
+  content:"";
+  position:absolute;
+  left:var(--origin-x);
+  top:var(--origin-y);
+  pointer-events:none;
+  border-radius:50%;
+}
+.mobile-test .mobile-stick.engaged::after {
+  width:56px;
+  height:56px;
+  border:1px solid #98f1cc90;
+  transform:translate(-50%,-50%);
+}
+.mobile-test .mobile-stick.engaged i {
+  z-index:1;
+  width:24px;
+  height:24px;
+  background:#98f1cce8;
+  transform:translate(calc(-50% + var(--dx)),calc(-50% + var(--dy)));
+}
 .mobile-test .touch button:active { background:#98f1cc; color:#101d28 }
-.mobile-test .mobile-dpad span:nth-child(1),.mobile-test .mobile-face button:nth-child(1) { grid-area:1/2 }
-.mobile-test .mobile-dpad span:nth-child(2),.mobile-test .mobile-face button:nth-child(2) { grid-area:2/1 }
-.mobile-test .mobile-dpad span:nth-child(3),.mobile-test .mobile-face button:nth-child(3) { grid-area:2/3 }
-.mobile-test .mobile-dpad span:nth-child(4),.mobile-test .mobile-face button:nth-child(4) { grid-area:3/2 }
+.mobile-test .mobile-face button:nth-child(1) { grid-area:1/2 }
+.mobile-test .mobile-face button:nth-child(2) { grid-area:2/1 }
+.mobile-test .mobile-face button:nth-child(3) { grid-area:2/3 }
+.mobile-test .mobile-face button:nth-child(4) { grid-area:3/2 }
 .mobile-test .mobile-face button { border-radius:50%; line-height:1.05 }
 .mobile-test .mobile-face b { display:block; font-size:16px }
 .mobile-test .mobile-face button:nth-child(1) b { color:#ffd39c }

@@ -12,9 +12,8 @@
   deck.innerHTML=`
     <div class="mobile-grip">
       <button data-mobile-key="KeyT">LB · Teleport</button>
-      <div class="mobile-dpad" aria-label="Directional pad">
-        <span aria-hidden="true">▲</span><span aria-hidden="true">◀</span>
-        <span aria-hidden="true">▶</span><span aria-hidden="true">▼</span>
+      <div class="mobile-stick" aria-label="Floating movement joystick">
+        <span aria-hidden="true">MOVE</span><i aria-hidden="true"></i>
       </div>
     </div>
     <div class="mobile-menu">
@@ -31,7 +30,7 @@
       </div>
     </div>`;
 
-  const pad=deck.querySelector('.mobile-dpad');
+  const stick=deck.querySelector('.mobile-stick');
   const selector=deck.querySelector('[data-mobile-fold]');
   const fingers=new Map();
   const heldKeys=new Set();
@@ -42,44 +41,64 @@
     for(const code of next)if(!heldKeys.has(code)&&!held(code))pressed.add(code);
     heldKeys.clear();
     for(const code of next)heldKeys.add(code);
-    pad.classList.toggle('up',next.has('ArrowUp'));
-    pad.classList.toggle('down',next.has('ArrowDown'));
-    pad.classList.toggle('left',next.has('ArrowLeft'));
-    pad.classList.toggle('right',next.has('ArrowRight'));
+  }
+  let origin=null;
+  function releaseStick() {
+    if(origin)update(origin.id,[]);
+    origin=null;
+    stick.classList.remove('engaged');
   }
   function clear() {
+    releaseStick();
     for(const id of fingers.keys())update(id,[]);
   }
-  function directions(event) {
-    const bounds=pad.getBoundingClientRect();
-    const x=(event.clientX-bounds.left)/bounds.width-.5;
-    const y=(event.clientY-bounds.top)/bounds.height-.5;
+  stick.addEventListener('pointerdown',event=>{
+    if(!active||paused||won||event.button!==0||origin)return;
+    event.preventDefault();
+    stick.setPointerCapture(event.pointerId);
+    origin={id:event.pointerId,x:event.clientX,y:event.clientY};
+    const bounds=stick.getBoundingClientRect();
+    stick.style.setProperty('--origin-x',`${origin.x-bounds.left}px`);
+    stick.style.setProperty('--origin-y',`${origin.y-bounds.top}px`);
+    stick.style.setProperty('--dx','0px');
+    stick.style.setProperty('--dy','0px');
+    stick.classList.add('engaged');
+  });
+  stick.addEventListener('pointermove',event=>{
+    if(event.pointerId!==origin?.id||!active||paused||won)return;
+    const x=event.clientX-origin.x;
+    const y=event.clientY-origin.y;
+    const distance=Math.hypot(x,y);
+    const travel=Math.min(1,24/(distance||1));
+    stick.style.setProperty('--dx',`${x*travel}px`);
+    stick.style.setProperty('--dy',`${y*travel}px`);
     const codes=[];
-    if(Math.abs(x)>.15)codes.push(x<0?'ArrowLeft':'ArrowRight');
-    if(Math.abs(y)>.15)codes.push(y<0?'ArrowUp':'ArrowDown');
-    return codes;
+    if(distance>=9){
+      if(Math.abs(x)>=distance*.42)codes.push(x<0?'ArrowLeft':'ArrowRight');
+      if(Math.abs(y)>=distance*.42)codes.push(y<0?'ArrowUp':'ArrowDown');
+    }
+    update(event.pointerId,codes);
+  });
+  function haptic(event) {
+    if(event.pointerType==='touch')navigator.vibrate?.(15);
   }
-  function bind(control,read,slide=false) {
-    const captured=new Set();
+  for(const type of ['pointerup','pointercancel','lostpointercapture']){
+    stick.addEventListener(type,event=>{if(event.pointerId===origin?.id)releaseStick();});
+  }
+  function bind(control,code) {
     control.addEventListener('pointerdown',event=>{
       if(!active||paused||won||event.button!==0)return;
       event.preventDefault();
       control.setPointerCapture(event.pointerId);
-      captured.add(event.pointerId);
-      update(event.pointerId,read(event));
-    });
-    if(slide)control.addEventListener('pointermove',event=>{
-      if(captured.has(event.pointerId)&&active&&!paused&&!won)update(event.pointerId,read(event));
+      update(event.pointerId,[code]);
+      haptic(event);
     });
     for(const type of ['pointerup','pointercancel','lostpointercapture']){
-      control.addEventListener(type,event=>{
-        captured.delete(event.pointerId);
-        update(event.pointerId,[]);
-      });
+      control.addEventListener(type,event=>update(event.pointerId,[]));
     }
   }
-  bind(pad,directions,true);
-  for(const button of deck.querySelectorAll('[data-mobile-key]'))bind(button,()=>[button.dataset.mobileKey]);
+  for(const button of deck.querySelectorAll('[data-mobile-key]'))bind(button,button.dataset.mobileKey);
+  for(const button of deck.querySelectorAll('.mobile-menu button'))button.addEventListener('pointerdown',haptic);
   function layout() {
     clear();
     const folded=mode==='fold'||(mode==='auto'&&split.matches);

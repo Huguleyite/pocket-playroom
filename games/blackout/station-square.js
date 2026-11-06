@@ -233,7 +233,7 @@
       grid.sources.push({x:1847,y:282,type:'node',drained:false});
     }
     grid.doors = stage.gates.map(([x,y],i)=>({
-      x,y,w:64,h:88,open:false,remote:true,optional:stage.optionalGates?.includes(i),draw:drawGate,
+      x,y,w:64,h:88,open:false,remote:true,optional:stage.optionalGates?.includes(i),draw:(door,fill,context,tick)=>drawPowerGate(door,fill,context,tick,stage.style==='tunnel'),
       onOpen(door) { door.openedAt=time; }
     }));
     for(const door of grid.doors) {
@@ -376,77 +376,6 @@
     if(!label)return;
     ctx.save();ctx.textAlign='center';ctx.fillStyle='#d0fff5';ctx.font='9px monospace';
     ctx.fillText(label,x,y-34);ctx.restore();
-  }
-
-  function drawGate(door, fill, context, tick) {
-    const {x,y,w,h,open} = door;
-    const floor = y+h;
-    const indicator = open ? '#8cf8df' : '#ffc77f';
-    const travel = open ? Math.min(1,Math.max(0,(tick-(door.openedAt ?? -1))/.22)) : 0;
-    const offset = Math.round(w*travel);
-
-    // The leaf slides along a bronze track into the receiving pier.
-    fill(x-3,floor-3,w+8,3,'#51423d');
-    fill(x,floor-3,w,1,'#b29a71');
-    if (offset<w) {
-      context.save();
-      context.beginPath();
-      context.rect(x,y,w,h);
-      context.clip();
-      const leaf=x+offset;
-      if(stationLevel().style==='tunnel'){
-        fill(leaf,y+5,w,h-10,'#2c4953');
-        fill(leaf+3,y+8,w-6,h-17,'#395863');
-        for(let seam=y+12;seam<floor-8;seam+=13) {
-          fill(leaf+4,seam,w-8,2,'#253d48');
-          fill(leaf+5,seam+2,w-10,1,'#6f7e78');
-        }
-      }
-      fill(leaf,y+10,w,5,'#27343c');
-      fill(leaf,y+10,w,1,'#7c8279');
-      fill(leaf,floor-14,w,7,'#23333e');
-      fill(leaf,floor-13,w,1,'#78817c');
-      for(let bar=leaf+3;bar<leaf+w;bar+=7) {
-        fill(bar,y+5,3,h-19,'#22313c');
-        fill(bar,y+5,1,h-19,'#818781');
-        fill(bar+1,y+2,1,4,'#9a8b76');
-        fill(bar+1,y+12,1,1,'#c7aa80');
-      }
-      for(const wheel of [leaf+5,leaf+w-10]) {
-        fill(wheel,floor-10,7,7,'#4a423e');
-        fill(wheel+1,floor-9,5,5,'#997f59');
-        fill(wheel+2,floor-8,3,3,'#26343d');
-      }
-      context.restore();
-    }
-
-    for(const pier of [x-15,x+w]) {
-      fill(pier,floor-78,15,78,'#8b796c');
-      fill(pier+1,floor-77,11,76,'#ae9780');
-      fill(pier+12,floor-76,2,75,'#6f645e');
-      for(let joint=floor-64;joint<floor-5;joint+=13) {
-        fill(pier+1,joint,13,1,'#766b62');
-        fill(pier+2,joint+1,9,1,'#c2aa90');
-      }
-      fill(pier-2,floor-81,19,5,'#c5ac8d');
-      fill(pier-1,floor-81,17,1,'#e6c7a2');
-      fill(pier-1,floor-7,17,7,'#9a8370');
-    }
-
-    const motor=x+w+13;
-    fill(motor,floor-17,13,17,'#263741');
-    fill(motor+1,floor-16,11,2,'#828176');
-    for(let vent=floor-12;vent<floor-2;vent+=3)fill(motor+3,vent,7,1,'#64726d');
-    fill(x+w+6,floor-61,7,10,'#343942');
-    fill(x+w+8,floor-59,3,5,indicator);
-    fill(x+w+9,floor-51,1,34,'#534c43');
-    if (open) return;
-
-    context.fillStyle = '#ffda9d';
-    context.font = '9px monospace';
-    context.textAlign = 'center';
-    context.fillText('REMOTE GRILLE',x+w/2,y-8);
-    context.textAlign = 'start';
   }
 
   CityScene.rooftops = (context, surfaces, power, tick, camera, width) => {
