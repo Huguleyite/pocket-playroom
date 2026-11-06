@@ -10,7 +10,7 @@ main.mobile-test {
 .mobile-test .stage {
   width:100%;
   height:auto!important;
-  min-height:0;
+  min-height:0!important;
   flex:1;
   border:0;
 }
@@ -19,13 +19,32 @@ main.mobile-test {
   right:max(8px,env(safe-area-inset-right));
   width:auto;
   transform:none;
-  padding:5px 8px;
+  padding:3px 7px;
+  display:block;
+  background:#0a1825a8;
+  border-color:#7ea4b654;
+  box-shadow:none;
+  text-shadow:0 1px 2px #081018;
 }
-.mobile-test .vitals { gap:8px; flex-wrap:nowrap }
+.mobile-test .vitals { gap:10px; flex-wrap:nowrap }
+.mobile-test .health-block,.mobile-test .energy-block { min-width:0 }
+.mobile-test .hud-label { font-size:9px; letter-spacing:.35px }
+.mobile-test .hud-label strong { font-size:10px; margin-left:3px }
+.mobile-test #health-slots,.mobile-test #energy-slots { margin-top:1px; gap:3px }
+.mobile-test #health-slots i { width:16px; height:6px }
+.mobile-test #energy-slots i { width:11px; height:10px; font-size:9px; line-height:8px }
+.mobile-test #charge { display:none }
 .mobile-test #hud-portrait,.mobile-test .mission .hud-label { display:none }
-.mobile-test .mission { display:block; margin:4px 0 0; padding:3px 0 0; border:0 }
-.mobile-test #objective,.mobile-test #hint { font-size:12px }
-.mobile-test #status { max-width:none; width:auto; margin-left:auto }
+.mobile-test .mission { display:block; margin:2px 0 0; padding:0; border:0 }
+.mobile-test #objective,.mobile-test #hint { font-size:11px; line-height:1.25 }
+.mobile-test #status { max-width:none; width:auto; margin-left:auto; font-size:10px }
+.mobile-test #damage-notice,.mobile-test .hud #boss-feedback { margin-top:2px; font-size:11px }
+.mobile-test .hud.is-fighting #boss-feedback { min-height:0 }
+.mobile-test .hud.is-fighting #boss-feedback[hidden] { display:none }
+.mobile-test #energy-caption { display:none }
+@media(max-height:450px) {
+  .mobile-test #overlay { min-height:0 }
+}
 .mobile-test footer { padding:2px; min-height:18px }
 .mobile-test footer #progress { font-size:10px }
 .mobile-test .touch {
