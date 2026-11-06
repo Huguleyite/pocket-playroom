@@ -1,11 +1,13 @@
 (() => {
   const params=new URLSearchParams(location.search);
-  if(params.get('touch')!=='1'&&params.get('touch')!=='fold')return;
+  const touchMode=params.get('touch');
+  const mobileViewport=matchMedia('(any-pointer: coarse), (max-width: 700px)').matches;
+  if(touchMode!=='1'&&touchMode!=='fold'&&!mobileViewport)return;
 
   const shell=document.querySelector('main');
   const deck=document.querySelector('.touch');
   const split=matchMedia('(vertical-viewport-segments: 2)');
-  let mode=params.get('touch')==='fold'?'fold':'auto';
+  let mode=touchMode==='fold'?'fold':'auto';
   shell.classList.add('mobile-test');
   deck.innerHTML=`
     <div class="mobile-grip">
