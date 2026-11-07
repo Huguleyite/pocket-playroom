@@ -565,30 +565,22 @@ function makeGrid() {
   return {solution,givens,entries:[...givens],selected:givens.indexOf(0)};
 }
 
+const sliderGoal = [1,2,3,4,5,6,7,8,0];
 function sliderNeighbors(cell) {
-  return [0,1,2,3,4,5].filter(i =>
+  return sliderGoal.map((_,index) => index).filter(i =>
     Math.abs(i%3-cell%3)+Math.abs(Math.floor(i/3)-Math.floor(cell/3)) === 1);
 }
 
 function makeSlider() {
-  const goal = [1,2,3,4,5,0];
-  const queue = [{tiles:goal,distance:0}];
-  const seen = new Set([goal.join('')]);
-  const options = [];
-  for (const {tiles,distance} of queue) {
-    if (distance >= 8) options.push(tiles);
-    if (distance === 13) continue;
-    const blank = tiles.indexOf(0);
-    for (const cell of sliderNeighbors(blank)) {
-      const next = [...tiles];
-      [next[cell],next[blank]] = [next[blank],next[cell]];
-      const key = next.join('');
-      if (seen.has(key)) continue;
-      seen.add(key);
-      queue.push({tiles:next,distance:distance+1});
-    }
+  const tiles = [...sliderGoal];
+  let blank = 8, previous = -1;
+  for (let move = 0; move < 11; move++) {
+    const next = shuffled(sliderNeighbors(blank).filter(cell => cell !== previous))[0];
+    [tiles[blank],tiles[next]] = [tiles[next],tiles[blank]];
+    previous = blank;
+    blank = next;
   }
-  return {tiles:shuffled(options)[0],moves:0};
+  return {tiles,moves:0};
 }
 
 function makePipe() {
@@ -619,7 +611,7 @@ function workbench() {
         challenge.pipe ??= makePipe();
         pipeConnect(challenge.pipe.route,challenge.pipe.rotations,challenge.pipe.selected);
       } else {
-        challenge.slider ??= makeSlider();
+        if (challenge.slider?.tiles.length !== 9) challenge.slider = makeSlider();
         slide(challenge.slider.tiles,challenge.slider.moves);
       }
       break;
@@ -684,31 +676,74 @@ function patternGrid(grid,message = '',focusCell = false) {
   if (focusCell) layout.children[selected].focus();
 }
 
-function slide(tiles,moves) {
+function slide(tiles,moves,selected) {
   challenge.slider = {tiles,moves};
   const blank = tiles.indexOf(0);
+  const neighbors = sliderNeighbors(blank);
   show('ASSIST_PUZZLE','2 · Slide the tiles',
-    'Slide tiles next to the gap. Make the top row 1 2 3 and the bottom row 4 5 □ to freeze the moving particles and upgrade the lens.\nMoves: ' + moves,[]);
+    'Drag a tile into the gap. Arrange 1–8 left to right, with the gap at the bottom right.\nMoves: ' + moves,[back]);
   const grid = document.createElement('div');
-  grid.className = 'slider';
+  grid.className = 'slider full-slider';
   tiles.forEach((tile,i) => {
+    if (!tile) {
+      const gap = document.createElement('span');
+      gap.className = 'slider-gap';
+      gap.setAttribute('aria-label','Empty space');
+      grid.append(gap);
+      return;
+    }
     const button = document.createElement('button');
-    button.textContent = tile || '□';
-    button.disabled = Math.abs(i%3-blank%3)+Math.abs(Math.floor(i/3)-Math.floor(blank/3)) !== 1;
-    button.onclick = () => {
+    button.textContent = tile;
+    const movable = neighbors.includes(i);
+    button.classList.toggle('movable',movable);
+    button.disabled = !movable;
+    function commit() {
       const next = [...tiles];
       [next[i],next[blank]] = [next[blank],next[i]];
-      if (next.join('') === '123450') unlock();
-      else slide(next,moves+1);
-    };
+      if (next.every((value,index) => value === sliderGoal[index])) unlock();
+      else slide(next,moves+1,blank);
+    }
+    if (movable) {
+      const dx = blank%3-i%3, dy = Math.floor(blank/3)-Math.floor(i/3);
+      let drag, suppressClick = false;
+      button.onclick = () => { if (!suppressClick) commit(); };
+      button.onpointerdown = event => {
+        if (event.button !== 0 || drag) return;
+        suppressClick = false;
+        const rect = button.getBoundingClientRect();
+        const gap = grid.children[blank].getBoundingClientRect();
+        drag = {id:event.pointerId,x:event.clientX,y:event.clientY,distance:0,
+          span:Math.abs(gap.left-rect.left)+Math.abs(gap.top-rect.top)};
+        button.setPointerCapture(event.pointerId);
+        button.classList.add('dragging');
+      };
+      button.onpointermove = event => {
+        if (drag?.id !== event.pointerId) return;
+        drag.distance = clamp((event.clientX-drag.x)*dx+(event.clientY-drag.y)*dy,0,drag.span);
+        if (Math.hypot(event.clientX-drag.x,event.clientY-drag.y) > 6) suppressClick = true;
+        button.style.setProperty('--slide-x',dx*drag.distance+'px');
+        button.style.setProperty('--slide-y',dy*drag.distance+'px');
+      };
+      function endDrag(event) {
+        if (drag?.id !== event.pointerId) return;
+        const shouldSlide = event.type === 'pointerup' && drag.distance >= drag.span*.4;
+        drag = null;
+        button.classList.remove('dragging');
+        button.style.removeProperty('--slide-x');
+        button.style.removeProperty('--slide-y');
+        if (shouldSlide) {
+          suppressClick = true;
+          commit();
+        }
+      }
+      button.onpointerup = button.onpointercancel = button.onlostpointercapture = endDrag;
+    }
     grid.append(button);
   });
-  const exit = document.createElement('button');
-  exit.textContent = back[0];
-  exit.onclick = back[1];
-  $('#choices').append(grid,exit);
-  grid.querySelector('button:enabled').focus();
+  $('#choices').prepend(grid);
+  (grid.children[selected] || grid.querySelector('button:enabled')).focus({preventScroll:true});
 }
+
 function pipeConnect(route,rotations,selected) {
   challenge.pipe = {route,rotations,selected};
   const directions = [-3,1,3,-1];

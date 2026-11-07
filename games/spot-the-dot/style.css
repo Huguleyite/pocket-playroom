@@ -206,3 +206,10 @@ h2{margin-top:.28rem;letter-spacing:-.035em}
 #target-toggle[aria-expanded="true"] canvas{width:38px;height:38px}
 #clue{font-size:.78rem;max-width:24ch}
 @media(max-width:480px){.search-info:has(#target-toggle[aria-expanded="true"]){flex-wrap:wrap}.search-info:has(#target-toggle[aria-expanded="true"]) #reference{justify-content:flex-start}}
+.full-slider{width:100%;max-width:21rem;gap:.4rem;margin:.15rem auto .5rem}
+#panel.puzzle-panel .full-slider :is(button,.slider-gap){aspect-ratio:1.22;min-height:48px}
+#panel.puzzle-panel .full-slider button{font-size:clamp(1.4rem,5vw,2rem);touch-action:none;user-select:none}
+#panel.puzzle-panel .full-slider button:disabled{opacity:.8}
+#panel.puzzle-panel .full-slider button.movable{border-color:var(--station-accent);cursor:grab}
+#panel.puzzle-panel .full-slider button.dragging{position:relative;z-index:1;cursor:grabbing;transform:translate(var(--slide-x,0px),var(--slide-y,0px));transition:none}
+.slider-gap{border:1px dashed var(--station-edge);border-radius:.65rem;background:var(--station-deep)}
