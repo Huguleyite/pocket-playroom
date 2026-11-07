@@ -172,3 +172,17 @@ html[data-stars-board="nebula"] body.game-daily-stars .site-header .brand-name{c
 .village-card-art{display:block;width:100%;height:100%;object-fit:cover;object-position:center 61%}
 
 .village-development-badge{position:absolute;top:8px;left:8px;z-index:1;padding:4px 8px;border-radius:999px;background:#fff8e8;color:#30482d;border:1px solid #4f6847;font-size:11px;font-weight:800;line-height:1.2;box-shadow:0 1px 4px #302d3533}
+
+.spot-card-art{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 43%}
+body.game-spot-the-dot .game-layout{grid-template-columns:minmax(0,1fr)}
+body.game-spot-the-dot .game-side{display:none}
+body.game-spot-the-dot .game-heading{padding:4px 0 10px}
+body.game-spot-the-dot .game-heading h1{font-size:clamp(26px,4vw,38px);margin:4px 0}
+body.game-spot-the-dot .game-frame{height:300px}
+@media(min-width:1001px){
+ body.game-spot-the-dot #main{position:relative}
+ body.game-spot-the-dot .night-controls{position:absolute;top:0;left:50%;transform:translateX(-50%);margin:0;z-index:1}
+ body.game-spot-the-dot .night-toggle{min-height:44px;padding:6px 14px}
+ body.game-spot-the-dot .game-heading{display:none}
+ body.game-spot-the-dot .game-layout{margin-top:.4rem}
+}

@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+<head><script src="../../recent-games.js?v=recent1" defer></script><script>if(window.top===window){document.documentElement.style.visibility='hidden';location.replace(new URL('../../index.html#games/spot-the-dot',location.href));}</script>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Spot the Dot</title>
+<link rel="stylesheet" href="style.css">
+<script>
+window.roomComplete=(id,date)=>{if(!date){const d=new Date();date=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}try{localStorage.setItem('room-for-play:completed:'+id,JSON.stringify(date));}catch{}parent.postMessage({type:'room:completed',id,date},location.origin);};
+</script><script src="../../night-frame.js" data-game="spot-the-dot"></script><script src="collection-fit.js" defer></script><link rel="stylesheet" href="../../game-invite.css?v=invite1"><script src="../../game-invite.js?v=invite1" defer></script></head>
+<body>
+<main>
+<header><div class="brand"><span>VISUAL PUZZLE LAB</span><h1>Spot the Dot<span>.</span></h1></div><div class="toolbar"><button id="sound" aria-pressed="true">Sound on</button><button id="menu">Scenes</button></div></header>
+<p id="status" role="status"></p>
+<div id="scene-stage">
+<section id="board">
+<canvas tabindex="0" aria-label="Search board. Arrow keys move the lens. Hold Shift to move ten cells. Space confirms."></canvas>
+<div id="reference"><canvas width="30" height="30" aria-hidden="true"></canvas><span id="clue"></span></div>
+</section>
+</div>
+<footer><button id="assist">Assist Workbench</button><button id="found">FOUND IT!</button></footer>
+</main>
+<dialog id="panel" aria-labelledby="title">
+<div class="puzzle-scene" aria-hidden="true"><span id="puzzle-station"></span></div>
+<div class="panel-toolbar"><div id="panel-label" class="eyebrow"></div><button id="music" aria-pressed="true">Music on</button></div><h2 id="title"></h2><p id="description"></p><div id="choices"></div>
+</dialog>
+<script src="game.js" defer></script>
+</body>
+</html>
+
