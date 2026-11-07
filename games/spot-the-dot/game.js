@@ -237,6 +237,19 @@ function saveRun() {
 window.addEventListener('pagehide',saveRun);
 document.addEventListener('visibilitychange',() => { if (document.hidden) saveRun(); });
 
+const targetToggle = $('#target-toggle');
+function showClue(open) {
+  targetToggle.setAttribute('aria-expanded',String(open));
+  $('#clue').hidden = !open;
+}
+targetToggle.onclick = () => showClue($('#clue').hidden);
+targetToggle.addEventListener('focus',() => {
+  if (targetToggle.matches(':focus-visible')) showClue(true);
+});
+targetToggle.addEventListener('keydown',event => {
+  if (event.key === 'Escape') showClue(false);
+});
+
 function start(index,run) {
   scene = scenes[index];
   challenge = run?.challenge ?? {};
@@ -284,10 +297,12 @@ function start(index,run) {
   }
   dimmed = new Set(run?.dimmed ?? distractors.slice(0,Math.floor(tiles.length*.7)));
   document.body.style.setProperty('--ambient',scene[2]);
+  $('#reference').hidden = false;
   $('#clue').textContent = scene[1];
+  showClue(!run);
   const ref = $('#reference canvas').getContext('2d');
-  ref.clearRect(0,0,30,30);
-  ref.save(); ref.scale(1.5,1.5); glyph(ref,10,10,scene[3][signature],true); ref.restore();
+  ref.clearRect(0,0,60,60);
+  ref.save(); ref.scale(3,3); glyph(ref,10,10,scene[3][signature],true); ref.restore();
   rebuild();
   resume(run ? 'Run resumed. Match the sample.' : 'Drag to scan. Match the sample.');
   if (run?.inPuzzle) workbench();
@@ -391,6 +406,7 @@ function resume(message) {
   render();
 }
 function menu() {
+  if (!scene) $('#reference').hidden = true;
   const actions = scenes.map(([name], index) => [name, () => start(index)]);
   const run = saved.run;
   if (!scene && Number.isInteger(run?.index) && scenes[run.index] &&
@@ -852,6 +868,7 @@ function move(x,y,follow) {
   if (playtest && tier === 2 && Math.hypot(nextX-focus.x,nextY-focus.y) >= 1) {
     playtest.lensUsed = true;
   }
+  if (nextX !== focus.x || nextY !== focus.y) showClue(false);
   focus.x = nextX;
   focus.y = nextY;
   if (follow && tier < 3) centerCamera(focus.x,focus.y);

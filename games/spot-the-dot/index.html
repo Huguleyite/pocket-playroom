@@ -11,11 +11,16 @@ window.roomComplete=(id,date)=>{if(!date){const d=new Date();date=d.getFullYear(
 <body>
 <main>
 <header><div class="brand"><span>VISUAL PUZZLE LAB</span><h1>Spot the Dot<span>.</span></h1></div><div class="toolbar"><button id="sound" aria-pressed="true">Sound on</button><button id="menu">Scenes</button></div></header>
+<div class="search-info">
 <p id="status" role="status"></p>
+<div id="reference" hidden>
+<button id="target-toggle" type="button" aria-expanded="false" aria-controls="clue"><canvas width="60" height="60" aria-hidden="true"></canvas><span>Target</span></button>
+<span id="clue" hidden></span>
+</div>
+</div>
 <div id="scene-stage">
 <section id="board">
 <canvas tabindex="0" aria-label="Search board. Arrow keys move the lens. Hold Shift to move ten cells. Space confirms."></canvas>
-<div id="reference"><canvas width="30" height="30" aria-hidden="true"></canvas><span id="clue"></span></div>
 </section>
 </div>
 <footer><button id="assist">Assist Workbench</button><button id="found">FOUND IT!</button></footer>
