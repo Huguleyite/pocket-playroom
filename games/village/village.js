@@ -46,7 +46,7 @@ function drawPicture(){const p=progress.picture(),crop=p.crop,g=setupArt(crop);r
  else if(progress.complete())addAmbient(g,crop,false,p.id);
 }
 function svgCrop(crop,gray=false,href=VILLAGE_DATA.image){return `<svg viewBox="${crop.x} ${crop.y} ${crop.w} ${crop.h}" aria-hidden="true"><image href="${href}" width="1254" height="1254" ${gray?'style="filter:grayscale(1)"':''}/></svg>`}
-function renderUI(){const p=progress.picture(),entry=progress.entry();$('#title').textContent=p.title;$('#eyebrow').textContent=currentScene().title;updateCollectionButtons();$('#percent').textContent=Math.round(entry.filled.size/p.regions.length*100)+'%';$('#bar').style.width=$('#percent').textContent;$('#count').textContent=`${entry.filled.size} of ${p.regions.length} regions brought to life`;
+function renderUI(){const p=progress.picture(),entry=progress.entry();$('#title').textContent=p.title;$('#eyebrow').textContent=currentScene().title;updateCollectionButtons();$('#percent').textContent=Math.floor(entry.filled.size*100/p.regions.length)+'%';$('#bar').style.width=$('#percent').textContent;$('#count').textContent=`${entry.filled.size} of ${p.regions.length} regions brought to life`;
  if(mode==='coloring')regions.forEach((r,i)=>{const done=entry.filled.has(i);r.color.setAttribute('opacity',done?'1':'0');r.p.classList.toggle('match',!done&&r.c===entry.selected);r.p.setAttribute('aria-label',`${r.name}, color ${r.c}${done?', colored':''}`);r.t.textContent=done?'':r.c});
  const palette = $('#palette');
  palette.style.setProperty('--swatch-columns', Math.max(4, Math.ceil(p.palette.length / 2)));
@@ -56,7 +56,7 @@ function renderUI(){const p=progress.picture(),entry=progress.entry();$('#title'
  palette.replaceChildren(...p.palette.map(([name, color], index) => {
   const num = index + 1, left = counts[index], selected = entry.selected === num;
   const button = document.createElement('button');
-  button.className = 'swatch' + (selected ? ' selected' : '');
+  button.className = 'swatch' + (selected ? ' selected' : '') + (left === 0 ? ' completed' : '');
   button.style.background = color;
   const channels = color.slice(1).match(/../g).map(hex => parseInt(hex, 16) / 255);
   const [r, g, b] = channels.map(c => c <= .04045 ? c / 12.92 : ((c + .055) / 1.055) ** 2.4);
@@ -141,7 +141,7 @@ function drawScene(){
   };
   const label=node('text',{x:x+627,y:y+1205,class:'tile-label'});
   label.style.fontSize='65px';
-  label.textContent=`${picture.title} · ${done?'Collected':Math.round(count/picture.regions.length*100)+'%'}`;
+  label.textContent=`${picture.title} · ${done?'Collected':Math.floor(count*100/picture.regions.length)+'%'}`;
   group.append(tile,label);
  });
 }
