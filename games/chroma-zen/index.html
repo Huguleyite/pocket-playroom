@@ -149,7 +149,7 @@ body:not([data-scene]) main { width:min(100%,1080px); padding:0 0 24px }
 <button id="tutorial-hint" type="button">Show me a swap</button>
 <p id="tutorial-step" role="status"></p>
 </dialog>
-<div class="control-dock"><button id="swatches" type="button" aria-pressed="false" title="Hold to compare colors. Enter or Space toggles." hidden>Colors</button><button id="undo" type="button" hidden>Undo</button><button id="controls-toggle" type="button" aria-expanded="false" aria-controls="game-controls">Controls</button><div class="game-controls" id="game-controls" hidden><button id="scene-audio" type="button" hidden>Audio on</button><button id="listen" type="button" aria-pressed="false">Listen</button><button id="restart" type="button">Restart</button><button id="levels" type="button">Levels</button><button id="help" type="button" aria-label="How to order the tiles" aria-haspopup="dialog">?</button><button id="back" type="button">All modes</button></div></div><p id="message" role="status"></p>
+<div class="control-dock"><button id="swatches" type="button" aria-pressed="false" title="Toggle solid tile colors" hidden>Colors</button><button id="undo" type="button" hidden>Undo</button><button id="controls-toggle" type="button" aria-expanded="false" aria-controls="game-controls">Controls</button><div class="game-controls" id="game-controls" hidden><button id="scene-audio" type="button" hidden>Audio on</button><button id="listen" type="button" aria-pressed="false">Listen</button><button id="restart" type="button">Restart</button><button id="levels" type="button">Levels</button><button id="help" type="button" aria-label="How to order the tiles" aria-haspopup="dialog">?</button><button id="back" type="button">All modes</button></div></div><p id="message" role="status"></p>
 <div class="actions" id="finish" hidden><button id="save" type="button">Save Wallpaper</button><button id="next" type="button">Next Level</button></div>
 </section>
 </main>
@@ -201,11 +201,6 @@ const modes = [
   { id:'chiaroscuro', name:'Chiaroscuro', full:'Chiaroscuro', description:'Swap along rows or columns to arrange a studio light study.', preview:'linear-gradient(140deg,#fff4db,#ad514b,#190f29)', base:350, sweep:72, notes:[0,2,4,7,9] }
 ];
 const openingSwaps = {
-  horizon: [
-    [[1,28],[4,24],[7,21],[10,25],[12,32],[16,31],[17,19],[22,33]],
-    [[2,23],[3,32],[6,29],[8,24],[9,25],[11,31],[12,27],[15,34],[16,18],[20,33]],
-    [[1,34],[2,26],[4,31],[6,23],[7,29],[8,28],[9,25],[10,24],[12,33],[13,27],[15,32],[17,19]]
-  ],
   hexaweave: [[[6,7]], [[6,7],[7,8]], [[6,7],[7,8],[8,13]]],
   chiaroscuro: [[[6,8]], [[1,11],[6,8]], [[1,11],[6,8],[7,12]]]
 };
@@ -218,6 +213,7 @@ const progress = Object.fromEntries(modes.map(({id}) => {
 }));
 let audioOn = saved.audio !== false;
 let tileAudio = saved.tileAudio !== false;
+let solidColors = saved.solidColors === true;
 $("tile-audio").checked = tileAudio;
 let drag = null;
 let suppressClick = false;
@@ -230,13 +226,14 @@ function remember(state) {
   if (!state.practice) {
     lastBoard = state.key;
     recentBoard = state.key;
-    boards[state.key] = {order:state.order,moves:state.moves,history:state.history};
+    boards[state.key] = {order:state.order,moves:state.moves,history:state.history,revision:2};
     storeProgress();
   }
 }
 function restore(state) {
   const record = boards[state.key];
   const count = state.order.length;
+  if (state.mode.id === "horizon" && !state.daily && !record?.moves && record?.revision !== 2) return;
   if (!Array.isArray(record?.order) || record.order.length !== count ||
       new Set(record.order).size !== count ||
       record.order.some(value => !Number.isInteger(value) || value < 0 || value >= count) ||
@@ -251,7 +248,7 @@ function restore(state) {
 }
 const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
 function storeProgress() {
-  try { localStorage.setItem(storageKey, JSON.stringify({ progress, audio:audioOn, tileAudio, boards, lastBoard, recentBoard })); } catch {}
+  try { localStorage.setItem(storageKey, JSON.stringify({ progress, audio:audioOn, tileAudio, solidColors, boards, lastBoard, recentBoard })); } catch {}
 }
 function updateAudio() {
   $('audio').textContent = audioOn ? 'Audio on' : 'Audio off';
@@ -362,8 +359,18 @@ function makeLevel(mode, level, cols, rows, dailySeed) {
   const movable = order.filter(i => !anchors.has(i));
   const random = dailySeed === undefined ? Math.random : seededRandom(dailySeed);
   const geometry = {mode,hex,cols,tiles,anchors};
-  const opening = dailySeed === undefined ? openingSwaps[mode.id][level - 1] : null;
-  if (opening && cols === (mode.id === "horizon" ? 6 : 5) && rows === (hex ? 4 : 6)) {
+  const opening = dailySeed === undefined ? openingSwaps[mode.id]?.[level - 1] : null;
+  if (mode.id === "horizon" && dailySeed === undefined) {
+    const shuffle = seededRandom(level * 104729 + 83);
+    const minimum = Math.min(movable.length-1,30,12 + (level-1)*4);
+    for (let i = movable.length-1; i > 0; i--) {
+      const j = Math.floor(shuffle()*(i+1));
+      [movable[i],movable[j]] = [movable[j],movable[i]];
+    }
+    // A cycle of n + 1 tiles takes exactly n unrestricted swaps to solve.
+    const cycle = movable.slice(0,minimum+1);
+    cycle.forEach((position,i) => { order[position] = cycle[(i+1)%cycle.length]; });
+  } else if (opening && cols === (mode.id === "horizon" ? 6 : 5) && rows === (hex ? 4 : 6)) {
     for (const [a,b] of opening) [order[a],order[b]] = [order[b],order[a]];
   } else if (hex) {
     const edges = movable.flatMap(a => movable.filter(b => b > a && canSwap(geometry,a,b)).map(b => [a,b]));
@@ -816,6 +823,7 @@ function showMode(mode, level = progress[mode.id] + 1, options = {}) {
   }
   drag = null;
   active = sessions.get(key);
+  if (mode.id === "horizon") active.showSwatches = solidColors;
   remember(active);
   document.body.dataset.scene = mode.id;
   $("scene-audio").hidden = false;
@@ -1014,22 +1022,13 @@ $("controls-toggle").addEventListener("click", () => {
   controls.hidden = !controls.hidden;
   $("controls-toggle").setAttribute("aria-expanded", String(!controls.hidden));
 });
-function compareColors(show) {
+$("swatches").addEventListener("click", () => {
   if (active?.mode.id !== "horizon" || active.wonAt !== null) return;
-  active.showSwatches = show;
-  $("swatches").setAttribute("aria-pressed", String(show));
+  solidColors = !solidColors;
+  active.showSwatches = solidColors;
+  $("swatches").setAttribute("aria-pressed",String(solidColors));
+  storeProgress();
   paint();
-}
-$("swatches").addEventListener("pointerdown",event => {
-  if (!event.isPrimary || event.button !== 0) return;
-  $("swatches").setPointerCapture(event.pointerId);
-  compareColors(true);
-});
-for (const event of ["pointerup","pointercancel","lostpointercapture","blur"]) {
-  $("swatches").addEventListener(event,() => compareColors(false));
-}
-$("swatches").addEventListener("click",event => {
-  if (event.detail === 0) compareColors(!active?.showSwatches);
 });
 $("undo").addEventListener("click", () => {
   if (!active || active.wonAt !== null || !active.history.length) return;
