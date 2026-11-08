@@ -229,3 +229,22 @@ h2{margin-top:.28rem;letter-spacing:-.035em}
  .spot-embedded :is(#scene-stage,footer){grid-column:1/-1}
  .spot-embedded #scene-stage[data-scene] #board{width:calc(100% - clamp(16px,9cqw,92px));margin-block:clamp(7px,5cqh,28px)}
 }
+.spot-embedded main{min-height:0;grid-template-rows:auto auto minmax(0,1fr) auto}
+@media(orientation:landscape) and (max-height:480px){
+ .spot-embedded main{grid-template-columns:auto minmax(0,1fr);grid-template-rows:auto minmax(0,1fr) auto}
+ .spot-embedded main>header{justify-content:flex-start;gap:.35rem}
+ .spot-embedded .search-info{justify-content:flex-end}
+ .spot-embedded :is(#scene-stage,footer){grid-column:1/-1}
+ .spot-embedded .brand>span{display:none}
+ .spot-embedded .brand h1{font-size:1.05rem}
+ .spot-embedded #scene-stage[data-scene] #board{margin-block:clamp(2px,3cqh,12px)}
+ .spot-embedded #reference{flex-wrap:nowrap;flex-shrink:0;max-width:100%}
+}
+@media(orientation:landscape) and (max-height:480px){
+ .spot-embedded #status{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+ .spot-embedded #clue{line-height:1.15}
+}
+
+@media(max-width:1100px) and (orientation:landscape){
+ .spot-embedded main{grid-template-rows:auto minmax(0,1fr) auto}
+}

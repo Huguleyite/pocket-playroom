@@ -204,3 +204,5 @@ body.game-spot-the-dot .game-frame{height:300px}
  body.game-spot-the-dot .game-layout{margin:0}
  body.game-spot-the-dot .game-well{border:0;border-radius:0;box-shadow:none}
 }
+body.game-spot-the-dot #main,
+body.game-spot-the-dot :is(.game-layout,.game-well,.game-frame){min-inline-size:0;max-inline-size:100%}
