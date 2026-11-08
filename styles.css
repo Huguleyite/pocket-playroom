@@ -206,3 +206,5 @@ body.game-spot-the-dot .game-frame{height:300px}
 }
 body.game-spot-the-dot #main,
 body.game-spot-the-dot :is(.game-layout,.game-well,.game-frame){min-inline-size:0;max-inline-size:100%}
+
+.chroma-zen-card-art{height:88%;width:auto;max-width:100%;object-fit:contain;position:relative}
