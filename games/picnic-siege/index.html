@@ -151,7 +151,7 @@ main{width:min(1240px,100%);margin:auto;padding:16px}header{display:flex;align-i
  .tools{grid-area:4/1}.speed{grid-area:4/2}
 }
 .command-tabs{display:none}
-@media (orientation:landscape) and (max-width:1099px), (orientation:landscape) and (pointer:coarse){
+@media (orientation:landscape), (min-width:600px) and (min-height:560px){
  main{display:flex;flex-direction:column;width:100%;height:100dvh;max-width:none;padding:4px max(5px,env(safe-area-inset-right)) 4px max(5px,env(safe-area-inset-left))}
  header{flex:none;margin:0 0 4px;gap:7px}.mark{padding:3px 6px}header strong{font-size:8px}h1{font-size:22px}header>p{font-size:9px}
  .board{display:grid;flex:1;min-height:0;grid-template-columns:minmax(0,1fr) auto;grid-template-rows:auto minmax(0,1fr) auto auto;gap:4px;padding:4px;border-width:2px;border-radius:10px;box-shadow:none}
@@ -159,7 +159,7 @@ main{width:min(1240px,100%);margin:auto;padding:16px}header{display:flex;align-i
  .stats{grid-area:1/1/2/-1;display:grid;grid-template-columns:auto minmax(30px,1fr) auto auto auto;align-items:center;gap:clamp(4px,1vw,12px);font-size:clamp(9px,1.4vw,12px)}
  .stats label,.resources{margin:0}.stats progress{height:7px}.resources{gap:5px}
  .field{grid-area:2/1/3/-1;container-type:size;min-height:0;min-width:0;overflow:hidden;background:#211e2d;border-radius:5px}
- canvas{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:min(max(100cqw,calc(100cqh * 1100 / 650)),calc(100cqw * 1100 / 1010),calc(100cqh * 1100 / 460));height:auto;max-width:none;max-height:none}
+ canvas{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:min(max(100cqw,calc(100cqh * 1100 / 650)),calc(100cqw * 1100 / 1010),calc(100cqh * 1100 / 396));height:auto;max-width:none;max-height:none}
  .spawn{grid-area:3/1/4/-1;position:relative;display:grid;align-content:start;align-self:stretch;grid-template-columns:repeat(3,minmax(0,1fr));grid-template-rows:auto auto;gap:4px}
  .spawn>h2{display:none}
  .command-tabs{display:flex;grid-column:1/-1;gap:4px}
@@ -178,29 +178,93 @@ main{width:min(1240px,100%);margin:auto;padding:16px}header{display:flex;align-i
  .speed button,.speed #auto{min-width:44px;min-height:44px;flex:none;padding:3px 6px}.speed #auto{min-width:62px}
  .speed svg{width:19px;height:19px}.help{display:none}
 }
+@media (min-width:640px) and (orientation:landscape), (min-width:640px) and (min-height:560px){
+ .spawn{grid-template-columns:auto repeat(3,minmax(0,1fr)) auto;grid-template-rows:auto}
+ .spawn .command-tabs{grid-area:1/1;align-items:stretch}
+ .spawn .command-tabs button,.spawn #nestSelect{min-height:44px}
+ .spawn .build-options{grid-area:1/2/2/5}
+ .spawn #nestSelect{position:static;grid-area:1/5;max-width:108px;line-height:1.15}
+}
+@media (min-width:1100px) and (min-height:650px){
+ main{padding:10px 14px}header{margin-bottom:8px}header strong{font-size:10px}h1{font-size:32px}
+}
 @media (orientation:landscape) and (max-width:640px){
  .tools .tile{display:none}.tools button{font-size:9px}.spawn .build-options .tile{display:none}.spawn .build-options button{grid-template-columns:1fr;text-align:center}
 }
-@media (orientation:landscape) and (max-height:425px) and (max-width:1099px), (orientation:landscape) and (max-height:425px) and (pointer:coarse){
+@media (orientation:landscape) and (max-height:425px) and (max-width:639px){
  .spawn{grid-template-columns:auto repeat(3,minmax(0,1fr));grid-template-rows:auto}
  .spawn .command-tabs{grid-area:1/1;display:flex;gap:3px;align-items:stretch}
  .spawn .command-tabs button{min-height:44px;padding-inline:6px;font-size:10px}
  .spawn .build-options{grid-area:1/2/2/-1}
  .spawn #nestSelect{position:static;grid-column:1/-1;min-height:27px}
 }
-</style>
-<style>
-@media (min-width:1100px) and (min-height:650px) and (pointer:fine){
- main{padding:12px 16px}
- .board{grid-template-columns:minmax(0,1fr) clamp(218px,18vw,290px);grid-template-rows:auto auto auto minmax(0,1fr) auto;gap:7px;padding:7px}
- .field{grid-area:1/1/-1/2}
- .stats{grid-area:1/2;grid-template-columns:1fr auto;gap:7px;padding:10px}
- .stats label,.stats .resources{grid-column:1/-1}.stats label{grid-row:2}.stats .resources{justify-content:space-between}
- .spawn{grid-area:2/2;grid-template-columns:1fr;align-content:start;padding:9px}
- .tools{grid-area:3/2;display:grid;grid-template-columns:1fr;gap:5px;padding:9px;text-align:left}
- .tools button{width:100%;font-size:12px}.tools h2{margin:0}
- .speed{grid-area:5/2;padding:7px}.speed button,.speed #auto{min-height:37px}
- .help{display:block;flex:none;font-size:12px;margin:5px 0 0}
+@media (orientation:landscape) and (max-height:425px){
+ .spawn .build-options button>span:last-child{min-width:0}
+ .spawn .build-options button small{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+}
+.portrait-camera{display:none}
+.stats #gameSettings{border:1px solid #8d779d;border-radius:6px;background:#463655;color:#fff5db;min-width:34px;min-height:32px;padding:3px;font-size:13px}
+.stats #gameSettings[hidden]{display:none}
+.command-tabs [data-command="abilities"]{display:none}
+body.in-play header{display:none}
+body.in-play main{padding-bottom:max(4px,env(safe-area-inset-bottom))}
+@media (orientation:landscape), (min-width:600px) and (min-height:560px){
+ .stats{grid-template-columns:auto minmax(30px,1fr) auto auto auto auto}
+}
+@media (orientation:landscape) and (max-height:500px){
+ .board{grid-template-rows:auto minmax(0,1fr) auto;grid-template-columns:minmax(0,1fr) auto}
+ .spawn{grid-area:3/1;grid-template-columns:auto repeat(3,minmax(0,1fr)) auto;grid-template-rows:auto}
+ .spawn .command-tabs{grid-area:1/1;align-items:stretch;gap:2px}
+ .spawn .command-tabs button{min-height:44px;padding-inline:5px;font-size:10px}
+ .spawn #nestSelect{position:static;grid-area:1/5;max-width:64px;min-height:44px;padding:2px;font-size:9px}
+ .spawn .build-options{grid-area:1/2/2/5;gap:2px}
+ .spawn .build-options button{grid-template-columns:1fr;font-size:9px;text-align:center;padding:2px}
+ .spawn .build-options .tile{display:none}
+ .spawn>button[data-unit]{grid-template-columns:1fr;text-align:center;font-size:10px;padding:2px}
+ .spawn>button[data-unit] .tile{display:none}
+ .command-tabs [data-command="abilities"]{display:block}
+ .board .tools{display:none}
+ .board[data-command="abilities"] .tools{display:flex;grid-area:3/1;align-self:stretch;margin-inline:150px 64px;z-index:1;background:#30283d;padding:0}
+ .board[data-command="abilities"] .spawn{min-height:50px}
+ .board[data-command="abilities"] .spawn>button[data-unit],.board[data-command="abilities"] .build-options{display:none}
+ .board[data-command="abilities"] .tools .tile{display:none}
+ .speed{grid-area:3/2}
+}
+@media (orientation:landscape) and (max-height:500px) and (max-width:680px){
+ .board:not([data-paused="true"]) .speed button[data-speed="1"],.board[data-paused="true"] .speed button[data-speed="0"]{display:none}
+ .speed #auto{min-width:56px}
+ .board[data-command="abilities"] .tools{margin-inline:132px 64px}
+}
+@media (orientation:portrait) and (max-width:639px){
+ body.in-play main{display:flex;flex-direction:column;height:100dvh;padding:4px 5px max(4px,env(safe-area-inset-bottom))}
+ body.in-play .board{flex:1;min-height:0;grid-template-columns:minmax(0,1fr);grid-template-rows:auto auto minmax(0,1fr) auto auto;gap:4px;box-shadow:none}
+ body.in-play .stats{grid-area:1/1;grid-template-columns:auto minmax(0,1fr) auto auto;gap:4px}
+ body.in-play .stats .resources{grid-column:1/3}
+ body.in-play .portrait-camera{grid-area:2/1;display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:4px;align-items:center;color:#fff2d6;padding:2px}
+ .portrait-camera svg{width:100%;height:39px;background:#583b3b;border-radius:5px}
+ .portrait-camera button{min-height:44px;padding:3px 6px;border:1px solid #8d779d;border-radius:6px;background:#463655;color:#fff5db;font:800 10px system-ui}
+ body.in-play .field{grid-area:3/1;container-type:size;min-height:0;overflow:hidden;isolation:isolate;background:#3a292b}
+ body.in-play .field::before{content:"";position:absolute;inset:-16px;z-index:-1;background:linear-gradient(#20161ca0,#20161caa),var(--tabletop) center/cover;filter:blur(10px)}
+ body.in-play canvas{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:min(100cqw,calc(100cqh * 1100 / 650));height:auto;max-width:none}
+ body.in-play .board[data-focus=true] canvas{width:205cqw;left:calc(50% + (550 - var(--camera-x,270)) * 205cqw / 1100)}
+ body.in-play .spawn{grid-area:4/1;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));grid-template-rows:auto auto;position:relative}
+ body.in-play .spawn>h2{display:none}
+ body.in-play .command-tabs{display:flex;grid-column:1/-1;gap:4px;padding-right:68px}
+ body.in-play .command-tabs [data-command="abilities"]{display:block}
+ body.in-play .spawn .command-tabs button{display:block;width:auto;min-height:36px;margin:0;padding:3px 6px}
+ body.in-play .spawn .command-tabs button[aria-pressed=true]{background:#a9c883;color:#273525}
+ body.in-play .spawn #nestSelect{position:absolute;top:5px;right:5px;width:auto;max-width:70px;min-height:36px;font-size:9px;margin:0}
+ body.in-play .spawn[data-mode="build"]>button[data-unit],body.in-play .spawn:not([data-mode="build"]) .build-options,
+ body.in-play .spawn[data-mode="abilities"]>button[data-unit]{display:none}
+ body.in-play .spawn .build-options{grid-column:1/-1;grid-template-columns:repeat(4,minmax(0,1fr));gap:3px}
+ body.in-play .spawn .build-options button{display:block;grid-column:auto;min-height:44px;text-align:center;padding:2px;font-size:9px;overflow-wrap:anywhere}
+ body.in-play .spawn .build-options .tile{display:none}
+ body.in-play .board .tools{display:none}
+ body.in-play .board[data-command="abilities"] .tools{display:flex;grid-area:4/1;align-self:end;justify-content:center;gap:2px;padding:2px;z-index:1}
+ body.in-play .board[data-command="abilities"] .spawn{min-height:91px}
+ body.in-play .tools h2{display:none}body.in-play .tools button{min-height:40px}
+ body.in-play .speed{grid-area:5/1;gap:5px}body.in-play .speed button{min-width:44px;min-height:44px}
+ body.in-play .help{display:none}
 }
 </style>
 </head>
@@ -216,20 +280,20 @@ main{width:min(1240px,100%);margin:auto;padding:16px}header{display:flex;align-i
 <symbol id="icon-pause" viewBox="0 0 32 32"><path d="M7 5h6v22H7zm12 0h6v22h-6z" fill="currentColor" stroke="#2a2632" stroke-width="2"/></symbol>
 </svg>
 <main class="mx-auto">
-<header><span class="mark" aria-hidden="true">PP</span><div><strong>POCKET PLAYROOM</strong><h1>Picnic Siege</h1></div><p>STAGE 01<br>Backyard Picnic Table</p><div class="audio-controls" aria-label="Audio settings"><button id="music" type="button">Music on</button><button id="effects" type="button">Effects on</button></div></header>
+<header><span class="mark" aria-hidden="true">PP</span><div><strong>POCKET PLAYROOM</strong><h1>Picnic Siege</h1></div><p>STAGE 01<br>Backyard Picnic Table</p></header>
 <section class="board" aria-label="Picnic Siege game">
-<div class="field">
+<div class="portrait-camera" aria-label="Table camera"><button id="tableOverview" type="button" aria-label="Tap the overview to focus that part of the table"><svg viewBox="0 0 1100 650" preserveAspectRatio="none" aria-hidden="true"><rect width="1100" height="650" rx="35" fill="#6a4739"/><path d="M200 360 860 48 1100 390 530 650Z" fill="#aa645c"/><rect id="miniCamera" x="0" width="536" height="650" fill="#fff0cb20" stroke="#ffedb9" stroke-width="14"/><polyline id="miniTrail0" fill="none" stroke="#e0aaff" stroke-width="18"/><polyline id="miniTrail1" fill="none" stroke="#96ffda" stroke-width="18"/><circle cx="165" cy="450" r="25" fill="#f4ca9c"/><circle id="miniOutpost" cx="808" cy="445" r="25" fill="#96ffda"/><circle cx="377" cy="299" r="23" fill="#fff4db"/><circle cx="927" cy="257" r="23" fill="#ffd865"/></svg></button><button id="fitTable" type="button">Fit Table</button><button id="panTable" type="button">Pan</button></div><div class="field">
 <canvas id="arena" width="1100" height="650" aria-label="Picnic table. Draw from the nest to the sugar cache or candy stash, or use Lay trail to play without drawing."></canvas>
 <p class="notice" id="notice" role="status"></p><div id="outpostAlert" class="outpost-alert" role="status" aria-atomic="true" hidden><strong id="outpostHeadline"></strong><small id="outpostDetail"></small></div><div class="build-controls" id="buildControls" hidden><p id="buildHint" aria-live="polite"></p><button id="confirmCap" type="button">Build</button><button id="cancelCap" type="button">Cancel</button></div>
 <div class="veil" id="veil"><div class="card"><h2 id="cardTitle">The Sugar Run</h2><p id="cardText">Guide a worker to the sugar cache or candy stash and back before the siege begins. Deliver 12 cubes to unlock Nest 2. Survive as many five-wave sets as you can. Each set gets tougher.</p><p id="challenge" hidden></p><button id="start">Start picnic</button><aside id="completionAd" class="completion-ad" aria-label="Advertisement" hidden><span>Advertisement</span><a href="https://www.kqzyfj.com/click-101910956-15640650" target="_blank" rel="sponsored noopener"><img id="completionCreative" data-src="https://www.awltovhc.com/image-101910956-15640650" width="300" height="250" alt="NordVPN — explore VPN plans."></a><p>We may earn a commission if you purchase through this ad.</p></aside></div></div>
 </div>
-<div class="panel stats"><strong id="wave">Wave 1 / 5</strong><label><span id="hp">Nest HP 100%</span><progress id="health" max="100" value="100"></progress></label><span class="readout clock-readout"><small>Time left</small><b id="clock">3:30</b></span><div class="resources"><span class="readout sugar-readout"><small>Sugar</small><b id="sugar">105</b></span><span id="scraps">⚙ Scraps 2</span></div><span id="goal">Lv 2 · 0/12</span></div>
-<div class="panel spawn" data-mode="swarm"><h2>Spawn Swarm</h2><div class="command-tabs" role="group" aria-label="Command panel"><button type="button" data-command="swarm" aria-pressed="true">Swarm</button><button type="button" data-command="build" aria-pressed="false">Build</button></div><button data-unit="worker"><span class="tile"><svg aria-hidden="true"><use href="#icon-ant"></use></svg></span><span>Worker Ant<small>10 sugar</small></span><kbd>1</kbd></button><button data-unit="soldier"><span class="tile"><svg aria-hidden="true"><use href="#icon-shield"></use></svg></span><span>Shield Soldier<small>30 sugar</small></span><kbd>2</kbd></button><button data-unit="beetle"><span class="tile"><svg aria-hidden="true"><use href="#icon-beetle"></use></svg></span><span>Acid Beetle<small>75 sugar</small></span><kbd>3</kbd></button><div class="build-options"><button id="buildCap" type="button" aria-pressed="false"><span class="tile"><svg aria-hidden="true"><use href="#icon-shelter"></use></svg></span><span>Bottle-cap Shelter<small>2 scraps · 2 strikes</small></span></button><button id="buildFork" type="button" aria-pressed="false"><span class="tile"><svg aria-hidden="true"><use href="#icon-fork"></use></svg></span><span>Fork Barricade<small>2 scraps · slows raiders</small></span></button><button id="buildSpoon" type="button" aria-pressed="false"><span class="tile"><svg aria-hidden="true"><use href="#icon-spoon"></use></svg></span><span>Spoon Bridge<small>3 scraps · crosses lemonade</small></span></button><button id="manageBuilds" type="button">Upgrade / Sell</button></div><button id="nestSelect" type="button" hidden>Recruit at Nest 1 · Switch</button></div>
+<div class="panel stats"><strong id="wave">Wave 1 / 5</strong><label><span id="hp">Nest HP 100%</span><progress id="health" max="100" value="100"></progress></label><span class="readout clock-readout"><small>Time left</small><b id="clock">3:30</b></span><div class="resources"><span class="readout sugar-readout"><small>Sugar</small><b id="sugar">105</b></span><span id="scraps">⚙ Scraps 2</span></div><span id="goal">Lv 2 · 0/12</span><button type="button" id="gameSettings" aria-label="Game settings" hidden>⚙</button></div>
+<div class="panel spawn" data-mode="swarm"><h2>Spawn Swarm</h2><div class="command-tabs" role="group" aria-label="Command panel"><button type="button" data-command="swarm" aria-pressed="true">Swarm</button><button type="button" data-command="build" aria-pressed="false">Build</button><button type="button" data-command="abilities" aria-pressed="false">Abilities</button></div><button data-unit="worker"><span class="tile"><svg aria-hidden="true"><use href="#icon-ant"></use></svg></span><span>Worker Ant<small>10 sugar</small></span><kbd>1</kbd></button><button data-unit="soldier"><span class="tile"><svg aria-hidden="true"><use href="#icon-shield"></use></svg></span><span>Shield Soldier<small>30 sugar</small></span><kbd>2</kbd></button><button data-unit="beetle"><span class="tile"><svg aria-hidden="true"><use href="#icon-beetle"></use></svg></span><span>Acid Beetle<small>75 sugar</small></span><kbd>3</kbd></button><div class="build-options"><button id="buildCap" type="button" aria-pressed="false"><span class="tile"><svg aria-hidden="true"><use href="#icon-shelter"></use></svg></span><span>Bottle-cap Shelter<small>2 scraps · 2 strikes</small></span></button><button id="buildFork" type="button" aria-pressed="false"><span class="tile"><svg aria-hidden="true"><use href="#icon-fork"></use></svg></span><span>Fork Barricade<small>2 scraps · slows raiders</small></span></button><button id="buildSpoon" type="button" aria-pressed="false"><span class="tile"><svg aria-hidden="true"><use href="#icon-spoon"></use></svg></span><span>Spoon Bridge<small>3 scraps · crosses lemonade</small></span></button><button id="manageBuilds" type="button">Upgrade / Sell</button></div><button id="nestSelect" type="button" hidden>Recruit at Nest 1 · Switch</button></div>
 <div class="panel tools"><h2>Active Abilities</h2><button id="alert" title="Reveal the next flyswatter strike"><span class="tile"><svg aria-hidden="true"><use href="#icon-stomp"></use></svg></span><span>Stomp Alert</span></button> <button id="boost" title="Double movement for 8 seconds. Costs 1 scrap."><span class="tile"><svg aria-hidden="true"><use href="#icon-boost"></use></svg></span><span>Double Move</span></button> <button id="shield" title="Reduce all swarm damage for 8 seconds. Costs 2 scraps."><span class="tile"><svg aria-hidden="true"><use href="#icon-shield"></use></svg></span><span>Shield Formation</span></button></div>
 <div class="panel speed" aria-label="Game speed"><button data-speed="1" aria-label="Play"><svg aria-hidden="true"><use href="#icon-play"></use></svg></button><button data-speed="2" aria-label="Fast forward"><svg aria-hidden="true"><use href="#icon-fast"></use></svg></button><button data-speed="0" aria-label="Pause"><svg aria-hidden="true"><use href="#icon-pause"></use></svg></button><button id="auto">Lay trail</button></div>
 </section>
 <div class="help"><p>Draw from <b>Nest</b> to either stash to replace the trail. Brush over trail dots to refresh them. Spawn with <b>1–3</b>, pause with <b>Space</b>.</p></div>
-</main><dialog class="route-picker" id="routePicker" aria-labelledby="routeTitle"><h2 id="routeTitle">Choose a trail</h2><p>You can switch routes during a wave or draw your own detour.</p><button type="button" data-route="pantry">Sugar Cache<small>1 cube per worker · sheltered by the first nest</small></button><button type="button" data-route="candy">Candy Stash<small>3 cubes per worker · more exposed to hazards</small></button><button type="button" id="spillDetour" hidden>South detour<small id="spillDestination"></small></button><button type="button" id="spoonRoute" hidden>Use spoon bridge<small>Keep the middle crossing open</small></button><button type="button" id="cancelRoute">Cancel</button></dialog>
+</main><dialog class="route-picker" id="settingsDialog" aria-labelledby="settingsTitle"><h2 id="settingsTitle">Game settings</h2><div class="audio-controls" aria-label="Audio settings"><button id="music" type="button">Music on</button><button id="effects" type="button">Effects on</button></div><button id="fullScreen" type="button">Fullscreen</button><button id="closeSettings" type="button">Back to picnic</button></dialog><dialog class="route-picker" id="routePicker" aria-labelledby="routeTitle"><h2 id="routeTitle">Choose a trail</h2><p>You can switch routes during a wave or draw your own detour.</p><button type="button" data-route="pantry">Sugar Cache<small>1 cube per worker · sheltered by the first nest</small></button><button type="button" data-route="candy">Candy Stash<small>3 cubes per worker · more exposed to hazards</small></button><button type="button" id="spillDetour" hidden>South detour<small id="spillDestination"></small></button><button type="button" id="spoonRoute" hidden>Use spoon bridge<small>Keep the middle crossing open</small></button><button type="button" id="cancelRoute">Cancel</button></dialog>
 <style>
 .pocket-sharing{display:grid;gap:8px;margin:16px 0;width:100%;min-width:0;clear:both;text-align:center}
 .pocket-sharing[hidden],.pocket-sharing [hidden]{display:none!important}
@@ -557,7 +621,19 @@ const strikeSpots = [{x:440,y:398},{x:702,y:310},{x:340,y:342},{x:822,y:332},{x:
 const debrisSpots = [{x:418,y:351},{x:707,y:317},{x:509,y:415},{x:817,y:306},{x:614,y:369}];
 const dist = (a,b) => Math.hypot(a.x-b.x,a.y-b.y);
 const clamp = (v,a,b) => Math.max(a,Math.min(b,v));
-let g, draft, draftNest, draftTip, pointer, placement, lastFrame = 0, accumulator = 0;
+let g, draft, draftNest, draftTip, pointer, placement, cameraDrag, lastFrame = 0, accumulator = 0;
+const portraitMode=matchMedia('(orientation:portrait) and (max-width:639px)');
+const board=document.querySelector('.board');
+const overviewPaths=[];
+function setCamera(x){
+  g.cameraX=clamp(x,268,832);
+  board.style.setProperty('--camera-x',g.cameraX);
+}
+function focusNest(){
+  const home=g.nests[g.activeNest];
+  const target=routes[home.route]?.end;
+  setCamera(target&&Math.abs(home.x-target.x)<440?(home.x+target.x)/2:home.x);
+}
 const incoming=window.PocketChallenge.incoming;
 const challenge=incoming?.id==='picnic-siege'?{wave:incoming.target,haul:incoming.haul}:null;
 function scoreText(wave,haul){return 'Wave '+wave+' · '+haul+' sugar';}
@@ -566,6 +642,7 @@ function reset(){
     nextDrip:8,nextRaid:11,raidNumber:0,chapterHaul:0,boost:0,shield:0,alert:0,speed:0,started:false,ended:false,delivery:null,
     message:'',messageUntil:0,tutorial:true,animationTime:0};
   g.shelters=[];g.forks=[];g.spoon=null;g.nests=[{...nest,trail:[],expiry:0}];g.activeNest=0;
+  g.focus=true;g.pan=false;setCamera(270);cameraDrag=null;
   draft = null; draftNest=0;pointer = null; placement=null;
 }
 function say(message, seconds=3){g.message=message;g.messageUntil=g.time+seconds;}
@@ -643,8 +720,11 @@ function validSpoon(p){
 const buildChecks={cap:canBuildCap,fork:canBuildFork,spoon:canBuildSpoon};
 for(const button of document.querySelectorAll('[data-command]'))button.onclick=()=>{
   button.closest('.spawn').dataset.mode=button.dataset.command;
+  board.dataset.command=button.dataset.command;
   for(const tab of button.parentElement.children)tab.setAttribute('aria-pressed',String(tab===button));
 };
+portraitMode.addEventListener('change',()=>{if(g&&board.dataset.command==='abilities')document.querySelector('button[data-command="swarm"]').click();});
+matchMedia('(orientation:landscape) and (max-height:500px)').addEventListener('change',()=>{if(g&&board.dataset.command==='abilities')document.querySelector('button[data-command="swarm"]').click();});
 function toggleBuild(kind){
   if(placement?.kind===kind){placement=null;return;}
   if(buildChecks[kind]())placement={kind,point:null,locked:false};
@@ -725,23 +805,28 @@ function paint(p,complete=false){
   }
 }
 canvas.addEventListener('pointerdown',e=>{
-  if(!g.started||g.ended||pointer!==null||e.button!==0)return;
+  if(!g.started||g.ended||pointer!==null||(e.pointerType==='mouse'&&e.button!==0))return;
   if(placement){placement.point=cursor(e);placement.locked=true;return;}
   pointer=e.pointerId;canvas.setPointerCapture(pointer);
+  if(portraitMode.matches&&g.focus&&g.pan){cameraDrag={x:e.clientX,center:g.cameraX,scale:W/canvas.getBoundingClientRect().width};return;}
   const p=cursor(e);
-  const index=g.nests.findIndex(home=>dist(p,home)<40);
+  const touch=e.pointerType!=='mouse';
+  const index=g.nests.findIndex(home=>dist(p,home)<(touch?58:40)||
+    ((p.x-home.x)/(touch?56:42))**2+((p.y-(home.y-32))/(touch?65:49))**2<=1);
   if(index>=0){
     draftNest=index;g.activeNest=index;
     const {x,y}=g.nests[index];draft=[{x,y}];
-  }
+  }else if(!g.nests[g.activeNest].trail.length)say('Start your drag anywhere on the nest',3);
   paint(p);
 });
 canvas.addEventListener('pointermove',e=>{
+  if(cameraDrag&&e.pointerId===pointer){setCamera(cameraDrag.center+(cameraDrag.x-e.clientX)*cameraDrag.scale);return;}
   if(placement&&!placement.locked&&e.pointerType==='mouse')placement.point=cursor(e);
   else if(e.pointerId===pointer)paint(cursor(e));
 });
 function stopDrawing(e){
   if(e.pointerId!==pointer)return;
+  if(cameraDrag){cameraDrag=null;pointer=null;return;}
   if(e.type==='pointerup')paint(cursor(e),true);
   if(draft)say('Release inside a sugar target ring to connect the trail');
   draft=null;pointer=null;
@@ -763,10 +848,29 @@ function activate(kind){
 $('start').onclick=()=>{
   sound.unlock();
   reset();g.started=true;g.speed=1;$('veil').hidden=true;
+  document.body.classList.add('in-play');
+  document.querySelector('button[data-command="swarm"]').click();
   $('veil').classList.remove('result-open');sharing.hidden=true;$('completionAd').hidden=true;
 };
+$('fitTable').onclick=()=>{g.focus=!g.focus;g.pan=false;if(g.focus)focusNest();};
+$('panTable').onclick=()=>{if(g.focus)g.pan=!g.pan;};
+$('tableOverview').onclick=e=>{
+  const rect=e.currentTarget.getBoundingClientRect();
+  g.focus=true;
+  if(e.detail===0)focusNest();
+  else setCamera((e.clientX-rect.left)/rect.width*W);
+};
+$('gameSettings').onclick=()=>$('settingsDialog').showModal();
+$('closeSettings').onclick=()=>$('settingsDialog').close();
+$('fullScreen').onclick=async()=>{
+  $('settingsDialog').close();
+  try{
+    if(document.fullscreenElement)await document.exitFullscreen();
+    else if(document.fullscreenEnabled)await document.documentElement.requestFullscreen();
+  }catch{say('Fullscreen is unavailable in this browser');}
+};
 $('auto').onclick=()=>{if(g.started&&!g.ended)$('routePicker').showModal();};
-$('nestSelect').onclick=()=>{if(g.nests.length>1)g.activeNest=1-g.activeNest;};
+$('nestSelect').onclick=()=>{if(g.nests.length>1){g.activeNest=1-g.activeNest;if(portraitMode.matches&&g.focus)focusNest();}};
 for(const button of document.querySelectorAll('[data-route]'))button.onclick=()=>{
   if(g.started&&!g.ended)autoTrail(button.dataset.route);
   $('routePicker').close();
@@ -1085,6 +1189,11 @@ function gummy(x,y,angle,color){
   ctx.restore();
 }
 function endpoints(){
+  if(g.started&&g.tutorial&&!draft&&!g.nests[0].trail.length){
+    ctx.save();ctx.setLineDash([5,5]);ctx.lineWidth=2.5;
+    ellipse(nest.x,nest.y-23,49,65,'#a675bc25','#ffe8ae');
+    ctx.restore();
+  }
   if(g.nests.length>1){
     const active=g.nests[g.activeNest];
     ellipse(active.x,active.y+7,43,17,'#79e5c329','#b8f3bd');
@@ -1570,10 +1679,29 @@ function hud(){
   display('sugar',String(g.sugar));display('scraps','⚙ Scraps: '+g.scraps);display('goal',g.nests.length===1?'Lv 2 · '+g.haul+'/'+levelTarget:'Set haul '+(g.haul-g.chapterHaul)+'/'+quota);
   const home=g.nests[g.activeNest],warning=home.trail.length&&home.expiry>g.time&&home.expiry-g.time<=8;
   const worker=g.units[0];
-  const lesson=!home.trail.length?'Draw to the cache or candy, or tap Lay trail':!worker?'Spawn a Worker Ant · 1':worker.returning?'Sugar collected · heading back to the nest':'Follow the worker to the '+routes[home.route].name;
-  const message=!g.started||g.ended?'':!g.speed?'Paused':g.tutorial?lesson:g.messageUntil>g.time?g.message:warning?'Trail fading · brush over its dots':home.trail.length&&home.expiry<=g.time?'Trail expired · redraw or lay trail':'';
+  const lesson=!home.trail.length?'Drag from the nest to a sugar source':!worker?'Spawn a Worker Ant · 1':worker.returning?'Sugar collected · heading back to the nest':'Follow the worker to the '+routes[home.route].name;
+  const message=!g.started||g.ended?'':portraitMode.matches&&g.pan?'Pan mode · tap Draw Trail to draw':!g.speed?'Paused':g.tutorial?lesson:g.messageUntil>g.time?g.message:warning?'Trail fading · brush over its dots':home.trail.length&&home.expiry<=g.time?'Trail expired · redraw or lay trail':'';
   display('notice',message);$('notice').hidden=!message;
   const locked=!g.started||g.ended;
+  board.dataset.focus=String(g.focus);
+  board.dataset.paused=String(!g.speed);
+  display('fitTable',g.focus?'Fit Table':'Focus Nest');
+  display('panTable',g.pan?'Draw Trail':'Pan map');
+  $('panTable').setAttribute('aria-pressed',String(g.pan));
+  $('panTable').disabled=!g.focus;
+  $('gameSettings').hidden=!g.started;
+  $('fullScreen').disabled=!document.fullscreenEnabled;
+  display('fullScreen',document.fullscreenElement?'Exit fullscreen':'Fullscreen');
+  for(let i=0;i<2;i++){
+    const points=g.nests[i]?.trail;
+    if(points!==overviewPaths[i]){
+      overviewPaths[i]=points;
+      $('miniTrail'+i).setAttribute('points',(points||[]).map(p=>p.x+','+p.y).join(' '));
+    }
+  }
+  $('miniOutpost').style.display=g.nests.length===2?'':'none';
+  $('miniCamera').setAttribute('x',String(g.focus?g.cameraX-268:0));
+  $('miniCamera').setAttribute('width',String(g.focus?536:1100));
   $('nestSelect').hidden=g.nests.length===1;
   $('nestSelect').disabled=locked;
   const landed=g.nests.length>1&&g.animationTime-g.outpostLandedAt<8;
@@ -1630,7 +1758,7 @@ function hud(){
 }
 function frame(now){
   const dt=Math.min(.05,(now-lastFrame)/1000);lastFrame=now;
-  const managing=$('manageDialog').open;
+  const managing=$('manageDialog').open||$('settingsDialog').open;
   if(g.speed&&!g.ended&&!managing){
     const step=1/60;
     accumulator+=dt*g.speed;
