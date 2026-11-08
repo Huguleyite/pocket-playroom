@@ -213,7 +213,7 @@ const progress = Object.fromEntries(modes.map(({id}) => {
 }));
 let audioOn = saved.audio !== false;
 let tileAudio = saved.tileAudio !== false;
-let solidColors = saved.solidColors === true;
+let solidColors = saved.solidColors !== false;
 $("tile-audio").checked = tileAudio;
 let drag = null;
 let suppressClick = false;
@@ -680,7 +680,7 @@ function describeTile(state, index) {
 function updateTutorial() {
   const state = active;
   const patterns = {
-    horizon: "Arrange the tints from warm gold on the left to cool lavender on the right. Each row gets darker as you move down. The scenery stays in place. Use Colors to compare the tints without the painting showing through." ,
+    horizon: "Arrange the tints from warm gold on the left to cool lavender on the right. Each row gets darker as you move down. The scenery stays in place. Tap Colors to switch between solid tiles and translucent tiles that let you see the sunset." ,
     hexaweave: "Only hexes that share an edge can trade places. Follow the shift from green to blue and from pale silk to deep shadow. Use hue and lightness to place the silk pieces.",
     chiaroscuro: "Swap along a single row or column. Follow the hue shift left to right, with bright highlights at the top and deep shadows at the bottom."
   };
@@ -827,7 +827,9 @@ function showMode(mode, level = progress[mode.id] + 1, options = {}) {
   remember(active);
   document.body.dataset.scene = mode.id;
   $("scene-audio").hidden = false;
-  $("intro").textContent = active.scene.name + " · " + rules[mode.id];
+  $("intro").textContent = mode.id === "horizon" && !active.daily && active.level <= 3
+    ? "Tap Colors to switch between solid tiles and a view of the sunset through them."
+    : active.scene.name + " · " + rules[mode.id];
   $("undo").hidden = Boolean(active.practice) || active.wonAt !== null || !active.history.length;
   $("next").textContent = active.practice ? "Return to Chiaroscuro" : active.daily ? "All modes" : "Next Level";
   $("game-controls").hidden = true;
