@@ -248,3 +248,5 @@ h2{margin-top:.28rem;letter-spacing:-.035em}
 @media(max-width:1100px) and (orientation:landscape){
  .spot-embedded main{grid-template-rows:auto minmax(0,1fr) auto}
 }
+#panel.puzzle-panel #choices .sudoku button.incorrect{background:#792e3b;color:#fff3f1;border-color:#ffa5a6;box-shadow:inset 0 0 0 1px #ffa5a6}
+#panel.puzzle-panel #choices .sudoku button.incorrect.active-cell{outline:2px solid var(--station-accent);outline-offset:-4px}

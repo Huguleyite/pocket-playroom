@@ -631,21 +631,26 @@ function workbench() {
 
 function patternGrid(grid,message = '',focusCell = false) {
   const {givens,entries,selected,solution} = grid;
+  const errors = entries.filter((value,i) => value && value !== solution[i]).length;
+  const remaining = entries.filter(value => !value).length;
+  const feedback = errors ? errors + (errors === 1 ? ' incorrect entry' : ' incorrect entries') + ' marked in red.' :
+    remaining + ' cells left. Complete the grid to unlock the Color Filter.';
   show('ASSIST_PUZZLE','1 · Complete the grid',
     'Place 1–4 once in each row, column and outlined box. Pick a blank cell, then choose a number.\n' +
-    (message || entries.filter(n => !n).length + ' cells left. Complete the grid to unlock the Color Filter.'),
+    (message || feedback),
     [...digits.map(n => [String(n),() => {
       if (givens[selected]) return;
       entries[selected] = n;
-      patternGrid(grid,'',true);
+      if (entries.every((value,i) => value === solution[i])) unlock();
+      else patternGrid(grid,'',true);
     }]),['Erase',() => {
       if (givens[selected]) return;
       entries[selected] = 0;
       patternGrid(grid,'',true);
-    }],['Check grid',() => {
-      if (entries.includes(0)) patternGrid(grid,'Fill every blank before checking.');
-      else if (entries.every((n,i) => n === solution[i])) unlock();
-      else patternGrid(grid,'Some numbers conflict. Check the rows, columns and boxes.');
+    }],['Restart',() => {
+      grid.entries = [...givens];
+      grid.selected = givens.indexOf(0);
+      patternGrid(grid,'Grid restarted.',true);
     }],back]);
   const layout = document.createElement('div');
   layout.className = 'number-grid sudoku';
@@ -658,7 +663,10 @@ function patternGrid(grid,message = '',focusCell = false) {
       cell.tabIndex = -1;
       cell.setAttribute('aria-label','Preset '+value+', row '+(Math.floor(i/4)+1)+', column '+(i%4+1));
     } else {
-      cell.setAttribute('aria-label','Row '+(Math.floor(i/4)+1)+', column '+(i%4+1)+', '+(value || 'blank'));
+      const incorrect = Boolean(value && value !== solution[i]);
+      cell.classList.toggle('incorrect',incorrect);
+      cell.setAttribute('aria-label','Row '+(Math.floor(i/4)+1)+', column '+(i%4+1)+', '+
+        (value || 'blank')+(incorrect ? ', incorrect' : ''));
       cell.setAttribute('aria-pressed',String(i === selected));
       cell.onclick = () => { grid.selected = i; patternGrid(grid,'',true); };
     }
@@ -964,13 +972,6 @@ panel.addEventListener('keydown',event => {
     return;
   }
   const sudoku = $('#choices .sudoku');
-  if (sudoku && event.key === 'Enter') {
-    event.preventDefault();
-    if (!event.repeat) {
-      [...$('#choices').children].find(button => button.textContent === 'Check grid')?.click();
-    }
-    return;
-  }
   if (!sudoku && !$('#choices.signal-keys')) return;
   const direction = {KeyW:[0,-1],KeyA:[-1,0],KeyS:[0,1],KeyD:[1,0]}[event.code];
   if (sudoku && direction) {
