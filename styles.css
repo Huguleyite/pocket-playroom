@@ -195,3 +195,12 @@ body.game-spot-the-dot .game-frame{height:300px}
 .picnic-card .play-label{color:#5d334a}.night-play .picnic-card .play-label{color:#ffe0a9}
 .card-art:has(.game-test-badge){position:relative}
 .game-card .game-test-badge{position:absolute;top:10px;right:10px;z-index:1;padding:4px 8px;border:1px solid #e6c99288;border-radius:999px;background:#2f2334;color:#fff3d6;font:800 10px system-ui;letter-spacing:.07em}
+@media(max-width:1100px),(pointer:coarse) and (max-width:1400px){
+ body.game-spot-the-dot #main{position:relative;max-width:none;padding:0}
+ body.game-spot-the-dot .site-header,body.game-spot-the-dot .game-heading,body.game-spot-the-dot .share-game-button{display:none}
+ body.game-spot-the-dot .night-controls{position:absolute;inset:0 max(.4rem,env(safe-area-inset-right)) auto auto;gap:.35rem;margin:0;transform:none}
+ body.game-spot-the-dot .night-toggle{min-height:44px;padding:0 .55rem;font-size:.72rem;border-radius:.5rem;box-shadow:none}
+ body.game-spot-the-dot #main>.back-link{margin-inline-start:max(.4rem,env(safe-area-inset-left));font-size:.72rem}
+ body.game-spot-the-dot .game-layout{margin:0}
+ body.game-spot-the-dot .game-well{border:0;border-radius:0;box-shadow:none}
+}
