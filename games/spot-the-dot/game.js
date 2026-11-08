@@ -29,6 +29,7 @@ function readSave() {
   catch { return {}; }
 }
 const saved = readSave();
+const recentPuzzles = saved.recentPuzzles ?? {};
 muted = saved.muted === true;
 musicEnabled = saved.music !== false;
 const soundButton = $('#sound');
@@ -231,7 +232,7 @@ function saveRun() {
     index:scenes.indexOf(scene), tiles, target, dimmed:[...dimmed], tier,
     mistakes, bounds, focus, camera, challenge, inPuzzle:state === 'ASSIST_PUZZLE'
   } : scene ? null : saved.run;
-  try { localStorage.setItem(saveKey,JSON.stringify({run,muted,music:musicEnabled})); }
+  try { localStorage.setItem(saveKey,JSON.stringify({run,muted,music:musicEnabled,recentPuzzles})); }
   catch {}
 }
 window.addEventListener('pagehide',saveRun);
@@ -599,29 +600,46 @@ function makePipe() {
   return {route,rotations:route.map(() => shuffled([1,3])[0]),selected:0};
 }
 
+function freshPuzzle(kind,generate,identify) {
+  const recent = recentPuzzles[kind] ?? [];
+  let next, id;
+  do {
+    next = generate();
+    id = identify(next);
+  } while (recent.includes(id));
+  recentPuzzles[kind] = [id,...recent].slice(0,6);
+  return next;
+}
+
 function workbench() {
   if (state !== 'SEARCHING') return;
   if (playtest) playtest.firstPuzzle ??= performance.now();
   switch (tier) {
     case 0:
-      challenge.grid ??= makeGrid();
+      challenge.grid ??= freshPuzzle('grid',makeGrid,grid => grid.givens.join(''));
       patternGrid(challenge.grid);
       break;
     case 1:
       if (['cell','chip'].includes(scene[4])) {
-        challenge.pipe ??= makePipe();
+        challenge.pipe ??= freshPuzzle('pipe',makePipe,pipe => pipe.route.join('') + ':' + pipe.rotations.join(''));
         pipeConnect(challenge.pipe.route,challenge.pipe.rotations,challenge.pipe.selected);
       } else {
-        if (challenge.slider?.tiles.length !== 9) challenge.slider = makeSlider();
+        if (challenge.slider?.tiles.length !== 9) {
+          challenge.slider = freshPuzzle('slider',makeSlider,slider => slider.tiles.join(''));
+        }
         slide(challenge.slider.tiles,challenge.slider.moves);
       }
       break;
     case 2:
-      challenge.cipher ??= {word:shuffled(codeWords)[0],shift:shuffled([2,3,4,5])[0],input:''};
+      challenge.cipher ??= freshPuzzle('cipher',() => ({
+        word:shuffled(codeWords)[0],shift:shuffled([2,3,4,5])[0],input:''
+      }),cipher => cipher.word);
       cipher(challenge.cipher,challenge.cipher.input);
       break;
     case 3:
-      puzzle = challenge.memory ??= Array.from({length:7}, () => Math.floor(Math.random()*4));
+      puzzle = challenge.memory ??= freshPuzzle('memory',
+        () => Array.from({length:7}, () => Math.floor(Math.random()*4)),
+        sequence => sequence.join(''));
       if (challenge.recallStep != null) recall(challenge.recallStep);
       else showPattern();
       break;
