@@ -305,7 +305,7 @@ h2{margin-top:.28rem;letter-spacing:-.035em}
  #panel.puzzle-panel .panel-toolbar .eyebrow{display:none}
  #panel.puzzle-panel #description{min-height:2.1em}
 }
-@media(orientation:landscape) and (min-width:450px) and (max-height:330px){
+@media(orientation:landscape) and (min-width:450px) and (max-height:380px){
  #panel.puzzle-panel[open]:has(.puzzle-layout){display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.2fr);grid-template-rows:auto auto 1fr;gap:.25rem;align-items:start}
  #panel.puzzle-panel #choices.puzzle-layout{display:contents}
  #panel.puzzle-panel .puzzle-layout>:first-child{grid-column:1;grid-row:1/4;justify-self:center}
@@ -317,16 +317,250 @@ h2{margin-top:.28rem;letter-spacing:-.035em}
  #panel.puzzle-panel .full-slider{max-width:190px}
  #panel.puzzle-panel .sudoku :is(span,button){height:44px}
 }
-@media(orientation:landscape) and (min-width:450px) and (max-height:330px){
+@media(orientation:landscape) and (min-width:450px) and (max-height:380px){
  #panel.puzzle-panel[open]:has(.cipher-layout){width:96vw;grid-template-columns:minmax(200px,.8fr) minmax(0,1.6fr)}
  #panel.puzzle-panel .cipher-wheel{grid-template-columns:auto auto;align-items:center}
  #panel.puzzle-panel .cipher-wheel-controls{flex-direction:column}
  #panel.puzzle-panel .cipher-readout{grid-column:1/-1}
 }
-@media(orientation:landscape) and (min-width:450px) and (max-height:330px){
+@media(orientation:landscape) and (min-width:450px) and (max-height:380px){
  #panel.puzzle-panel[open]:has(.cipher-layout){--station-padding:.45rem;grid-template-rows:auto 1fr}
  #panel:has(.cipher-layout) .panel-toolbar{grid-column:1;grid-row:1;justify-content:center}
  #panel:has(.cipher-layout) .cipher-wheel{grid-row:2}
  #panel:has(.cipher-layout) #description{grid-column:2;grid-row:1;align-self:center}
  #panel:has(.cipher-layout) .cipher-layout>.puzzle-controls{grid-row:2}
+}
+/* Signal Board Sudoku is a mounted assembly on a dedicated workbench. */
+#panel[data-scene="chip"]:has(.sudoku){
+ --bench-art:url("assets/signal-sudoku-bench.jpg");
+ --bench-brass:linear-gradient(155deg,#fff1bd 0%,#e7ac57 37%,#b77327 86%,#e8ad54);
+ --bench-ivory:linear-gradient(145deg,#fff1cf,#d2b78c);
+ border:2px solid #b77b43;
+ background:#153c38 var(--bench-art) center / 100% 100%;
+ box-shadow:inset 0 0 0 3px #0d2525,0 18px 55px #000a;
+}
+#panel[data-scene="chip"]:has(.sudoku) .puzzle-scene{
+ justify-content:center;align-items:center;min-height:48px;
+ background:none;border:0;margin-bottom:.12rem;
+}
+#panel[data-scene="chip"]:has(.sudoku) #puzzle-station{
+ padding:.32rem .8rem;border:1px solid #e9b978;border-radius:.45rem;
+ background:var(--bench-brass);color:#21190f;text-shadow:0 1px #ffd78f;
+ font:900 clamp(.95rem,3.6vw,1.35rem) Georgia,serif;box-shadow:0 3px 0 #56341d,0 5px 10px #0009;
+}
+#panel[data-scene="chip"]:has(.sudoku) :is(h2,#description){text-shadow:0 2px 3px #000}
+#panel[data-scene="chip"]:has(.sudoku) .panel-toolbar{padding-inline:.3rem}
+#panel[data-scene="chip"]:has(.sudoku) #description{background:#0e2726e8;border-left:3px solid #e39d58;padding:.3rem .4rem}
+#panel[data-scene="chip"] .sudoku-layout :is(.card-row,.puzzle-controls){
+ position:relative;padding:.55rem;border:2px solid #af7850;border-radius:.65rem;
+ background:linear-gradient(155deg,#547b66,#224743 42%,#112e30);
+ box-shadow:inset 0 0 0 2px #153b39,inset 0 0 0 4px #83937a55,0 4px 0 #101d1c,0 7px 12px #0009;
+}
+#panel[data-scene="chip"] .sudoku-layout :is(.card-row,.puzzle-controls)::before,
+#panel[data-scene="chip"] .sudoku-layout :is(.card-row,.puzzle-controls)::after{
+ content:"×";position:absolute;z-index:1;width:14px;height:14px;display:grid;place-content:center;
+ border-radius:50%;background:var(--bench-brass);color:#4b2d13;font:bold 12px/1 system-ui;
+ box-shadow:0 1px 2px #000;pointer-events:none;
+}
+#panel[data-scene="chip"] .sudoku-layout :is(.card-row,.puzzle-controls)::before{top:1px;left:1px}
+#panel[data-scene="chip"] .sudoku-layout :is(.card-row,.puzzle-controls)::after{bottom:1px;right:1px}
+#panel[data-scene="chip"] #choices .number-grid.sudoku{
+ border-color:#081c1b;background:#0b2322;padding:.25rem;gap:.2rem;
+ box-shadow:inset 0 2px 7px #000;
+}
+#panel[data-scene="chip"] #choices .sudoku :is(span,button):not(.active-cell):not(.incorrect){
+ color:#2b2218;border-color:#a47a4b;background:var(--bench-ivory);
+ box-shadow:inset 0 1px 2px #fff9,inset 0 -3px #593e2e55,0 2px 2px #0009;
+}
+#panel[data-scene="chip"] #choices .sudoku button:not(.active-cell):not(.incorrect){background:linear-gradient(145deg,#d9c6a5,#b29a77)}
+#panel[data-scene="chip"] #choices .sudoku :is(span,button):nth-child(4n+2){border-right-color:#e39551}
+#panel[data-scene="chip"] #choices .sudoku :is(span,button):nth-child(n+5):nth-child(-n+8){border-bottom-color:#e39551}
+#panel[data-scene="chip"] #choices .sudoku button.incorrect{
+ background:linear-gradient(#a7443d,#542321);box-shadow:inset 0 0 0 2px #ffb19a,0 0 9px #ff3f31;
+}
+#panel[data-scene="chip"] .sudoku-layout .puzzle-controls button{
+ color:#30251b;border:1px solid #b78753;background:var(--bench-ivory);font-weight:800;
+ box-shadow:inset 0 1px 1px #fff8,inset 0 -3px #815f3860,0 3px 0 #111e1e;
+}
+#panel[data-scene="chip"] .sudoku-layout .sudoku-keys button{
+ background:var(--bench-brass);font-size:1.3rem;
+}
+#panel[data-scene="chip"] .sudoku-layout .puzzle-controls button:active{transform:translateY(2px);box-shadow:inset 0 2px 4px #68421d}
+@media(orientation:portrait){
+ #panel[data-scene="chip"]:has(.sudoku){background-size:auto 100%}
+ #panel[data-scene="chip"]:has(.sudoku) .puzzle-scene{background:var(--bench-art) center top / 100% auto}
+}
+@media(orientation:landscape) and (min-width:450px) and (max-height:380px){
+ #panel[data-scene="chip"] .sudoku-layout :is(.card-row,.puzzle-controls){padding:.2rem}
+ #panel[data-scene="chip"]:has(.sudoku) #description{padding:.15rem .3rem}
+}
+/* Mount live controls over the approved illustrated hardware. */
+#panel[data-scene="chip"] .sudoku-layout .card-row{
+ position:relative;justify-self:center;width:min(100%,246px);aspect-ratio:685/766;
+ padding:0;border:0;background:url("assets/signal-sudoku-tray.jpg") center / 100% 100%;
+ border-radius:8%;box-shadow:0 5px 12px #0009;
+}
+#panel[data-scene="chip"] .sudoku-layout .card-row::before,
+#panel[data-scene="chip"] .sudoku-layout .card-row::after,
+#panel[data-scene="chip"] .sudoku-layout .puzzle-controls::before,
+#panel[data-scene="chip"] .sudoku-layout .puzzle-controls::after{display:none}
+#panel[data-scene="chip"] #choices .number-grid.sudoku{
+ position:absolute;inset:0;display:block;width:100%;max-width:none;margin:0;padding:0;border:0;background:none;box-shadow:none;
+}
+#panel[data-scene="chip"] #choices .sudoku :is(span,button){
+ position:absolute;display:grid;place-content:center;left:var(--socket-x);top:var(--socket-y);
+ transform:translate(-50%,-50%);width:17%;height:16%;min-height:0;min-width:0;
+ padding:0;border:0;border-radius:12%;background:transparent;color:#251b12;
+ box-shadow:none;text-shadow:0 1px #fff6;font:900 clamp(1rem,5vw,1.6rem) Georgia,serif;
+}
+#panel[data-scene="chip"] #choices .sudoku :is(span,button):not(.active-cell):not(.incorrect){background:transparent;color:#251b12;border:0;box-shadow:none}
+#panel[data-scene="chip"] .sudoku :nth-child(4n+1){--socket-x:21%}
+#panel[data-scene="chip"] .sudoku :nth-child(4n+2){--socket-x:39.5%}
+#panel[data-scene="chip"] .sudoku :nth-child(4n+3){--socket-x:61.5%}
+#panel[data-scene="chip"] .sudoku :nth-child(4n+4){--socket-x:80%}
+#panel[data-scene="chip"] .sudoku :nth-child(-n+4){--socket-y:20.8%}
+#panel[data-scene="chip"] .sudoku :nth-child(n+5):nth-child(-n+8){--socket-y:39%}
+#panel[data-scene="chip"] .sudoku :nth-child(n+9):nth-child(-n+12){--socket-y:61.5%}
+#panel[data-scene="chip"] .sudoku :nth-child(n+13){--socket-y:79.5%}
+#panel[data-scene="chip"] #choices .sudoku .active-cell{color:#251b12;background:#fff0b92e;box-shadow:inset 0 0 0 2px #fff4b4,0 0 7px #ffe2a0}
+#panel[data-scene="chip"] #choices .sudoku button.incorrect{background:#ff47342e;color:#48110c;box-shadow:inset 0 0 0 2px #ff3f2a,0 0 8px 2px #f52715}
+#panel[data-scene="chip"] .sudoku-layout .puzzle-controls{
+ position:relative;justify-self:center;width:min(100%,282px);aspect-ratio:736/605;
+ padding:0;border:0;border-radius:8%;background:url("assets/signal-sudoku-keypad.jpg") center / 100% 100%;box-shadow:0 5px 12px #0009;
+}
+#panel[data-scene="chip"] .sudoku-layout .sudoku-keys{position:absolute;inset:0;display:block}
+#panel[data-scene="chip"] .sudoku-layout .puzzle-controls button{
+ position:absolute;left:var(--key-x);top:var(--key-y);transform:translate(-50%,-50%);
+ border:0;background:transparent;box-shadow:none;color:#2c1b0e;text-shadow:0 1px #fff7;
+ padding:0;width:19%;height:25%;font-family:Georgia,serif;
+}
+#panel[data-scene="chip"] .sudoku-layout .puzzle-controls button:active{transform:translate(-50%,-50%);background:#fff4bc2b}
+#panel[data-scene="chip"] .sudoku-layout .sudoku-keys button{--key-y:43%;font-size:1.5rem}
+#panel[data-scene="chip"] .sudoku-keys button:nth-child(1){--key-x:17%}
+#panel[data-scene="chip"] .sudoku-keys button:nth-child(2){--key-x:39%}
+#panel[data-scene="chip"] .sudoku-keys button:nth-child(3){--key-x:61%}
+#panel[data-scene="chip"] .sudoku-keys button:nth-child(4){--key-x:83%}
+#panel[data-scene="chip"] .sudoku-layout .puzzle-controls>button{--key-y:75%;height:20%;font-size:clamp(.62rem,2.5vw,.8rem);white-space:normal;line-height:1.05}
+#panel[data-scene="chip"] .sudoku-layout .puzzle-controls>button:nth-of-type(1){--key-x:28%}
+#panel[data-scene="chip"] .sudoku-layout .puzzle-controls>button:nth-of-type(2){--key-x:50%}
+#panel[data-scene="chip"] .sudoku-layout .puzzle-controls>button:nth-of-type(3){--key-x:72%}
+@media(orientation:landscape) and (max-height:550px){
+ #panel[data-scene="chip"] .sudoku-layout .card-row{width:min(100%,clamp(172px,58dvh,246px))}
+ #panel[data-scene="chip"] .sudoku-layout .puzzle-controls{width:min(100%,clamp(228px,72dvh,282px))}
+}
+
+/* Use the illustrated red ring as the selected socket, with live text above it. */
+#panel[data-scene="chip"] #choices .sudoku .active-cell{
+ color:#32190f;
+ background:url("assets/signal-sudoku-lit-tile.png") center / 100% 100% no-repeat;
+ box-shadow:0 0 7px #ff3a20a6;
+}
+#panel[data-scene="chip"] #choices .sudoku button.incorrect.active-cell{
+ color:#48110c;
+ background:linear-gradient(#ff382125,#ff382125),url("assets/signal-sudoku-lit-tile.png") center / 100% 100% no-repeat;
+ outline:0;
+ box-shadow:0 0 8px 2px #f52715;
+}
+/* Keep the tile material visible beneath the illuminated rim. */
+#panel.puzzle-panel:not([data-scene="chip"]) #choices .sudoku .active-cell:not(.incorrect){
+ background:linear-gradient(145deg,#fff0c9,#b69262);
+ color:#2b1c12;border-color:#ff6e4d;
+ box-shadow:inset 0 0 0 1px #fff0bd,inset 0 0 6px 2px #ff4a32,0 0 8px #ff3528;
+}
+#panel.puzzle-panel:not([data-scene="chip"]) #choices .sudoku button.incorrect{
+ border-color:#ff755d;box-shadow:inset 0 0 0 1px #ffd7bc,inset 0 0 6px 2px #ff432e,0 0 8px #ff3528;
+}
+#panel.puzzle-panel #choices :is(.slider button.landed,.slider button.dragging,.pipe-grid button[data-selected],.card-strip .puzzle-card.lit){
+ border-color:var(--station-accent);
+ box-shadow:inset 0 0 0 1px #fff9,inset 0 0 7px color-mix(in srgb,var(--station-accent),transparent 35%),0 0 9px color-mix(in srgb,var(--station-accent),transparent 30%);
+}
+#panel.puzzle-panel #choices .card-strip .puzzle-card.lit{
+ background:linear-gradient(155deg,#fff8,transparent 55%),var(--tile-light);
+ color:var(--tile-ink);
+}
+#panel.puzzle-panel .cipher-wheel-controls button:active{
+ border-color:var(--station-accent);box-shadow:inset 0 0 6px var(--station-accent),0 0 9px var(--station-accent);
+}
+/* Illustrated housings and keycaps for every scene's Workbench. */
+#panel[data-scene="leaf"]{--housing:url("assets/workbench-leaf-tray.jpg");--keycap:url("assets/workbench-leaf-key.jpg")}
+#panel[data-scene="cell"]{--housing:url("assets/workbench-cell-tray.jpg");--keycap:url("assets/workbench-cell-key.jpg")}
+#panel[data-scene="star"]{--housing:url("assets/workbench-star-tray.jpg");--keycap:url("assets/workbench-star-key.jpg")}
+#panel[data-scene="chip"]{--housing:url("assets/workbench-chip-tray.jpg");--keycap:url("assets/workbench-chip-key.jpg")}
+#panel[data-scene="paint"]{--housing:url("assets/workbench-paint-tray.jpg");--keycap:url("assets/workbench-paint-key.jpg")}
+#panel[data-scene="face"]{--housing:url("assets/workbench-face-tray.jpg");--keycap:url("assets/workbench-face-key.jpg")}
+#panel.puzzle-panel:not([data-scene="chip"]:has(.sudoku)){
+ background:linear-gradient(#0a101552,#0a1015bd),var(--scene-art) center / cover;
+ box-shadow:inset 0 0 0 3px var(--station-deep),0 14px 45px #000a;
+}
+#panel.puzzle-panel:not([data-scene="chip"]:has(.sudoku)) :is(h2,#description){text-shadow:0 1px 4px #000,0 1px 4px #000}
+#panel.puzzle-panel:not([data-scene="chip"]:has(.sudoku)) #description{background:#0d131ed9;border-left:2px solid var(--station-metal);padding:.23rem .4rem}
+#panel.puzzle-panel:not([data-scene="chip"]:has(.sudoku)) #choices :is(.number-grid.sudoku,.full-slider,.pipe-grid,.cipher-wheel,.puzzle-controls){
+ border-color:var(--station-metal);border-radius:.65rem;
+ background:var(--housing) center / 100% 100%;
+ box-shadow:0 4px 9px #000a;
+}
+#panel.puzzle-panel:not([data-scene="chip"]:has(.sudoku)) #choices .puzzle-controls{padding:.42rem}
+#panel.puzzle-panel #choices .cipher-wheel{padding:.3rem .45rem}
+#panel.puzzle-panel #choices:has(>.card-row):not(.puzzle-layout){
+ background:var(--housing) center / 100% 100%;
+ border-radius:.65rem;padding:.5rem;
+}
+#panel.puzzle-panel:not([data-scene="chip"]:has(.sudoku)) #choices :is(button,.puzzle-card,.sudoku span){
+ background:var(--keycap) center / 100% 100%;
+ border-color:var(--station-metal);color:#241912;text-shadow:0 1px #fff7;
+ box-shadow:0 2px 3px #0009;
+}
+#panel.puzzle-panel:not([data-scene="chip"]:has(.sudoku)) #choices .sudoku .box-alt:not(.active-cell):not(.incorrect){
+ background:linear-gradient(#39272232,#39272232),var(--keycap) center / 100% 100%;color:#241912;
+}
+#panel.puzzle-panel:not([data-scene="chip"]:has(.sudoku)) #choices .sudoku .active-cell:not(.incorrect){
+ background:var(--keycap) center / 100% 100%;
+ box-shadow:inset 0 0 0 1px #fff0bd,inset 0 0 7px 2px #ff4a32,0 0 8px #ff3528;
+}
+#panel.puzzle-panel:not([data-scene="chip"]:has(.sudoku)) #choices :is(.slider button.landed,.slider button.dragging,.pipe-grid button[data-selected],.puzzle-card.lit){
+ box-shadow:inset 0 0 0 2px var(--station-accent),0 0 8px var(--station-accent);
+}
+#panel.puzzle-panel:not([data-scene="chip"]:has(.sudoku)) #choices .sudoku button.incorrect{
+ background:linear-gradient(#8b131899,#540c15aa),var(--keycap) center / 100% 100%;color:#fff;
+ box-shadow:inset 0 0 0 2px #ffd0bc,0 0 8px #ff3528;
+}
+@media(orientation:landscape) and (max-height:380px){
+ #panel.puzzle-panel:not([data-scene="chip"]:has(.sudoku)) #choices .puzzle-controls{padding:.2rem}
+ #panel.puzzle-panel #choices .cipher-wheel{padding:0}
+}
+
+@media(orientation:landscape) and (max-height:380px){
+ #panel[data-scene="chip"] .sudoku-layout .puzzle-controls{aspect-ratio:1.65}
+ #panel[data-scene="chip"]:has(.sudoku) #description{font-size:.7rem;line-height:1.12}
+}
+#panel.puzzle-panel #choices.pipe-layout .pipe-grid{
+ --pipe-body:#c67842;--pipe-shine:#ffd19a;--pipe-live:#ffb34f;
+ gap:0;grid-template-columns:repeat(3,minmax(44px,62px));padding:.45rem 1.55rem;
+}
+#panel[data-scene="cell"] #choices.pipe-layout .pipe-grid{--pipe-body:#896ac4;--pipe-shine:#dbc2ff;--pipe-live:#7af7e5}
+#panel.puzzle-panel #choices.pipe-layout .pipe-grid button{
+ position:relative;display:block;padding:0;border:0;border-radius:0;min-height:48px;aspect-ratio:1.15;
+ background:linear-gradient(145deg,#335954,#142d32);box-shadow:inset 0 0 0 1px #ffffff2e;
+}
+#panel[data-scene="cell"] #choices.pipe-layout .pipe-grid button{background:linear-gradient(145deg,#4c537d,#2d244e)}
+.pipe-grid svg{display:block;width:100%;height:100%;position:absolute;inset:0;pointer-events:none}
+.pipe-grid path{fill:none}
+.pipe-rim{stroke:#171714;stroke-width:30}
+.pipe-body{stroke:var(--pipe-body);stroke-width:22}
+.pipe-shine{stroke:var(--pipe-shine);stroke-width:5}
+.pipe-grid .powered .pipe-body{stroke:var(--pipe-live)}
+.pipe-grid .powered .pipe-shine{stroke:#fff8c9}
+.pipe-grid .powered svg{filter:drop-shadow(0 0 4px var(--pipe-live))}
+#panel.puzzle-panel .pipe-grid .pipe-inlet::before,
+#panel.puzzle-panel .pipe-grid .pipe-outlet::after{
+ z-index:1;font:900 .57rem/1 system-ui;color:var(--station-accent);text-shadow:0 1px 2px #000;
+}
+#panel.puzzle-panel .pipe-grid .pipe-inlet::before{content:"IN";right:calc(100% + .14rem)}
+#panel.puzzle-panel .pipe-grid .pipe-outlet::after{content:"OUT";left:calc(100% + .1rem)}
+#panel.puzzle-panel #choices.pipe-layout .puzzle-controls{
+ align-self:center;justify-content:center;padding:0;background:none;border:0;box-shadow:none;
+}
+#panel.puzzle-panel #choices.pipe-layout .puzzle-controls button{
+ border:1px solid var(--station-metal);background:linear-gradient(#264748,#132b2e);
+ color:#fff4dc;text-shadow:none;box-shadow:0 2px 3px #0009;padding-inline:.7rem;
 }

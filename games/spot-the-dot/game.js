@@ -731,6 +731,7 @@ function slide(tiles,moves,selected) {
     button.textContent = tile;
     const movable = neighbors.includes(i);
     button.classList.toggle('movable',movable);
+    button.classList.toggle('landed',i === selected);
     button.disabled = !movable;
     function commit() {
       const next = [...tiles];
@@ -780,11 +781,29 @@ function slide(tiles,moves,selected) {
   (grid.children[selected] || grid.querySelector('button:enabled')).focus({preventScroll:true});
 }
 
+function pipeTrace(ports) {
+  const svgNS = 'http://www.w3.org/2000/svg';
+  const svg = document.createElementNS(svgNS,'svg');
+  svg.setAttribute('viewBox','0 0 100 100');
+  svg.setAttribute('preserveAspectRatio','none');
+  svg.setAttribute('aria-hidden','true');
+  const edge = [[50,0],[100,50],[50,100],[0,50]];
+  const [start,end] = ports.map(port => edge[port]);
+  const path = ports[0]%2 === ports[1]%2 ? 'M '+start.join(' ')+' L '+end.join(' ') :
+    'M '+start.join(' ')+' Q 50 50 '+end.join(' ');
+  for (const kind of ['rim','body','shine']) {
+    const line = document.createElementNS(svgNS,'path');
+    line.setAttribute('d',path);
+    line.setAttribute('class','pipe-'+kind);
+    svg.append(line);
+  }
+  return svg;
+}
+
 function pipeConnect(route,rotations,selected) {
   challenge.pipe = {route,rotations,selected,initial:challenge.pipe?.initial ?? [...rotations]};
   const directions = [-3,1,3,-1];
   const names = ['north','east','south','west'];
-  const glyphs = {3:'└',5:'│',6:'┌',9:'┘',10:'─',12:'┐'};
   const ports = route.map((cell,i) => [
     i === 0 ? 3 : directions.indexOf(route[i-1]-cell),
     i === route.length-1 ? 1 : directions.indexOf(route[i+1]-cell)
@@ -792,6 +811,14 @@ function pipeConnect(route,rotations,selected) {
   const turned = ports.map((pair,i) => pair.map(direction => (direction+rotations[i])%4));
   const aligned = turned.map((pair,i) => ports[i].every(direction => pair.includes(direction)));
   if (aligned.every(Boolean)) { unlock(); return; }
+  const powered = new Set();
+  if (turned[0].includes(3)) powered.add(0);
+  for (let i = 1; i < route.length; i++) {
+    const direction = directions.indexOf(route[i]-route[i-1]);
+    if (!powered.has(i-1) || !turned[i-1].includes(direction) ||
+        !turned[i].includes((direction+2)%4)) break;
+    powered.add(i);
+  }
 
   show('ASSIST_PUZZLE','2 · Connect the pipes',
     'Tap a pipe to turn it clockwise. Join the inlet on the left to the outlet on the right to freeze the motion and upgrade the lens.',[back]);
@@ -806,9 +833,12 @@ function pipeConnect(route,rotations,selected) {
       continue;
     }
     const button = document.createElement('button');
-    button.textContent = glyphs[(1 << turned[index][0]) | (1 << turned[index][1])];
+    button.append(pipeTrace(turned[index]));
+    button.classList.toggle('powered',powered.has(index));
     button.setAttribute('aria-label','Rotate pipe, row ' + (Math.floor(cell/3)+1) + ', column ' +
-      (cell%3+1) + ', openings ' + turned[index].map(direction => names[direction]).join(' and '));
+      (cell%3+1) + ', openings ' + turned[index].map(direction => names[direction]).join(' and ') +
+      (powered.has(index) ? ', connected to inlet' : '') +
+      (index === 0 ? ', inlet' : index === route.length-1 ? ', outlet' : ''));
     if (index === 0) button.classList.add('pipe-inlet');
     if (index === route.length-1) button.classList.add('pipe-outlet');
     button.onclick = () => {
