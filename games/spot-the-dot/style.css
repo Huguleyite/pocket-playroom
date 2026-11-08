@@ -250,3 +250,5 @@ h2{margin-top:.28rem;letter-spacing:-.035em}
 }
 #panel.puzzle-panel #choices .sudoku button.incorrect{background:#792e3b;color:#fff3f1;border-color:#ffa5a6;box-shadow:inset 0 0 0 1px #ffa5a6}
 #panel.puzzle-panel #choices .sudoku button.incorrect.active-cell{outline:2px solid var(--station-accent);outline-offset:-4px}
+.puzzle-tools{display:flex;align-items:center;gap:.3rem}
+#panel.puzzle-panel #puzzle-reset{font-size:.78rem;border-color:var(--station-edge);background:var(--station-tile)}

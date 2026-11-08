@@ -381,6 +381,7 @@ function setStatus(message) {
 }
 function show(next,title,description,actions) {
   state = next;
+  $('#puzzle-reset').hidden = next !== 'ASSIST_PUZZLE' || tier < 1 || tier > 3;
   panel.classList.toggle('puzzle-panel',next === 'ASSIST_PUZZLE');
   $('#panel-label').textContent = {
     MENU:'FIELD SELECT', ASSIST_PUZZLE:'SOLVE & REVEAL', LEVEL_COMPLETE:'FIELD REPORT'
@@ -629,6 +630,21 @@ function workbench() {
   }
 }
 
+$('#puzzle-reset').onclick = () => {
+  if (state !== 'ASSIST_PUZZLE') return;
+  if (tier === 1 && challenge.pipe) {
+    const {route,initial} = challenge.pipe;
+    pipeConnect(route,[...initial],0);
+  } else if (tier === 1 && challenge.slider) {
+    slide([...challenge.slider.initial],0);
+  } else if (tier === 2 && challenge.cipher) {
+    challenge.cipher.turns = 0;
+    cipher(challenge.cipher,'');
+  } else if (tier === 3 && puzzle) {
+    showPattern();
+  }
+};
+
 function patternGrid(grid,message = '',focusCell = false) {
   const {givens,entries,selected,solution} = grid;
   const errors = entries.filter((value,i) => value && value !== solution[i]).length;
@@ -685,7 +701,7 @@ function patternGrid(grid,message = '',focusCell = false) {
 }
 
 function slide(tiles,moves,selected) {
-  challenge.slider = {tiles,moves};
+  challenge.slider = {tiles,moves,initial:challenge.slider?.initial ?? [...tiles]};
   const blank = tiles.indexOf(0);
   const neighbors = sliderNeighbors(blank);
   show('ASSIST_PUZZLE','2 · Slide the tiles',
@@ -753,7 +769,7 @@ function slide(tiles,moves,selected) {
 }
 
 function pipeConnect(route,rotations,selected) {
-  challenge.pipe = {route,rotations,selected};
+  challenge.pipe = {route,rotations,selected,initial:challenge.pipe?.initial ?? [...rotations]};
   const directions = [-3,1,3,-1];
   const names = ['north','east','south','west'];
   const glyphs = {3:'└',5:'│',6:'┌',9:'┘',10:'─',12:'┐'};

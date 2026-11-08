@@ -27,7 +27,7 @@ window.roomComplete=(id,date)=>{if(!date){const d=new Date();date=d.getFullYear(
 </main>
 <dialog id="panel" aria-labelledby="title">
 <div class="puzzle-scene" aria-hidden="true"><span id="puzzle-station"></span></div>
-<div class="panel-toolbar"><div id="panel-label" class="eyebrow"></div><button id="music" aria-pressed="true">Music on</button></div><h2 id="title"></h2><p id="description"></p><div id="choices"></div>
+<div class="panel-toolbar"><div id="panel-label" class="eyebrow"></div><div class="puzzle-tools"><button id="puzzle-reset" type="button" hidden>Reset</button><button id="music" aria-pressed="true">Music on</button></div></div><h2 id="title"></h2><p id="description"></p><div id="choices"></div>
 </dialog>
 <script src="game.js" defer></script>
 </body>
