@@ -252,3 +252,81 @@ h2{margin-top:.28rem;letter-spacing:-.035em}
 #panel.puzzle-panel #choices .sudoku button.incorrect.active-cell{outline:2px solid var(--station-accent);outline-offset:-4px}
 .puzzle-tools{display:flex;align-items:center;gap:.3rem}
 #panel.puzzle-panel #puzzle-reset{font-size:.78rem;border-color:var(--station-edge);background:var(--station-tile)}
+.cipher-feedback{flex-basis:100%;font-size:.85rem;color:var(--station-accent)}
+.cipher-feedback:empty{display:none}
+/* Shared Workbench layout, with materials drawn from each scene. */
+#panel.puzzle-panel{--station-padding:clamp(.55rem,2.8vw,1rem);max-height:calc(100dvh - .5rem);border-color:var(--station-metal,var(--station-edge))}
+#panel[data-scene="leaf"]{--station-metal:#d6a85d;--tile-light:#f3d39b;--tile-dark:#b77a3f;--tile-ink:#2e190d}
+#panel[data-scene="cell"]{--station-metal:#92dad6;--tile-light:#c2f3f0;--tile-dark:#785cac;--tile-ink:#221a3c}
+#panel[data-scene="star"]{--station-metal:#e1b46b;--tile-light:#ffe5ad;--tile-dark:#ba7b38;--tile-ink:#2b1533}
+#panel[data-scene="chip"]{--station-metal:#ecae75;--tile-light:#b6ead7;--tile-dark:#428f83;--tile-ink:#092c2a}
+#panel[data-scene="paint"]{--station-metal:#e4a878;--tile-light:#fff0d3;--tile-dark:#d88a64;--tile-ink:#502d27}
+#panel[data-scene="face"]{--station-metal:#f8bbd1;--tile-light:#fff0a5;--tile-dark:#e594bb;--tile-ink:#412044}
+#panel.puzzle-panel .puzzle-scene{min-height:clamp(36px,7dvh,64px);margin-bottom:.35rem;border-color:var(--station-metal)}
+#panel.puzzle-panel h2{font-size:clamp(1.05rem,4.3vw,1.45rem)}
+#panel.puzzle-panel #description{margin:.3rem 0 .45rem;font-size:.83rem;line-height:1.25}
+#panel.puzzle-panel .panel-toolbar button{padding:.2rem .5rem}
+#panel.puzzle-panel #choices.puzzle-layout{display:grid;grid-template-columns:minmax(0,1fr);gap:.35rem}
+.puzzle-controls{display:flex;align-content:start;align-items:start;flex-wrap:wrap;gap:.3rem;min-width:0}
+#panel .puzzle-controls button{padding-inline:.45rem;font-size:.8rem}
+#panel .puzzle-controls .sudoku-keys button{font-size:1.15rem}
+.puzzle-layout :is(.full-slider,.number-grid.sudoku,.pipe-grid){margin:0 auto;padding:.35rem;border:1px solid var(--station-metal);border-radius:.65rem;background:var(--station-deep);box-shadow:inset 0 0 12px #0008}
+.puzzle-layout .pipe-grid{padding-inline:1.55rem}
+#panel.puzzle-panel #choices :is(.sudoku span,.full-slider button,.card-strip .puzzle-card,.signal-keys button:nth-child(-n+5)){
+ color:var(--tile-ink);border-color:var(--station-metal);
+ background:linear-gradient(155deg,#fff8,transparent 50%),linear-gradient(var(--tile-light),var(--tile-dark));
+}
+#panel.puzzle-panel #choices .number-grid.sudoku .box-alt:not(.active-cell):not(.incorrect){background:linear-gradient(155deg,#ffffff26,#0002),var(--station-tile)}
+#panel.puzzle-panel #choices .number-grid.sudoku span.box-alt{color:#fff5e7}
+#panel.puzzle-panel #choices :is(.card-strip .puzzle-card.lit,.number-grid.sudoku .active-cell):not(.incorrect){color:#211822;background:var(--station-accent);border-color:var(--station-accent)}
+#panel.puzzle-panel #choices .pipe-grid button{background:linear-gradient(145deg,#ffffff35,transparent 45%),var(--station-tile);color:var(--station-accent);text-shadow:0 0 8px var(--station-metal)}
+#panel .full-slider{max-width:17rem}
+#panel.puzzle-panel .full-slider :is(button,.slider-gap){aspect-ratio:1.4}
+#panel .cipher-layout .card-strip{margin:0;gap:.2rem}
+#panel .cipher-layout .puzzle-card{min-height:30px;font-size:.95rem}
+#panel .cipher-wheel{gap:.15rem}
+#panel .cipher-wheel-controls{margin:0}
+#panel .cipher-dial{--dial-size:clamp(146px,25dvh,194px);width:var(--dial-size);background:radial-gradient(circle,var(--station-deep) 0 34%,var(--station-metal) 35% 47%,var(--tile-dark) 48% 49%,var(--tile-light) 50% 65%,var(--station-metal) 66% 72%,var(--station-deep) 73%)}
+#panel .cipher-ring-outer{--radius:calc(var(--dial-size)*.42);color:var(--tile-ink)}
+#panel .cipher-ring-inner{--radius:calc(var(--dial-size)*.30);color:var(--tile-ink)}
+#panel .cipher-ring span{font-size:clamp(9px,1.4dvh,11px)}
+#panel .cipher-readout{font-size:.72rem}
+@media(orientation:landscape) and (min-width:450px){
+ #panel.puzzle-panel:has(.puzzle-layout){width:min(96vw,42rem)}
+ #panel.puzzle-panel .puzzle-scene{min-height:30px;padding-block:.2rem}
+ #panel.puzzle-panel #choices.puzzle-layout{grid-template-columns:minmax(0,1fr) minmax(0,1.2fr);align-items:start}
+ #panel .cipher-dial{--dial-size:clamp(142px,44dvh,194px)}
+ #panel .full-slider{max-width:min(100%,48dvh)}
+ #panel .number-grid.sudoku{max-width:15rem}
+}
+@media(max-height:450px){
+ #panel.puzzle-panel .puzzle-scene{display:none}
+ #panel.puzzle-panel .panel-toolbar{float:right;margin-left:.4rem}
+ #panel.puzzle-panel .panel-toolbar .eyebrow{display:none}
+ #panel.puzzle-panel #description{min-height:2.1em}
+}
+@media(orientation:landscape) and (min-width:450px) and (max-height:330px){
+ #panel.puzzle-panel[open]:has(.puzzle-layout){display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.2fr);grid-template-rows:auto auto 1fr;gap:.25rem;align-items:start}
+ #panel.puzzle-panel #choices.puzzle-layout{display:contents}
+ #panel.puzzle-panel .puzzle-layout>:first-child{grid-column:1;grid-row:1/4;justify-self:center}
+ #panel.puzzle-panel .puzzle-layout>.puzzle-controls{grid-column:2;grid-row:3}
+ #panel.puzzle-panel .panel-toolbar{grid-column:2;grid-row:1;justify-content:flex-end;margin:0}
+ #panel.puzzle-panel h2{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+ #panel.puzzle-panel #description{grid-column:2;grid-row:2;min-height:0;margin:0;font-size:.75rem}
+ #panel.puzzle-panel .cipher-dial{--dial-size:142px}
+ #panel.puzzle-panel .full-slider{max-width:190px}
+ #panel.puzzle-panel .sudoku :is(span,button){height:44px}
+}
+@media(orientation:landscape) and (min-width:450px) and (max-height:330px){
+ #panel.puzzle-panel[open]:has(.cipher-layout){width:96vw;grid-template-columns:minmax(200px,.8fr) minmax(0,1.6fr)}
+ #panel.puzzle-panel .cipher-wheel{grid-template-columns:auto auto;align-items:center}
+ #panel.puzzle-panel .cipher-wheel-controls{flex-direction:column}
+ #panel.puzzle-panel .cipher-readout{grid-column:1/-1}
+}
+@media(orientation:landscape) and (min-width:450px) and (max-height:330px){
+ #panel.puzzle-panel[open]:has(.cipher-layout){--station-padding:.45rem;grid-template-rows:auto 1fr}
+ #panel:has(.cipher-layout) .panel-toolbar{grid-column:1;grid-row:1;justify-content:center}
+ #panel:has(.cipher-layout) .cipher-wheel{grid-row:2}
+ #panel:has(.cipher-layout) #description{grid-column:2;grid-row:1;align-self:center}
+ #panel:has(.cipher-layout) .cipher-layout>.puzzle-controls{grid-row:2}
+}

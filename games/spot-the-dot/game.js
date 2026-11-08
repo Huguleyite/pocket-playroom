@@ -645,6 +645,16 @@ $('#puzzle-reset').onclick = () => {
   }
 };
 
+function arrangePuzzle(surface,kind) {
+  const choices = $('#choices');
+  const controls = document.createElement('div');
+  controls.className = 'puzzle-controls';
+  controls.append(...[...choices.children].filter(child => child !== surface));
+  choices.classList.add('puzzle-layout',kind);
+  choices.append(controls);
+  return controls;
+}
+
 function patternGrid(grid,message = '',focusCell = false) {
   const {givens,entries,selected,solution} = grid;
   const errors = entries.filter((value,i) => value && value !== solution[i]).length;
@@ -697,6 +707,7 @@ function patternGrid(grid,message = '',focusCell = false) {
   const choices = $('#choices');
   keys.append(...Array.from(choices.children).slice(1,5));
   row.after(keys);
+  arrangePuzzle(row,'sudoku-layout');
   if (focusCell) layout.children[selected].focus();
 }
 
@@ -765,6 +776,7 @@ function slide(tiles,moves,selected) {
     grid.append(button);
   });
   $('#choices').prepend(grid);
+  arrangePuzzle(grid,'slider-layout');
   (grid.children[selected] || grid.querySelector('button:enabled')).focus({preventScroll:true});
 }
 
@@ -808,6 +820,7 @@ function pipeConnect(route,rotations,selected) {
     if (index === selected) button.dataset.selected = 'true';
   }
   $('#choices').prepend(grid);
+  arrangePuzzle(grid,'pipe-layout');
   grid.querySelector('[data-selected]').focus();
 }
 function cardStrip(values,label,lit = -1) {
@@ -826,6 +839,7 @@ function cardStrip(values,label,lit = -1) {
   row.className = 'card-row';
   row.append(strip);
   $('#choices').prepend(row);
+  return strip;
 }
 function showPattern() {
   delete challenge.recallStep;
@@ -899,9 +913,10 @@ function cipherWheel(set,alphabet) {
   wheel.append(dial,controls,readout);
   update();
   $('#choices').prepend(wheel);
+  return wheel;
 }
 
-function cipher(set,input,message = '') {
+function cipher(set,input) {
   const {word,shift} = set;
   set.input = input;
   const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
@@ -909,17 +924,31 @@ function cipher(set,input,message = '') {
   set.keys ??= [...new Set(word+shuffled(alphabet).slice(0,5).join(''))].sort();
   const keys = set.keys;
   const places = ['','','two','three','four','five'][shift];
+  const feedback = document.createElement('p');
+  feedback.className = 'cipher-feedback';
+  feedback.setAttribute('role','status');
+  function updateAnswer(value,message = '') {
+    set.input = value;
+    [...answer.children].forEach((card,i) => {
+      card.textContent = value[i] ?? '·';
+      card.classList.toggle('lit',i === value.length-1);
+    });
+    feedback.textContent = message;
+    saveRun();
+  }
   show('ASSIST_PUZZLE','3 · Decode the message',
-    'Shift each letter back ' + places + (shift === 1 ? ' place.' : ' places.') + ' For example, ' + alphabet[shift] + ' becomes A. Spin the outer ring to line up that pair. Read the coded letters outside and their matches inside.' + (message ? '\n' + message : ''),
+    'Shift back ' + places + ' places. Align outer ' + alphabet[shift] + ' with inner A, then read each coded letter’s inner match.',
     [...keys.map(letter => [letter,() => {
-      const next = input + letter;
+      const next = set.input + letter;
       if (next === word) unlock();
-      else if (next.length === word.length) cipher(set,'','Try again. Check the shift for each letter.');
-      else cipher(set,next);
-    }]),['Erase',() => cipher(set,input.slice(0,-1))],back]);
-  cardStrip([...input.padEnd(word.length,'·')],'Decoded letters',input.length-1);
+      else if (next.length === word.length) updateAnswer('','Try again. Check the shift for each letter.');
+      else updateAnswer(next);
+    }]),['Erase',() => updateAnswer(set.input.slice(0,-1))],back]);
+  const answer = cardStrip([...input.padEnd(word.length,'·')],'Decoded letters',input.length-1);
   cardStrip(coded,'Encrypted letters');
-  cipherWheel(set,alphabet);
+  const wheel = cipherWheel(set,alphabet);
+  $('#choices').append(feedback);
+  arrangePuzzle(wheel,'cipher-layout');
 }
 function move(x,y,follow) {
   const nextX = clamp(x,bounds.x,bounds.x+bounds.width-.01);
