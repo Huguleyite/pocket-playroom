@@ -1,0 +1,4 @@
+User-agent: *
+Disallow:
+
+Sitemap: https://pocketplayroom.com/sitemap.xml
