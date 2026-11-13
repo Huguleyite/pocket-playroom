@@ -14,7 +14,7 @@ window.renderBigScreen = function(main) {
       </div>
       <div class="chrono-art"><img src="assets/aetheria/board-concept.png" alt="Aetheria board concept with turquoise pools and glowing crystals"></div>
     </section>
-    <section class="chrono-preview" aria-labelledby="aetheria-preview"><div class="chrono-preview-title"><h2 id="aetheria-preview">A look inside Patchwork Realm</h2><p>Gameplay preview</p></div><img src="assets/aetheria/gameplay.png" alt="Aetheria gameplay preview with an isometric board, heroes, water, and crystal nodes" loading="lazy"></section>
+    <section class="chrono-preview" aria-labelledby="aetheria-preview"><div class="chrono-preview-title"><h2 id="aetheria-preview">A look inside Patchwork Realm</h2><p>Gameplay preview: Level 5 (Raider Camp)</p></div><img src="assets/aetheria/raider-camp.png" alt="Level 5 Raider Camp board with heroes, enemies, and the camp banner" loading="lazy"></section>
     <section class="chrono-features" aria-label="Game features">
       <div><span aria-hidden="true">♟</span><h2>Lead three heroes</h2><p>Combine Aether-Weaver, Rune Warden, and Mist Stalker abilities.</p></div>
       <div><span aria-hidden="true">◇</span><h2>Reshape the board</h2><p>Terraform tiles, raise barriers, and cross the river bridge.</p></div>
