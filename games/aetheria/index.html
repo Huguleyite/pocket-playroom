@@ -1,0 +1,2726 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Aetheria: Patchwork Realm · Test</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+  html,body{margin:0;height:100%;background:#0d0630;overflow:hidden;font-family:system-ui,-apple-system,"Segoe UI",sans-serif}
+  canvas{display:block}
+  #hud{position:fixed;left:16px;top:14px;color:#e9e2ff;pointer-events:none;text-shadow:0 2px 8px #0008}
+  #hud h1{margin:0;font-size:18px;letter-spacing:.04em}
+  #hud p{margin:4px 0 0;font-size:12px;opacity:.75}
+  #readout{position:fixed;left:16px;bottom:14px;color:#bff6ff;font:600 13px ui-monospace,Menlo,monospace;pointer-events:none;text-shadow:0 2px 8px #000a}
+
+  .power-controls{display:grid;gap:5px}
+  .power-card{display:grid;grid-template-columns:24px minmax(0,1fr) auto;align-items:center;gap:7px;
+    width:100%;box-sizing:border-box;padding:6px 8px;text-align:left;color:#f0f3ff;
+    border:1px solid #415274;border-left:3px solid var(--hero-accent,#65e7ec);border-radius:7px;
+    background:#243251;font:600 12px system-ui;cursor:pointer;transition:transform 120ms,border-color 120ms,background 120ms}
+  .power-card-wrap{position:relative}
+  .power-card-wrap:has(>.power-card[hidden]),.power-card[hidden]{display:none}
+  .power-card:disabled{pointer-events:none}
+  .power-tip{display:none;position:absolute;z-index:2;left:0;right:0;bottom:calc(100% + 4px);
+    padding:7px 9px;border:1px solid var(--hero-accent);border-radius:6px;
+    background:#111c35;color:#edf4ff;font:500 11px/1.4 system-ui;pointer-events:none}
+  .power-card-wrap:hover>.power-tip,.power-card-wrap:focus-within>.power-tip{display:block}
+  .power-card:hover:not(:disabled),.power-card:focus-visible{transform:translateY(-1px);border-color:var(--hero-accent);background:#303f62}
+  .power-card:active:not(:disabled){transform:translateY(1px)}
+  .power-card:disabled{color:#aebad3;background:#1b2540;border-color:#3a4663;cursor:default}
+  .power-icon{display:grid;place-items:center;width:23px;height:23px;border-radius:5px;background:#131d36;color:var(--hero-accent);font-size:15px}
+  .power-cost{white-space:nowrap;padding:2px 5px;border-radius:5px;background:#131d36;color:#dfe8ff;font-size:10px}
+  .power-reason{display:block;font-size:10px;font-weight:500;color:#bac5dc;margin-top:2px}
+  .power-reason[hidden]{display:none}
+  .power-controls select,.power-controls .target-cancel{border:1px solid #536581;border-radius:6px;background:#22304d;color:#eef4ff;padding:4px 7px}
+  @media(prefers-reduced-motion:reduce){.power-card{transition:none}}
+
+.mobile-toggle,.mobile-vitals{display:none}
+@media (pointer:coarse),(max-width:700px){
+ #hud p,#readout{display:none}
+ #hud h1{font-size:11px;max-width:100px}
+ .mobile-toggle{display:block;position:fixed;right:8px;top:8px;z-index:12;padding:8px;border:1px solid #536581;border-radius:7px;background:#141d39;color:white}
+ .encounter-details{display:none;top:48px!important;max-height:48dvh;overflow:auto}
+ .encounter-details.is-open{display:block}
+ .mobile-vitals{display:flex;flex-direction:column;gap:4px;position:fixed;left:8px;bottom:max(8px,env(safe-area-inset-bottom));width:min(38vw,165px);max-height:32dvh;overflow:auto;z-index:7;padding:5px;background:#10182f;border-radius:8px}
+ .mobile-vitals:empty{display:none}
+ .mobile-vitals .unit-vitals{touch-action:manipulation;position:static!important;transform:none!important;flex-direction:column;align-items:flex-start!important;flex-shrink:0;padding:4px 6px!important;border-radius:7px!important}
+ .mobile-vitals .unit-vitals[aria-pressed=true]{border-color:#80eaf2!important}
+ .mobile-power-tray{left:auto!important;top:auto!important;right:8px;bottom:max(8px,env(safe-area-inset-bottom));width:min(54vw,245px)!important;max-height:42dvh;overflow:auto}
+}
+
+.power-info-toggle{display:none}
+@media (pointer:coarse),(max-width:700px){
+ .power-card-wrap{display:grid;grid-template-columns:minmax(0,1fr) 38px;gap:4px}
+ .power-card-wrap:has(>.power-card[hidden]){display:none}
+ .power-info-toggle{display:block;min-height:38px;padding:0;border:1px solid #536581;
+   border-radius:7px;background:#192640;color:var(--hero-accent,#65e7ec);font:700 16px system-ui;touch-action:manipulation}
+ .power-info-toggle[aria-expanded=true]{border-color:var(--hero-accent,#65e7ec);background:#304264}
+ .power-card-wrap>.power-tip{display:none!important;position:static;grid-column:1/-1}
+ .power-card-wrap.info-open>.power-tip{display:block!important}
+}
+</style>
+<script type="importmap">
+{"imports":{
+  "three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+  "three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+}}
+</script>
+<script>window.HERO_GLB={}</script>
+<script src="hero_glb-1.js"></script>
+<script src="hero_glb-2.js"></script>
+<script src="hero_glb-3.js"></script>
+<script src="hero_glb-4.js"></script>
+<script src="hero_glb-5.js"></script>
+<script src="hero_glb-6.js"></script>
+<script>window.TILE_GLB={}</script>
+<script src="tile_glb-1.js"></script>
+</head>
+<body>
+<div id="hud"><h1>Aetheria: Patchwork Realm · Test</h1><a href="../../#big-screen/aetheria" style="pointer-events:auto;color:#c8d9ff;font-size:11px">← Big Screen</a>
+<p>Drag = orbit &middot; wheel = zoom &middot; R = reset view</p></div>
+<div id="readout"></div>
+<script type="module">
+import * as THREE from 'three';
+import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
+import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { clone as cloneSkeleton } from 'three/addons/utils/SkeletonUtils.js';
+import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
+
+/* =====================================================================
+   CONSTANTS (look tuning lives here)
+   ===================================================================== */
+
+function readModelPack(html) {
+  function read(key, required) {
+    const match = html.match(new RegExp('<script>\\s*window\\.' + key +
+      '\\s*=\\s*(\\{[^\\r\\n]*\\})\\s*;?\\s*<\\/script>'));
+    const pack = match && JSON.parse(match[1]);
+    if (!pack || required.some(id => typeof pack[id] !== 'string' || !pack[id].startsWith('Z2xURg'))) {
+      throw new Error('Missing or invalid ' + key + ' assets.');
+    }
+    return pack;
+  }
+  return {
+    tiles: read('TILE_GLB', ['Tile_Grass', 'Tile_GrassFlowers', 'Tile_Water', 'Tile_Rock1',
+      'Tile_Rock2', 'Tile_Forest', 'Tile_Crystal', 'Tile_WaterRim']),
+    heroes: read('HERO_GLB', ['weaver', 'warden', 'stalker', 'raider',
+      'weaverStaff', 'wardenShield', 'stalkerDaggerL', 'stalkerDaggerR', 'raiderCleaver',
+      'archer', 'archerBow', 'archerQuiver', 'captain', 'captainCleaver'])
+  };
+}
+
+if (!Object.keys(window.TILE_GLB).length || !Object.keys(window.HERO_GLB).length) {
+  const startup = document.createElement('section');
+  startup.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);width:min(400px,85vw);padding:18px;background:#171631;color:#eef6ff;border-radius:8px';
+  const label = document.createElement('label');
+  label.textContent = 'Load models from Aetheria_index_phase1.html';
+  const picker = document.createElement('input');
+  picker.type = 'file';
+  picker.accept = '.html,text/html';
+  picker.style.display = 'block';
+  const message = document.createElement('p');
+  message.setAttribute('role', 'status');
+  message.textContent = 'Choose the full Phase 1 HTML from the Blender folder.';
+  label.append(picker);
+  startup.append(label, message);
+  document.body.append(startup);
+  await new Promise(resolve => {
+    picker.addEventListener('change', async () => {
+      const file = picker.files[0];
+      if (!file) return;
+      picker.disabled = true;
+      message.textContent = 'Loading models…';
+      try {
+        const pack = readModelPack(await file.text());
+        window.TILE_GLB = pack.tiles;
+        window.HERO_GLB = pack.heroes;
+        startup.remove();
+        resolve();
+      } catch (error) {
+        message.textContent = error.message + ' Choose the full Phase 1 HTML and try again.';
+        picker.value = '';
+        picker.disabled = false;
+      }
+    });
+  });
+}
+
+// Camera
+const CAM_YAW_DEG = 45, CAM_PITCH_DEG = 38, CAM_DISTANCE = 40;
+const VIEW_HALF_H = 5.6, VIEW_HALF_W = 7.4;      // base framing (world units)
+const ZOOM_MIN = 0.8, ZOOM_MAX = 1.6;
+// Materials
+const BEVEL = 0.05;
+const RESIN = { roughness: 0.15, metalness: 0.05, clearcoat: 0.8, clearcoatRoughness: 0.05 };
+const ENV_INTENSITY = 0.45;
+// Lighting
+const KEY_POS = [15, 25, 15];
+// Crystals
+const CRYSTAL_EMISSIVE = 2.5, CRYSTAL_PULSE = 0.35;
+// Water
+const WATER_OPACITY = 0.5, WATER_IOR = 1.33;
+// Colors
+const COL = {
+  grass: 0x08c455, dirt: 0x9a6234, soil: 0x3a2113, keel: 0x2a170d,
+  rock: 0x66779a, rockHi: 0x7b8db0, stoneBed: 0x808ca3,
+  water: 0x2ad8ff, crystal: 0x4a0f8f, crystalGlow: 0xa012ff,
+  treeA: 0x0ea35a, treeB: 0x12bd62, trunk: 0x8a4b2a,
+};
+
+/* =====================================================================
+   GAME DATA (pure; no THREE, no DOM) -- reused by the logic/tests later
+   ===================================================================== */
+const GRID = 8;
+const LAYOUT = [
+  'GGGRRGGG', // y0
+  'GWWGRGCG', // y1
+  'GWWGGGGG', // y2
+  'GGGGWWGR', // y3
+  'RGCGWWGR', // y4
+  'RGGGGGGG', // y5
+  'GGWGGRRG', // y6
+  'GGWGGRCG', // y7
+];
+const FOREST_TILES = [[6, 3], [7, 0], [4, 7]];   // my pick: grass cells far from heroes
+const CODE_TO_TYPE = { G: 'grass', W: 'water', R: 'rock', C: 'crystal' };
+const HERO_DEFS = [
+  { id: 'weaver',  name: 'Aether-Weaver', x: 0, y: 2, color: 0xb79cff, accent: 0xff8ad8 },
+  { id: 'warden',  name: 'Rune Warden',   x: 2, y: 5, color: 0x6b7a92, accent: 0xffb02e },
+  { id: 'stalker', name: 'Mist Stalker',  x: 3, y: 1, color: 0x1fd1c1, accent: 0x7df9ff },
+];
+const ENEMY_STATS = {
+  raider: { hp: 12, mp: 4 },
+  archer: { hp: 8, mp: 4 },
+  captain: { hp: 20, mp: 4 }
+};
+const PATCHWORK_MEADOW = {
+  name: 'Patchwork Meadow',
+  goal: 'Rout',
+  layout: LAYOUT,
+  heroes: HERO_DEFS,
+  enemies: [
+    { id: 'enemy0', modelId: 'raider', name: 'Raider 1', x: 5, y: 2 },
+    { id: 'enemy1', modelId: 'raider', name: 'Raider 2', x: 5, y: 5 }
+  ]
+};
+
+function raiders(points, modelId = 'raider') {
+  return points.map(([x, y]) => ({ x, y, modelId }));
+}
+const LEVELS = [
+  { ...PATCHWORK_MEADOW },
+  { name: 'River Crossing', goal: 'Crossing', point: [6,0], bridge: [[3,3],[3,4]],
+    layout: 'GGGFGGCG GGGGGRGG GGGGGGGG WWWGWWWW WWWGWWWW GGGGGGGG GGRGGGFG GGGGGGGG'.split(' '),
+    starts: [[1,5],[3,5],[5,6]], enemies: raiders([[3,2],[1,1],[6,5]]) },
+  { name: 'Crystal Quarry', goal: 'Hold the Node', point: [4,4],
+    layout: 'RRGGGGRR RGGCGGGR GGGRGGGG GGRGGCGG GGGGCRGG GGGGGGGG RGGGGGGR RRGGGGRR'.split(' '),
+    starts: [[0,3],[1,4],[0,5]], enemies: raiders([[7,3],[6,2]]),
+    wave: raiders([[7,5],[6,6]]) },
+  { name: 'Highland Pass', goal: 'Ambush', point: [0,0],
+    layout: 'GRRGFGGG GFGGGRGG GGRGGGFG RRGGRGGG GFGGGGRR GGGGRGFG GGRGGGGG GGGGGRRG'.split(' '),
+    starts: [[7,7],[7,6],[5,6]], enemies: [
+      ...raiders([[4,0],[6,2],[1,4]]).map(enemy => ({ ...enemy, concealed: true })),
+      ...raiders([[2,3],[5,5]])
+    ] },
+  { name: 'Raider Camp', goal: 'Camp Assault', point: [5,1],
+    layout: 'GGRFGGGG GGGGGBGG GRGGGGRG GGGGGGGG GGWWGGGG GGWWGGGG GGGGGGGG GGGGGGGG'.split(' '),
+    starts: [[0,3],[0,5],[1,6]], enemies: [
+      ...raiders([[6,1]], 'captain'), ...raiders([[4,0],[5,2]], 'archer'), ...raiders([[4,3],[6,3]])
+    ] }
+];
+let levelIndex = 0;
+const activeLevel = () => LEVELS[levelIndex];
+
+function makeBoard(level = PATCHWORK_MEADOW) {
+  const tiles = [];
+  for (let y = 0; y < GRID; y++) {
+    const row = [];
+    for (let x = 0; x < GRID; x++) {
+      const type = CODE_TO_TYPE[level.layout[y][x]] ?? (level.layout[y][x] === 'F' ? 'forest' : 'grass');
+      const elevation = type === 'rock' ? (((x + y) % 2 === 0) ? 2 : 1) : (type === 'water' ? 0.8 : 1);
+      row.push({ x, y, type, elevation, terraformed: false });
+    }
+    tiles.push(row);
+  }
+  if (level.layout === LAYOUT) for (const [x, y] of FOREST_TILES) tiles[y][x].type = 'forest';
+  for (const [x, y] of level.bridge ?? []) tiles[y][x].bridge = true;
+  return tiles;
+}
+const tileTop = (t) => t.bridge && kit.Tile_Bridge_2Tile ? 1.05 : t.elevation;               // top surface height (water = surface 0.8)
+const TILE_LABEL = { grass: 'Grass', water: 'Water', rock: 'Rock', crystal: 'Crystal Node', forest: 'Forest' };
+
+/* =====================================================================
+   RENDERING
+   ===================================================================== */
+const board = makeBoard();
+const rad = (d) => d * Math.PI / 180;
+const tw = (x) => x - (GRID - 1) / 2;             // tile index -> world coordinate
+
+const renderer = new THREE.WebGLRenderer({ antialias: false, powerPreference: 'high-performance' });
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.setSize(innerWidth, innerHeight);
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 0.85;
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+document.body.appendChild(renderer.domElement);
+
+const scene = new THREE.Scene();
+
+// Background: deep indigo gradient
+{
+  const c = document.createElement('canvas'); c.width = 4; c.height = 512;
+  const g = c.getContext('2d'); const gr = g.createLinearGradient(0, 0, 0, 512);
+  gr.addColorStop(0, '#1d0e55'); gr.addColorStop(0.5, '#120640'); gr.addColorStop(1, '#0a0425');
+  g.fillStyle = gr; g.fillRect(0, 0, 4, 512);
+  const tex = new THREE.CanvasTexture(c); tex.colorSpace = THREE.SRGBColorSpace;
+  scene.background = tex;
+}
+// Procedural environment so the clearcoat has something to reflect
+const pmrem = new THREE.PMREMGenerator(renderer);
+scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
+
+// Orthographic camera with orbit controls
+const camera = new THREE.OrthographicCamera(-10, 10, 10, -10, 0.1, 120);
+const camTarget = new THREE.Vector3(0, -0.2, 0);
+let zoom = 1;
+let yaw = rad(CAM_YAW_DEG), pitch = rad(CAM_PITCH_DEG);
+function orbitCamera() {
+  camera.position.set(
+    camTarget.x + Math.sin(yaw) * Math.cos(pitch) * CAM_DISTANCE,
+    camTarget.y + Math.sin(pitch) * CAM_DISTANCE,
+    camTarget.z + Math.cos(yaw) * Math.cos(pitch) * CAM_DISTANCE);
+  camera.lookAt(camTarget);
+  camera.updateMatrixWorld();
+}
+orbitCamera();
+function fitCamera() {
+  const aspect = innerWidth / innerHeight;
+  const halfH = Math.max(VIEW_HALF_H, VIEW_HALF_W / aspect) / zoom;
+  camera.left = -halfH * aspect; camera.right = halfH * aspect;
+  camera.top = halfH; camera.bottom = -halfH;
+  camera.updateProjectionMatrix();
+}
+
+// Lights
+const hemi = new THREE.HemisphereLight(0x8f86ff, 0x2a1550, 0.3); scene.add(hemi);
+const key = new THREE.DirectionalLight(0xffd7a3, 1.7);
+key.position.set(...KEY_POS); key.castShadow = true;
+key.shadow.mapSize.set(2048, 2048);
+Object.assign(key.shadow.camera, { left: -9, right: 9, top: 9, bottom: -9, near: 1, far: 70 });
+key.shadow.bias = -0.0003; key.shadow.normalBias = 0.03; key.shadow.radius = 4;
+scene.add(key);
+const rim = new THREE.DirectionalLight(0x22e5ff, 1.6); rim.position.set(-15, 12, -15); scene.add(rim);
+const fill = new THREE.DirectionalLight(0x9b5cff, 0.8); fill.position.set(-14, 6, 10); scene.add(fill);
+
+/* ---------- materials ---------- */
+function resin(color, extra = {}) {
+  return new THREE.MeshPhysicalMaterial({ color, ...RESIN, envMapIntensity: ENV_INTENSITY, ...extra });
+}
+const M = {
+  dirt: resin(COL.dirt, { roughness: 0.3 }),
+  soil: resin(COL.soil, { roughness: 0.4, clearcoat: 0.4 }),
+  keel: resin(COL.keel, { roughness: 0.4, clearcoat: 0.4 }),
+  stoneBed: resin(COL.stoneBed),
+  trunk: resin(COL.trunk),
+  treeA: resin(COL.treeA, { flatShading: true }),
+  treeB: resin(COL.treeB, { flatShading: true }),
+};
+const hash = (x, y) => { const s = Math.sin(x * 127.1 + y * 311.7) * 43758.5453; return s - Math.floor(s); };
+
+/* ---------- water (animated normal maps) ---------- */
+function makeWaterNormalMap(size = 256, strength = 3.0, seed = 7) {
+  let s = seed; const rnd = () => { s |= 0; s = s + 0x6D2B79F5 | 0; let t = Math.imul(s ^ s >>> 15, 1 | s); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; };
+  const octs = [[4, 1], [8, 0.5], [16, 0.25]];
+  const lat = octs.map(([p]) => Float32Array.from({ length: p * p }, rnd));
+  const sm = (t) => t * t * (3 - 2 * t);
+  const h = new Float32Array(size * size);
+  for (let y = 0; y < size; y++) for (let x = 0; x < size; x++) {
+    let v = 0;
+    octs.forEach(([p, a], i) => {
+      const fx = x / size * p, fy = y / size * p, x0 = Math.floor(fx), y0 = Math.floor(fy);
+      const tx = sm(fx - x0), ty = sm(fy - y0), L = lat[i];
+      const g = (xx, yy) => L[(yy % p) * p + (xx % p)];
+      v += a * ((g(x0, y0) * (1 - tx) + g(x0 + 1, y0) * tx) * (1 - ty) + (g(x0, y0 + 1) * (1 - tx) + g(x0 + 1, y0 + 1) * tx) * ty);
+    });
+    h[y * size + x] = v;
+  }
+  const c = document.createElement('canvas'); c.width = c.height = size;
+  const ctx = c.getContext('2d'); const img = ctx.createImageData(size, size);
+  const H = (x, y) => h[((y + size) % size) * size + ((x + size) % size)];
+  for (let y = 0; y < size; y++) for (let x = 0; x < size; x++) {
+    const dx = (H(x + 1, y) - H(x - 1, y)) * strength * 8, dy = (H(x, y + 1) - H(x, y - 1)) * strength * 8;
+    const l = Math.hypot(dx, dy, 1), i = (y * size + x) * 4;
+    img.data[i] = (-dx / l * 0.5 + 0.5) * 255; img.data[i + 1] = (-dy / l * 0.5 + 0.5) * 255; img.data[i + 2] = (1 / l * 0.5 + 0.5) * 255; img.data[i + 3] = 255;
+  }
+  ctx.putImageData(img, 0, 0);
+  const t = new THREE.CanvasTexture(c); t.wrapS = t.wrapT = THREE.RepeatWrapping; t.anisotropy = 4;
+  return t;
+}
+const waterN1 = makeWaterNormalMap(256, 3.0, 7);
+const waterN2 = waterN1.clone(); waterN2.needsUpdate = true; waterN2.repeat.set(1.7, 1.7);
+const waterMat = new THREE.MeshPhysicalMaterial({
+  color: COL.water, transparent: true, opacity: WATER_OPACITY, ior: WATER_IOR,
+  roughness: 0.4, metalness: 0, clearcoat: 0, clearcoatRoughness: 0.4,
+  normalMap: waterN1, normalScale: new THREE.Vector2(0.3, 0.3),
+  clearcoatNormalMap: waterN2, clearcoatNormalScale: new THREE.Vector2(0.12, 0.12),
+  emissive: 0x0a6a9a, emissiveIntensity: 0.2, envMapIntensity: 0.6, depthWrite: false,
+});
+
+/* ---------- geometry helpers ---------- */
+const geoCache = new Map();
+function rbox(w, h, d, r = BEVEL) {
+  const k = [w, h, d, r].join(',');
+  if (!geoCache.has(k)) geoCache.set(k, new RoundedBoxGeometry(w, h, d, 3, Math.min(r, Math.min(w, h, d) / 2 - 0.001)));
+  return geoCache.get(k);
+}
+function add(group, geo, mat, x, y, z, shadow = true) {
+  const m = new THREE.Mesh(geo, mat); m.position.set(x, y, z);
+  m.castShadow = shadow; m.receiveShadow = true; group.add(m); return m;
+}
+
+const pulsers = [];   // crystals: {mat, phase}
+const lights = [];    // crystal point lights
+
+function buildCrystalCluster(parent, seed) {
+  const g = new THREE.Group();
+  const mat = new THREE.MeshPhysicalMaterial({
+    color: COL.crystal, emissive: COL.crystalGlow, emissiveIntensity: CRYSTAL_EMISSIVE,
+    roughness: 0.1, metalness: 0.05, clearcoat: 1, clearcoatRoughness: 0.05, flatShading: true, envMapIntensity: ENV_INTENSITY,
+  });
+  const shard = (r, h) => new THREE.LatheGeometry([
+    new THREE.Vector2(0.001, 0), new THREE.Vector2(r * 0.9, 0), new THREE.Vector2(r, h * 0.12),
+    new THREE.Vector2(r, h * 0.62), new THREE.Vector2(0.001, h)], 6);
+  const specs = [[0.13, 0.78, 0, 0, 0, 0], [0.09, 0.46, 0.17, 0.05, 0.4, 0.5], [0.08, 0.38, -0.15, 0.1, -0.45, -0.3],
+                 [0.07, 0.32, 0.02, -0.17, 0.35, 2.2], [0.065, 0.28, -0.12, -0.12, -0.5, 3.4]];
+  specs.forEach(([r, h, ox, oz, tilt, dir]) => {
+    const m = new THREE.Mesh(shard(r, h), mat);
+    m.position.set(ox, 0, oz); m.rotation.set(Math.sin(dir) * tilt, 0, Math.cos(dir) * tilt);
+    m.castShadow = true; g.add(m);
+  });
+  g.position.y = 1.0; parent.add(g);
+  const pl = new THREE.PointLight(0xb84dff, 5, 4, 2); pl.position.set(0, 1.45, 0); parent.add(pl);
+  pulsers.push({ mat, phase: seed * 1.7 }); lights.push({ pl, phase: seed * 1.7 });
+}
+function buildTree(s = 1) {
+  const g = new THREE.Group();
+  add(g, new THREE.CylinderGeometry(0.055, 0.07, 0.18, 8), M.trunk, 0, 0.09, 0);
+  [[0.28, 0.34, 0.14, M.treeA], [0.22, 0.32, 0.32, M.treeB], [0.15, 0.30, 0.50, M.treeA]].forEach(([r, h, b, m]) =>
+    add(g, new THREE.ConeGeometry(r, h, 7), m, 0, b + h / 2, 0));
+  g.scale.setScalar(s); return g;
+}
+
+/* ---------- tile kit (Blender GLBs, embedded as base64) ---------- */
+const gltfLoader = new GLTFLoader();
+const kit = {};
+await Promise.all(Object.keys(window.TILE_GLB).map(k => new Promise((res, rej) => {
+  const bin = Uint8Array.from(atob(window.TILE_GLB[k]), c => c.charCodeAt(0));
+  gltfLoader.parse(bin.buffer, '', g => { kit[k] = g.scene; res(); }, rej);
+})));
+const kitKey = (t) => t.bridge && kit.Tile_Bridge_2Tile ? 'Tile_Water' : t.type === 'rock' ? (t.elevation >= 2 ? 'Tile_Rock2' : 'Tile_Rock1')
+  : { water: 'Tile_Water', crystal: 'Tile_Crystal', forest: 'Tile_Forest' }[t.type] || (hash(t.y * 5 + 1, t.x * 3 + 2) < 0.3 ? 'Tile_GrassFlowers' : 'Tile_Grass');
+const kitSeen = new Set();
+function kitMaterial(src) {                       // MATTE for everything; crystals keep their emissive glow
+  if (!kitSeen.has(src)) {
+    kitSeen.add(src); src.metalness = 0; src.envMapIntensity = 0.5;
+    if (src.name.startsWith('Crystal')) { src.roughness = 0.5; pulsers.push({ mat: src, phase: pulsers.length * 1.7 }); }
+    else src.roughness = 0.92;
+  }
+  return src;
+}
+const M_UNDER = new THREE.MeshStandardMaterial({ color: 0x463b41, roughness: 0.92, metalness: 0, envMapIntensity: 0.4 });
+const tileGroups = [];
+const bridgeScene = new THREE.Group();
+scene.add(bridgeScene);
+const bridgePickGeometry = new THREE.PlaneGeometry(1, 1).rotateX(-Math.PI / 2);
+const bridgePickMaterial = new THREE.MeshBasicMaterial({ visible: false });
+
+function drawBridge(level) {
+  bridgeScene.clear();
+  if (!level.bridge || !kit.Tile_Bridge_2Tile) return;
+  const [[x0, y0], [x1, y1]] = level.bridge;
+  const bridge = kit.Tile_Bridge_2Tile.clone(true);
+  bridge.position.set(tw((x0 + x1) / 2), 0, tw((y0 + y1) / 2));
+  bridge.rotation.y = x0 === x1 ? Math.PI / 2 : 0;
+  bridge.traverse(object => {
+    if (!object.isMesh) return;
+    object.castShadow = object.receiveShadow = true;
+    object.material = Array.isArray(object.material)
+      ? object.material.map(kitMaterial) : kitMaterial(object.material);
+  });
+  bridgeScene.add(bridge);
+}
+
+const terrainDressing = new THREE.Group();
+scene.add(terrainDressing);
+const dressedGeometry = new WeakMap();
+const boardPalettes = {
+  'River Crossing': [0.19, 0.38, 0.12],
+  'Crystal Quarry': [0.44, 0.48, 0.58],
+  'Highland Pass': [0.095, 0.25, 0.20],
+  'Raider Camp': [0.53, 0.33, 0.14]
+};
+
+function themeGeometry(geometry, level) {
+  const palette = boardPalettes[level.name];
+  const colors = geometry.getAttribute('color');
+  if (!palette || !colors) return geometry;
+  if (!dressedGeometry.has(geometry)) dressedGeometry.set(geometry, new Map());
+  const cache = dressedGeometry.get(geometry);
+  if (cache.has(level.name)) return cache.get(level.name);
+  const copy = geometry.clone();
+  const result = copy.getAttribute('color');
+  for (let i = 0; i < colors.count; i++) {
+    const r = colors.getX(i), g = colors.getY(i), b = colors.getZ(i);
+    if (g <= r * 1.18 || g <= b * 1.12) continue;
+    const shade = Math.min(1.2, 0.45 + g * 0.75);
+    result.setXYZ(i, palette[0] * shade, palette[1] * shade, palette[2] * shade);
+  }
+  cache.set(level.name, copy);
+  return copy;
+}
+
+const matteDressing = color => new THREE.MeshStandardMaterial({ color, roughness: 1, metalness: 0 });
+const reedMat = matteDressing(0x657d37);
+const reedHeadMat = matteDressing(0x754c34);
+const slateMat = matteDressing(0x9b9aad);
+const paleSlateMat = matteDressing(0xb6b0a9);
+const timberMat = matteDressing(0x65442f);
+const bannerMat = matteDressing(0x943a32);
+const bannerTrimMat = matteDressing(0xd3944e);
+const reedStem = new THREE.CylinderGeometry(0.012, 0.018, 0.24, 5);
+const reedHead = new THREE.CylinderGeometry(0.026, 0.026, 0.075, 6);
+let campFlag = null;
+
+function dressBoard(level) {
+  terrainDressing.clear();
+  campFlag = null;
+  if (level.name === 'River Crossing') {
+    for (const [x, y] of [[1,2],[2,2],[4,2],[5,2],[1,5],[2,5],[4,5],[5,5]]) {
+      for (let i = 0; i < 3; i++) {
+        const px = tw(x) + (i - 1) * 0.11;
+        const pz = tw(y) + (y === 2 ? 0.43 : -0.43) + i * 0.024;
+        const base = 0.98 + i * 0.045;
+        const stem = add(terrainDressing, reedStem, reedMat, px, base + 0.10, pz);
+        stem.rotation.z = (i - 1) * 0.2;
+        add(terrainDressing, reedHead, reedHeadMat, px + (1 - i) * 0.02, base + 0.23, pz);
+      }
+    }
+  } else if (level.name === 'Crystal Quarry') {
+    for (const [x, y] of [[2,4],[3,4],[4,4],[5,4],[6,4]]) {
+      for (const side of [-1, 1]) {
+        add(terrainDressing, rbox(0.77, 0.10, 0.16, 0.018), slateMat,
+          tw(x), 1.015, tw(y) + side * 0.40);
+        add(terrainDressing, rbox(0.51, 0.07, 0.105, 0.012), paleSlateMat,
+          tw(x), 1.08, tw(y) + side * 0.42);
+      }
+    }
+  } else if (level.name === 'Highland Pass') {
+    for (const [x, y, ox, oz] of [[4,0,-0.27,-0.23],[6,2,0.25,0.18],[1,4,-0.22,0.26],[6,5,0.26,-0.24]]) {
+      const tree = buildTree(2.7);
+      tree.position.set(tw(x) + ox, 0.98, tw(y) + oz);
+      terrainDressing.add(tree);
+    }
+  } else if (level.name === 'Raider Camp') {
+    for (const [x, y] of [[3,0],[4,0],[6,0],[7,0],[7,1],[7,2],[7,3]]) {
+      const side = x === 7;
+      const x0 = tw(x) + (side ? 0.41 : 0);
+      const z0 = tw(y) - (side ? 0 : 0.41);
+      add(terrainDressing, rbox(side ? 0.11 : 0.81, 0.15, side ? 0.81 : 0.11, 0.022),
+        timberMat, x0, 1.18, z0);
+      for (const end of [-0.31, 0.31]) {
+        add(terrainDressing, rbox(0.11, 0.34, 0.11, 0.017), timberMat,
+          x0 + (side ? 0 : end), 1.15, z0 + (side ? end : 0));
+      }
+    }
+    campFlag = new THREE.Group();
+    campFlag.position.set(tw(5), 1, tw(1));
+    terrainDressing.add(campFlag);
+    add(campFlag, rbox(0.08, 1.62, 0.08, 0.014), timberMat, 0, 0.81, 0);
+    add(campFlag, rbox(0.59, 0.06, 0.06, 0.012), timberMat, 0, 1.53, 0);
+    add(campFlag, rbox(0.48, 0.63, 0.045, 0.016), bannerMat, 0, 1.18, 0);
+    for (const x of [-0.13, 0, 0.13]) {
+      add(campFlag, rbox(0.045, 0.20, 0.05, 0.009), bannerTrimMat, x, 1.24, 0);
+    }
+  }
+}
+
+function buildTile(t) {
+  const g = new THREE.Group();
+  g.position.set(tw(t.x), 0, tw(t.y));
+  add(g, rbox(1, 1.2, 1, 0.012), M_UNDER, 0, -0.6, 0);               // clean square underside block
+  const inst = kit[kitKey(t)].clone(true);
+  inst.rotation.y = Math.floor(hash(t.x, t.y) * 4) * Math.PI / 2;     // vary details; footprint stays square
+  inst.traverse(o => {
+    if (!o.isMesh) return;
+    o.castShadow = o.receiveShadow = true;
+    if (o.material.name === 'Water') {
+      o.geometry = o.geometry.clone(); const p = o.geometry.attributes.position, uv = new Float32Array(p.count * 2);
+      for (let i = 0; i < p.count; i++) { uv[i * 2] = (tw(t.x) + p.getX(i)) * 0.5; uv[i * 2 + 1] = (tw(t.y) + p.getZ(i)) * 0.5; }
+      o.geometry.setAttribute('uv', new THREE.BufferAttribute(uv, 2));
+      o.material = waterMat; o.castShadow = false; o.renderOrder = 2;
+    } else {
+      o.material = kitMaterial(o.material);
+      o.geometry = themeGeometry(o.geometry, activeLevel());
+    }
+  });
+  g.add(inst);
+  if (t.bridge && kit.Tile_Bridge_2Tile) {
+    const pickSurface = new THREE.Mesh(bridgePickGeometry, bridgePickMaterial);
+    pickSurface.position.y = tileTop(t);
+    g.add(pickSurface);
+  }
+  if (t.type === 'water' && kit.Tile_WaterRim) {                         // stone rim, ONLY on edges that face open air (the island perimeter)
+    const edges = [[t.y === GRID - 1, 0], [t.y === 0, Math.PI], [t.x === GRID - 1, Math.PI / 2], [t.x === 0, -Math.PI / 2]];
+    for (const [exposed, ry] of edges) {
+      if (!exposed) continue;
+      const w = kit.Tile_WaterRim.clone(true); w.rotation.y = ry;
+      w.traverse(o => { if (o.isMesh) { o.castShadow = o.receiveShadow = true; o.material = kitMaterial(o.material); } });
+      g.add(w);
+    }
+  }
+  if (t.type === 'crystal') { const pl = new THREE.PointLight(0xb84dff, 5, 4, 2); pl.position.set(0, 1.45, 0); g.add(pl); lights.push({ pl, phase: t.x * 3 + t.y }); }
+  g.traverse(o => { if (o.isMesh) o.userData.tile = t; });
+  scene.add(g); tileGroups.push(g);
+}
+board.forEach(row => row.forEach(buildTile));
+dressBoard(activeLevel());
+
+// Floating slab "keel" + soft contact shadow below
+{
+  const keel = add(scene, rbox(7.2, 0.9, 7.2, 0.02), M_UNDER, 0, -1.65, 0);
+  const keel2 = add(scene, rbox(5.4, 0.7, 5.4, 0.02), M_UNDER, 0, -2.4, 0);
+  const c = document.createElement('canvas'); c.width = c.height = 256;
+  const g = c.getContext('2d'); const gr = g.createRadialGradient(128, 128, 10, 128, 128, 128);
+  gr.addColorStop(0, 'rgba(0,0,0,0.65)'); gr.addColorStop(0.55, 'rgba(0,0,0,0.3)'); gr.addColorStop(1, 'rgba(0,0,0,0)');
+  g.fillStyle = gr; g.fillRect(0, 0, 256, 256);
+  const blob = new THREE.Mesh(new THREE.PlaneGeometry(13, 13),
+    new THREE.MeshBasicMaterial({ map: new THREE.CanvasTexture(c), transparent: true, depthWrite: false }));
+  blob.rotation.x = -Math.PI / 2; blob.position.y = -3.6; scene.add(blob);
+}
+
+/* ---------- heroes (Blender GLB models, embedded as base64): Weaver, Warden = people; Stalker = non-human ---------- */
+const HERO_SCALE = 0.95;   // world units per Blender unit (same for all, keeps designed relative sizes)
+const HERO_BLENDER_H = { weaver: 1.637, warden: 1.538, stalker: 1.338, raider: 1.440, captain: 1.610, archer: 1.344 };   // measured model heights (Blender units)
+const heroModels = {};
+const combatClips = {};
+const restScales = {};
+await Promise.all(Object.keys(window.HERO_GLB).map(k => new Promise((res, rej) => {
+  const bin = Uint8Array.from(atob(window.HERO_GLB[k]), c => c.charCodeAt(0));
+  gltfLoader.parse(bin.buffer, '', gltf => {
+    heroModels[k] = gltf.scene;
+    combatClips[k] = THREE.AnimationClip.findByName(gltf.animations, 'CombatIdle');
+    res();
+  }, rej);
+})));
+function heroMat(m) {                                   // MATTE everywhere: no metal, high roughness, no clearcoat
+  m.metalness = 0; m.roughness = Math.max(m.roughness ?? 0.85, 0.75); m.envMapIntensity = 0.5;
+  if (m.emissiveIntensity > 0 && m.emissive && (m.emissive.r + m.emissive.g + m.emissive.b) > 0) m.emissiveIntensity *= 0.8;
+  if (/Cloak/.test(m.name)) m.side = THREE.DoubleSide;
+  if (m.transparent) m.depthWrite = false;
+  m.needsUpdate = true; return m;
+}
+function loadHeroModel(id) {
+  const obj = cloneSkeleton(heroModels[id]);
+  obj.traverse(o => {
+    if (!o.isMesh) return;
+    o.material = Array.isArray(o.material) ? o.material.map(m => heroMat(m.clone())) : heroMat(o.material.clone());
+    o.castShadow = o.receiveShadow = true;
+  });
+  return obj;
+}
+function buildUnit(h, modelId = h.id) {
+  const g = new THREE.Group();
+  const idleId = modelId + 'CombatIdle';
+  const stanceId = modelId + 'CombatStance';
+  const clip = combatClips[idleId];
+  const stance = !clip && Boolean(heroModels[stanceId]);
+  const model = loadHeroModel(clip ? idleId : stance ? stanceId : modelId);
+  if (!restScales[modelId]) {
+    const height = new THREE.Box3().setFromObject(heroModels[modelId]).getSize(new THREE.Vector3()).y;
+    restScales[modelId] = HERO_SCALE * HERO_BLENDER_H[modelId] / height;
+  }
+  model.scale.multiplyScalar(restScales[modelId]);
+  if (!clip && !stance) model.position.y -= new THREE.Box3().setFromObject(model).min.y;
+  if (!clip) for (const suffix of ['Staff', 'Shield', 'DaggerL', 'DaggerR', 'Cleaver', 'Quiver', 'Bow', 'Arrow']) {
+    const id = modelId + suffix + (stance ? 'CombatStance' : '');
+    if (heroModels[id]) model.add(loadHeroModel(id));
+  }
+  const mixer = clip ? new THREE.AnimationMixer(model) : null;
+  if (mixer) mixer.clipAction(clip).setLoop(THREE.LoopRepeat, Infinity).play();
+  g.add(model); g.rotation.y = rad(45);                                              // turn to face the camera
+  const t = board[h.y][h.x];
+  g.position.set(tw(h.x), tileTop(t), tw(h.y)); scene.add(g);
+  return { ...h, mesh: g, baseY: g.position.y, mixer };
+}
+const heroes = PATCHWORK_MEADOW.heroes.map(hero => buildUnit(hero));
+
+/* ---------- hover marker ---------- */
+const marker = (() => {
+  const c = document.createElement('canvas'); c.width = c.height = 128;
+  const g = c.getContext('2d');
+  g.fillStyle = 'rgba(120,255,255,0.14)'; g.beginPath(); g.roundRect(10, 10, 108, 108, 14); g.fill();
+  g.shadowColor = '#7df9ff'; g.shadowBlur = 12; g.strokeStyle = '#fff'; g.lineWidth = 7;
+  g.beginPath(); g.roundRect(12, 12, 104, 104, 14); g.stroke();
+  const mat = new THREE.MeshBasicMaterial({ map: new THREE.CanvasTexture(c), transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, toneMapped: false });
+  mat.map.colorSpace = THREE.SRGBColorSpace; mat.color.setRGB(0.5, 1.6, 2.0);
+  const m = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), mat);
+  m.rotation.x = -Math.PI / 2; m.visible = false; m.renderOrder = 5; scene.add(m); return m;
+})();
+
+/* ---------- post-processing ---------- */
+const rt = new THREE.WebGLRenderTarget(innerWidth, innerHeight, { type: THREE.HalfFloatType, samples: 4 });
+const composer = new EffectComposer(renderer, rt);
+composer.addPass(new RenderPass(scene, camera));
+const bloom = new UnrealBloomPass(new THREE.Vector2(innerWidth, innerHeight), 0.5, 0.5, 1.1);
+composer.addPass(bloom);
+composer.addPass(new OutputPass());
+
+function resize() {
+  renderer.setSize(innerWidth, innerHeight);
+  composer.setPixelRatio(Math.min(devicePixelRatio, 2)); composer.setSize(innerWidth, innerHeight);
+  fitCamera();
+}
+addEventListener('resize', resize); resize();
+addEventListener('wheel', e => { zoom = THREE.MathUtils.clamp(zoom * (e.deltaY < 0 ? 1.06 : 1 / 1.06), ZOOM_MIN, ZOOM_MAX); fitCamera(); }, { passive: true });
+
+
+
+function terrainMoveCost(hero, tile) {
+  return tile.type === 'rock' ||
+    (hero.id !== 'stalker' && ['water', 'forest'].includes(tile.type)) ? 2 : 1;
+}
+
+function mountainStance(hero, tile) {
+  return hero.id === 'warden' && (tile.type === 'rock' || tile.elevation >= 2);
+}
+
+function wardenAction(tiles, roster, kind, x, y, turn) {
+  const warden = roster.find(h => h.id === 'warden' && h.hp > 0);
+  const error = message => ({ error: message });
+  if (!warden) return error('Rune Warden is unavailable.');
+  const at = (x, y) => roster.find(h => h.hp > 0 && h.x === x && h.y === y);
+  const cost = kind === 'quake' ? 2 : 3;
+  if (warden.mp < cost) return error('This ability costs ' + cost + ' MP.');
+  const origin = tiles[warden.y][warden.x];
+  function impact(target, dx, dy, amount, push) {
+    const tile = tiles[target.y][target.x];
+    const destination = tiles[target.y + dy]?.[target.x + dx];
+    return {
+      target, damage: mountainStance(target, tile) ? amount / 2 : amount,
+      destination: push && !target.braced && destination && !destination.barrier &&
+        !at(destination.x, destination.y) ? destination : null
+    };
+  }
+
+  if (kind === 'quake') {
+    if (warden.quakeTurn === turn) return error('Quake Strike was already used this turn.');
+    const damage = mountainStance(warden, origin) ? 7 : 5;
+    const impacts = [];
+    for (const [dx, dy] of [[1,0], [-1,0], [0,1], [0,-1]]) {
+      const target = at(warden.x + dx, warden.y + dy);
+      if (target?.team === 'enemy' && !target.concealed) {
+        impacts.push(impact(target, dx, dy, damage, tiles[target.y][target.x].type === 'water'));
+      }
+    }
+    return { mp: warden.mp - cost, impacts };
+  }
+
+  const tile = tiles[y]?.[x];
+  if (!tile) return error('Choose a tile on the board.');
+  const dx = x - warden.x, dy = y - warden.y;
+  const range = Math.abs(dx) + Math.abs(dy);
+  if (kind === 'barrier') {
+    if (turn < (warden.barrierReadyTurn ?? 0)) return error('Seismic Barrier is cooling down.');
+    if (range < 1 || range > 2) return error('Choose a tile 1–2 steps away.');
+    if (tile.bridge || tile.barrier || at(x, y) || ['water', 'crystal'].includes(tile.type)) {
+      return error('Choose an empty tile other than Water, Crystal or an active barrier.');
+    }
+    return { mp: warden.mp - cost, barrier: {
+      expires: turn + 2, previous: { type: tile.type, elevation: tile.elevation, terraformed: tile.terraformed }
+    } };
+  }
+
+  if (kind !== 'charge') return error('Unknown ability.');
+  if (turn < (warden.chargeReadyTurn ?? 0)) return error('Bulwark Charge is cooling down.');
+  if (range < 1 || range > 3 || (dx && dy)) return error('Choose a tile 1–3 steps away in a straight line.');
+  const sx = Math.sign(dx), sy = Math.sign(dy);
+  let travelCost = 0, landingCost = 0, destination = origin;
+  const impacts = [];
+  for (let i = 1; i <= range; i++) {
+    const step = tiles[warden.y + sy * i]?.[warden.x + sx * i];
+    if (!step || step.type === 'water') break;
+    const target = at(step.x, step.y);
+    if (target) {
+      if (target.team === 'enemy' && !target.concealed && !tiles[warden.y + sy * (i - 1)][warden.x + sx * (i - 1)].barrier) {
+        impacts.push(impact(target, sx, sy, 4, true));
+      }
+      break;
+    }
+    travelCost += step.barrier ? 2 : step.type === 'rock' ? 1 : terrainMoveCost(warden, step);
+    if (warden.mp < cost + travelCost) break;
+    if (!step.barrier) {
+      destination = step;
+      landingCost = travelCost;
+    }
+  }
+  if (destination === origin && !impacts.length) return error('Charge has no reachable landing tile or enemy.');
+  return { mp: warden.mp - cost - landingCost, impacts, destination };
+}
+
+function phase2Move(tiles, roster, id, x, y) {
+  const hero = roster.find(h => h.id === id);
+  if (!hero) return { error: 'Select a hero first.' };
+  const tile = Number.isInteger(x) && Number.isInteger(y) ? tiles[y]?.[x] : null;
+  if (!tile) return { error: 'Choose a tile on the board.' };
+  if (Math.abs(x - hero.x) + Math.abs(y - hero.y) !== 1) {
+    return { error: 'Choose an adjacent tile.' };
+  }
+  if (roster.some(h => h.x === x && h.y === y)) return { error: 'That tile is occupied.' };
+
+  if (tile.barrier) return { error: 'Units cannot stop on a Seismic Barrier.' };
+  const cost = terrainMoveCost(hero, tile);
+  if (hero.mp < cost) return { error: 'This move costs ' + cost + ' MP.' };
+  const refund = hero.id === 'weaver' && tile.terraformed ? 1 : 0;
+  return { x, y, baseY: tileTop(tile), mp: Math.min(5, hero.mp - cost + refund) };
+}
+
+function phase2EndTurn(roster) {
+  return roster.map(hero => ({ ...hero, mp: 5 }));
+}
+
+function phase2PickTile(hit) {
+  return hit?.object.userData.tile ?? null;
+}
+
+function runPhase2SelfTests() {
+  const tiles = makeBoard();
+  const roster = HERO_DEFS.map(hero => ({ ...hero, hp: 20, mp: 5 }));
+  const probe = (type, id = 'warden', mp = 5, terraformed = false) =>
+    phase2Move(
+      [[{}, { type, terraformed, elevation: type === 'water' ? 0.8 : 2 }]],
+      [{ id, x: 0, y: 0, mp }], id, 1, 0
+    );
+  const move = (id, x, y) => phase2Move(tiles, roster, id, x, y);
+  const occupied = [...roster, { id: 'other', x: 0, y: 3 }];
+  const spent = roster.map(hero => ({ ...hero, mp: 0 }));
+  const tile = tiles[2][1];
+  const checks = [
+    ['Board has 64 indexed tiles', () => tiles.length === 8 && tiles.every((row, y) =>
+      row.length === 8 && row.every((t, x) => t.x === x && t.y === y))],
+    ['Hero names, starts, HP and MP match', () =>
+      JSON.stringify(roster.map(h => [h.name, h.x, h.y, h.hp, h.mp])) ===
+      JSON.stringify([['Aether-Weaver', 0, 2, 20, 5], ['Rune Warden', 2, 5, 20, 5],
+        ['Mist Stalker', 3, 1, 20, 5]])],
+    ['Movement requires selection', () => Boolean(move(null, 0, 3).error)],
+    ['Off-board destinations are rejected', () => Boolean(move('weaver', -1, 2).error)],
+    ['Fractional coordinates are rejected', () => Boolean(move('weaver', 0, 2.5).error)],
+    ['Current tile is rejected', () => Boolean(move('weaver', 0, 2).error)],
+    ['Diagonal movement is rejected', () => Boolean(move('weaver', 1, 3).error)],
+    ['Multi-tile movement is rejected', () => Boolean(move('weaver', 0, 4).error)],
+    ['Occupied adjacent tiles are rejected', () =>
+      phase2Move(tiles, occupied, 'weaver', 0, 3).error === 'That tile is occupied.'],
+    ['Grass costs 1 MP', () => move('weaver', 0, 3).mp === 4],
+    ['Water costs 2 MP and sets height to 0.8', () =>
+      move('weaver', 1, 2).mp === 3 && move('weaver', 1, 2).baseY === 0.8],
+    ['Rock costs 2 MP and uses its elevation', () =>
+      probe('rock').mp === 3 && probe('rock').baseY === 2],
+    ['Forest costs 2 MP', () => probe('forest').mp === 3],
+    ['Crystal costs 1 MP', () => move('warden', 2, 4).mp === 4],
+    ['Mist Stalker pays 1 MP for water and forest', () =>
+      probe('water', 'stalker').mp === 4 && probe('forest', 'stalker').mp === 4],
+    ['Insufficient MP blocks movement and exact MP succeeds', () =>
+      Boolean(probe('rock', 'warden', 1).error) && probe('rock', 'warden', 2).mp === 0],
+    ['Only Aether-Weaver gets the terraformed-tile refund', () =>
+      probe('rock', 'weaver', 5, true).mp === 4 && probe('rock', 'warden', 5, true).mp === 3],
+    ['Move calculation leaves input state untouched', () => {
+      const before = JSON.stringify([tiles, roster]);
+      move('weaver', 1, 2);
+      return JSON.stringify([tiles, roster]) === before;
+    }],
+    ['End turn restores MP and preserves position and HP', () =>
+      phase2EndTurn(spent).every((h, i) => h.mp === 5 && spent[i].mp === 0 &&
+        h.x === spent[i].x && h.y === spent[i].y && h.hp === spent[i].hp)],
+    ['Tile picking uses mesh metadata and handles a miss', () =>
+      phase2PickTile({ object: { userData: { tile } } }) === tile &&
+      phase2PickTile(undefined) === null]
+  ];
+  return checks.map(([name, check]) => {
+    try {
+      return { name, pass: Boolean(check()) };
+    } catch {
+      return { name, pass: false };
+    }
+  });
+}
+
+
+function weaverAction(tiles, roster, kind, x, y, turn, terrain) {
+  const fail = error => ({ error });
+  const weaver = roster.find(h => h.id === 'weaver' && h.hp > 0);
+  if (!weaver) return fail('Aether-Weaver is unavailable.');
+  const tile = tiles[y]?.[x];
+  if (!tile) return fail('Choose a tile on the board.');
+  const distance = (a, b) => Math.abs(a.x - b.x) + Math.abs(a.y - b.y);
+  const range = distance(weaver, tile);
+  const target = roster.find(h => h.hp > 0 && h.x === x && h.y === y);
+  const cost = kind === 'shift' ? 3 : 2;
+  if (weaver.mp < cost) return fail('This ability costs ' + cost + ' MP.');
+
+  if (kind === 'terraform') {
+    if (range < 1 || range > 2) return fail('Choose a tile 1–2 steps away.');
+    if (target || tile.bridge || tile.barrier || tile.type === 'crystal') return fail('Choose an empty, non-crystal tile.');
+    if (!['grass', 'water', 'rock'].includes(terrain)) return fail('Choose Grass, Water or Rock.');
+    return { mp: weaver.mp - cost, terrain: {
+      type: terrain, elevation: { grass: 1, water: 0.8, rock: 2 }[terrain],
+      terraformed: true
+    } };
+  }
+
+  const dx = x - weaver.x, dy = y - weaver.y;
+  function blocked() {
+    // Intersect the center-to-center line with interiors of intermediate cells.
+    return tiles.flat().some(t => {
+      if (t === tile || distance(t, weaver) === 0 || t.type !== 'rock' || t.elevation < 2) return false;
+      let enter = 0, exit = 1;
+      for (const [start, delta, center] of [[weaver.x, dx, t.x], [weaver.y, dy, t.y]]) {
+        if (!delta) {
+          if (Math.abs(start - center) >= 0.5) return false;
+          continue;
+        }
+        const a = (center - 0.5 - start) / delta;
+        const b = (center + 0.5 - start) / delta;
+        enter = Math.max(enter, Math.min(a, b));
+        exit = Math.min(exit, Math.max(a, b));
+      }
+      return enter < exit;
+    });
+  }
+
+  if (kind === 'resonance') {
+    if (weaver.resonanceTurn === turn) return fail('Resonance was already used this turn.');
+    if (range < 1 || range > 4 || (dx && dy)) return fail('Choose an enemy 1–4 tiles away in a straight line.');
+    if (target?.team !== 'enemy' || target.concealed) return fail('Resonance requires a visible enemy.');
+    const crystals = tiles.flat().filter(t => t.type === 'crystal');
+    if (!crystals.some(t => distance(t, weaver) <= 1)) return fail('Stand on or beside a Crystal Node.');
+    if (blocked()) return fail('Tall Rock blocks the beam.');
+    const damage = 4 + 2 * crystals.filter(t => distance(t, weaver) <= 3).length;
+    return {
+      mp: weaver.mp - cost, target,
+      damage: mountainStance(target, tile) ? damage / 2 : damage
+    };
+  }
+
+  if (kind !== 'shift') return fail('Unknown ability.');
+  if (target?.team === 'objective' || target?.concealed) return fail('Choose an empty tile or a visible unit.');
+  if (target?.braced) return fail('A braced Raider cannot be displaced.');
+  if (turn < (weaver.shiftReadyTurn ?? 0)) return fail('Aether Shift is cooling down.');
+  if (range < 1 || range > 3) return fail('Choose a tile 1–3 steps away.');
+  if (tile.barrier) return fail('Units cannot stop on a Seismic Barrier.');
+  if (['water', 'crystal'].includes(tile.type)) return fail('Aether Shift cannot land on Water or a Crystal Node.');
+  if (target?.id === 'warden' && tile.type === 'rock') return fail('Mountain’s Stance anchors the Rune Warden.');
+  if (blocked()) return fail('Tall Rock blocks line of sight.');
+  const surcharge = target && ['rock', 'forest'].includes(tile.type) ? 2 : target ? 1 : 0;
+  if (weaver.mp < cost + surcharge) return fail('This swap costs ' + (cost + surcharge) + ' MP.');
+  return { mp: weaver.mp - cost - surcharge + (tile.terraformed ? 1 : 0), target };
+}
+
+
+function stalkerAction(tiles, roster, kind, x, y, turn) {
+  const hero = roster.find(h => h.id === 'stalker' && h.hp > 0);
+  const fail = error => ({ error });
+  const tile = tiles[y]?.[x];
+  if (!hero || !tile) return fail('Choose a tile on the board.');
+  const [cost, range, cooldown] = { shadow: [2,5,2], dash: [3,3,2], harvest: [2,4,3] }[kind];
+  if (turn < (hero.readyTurns?.[kind] ?? 0)) return fail('This ability is cooling down.');
+  if (hero.mp < cost) return fail('This ability costs ' + cost + ' MP.');
+  const dx = x - hero.x, dy = y - hero.y;
+  const distance = Math.abs(dx) + Math.abs(dy);
+  if (!distance || distance > range) return fail('Choose a tile 1–' + range + ' steps away.');
+  const occupant = t => roster.find(h => h.hp > 0 && h.x === t.x && h.y === t.y);
+  const result = { mp: hero.mp - cost, readyTurn: turn + cooldown, impacts: [], nodes: [] };
+  if (kind === 'shadow') {
+    if (tile.type !== 'forest' || tile.barrier || occupant(tile)) return fail('Choose an empty Forest tile.');
+    return { ...result, destination: tile };
+  }
+
+  if (dx && dy) return fail('Choose a target in a straight line.');
+  const path = [];
+  const hits = [];
+  let landing = -1;
+  for (let i = 1; i <= distance; i++) {
+    const step = tiles[hero.y + i * Math.sign(dy)]?.[hero.x + i * Math.sign(dx)];
+    if (!step || step.barrier || (step.type === 'rock' && step.elevation >= 2)) break;
+    const unit = occupant(step);
+    if (unit && (kind === 'harvest' || unit.team !== 'enemy' || unit.concealed)) break;
+    path.push(step);
+    if (unit) hits.push({ index: path.length - 1, unit, damage: mountainStance(unit, step) ? 1.5 : 3 });
+    else landing = path.length - 1;
+  }
+  if (landing < 0) return fail('There is no reachable empty landing tile.');
+  result.destination = path[landing];
+  if (kind === 'dash') result.impacts = hits.filter(hit => hit.index < landing);
+  if (kind === 'harvest') {
+    const used = hero.harvestTurn === turn ? hero.harvestedNodes : [];
+    const traveled = path.slice(0, landing + 1);
+    result.nodes = tiles.flat().filter(node => node.type === 'crystal' && !used.includes(node) &&
+      traveled.some(step => Math.abs(step.x - node.x) + Math.abs(step.y - node.y) <= 1)).slice(0, 2);
+    result.mp = Math.min(5, result.mp + result.nodes.length);
+  }
+  return result;
+}
+
+
+
+function isRaiderFighter(unit) {
+  return unit.team === 'enemy' && ['raider', 'captain'].includes(unit.modelId);
+}
+
+function raiderSupport(attacker, target, roster) {
+  if (!isRaiderFighter(attacker)) return 0;
+  return roster.reduce((count, unit) => count + (
+    unit !== attacker && isRaiderFighter(unit) && unit.hp > 0 && !unit.concealed &&
+    Math.abs(unit.x - target.x) + Math.abs(unit.y - target.y) === 1
+      ? (unit.modelId === 'captain' ? 2 : 1) : 0), 0);
+}
+
+function raiderStrike(tiles, roster, attacker, target, charge = false) {
+  const dx = target.x - attacker.x, dy = target.y - attacker.y;
+  const range = Math.abs(dx) + Math.abs(dy);
+  if (target.team !== 'player' || target.hp <= 0 || (dx && dy) ||
+      (charge ? range !== 2 : range !== 1)) return null;
+  const sx = Math.sign(dx), sy = Math.sign(dy);
+  const at = tile => tile && roster.find(unit => unit.hp > 0 && unit.x === tile.x && unit.y === tile.y);
+  const behind = tiles[target.y + sy]?.[target.x + sx];
+  const targetTile = tiles[target.y][target.x];
+  const support = raiderSupport(attacker, target, roster);
+  const bonus = support > 0 ? 1 : 0;
+  if (!charge) {
+    const splash = at(behind);
+    return { damage: 4 + bonus, splash: splash && splash.team !== 'objective' && !splash.concealed ? splash : null };
+  }
+  const approach = tiles[attacker.y + sy][attacker.x + sx];
+  if (approach.type === 'water' || approach.barrier || at(approach) ||
+      terrainMoveCost(attacker, approach) > attacker.mp) return null;
+  const push = behind && !behind.barrier && !at(behind) && !target.braced ? behind : null;
+  return { approach, push, damage: 3 + bonus + (push ? (push.type === 'water' ? 2 : 0) : 1), targetTile };
+}
+
+function aimedShot(tiles, roster, archer, origin, target) {
+  if (archer.modelId !== 'archer' || archer.hp <= 0 ||
+      !target || target.hp <= 0 || target.team === archer.team) return null;
+
+  const dx = target.x - origin.x, dy = target.y - origin.y;
+  const range = Math.max(Math.abs(dx), Math.abs(dy));
+  const maxRange = origin.type === 'rock' ? 5 : 4;
+  if (range < 2 || range > maxRange || (dx && dy && Math.abs(dx) !== Math.abs(dy))) return null;
+
+  for (let step = 1; step < range; step++) {
+    const x = origin.x + step * Math.sign(dx);
+    const y = origin.y + step * Math.sign(dy);
+    const tile = tiles[y]?.[x];
+    if (!tile || tile.type === 'rock' || roster.some(unit =>
+      unit !== archer && unit.hp > 0 && unit.x === x && unit.y === y)) return null;
+  }
+
+  return { damage: mountainStance(target, tiles[target.y][target.x]) ? 1.5 : 3 };
+}
+
+function enemyPlan(board, roster, enemy) {
+  const living = roster.filter(h => h.hp > 0 && h !== enemy);
+  const allies = living.filter(h => h.team === 'player');
+  const occupied = new Set(living.map(h => board[h.y][h.x]));
+  const start = board[enemy.y][enemy.x];
+  const distances = new Map([[start, 0]]);
+  const previous = new Map();
+  const queue = [{ tile: start, cost: 0 }];
+  while (queue.length) {
+    queue.sort((a, b) => a.cost - b.cost);
+    const { tile, cost } = queue.shift();
+    if (cost !== distances.get(tile)) continue;
+    const target = allies.find(h => enemy.modelId === 'archer'
+      ? aimedShot(board, roster, enemy, tile, h)
+      : Math.abs(h.x - tile.x) + Math.abs(h.y - tile.y) === 1);
+    if (target) {
+      const path = [];
+      for (let step = tile; step !== start; step = previous.get(step)) path.unshift(step);
+      return path;
+    }
+    for (const [dx, dy] of [[1,0], [0,1], [-1,0], [0,-1]]) {
+      const next = board[tile.y + dy]?.[tile.x + dx];
+      if (!next || occupied.has(next) || next.barrier) continue;
+      const nextCost = cost + terrainMoveCost(enemy, next);
+      if (nextCost >= (distances.get(next) ?? Infinity)) continue;
+      distances.set(next, nextCost);
+      previous.set(next, tile);
+      queue.push({ tile: next, cost: nextCost });
+    }
+  }
+  return [];
+}
+
+function encounterResult(roster) {
+  if (!roster.some(h => h.team === 'player' && h.hp > 0)) return 'Defeat';
+  if (!roster.some(h => h.team === 'enemy' && h.hp > 0)) return 'Victory';
+  return null;
+}
+
+
+function basicAttack(board, attacker, target) {
+  if (attacker?.team !== 'player' || attacker.hp <= 0 ||
+      !['enemy', 'objective'].includes(target?.team) || target.hp <= 0 || target.concealed) return null;
+  if (attacker.mp < 2 || Math.abs(attacker.x - target.x) + Math.abs(attacker.y - target.y) !== 1) return null;
+  return { chance: 100, cost: 2, damage: mountainStance(target, board[target.y][target.x]) ? 2 : 4 };
+}
+
+function partyHasMove(tiles, living) {
+  return living.some(hero => hero.team === 'player' && [[1,0], [-1,0], [0,1], [0,-1]]
+    .some(([dx, dy]) => !phase2Move(tiles, living, hero.id, hero.x + dx, hero.y + dy).error));
+}
+
+function nearestOpponent(unit, roster) {
+  let closest = null;
+  let distance = Infinity;
+  for (const opponent of roster) {
+    if (opponent.hp <= 0 || opponent.team === unit.team || opponent.concealed || opponent.team === 'objective') continue;
+    const dx = opponent.x - unit.x, dy = opponent.y - unit.y;
+    const squared = dx * dx + dy * dy;
+    if (squared < distance) {
+      distance = squared;
+      closest = opponent;
+    }
+  }
+  return closest;
+}
+
+function faceOpponents(roster, blend) {
+  for (const unit of roster) {
+    if (unit.hp <= 0 || unit.mesh.userData.attackPose) continue;
+    const opponent = nearestOpponent(unit, roster);
+    if (!opponent) continue;
+    const yaw = Math.atan2(opponent.x - unit.x, opponent.y - unit.y);
+    const delta = yaw - unit.mesh.rotation.y;
+    unit.mesh.rotation.y += Math.atan2(Math.sin(delta), Math.cos(delta)) * blend;
+  }
+}
+
+function initPhase2() {
+  const canvas = renderer.domElement;
+  const ray = new THREE.Raycaster();
+  const ndc = new THREE.Vector2();
+  const readout = document.getElementById('readout');
+  const panel = document.createElement('section');
+  panel.className = 'encounter-details';
+  panel.id = 'encounter-details';
+  const mobileLayout = matchMedia('(pointer:coarse), (max-width:700px)');
+  const detailsToggle = document.createElement('button');
+  detailsToggle.className = 'mobile-toggle';
+  detailsToggle.type = 'button';
+  detailsToggle.textContent = 'Details';
+  detailsToggle.setAttribute('aria-controls', panel.id);
+  detailsToggle.setAttribute('aria-expanded', 'false');
+  detailsToggle.addEventListener('click', () => {
+    const open = panel.classList.toggle('is-open');
+    detailsToggle.textContent = open ? 'Close details' : 'Details';
+    detailsToggle.setAttribute('aria-expanded', String(open));
+  });
+  const vitals = document.createElement('section');
+  vitals.className = 'mobile-vitals';
+  vitals.setAttribute('aria-label', 'Unit health and movement points');
+  document.body.append(detailsToggle, vitals);
+  Object.assign(panel.style, {
+    position: 'fixed', top: '12px', right: '12px', zIndex: '10',
+    maxWidth: 'min(320px, 90vw)', padding: '10px', color: '#fff',
+    background: '#141233', borderRadius: '8px', font: '13px system-ui'
+  });
+  panel.setAttribute('aria-label', 'Turn controls');
+  document.body.append(panel);
+
+  const status = document.createElement('div');
+  panel.append(status);
+  const toast = document.createElement('div');
+  toast.setAttribute('role', 'status');
+  let toastTimer;
+  let selected = null;
+  let turn = 1;
+  let pointer = null;
+  let ability = null;
+  let outcome = null;
+  const party = heroes.slice();
+  const outlines = new THREE.Group();
+  scene.add(outlines);
+  const outlineGeometry = new THREE.BufferGeometry().setFromPoints(
+    [[-.46,-.46],[.46,-.46],[.46,.46],[-.46,.46]].map(([x,z]) => new THREE.Vector3(x,0,z)));
+  const outlineMaterial = new THREE.LineBasicMaterial({ color: 0x61ecf5, toneMapped: false });
+  const targets = new THREE.Group();
+  const preview = new THREE.Group();
+  const selection = new THREE.Group();
+  scene.add(targets, preview, selection);
+  const targetMaterial = new THREE.LineBasicMaterial({ color: 0xffcf54, toneMapped: false });
+  const impactMaterial = new THREE.LineBasicMaterial({ color: 0xff607e, toneMapped: false });
+  const landingMaterial = new THREE.LineBasicMaterial({ color: 0xffffff, toneMapped: false });
+  let hoveredTile = null;
+
+  const tileFill = new THREE.PlaneGeometry(0.9, 0.9).rotateX(-Math.PI / 2);
+  const dot = new THREE.CircleGeometry(0.035, 12).rotateX(-Math.PI / 2);
+  const cornerPoints = [];
+  for (const x of [-1, 1]) for (const z of [-1, 1]) {
+    const corner = new THREE.Vector3(x * 0.46, 0, z * 0.46);
+    cornerPoints.push(new THREE.Vector3(x * 0.27, 0, corner.z), corner,
+      corner, new THREE.Vector3(corner.x, 0, z * 0.27));
+  }
+  const corners = new THREE.BufferGeometry().setFromPoints(cornerPoints);
+  const tint = (color, opacity) => new THREE.MeshBasicMaterial({
+    color, opacity, transparent: true, depthWrite: false, toneMapped: false
+  });
+  const selectedFill = tint(0xffffff, 0.28);
+  const targetFill = tint(0xffffff, 0.09);
+  const moveFill = tint(0x61ecf5, 0.09);
+  const impactFill = tint(0xff607e, 0.30);
+  const routeDots = tint(0xf7e4ff, 0.92);
+
+  const chevron = new THREE.Shape();
+  chevron.moveTo(-0.16, -0.035);
+  chevron.lineTo(0, 0.105);
+  chevron.lineTo(0.16, -0.035);
+  chevron.lineTo(0.12, -0.075);
+  chevron.lineTo(0, 0.03);
+  chevron.lineTo(-0.12, -0.075);
+  chevron.closePath();
+  const stampGeometry = new THREE.ShapeGeometry(chevron).rotateX(-Math.PI / 2);
+  const stampMaterial = tint(0xe6a952, 0.82);
+  const rippleGeometry = new THREE.RingGeometry(0.38, 0.41, 4, 1, Math.PI / 4).rotateX(-Math.PI / 2);
+  const rippleMaterial = tint(0xffd795, 0);
+  const ripple = new THREE.Mesh(rippleGeometry, rippleMaterial);
+  scene.add(ripple);
+  ripple.visible = false;
+  let rippleTile = null;
+  let rippleAbility = null;
+  let rippleStart = 0;
+
+  function stamp(tile) {
+    const mark = new THREE.Mesh(stampGeometry, stampMaterial);
+    mark.position.set(tw(tile.x), tileTop(tile) + 0.06, tw(tile.y));
+    targets.add(mark);
+  }
+
+  function previewStamp(tile) {
+    if (rippleTile === tile && rippleAbility === ability) return;
+    rippleTile = tile;
+    rippleAbility = ability;
+    ripple.visible = Boolean(tile);
+    if (!tile) return;
+    ripple.position.set(tw(tile.x), tileTop(tile) + 0.08, tw(tile.y));
+    ripple.scale.setScalar(0.25);
+    rippleMaterial.opacity = 0.85;
+    rippleStart = performance.now();
+  }
+
+  function fill(group, tile, material, scale = 1) {
+    const mesh = new THREE.Mesh(tileFill, material);
+    mesh.position.set(tw(tile.x), tileTop(tile) + 0.04, tw(tile.y));
+    mesh.scale.setScalar(scale);
+    group.add(mesh);
+  }
+
+  function bracket(group, tile, material, fillMaterial) {
+    fill(group, tile, fillMaterial);
+    const marks = new THREE.LineSegments(corners, material);
+    marks.position.set(tw(tile.x), tileTop(tile) + 0.052, tw(tile.y));
+    group.add(marks);
+  }
+
+  function dottedStep(tile, dx, dy, last) {
+    for (const offset of (last ? [-0.4, -0.2, 0] : [-0.4, -0.2, 0, 0.2, 0.4])) {
+      const point = new THREE.Mesh(dot, routeDots);
+      point.position.set(tw(tile.x) + dx * offset, tileTop(tile) + 0.075, tw(tile.y) + dy * offset);
+      preview.add(point);
+    }
+  }
+
+  function edge(group, tile, material, scale = 1) {
+    const line = new THREE.LineLoop(outlineGeometry, material);
+    line.position.set(tw(tile.x), tileTop(tile) + 0.055, tw(tile.y));
+    line.scale.setScalar(scale);
+    group.add(line);
+  }
+
+  const coins = new Map();
+  let collected = 0;
+  const coinGeometry = new THREE.CylinderGeometry(0.15, 0.15, 0.045, 10);
+  const coinMaterial = new THREE.MeshStandardMaterial({
+    color: 0xe8b746, roughness: 1, metalness: 0, emissive: 0x5e3b08, emissiveIntensity: 0.5
+  });
+  for (const [x,y] of [[0,3],[3,4],[5,6]]) {
+    const tile = board[y][x];
+    const coin = new THREE.Mesh(coinGeometry, coinMaterial);
+    coin.rotation.x = Math.PI / 2;
+    coin.rotation.y = Math.PI / 5;
+    coin.position.set(tw(x), tileTop(tile) + 0.26, tw(y));
+    coins.set(tile, coin);
+    scene.add(coin);
+  }
+  const originalCoins = new Map(coins);
+  let heldTurns = 0;
+  let banner = null;
+  spawnOpponents();
+
+  function spawnOpponents() {
+    const level = activeLevel();
+    const starts = [...level.enemies, ...(level.wave ?? []).map(enemy => ({ ...enemy, pending: true }))];
+    starts.forEach((enemy, i) => {
+      const stats = ENEMY_STATS[enemy.modelId];
+      const name = { raider: 'Raider', captain: 'Raider Captain', archer: 'Raider Archer' }[enemy.modelId];
+      const unit = buildUnit({ ...stats, ...enemy, id: 'enemy' + i,
+        name: enemy.name ?? name, team: 'enemy', hp: enemy.pending ? 0 : stats.hp }, enemy.modelId);
+      unit.mesh.visible = !unit.pending && !unit.concealed;
+      heroes.push(unit);
+    });
+    if (level.goal === 'Camp Assault') {
+      const [x, y] = level.point;
+      const mesh = new THREE.Group();
+      const baseY = tileTop(board[y][x]);
+      mesh.position.set(tw(x), baseY, tw(y));
+      scene.add(mesh);
+      banner = { id: 'banner', name: 'Camp Banner', team: 'objective', hp: 12, x, y, baseY, mesh };
+      heroes.push(banner);
+    }
+  }
+
+  function updateAmbush() {
+    for (const enemy of heroes) {
+      if (!enemy.concealed || !party.some(hero => hero.hp > 0 &&
+        Math.abs(hero.x - enemy.x) + Math.abs(hero.y - enemy.y) <= 2)) continue;
+      enemy.concealed = false;
+      enemy.mesh.visible = enemy.hp > 0;
+    }
+  }
+
+  function onObjective(hero) {
+    const point = activeLevel().point;
+    return hero.hp > 0 && point && hero.x === point[0] && hero.y === point[1];
+  }
+
+  function levelResult() {
+    if (!party.some(hero => hero.hp > 0)) return 'Defeat';
+    switch (activeLevel().goal) {
+      case 'Crossing':
+      case 'Ambush': return party.some(onObjective) ? 'Victory' : null;
+      case 'Hold the Node': return heldTurns >= 5 ? 'Victory' : null;
+      case 'Camp Assault': return banner.hp <= 0 ? 'Victory' : null;
+      default: return encounterResult(heroes);
+    }
+  }
+
+  function notify(message) {
+    clearTimeout(toastTimer);
+    toast.textContent = message;
+    const entry = document.createElement('li');
+    entry.textContent = message;
+    entries.prepend(entry);
+    if (entries.children.length > 5) entries.lastElementChild.remove();
+    toastTimer = setTimeout(() => { toast.textContent = ''; }, 2800);
+  }
+
+  function button(label, action, parent = panel) {
+    const element = document.createElement('button');
+    element.type = 'button';
+    element.textContent = label;
+    element.addEventListener('click', action);
+    parent.append(element);
+    return element;
+  }
+
+  function prepareUnits() {
+  for (const hero of heroes) {
+    hero.mp ??= 5;
+    hero.hp ??= 20;
+    hero.team ??= 'player';
+    hero.mesh.traverse(object => {
+      if (object.isMesh) object.userData.phase2Hero = hero.id;
+    });
+  }
+
+  }
+  prepareUnits();
+
+  const health = document.createElement('div');
+  health.style.margin = '6px 0';
+  panel.append(health);
+  const tray = document.createElement('section');
+  tray.className = 'mobile-power-tray';
+  tray.setAttribute('aria-label', 'Selected hero actions');
+  tray.hidden = true;
+  Object.assign(tray.style, {
+    position: 'fixed', left: '8px', top: '8px',
+    zIndex: '8', padding: '6px 9px', width: 'max-content',
+    maxWidth: 'min(245px, calc(100vw - 16px))', boxSizing: 'border-box',
+    color: '#fff', background: '#141d39', border: '1px solid #487895',
+    borderRadius: '7px', font: '12px system-ui'
+  });
+  const trayTitle = document.createElement('div');
+  trayTitle.style.marginBottom = '5px';
+  const pips = document.createElement('div');
+  pips.style.cssText = 'display:flex;gap:3px;margin:4px 0 7px';
+  const mpPips = Array.from({ length: 5 }, () => {
+    const pip = document.createElement('span');
+    pip.style.cssText = 'width:15px;height:5px;border-radius:5px';
+    pips.append(pip);
+    return pip;
+  });
+  const passive = document.createElement('span');
+  passive.style.cssText = 'font-size:11px;color:#bbd5ef';
+  const trayControls = document.createElement('div');
+  trayControls.className = 'power-controls';
+  tray.append(trayTitle, passive, pips, trayControls);
+  document.body.append(tray);
+  const boardEnd = document.createElement('div');
+  let turnReady = false;
+  boardEnd.style.cssText = 'position:fixed;top:8px;left:50%;z-index:13;transform:translateX(-50%)';
+  document.body.append(boardEnd);
+  let enemyActing = false;
+  let playerAttacking = false;
+  const endButton = button('End turn', async () => {
+    if (enemyActing || playerAttacking || outcome) return;
+    enemyActing = true;
+    ability = null;
+    refresh();
+    const summary = await enemyTurn();
+    enemyActing = false;
+    if (activeLevel().goal === 'Hold the Node') heldTurns = party.some(onObjective) ? heldTurns + 1 : 0;
+    if (levelResult()) {
+      refresh();
+      return notify(summary);
+    }
+    const refreshed = phase2EndTurn(heroes);
+    heroes.forEach((hero, index) => { if (hero.team === 'player') hero.mp = refreshed[index].mp; });
+    turn += 1;
+    if (turn >= 3) for (const unit of heroes) {
+      if (!unit.pending || heroes.some(other => other.hp > 0 && other.x === unit.x && other.y === unit.y)) continue;
+      unit.pending = false;
+      unit.hp = ENEMY_STATS[unit.modelId].hp;
+      unit.mesh.visible = true;
+    }
+    for (const tile of board.flat()) {
+      if (tile.barrier?.expires === turn) {
+        const previous = tile.barrier.previous;
+        delete tile.barrier;
+        changeTile(tile, previous);
+      }
+    }
+    ability = null;
+    refresh();
+    notify('Turn ' + turn + '. ' + summary);
+    clearTimeout(bannerTimer);
+    turnBanner.textContent = 'Turn ' + turn + ' · Your move';
+    turnBanner.hidden = false;
+    bannerTimer = setTimeout(() => { turnBanner.hidden = true; }, 1100);
+  }, boardEnd);
+  endButton.style.cssText = 'cursor:pointer;border:2px solid #e8cb83;border-radius:999px;background:#423268;color:#fff4d5;padding:7px 17px;font:800 14px system-ui;box-shadow:0 3px 0 #211735';
+
+  const levelPicker = document.createElement('select');
+  levelPicker.setAttribute('aria-label', 'Choose a level');
+  LEVELS.forEach((level, index) => levelPicker.add(new Option((index + 1) + '. ' + level.name, index)));
+  levelPicker.addEventListener('change', () => startLevel(Number(levelPicker.value)));
+  panel.append(levelPicker);
+  button('Restart encounter', () => startLevel(levelIndex));
+  const icons = { attack: '⚔', terraform: '▧', resonance: '✦', shift: '⇄', quake: 'ϟ',
+    barrier: '▤', charge: '➜', shadow: '◐', dash: '⟫', harvest: '◇' };
+
+  function choosePower(id, element) {
+    if (enemyActing || playerAttacking || outcome) return;
+    const rect = element.getBoundingClientRect();
+    ability = id;
+    closePowerInfo();
+    refresh();
+    if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    screen.set(tw(selected.x), selected.baseY + 0.05, tw(selected.y)).project(camera);
+    const x = rect.left + rect.width / 2;
+    const y = rect.top + rect.height / 2;
+    const dx = (screen.x + 1) * innerWidth / 2 - x;
+    const dy = (1 - screen.y) * innerHeight / 2 - y;
+    const pulse = document.createElement('span');
+    pulse.style.cssText = 'position:fixed;pointer-events:none;z-index:9;width:9px;height:9px;border-radius:50%';
+    pulse.style.left = x + 'px';
+    pulse.style.top = y + 'px';
+    pulse.style.background = heroColors[selected.id];
+    document.body.append(pulse);
+    pulse.animate([
+      { transform: 'translate(-50%,-50%) scale(.65)', opacity: 0.7 },
+      { transform: 'translate(' + dx + 'px,' + dy + 'px) scale(1.7)', opacity: 0 }
+    ], { duration: 260, easing: 'ease-out' }).onfinish = () => pulse.remove();
+  }
+
+  const powerTips = {
+    attack: 'Hit one adjacent Raider for 4 damage. Guaranteed hit.',
+    terraform: 'Turn an empty tile 1–2 steps away into Grass, Water or Rock. Crystal Nodes are protected.',
+    resonance: 'Stand on or beside a Crystal Node to hit an enemy up to 4 tiles away in a straight line. 4 damage +2 per Node within 3 tiles. Tall Rock blocks it. Once per turn.',
+    shift: 'Teleport or swap up to 3 tiles away with line of sight. No Water or Crystal landings. Swaps also cost the destination’s movement MP. Ready again in 2 turns.',
+    quake: 'Hit all adjacent enemies for 5 damage, or 7 from Rock or elevation 2+. Push enemies on Water. Once per turn.',
+    barrier: 'Raise a wall on an empty tile 1–2 steps away for 2 turns. Units cannot land on it. Ready again in 3 turns.',
+    charge: 'Rush up to 3 tiles in a straight line. Deal 4 damage and push the first enemy. Travel costs extra MP. Ready again in 2 turns.',
+    shadow: 'Teleport to an empty Forest tile up to 5 steps away. Ignore intervening terrain and units. Ready again in 2 turns.',
+    dash: 'Dash up to 3 tiles in a straight line and hit each enemy passed for 3 damage. Land on an empty tile. Skip the next turn before using it again.',
+    harvest: 'Sprint up to 4 tiles in a straight line. Recover 1 MP per distinct Crystal Node within 1 tile of the path, up to 2 MP. Ready again in 3 turns.'
+  };
+
+  function closePowerInfo() {
+    const open = trayControls.querySelector('.info-open');
+    if (!open) return;
+    open.classList.remove('info-open');
+    open.querySelector('.power-info-toggle').setAttribute('aria-expanded', 'false');
+  }
+
+  function powerCard(id, label) {
+    const [, name, cost] = label.match(/^(.*) \((\d+ MP)\)$/);
+    const wrap = document.createElement('div');
+    wrap.className = 'power-card-wrap';
+    trayControls.append(wrap);
+    const element = button('', () => choosePower(id, element), wrap);
+    const tip = document.createElement('span');
+    tip.className = 'power-tip';
+    tip.id = 'power-tip-' + id;
+    tip.setAttribute('role', 'tooltip');
+    tip.textContent = powerTips[id];
+    element.setAttribute('aria-describedby', tip.id);
+    wrap.setAttribute('aria-describedby', tip.id);
+    const info = button('ⓘ', () => {
+      const opening = !wrap.classList.contains('info-open');
+      closePowerInfo();
+      if (opening) {
+        wrap.classList.add('info-open');
+        info.setAttribute('aria-expanded', 'true');
+        tip.scrollIntoView({ block: 'nearest' });
+      }
+    }, wrap);
+    info.className = 'power-info-toggle';
+    info.setAttribute('aria-label', 'About ' + name);
+    info.setAttribute('aria-controls', tip.id);
+    info.setAttribute('aria-expanded', 'false');
+    wrap.append(tip);
+    element.className = 'power-card';
+    element.dataset.label = name;
+    const icon = document.createElement('span');
+    icon.className = 'power-icon';
+    icon.textContent = icons[id];
+    icon.setAttribute('aria-hidden', 'true');
+    const words = document.createElement('span');
+    words.textContent = name;
+    const reason = document.createElement('small');
+    reason.className = 'power-reason';
+    reason.hidden = true;
+    words.append(reason);
+    const badge = document.createElement('span');
+    badge.className = 'power-cost';
+    badge.textContent = cost;
+    element.append(icon, words, badge);
+    return element;
+  }
+
+  function setCardReason(element, message) {
+    const reason = element.querySelector('.power-reason');
+    reason.textContent = message;
+    reason.hidden = !message;
+    element.disabled = Boolean(message);
+    element.parentElement.tabIndex = message ? 0 : -1;
+  }
+
+  const attackButton = powerCard('attack', 'Attack (2 MP)');
+  const terrainPicker = document.createElement('select');
+  terrainPicker.setAttribute('aria-label', 'Terraform terrain');
+  for (const type of ['grass', 'water', 'rock']) {
+    terrainPicker.add(new Option(TILE_LABEL[type], type));
+  }
+  const abilities = [
+    ['terraform', 'Terraform (2 MP)'],
+    ['resonance', 'Prismic Resonance (2 MP)'],
+    ['shift', 'Aether Shift (3 MP)'],
+    ['quake', 'Quake Strike (2 MP)', 'warden'],
+    ['barrier', 'Seismic Barrier (3 MP)', 'warden'],
+    ['charge', 'Bulwark Charge (3 MP)', 'warden'],
+    ['shadow', 'Shadow Step (2 MP)', 'stalker'],
+    ['dash', 'Twin Blade Dash (3 MP)', 'stalker'],
+    ['harvest', 'Harvest Sprint (2 MP)', 'stalker']
+  ].map(([id, label, owner = 'weaver']) => [id, owner, powerCard(id, label)]);
+  terrainPicker.addEventListener('change', refresh);
+  trayControls.append(terrainPicker);
+  const cancelButton = button('Cancel target', () => {
+    ability = null;
+    refresh();
+  }, trayControls);
+
+  const report = document.createElement('pre');
+  Object.assign(report.style, { whiteSpace: 'pre-wrap', maxHeight: '42vh', overflow: 'auto' });
+  report.hidden = true;
+  button('Run self-tests', () => {
+    const results = runPhase2SelfTests();
+    report.textContent = results.map(({ name, pass }, i) =>
+      (i + 1) + '. ' + (pass ? 'PASS ' : 'FAIL ') + name
+    ).join('\n');
+    report.hidden = false;
+    notify(results.filter(test => test.pass).length + '/' + results.length + ' tests passed.');
+  });
+  const actionLog = document.createElement('details');
+  const logTitle = document.createElement('summary');
+  logTitle.textContent = 'Action log';
+  const entries = document.createElement('ol');
+  actionLog.append(logTitle, entries);
+  cancelButton.className = 'target-cancel';
+  panel.append(toast, actionLog, report);
+  const turnBanner = document.createElement('div');
+  turnBanner.hidden = true;
+  turnBanner.setAttribute('role', 'status');
+  turnBanner.style.cssText = 'position:fixed;top:12%;left:50%;transform:translateX(-50%);z-index:12;pointer-events:none;background:#141d39;color:#fff;border:1px solid #487895;border-radius:8px;padding:8px 20px;font:600 14px system-ui';
+  document.body.append(turnBanner);
+  let bannerTimer;
+
+
+  function abilityResult(tile, roster, kind = ability) {
+    if (kind === 'attack') {
+      const enemy = roster.find(h => h.x === tile.x && h.y === tile.y);
+      const attack = basicAttack(board, selected, enemy);
+      return attack ? { target: enemy, damage: attack.damage } : { error: true };
+    }
+    if (selected.id === 'weaver') {
+      return weaverAction(board, roster, kind, tile.x, tile.y, turn, terrainPicker.value);
+    }
+    if (selected.id === 'warden') {
+      return wardenAction(board, roster, kind, tile.x, tile.y, turn);
+    }
+    return stalkerAction(board, roster, kind, tile.x, tile.y, turn);
+  }
+
+  function drawAbilityTargets() {
+    targets.clear();
+    if (!selected || !ability || enemyActing) return;
+    const living = heroes.filter(hero => hero.hp > 0);
+    const origin = board[selected.y][selected.x];
+    if (ability === 'quake') {
+      if (abilityResult(origin, living).error) return;
+
+      for (const tile of board.flat()) {
+        if (Math.abs(tile.x - origin.x) + Math.abs(tile.y - origin.y) === 1) {
+          fill(targets, tile, impactFill);
+          edge(targets, tile, impactMaterial);
+        }
+      }
+      return;
+    }
+    for (const tile of board.flat()) {
+      if (abilityResult(tile, living).error) continue;
+      bracket(targets, tile, targetMaterial, targetFill);
+      if (selected.id === 'warden') stamp(tile);
+    }
+  }
+
+  function drawAbilityPreview(tile) {
+    preview.clear();
+    if (!selected || !ability || !tile || ability === 'quake') {
+      previewStamp(null);
+      return;
+    }
+    const result = abilityResult(tile, heroes.filter(hero => hero.hp > 0));
+    if (result.error) {
+      previewStamp(null);
+      return;
+    }
+    previewStamp(selected.id === 'warden' ? tile : null);
+
+    const hitUnits = (result.impacts ?? []).map(hit => hit.target ?? hit.unit);
+    if (result.damage && result.target) hitUnits.push(result.target);
+    const lineEnd = result.destination ?? (ability === 'resonance' ? tile : null);
+    if (lineEnd && ['charge', 'dash', 'harvest', 'resonance'].includes(ability)) {
+      const dx = Math.sign(lineEnd.x - selected.x);
+      const dy = Math.sign(lineEnd.y - selected.y);
+      const distance = Math.abs(lineEnd.x - selected.x) + Math.abs(lineEnd.y - selected.y);
+      for (let i = 1; i <= distance; i++) {
+        dottedStep(board[selected.y + dy * i][selected.x + dx * i], dx, dy, i === distance);
+      }
+    }
+    for (const node of result.nodes ?? []) edge(preview, node, targetMaterial, 0.7);
+    for (const unit of hitUnits) {
+      const hit = board[unit.y][unit.x];
+      fill(preview, hit, impactFill);
+      edge(preview, hit, impactMaterial, 0.92);
+    }
+    if (result.destination) edge(preview, result.destination, landingMaterial, 0.65);
+    if (ability === 'shift' && result.target) {
+      edge(preview, board[selected.y][selected.x], landingMaterial, 0.65);
+    }
+  }
+
+  const heroColors = { weaver: '#d493ff', warden: '#ffc46f', stalker: '#60e4df' };
+  const passives = {
+    weaver: ['✦ Patchwork Mastery', 'Recover 1 MP when landing on a terraformed tile.'],
+    warden: ['◆ Mountain’s Stance', 'Take half damage on Rock or elevation 2+.'],
+    stalker: ['◈ Veil Walker', 'Water and Forest cost 1 MP to enter.']
+  };
+  const costs = { terraform: 2, resonance: 2, shift: 3, quake: 2, barrier: 3,
+    charge: 3, shadow: 2, dash: 3, harvest: 2 };
+
+  function powerState(kind, roster) {
+    const ready = { shift: selected.shiftReadyTurn, barrier: selected.barrierReadyTurn,
+      charge: selected.chargeReadyTurn }[kind] ?? selected.readyTurns?.[kind] ?? 0;
+    const remaining = ready - turn;
+    if (remaining > 0) return remaining + (remaining === 1 ? ' turn left' : ' turns left');
+    if ((kind === 'quake' && selected.quakeTurn === turn) ||
+        (kind === 'resonance' && selected.resonanceTurn === turn)) return 'Used this turn';
+    if (selected.mp < costs[kind]) return 'Needs ' + costs[kind] + ' MP';
+    if (!board.flat().some(tile => !abilityResult(tile, roster, kind).error)) return 'No legal target';
+    return '';
+  }
+
+  function refresh() {
+    updateAmbush();
+    const previous = outcome;
+    outcome = levelResult();
+    if (campFlag) campFlag.visible = banner?.hp > 0;
+    if (outcome === 'Victory' && previous !== outcome) celebrate();
+    if (selected?.hp <= 0 || outcome) {
+      selected = null;
+      ability = null;
+    }
+    endButton.disabled = Boolean(outcome) || enemyActing || playerAttacking;
+    levelPicker.disabled = enemyActing || playerAttacking;
+    levelPicker.value = String(levelIndex);
+    const living = heroes.filter(hero => hero.hp > 0);
+    const ready = !outcome && !enemyActing && !playerAttacking && !partyHasMove(board, living);
+    endButton.title = ready ? 'No allies can move' : 'End the turn early';
+    boardEnd.hidden = Boolean(outcome);
+    endButton.textContent = ready ? '✦ End turn →' : 'End turn →';
+    if (turnReady !== ready) {
+      turnReady = ready;
+      if (ready) endButton.animate([
+        { transform: 'translateY(4px) scale(.9)' },
+        { transform: 'translateY(-2px) scale(1.04)' },
+        { transform: 'translateY(0) scale(1)' }
+      ], { duration: 240, easing: 'ease-out' });
+    }
+    attackButton.disabled = !selected || selected.mp < 2;
+    attackButton.setAttribute('aria-pressed', String(ability === 'attack'));
+    outlines.clear();
+    selection.clear();
+    if (selected) {
+      const origin = board[selected.y][selected.x];
+      selectedFill.color.set(heroColors[selected.id]);
+      targetFill.color.copy(selectedFill.color);
+      targetMaterial.color.copy(selectedFill.color);
+      fill(selection, origin, selectedFill);
+      edge(selection, origin, targetMaterial);
+    }
+    if (selected && !ability && !enemyActing && !playerAttacking) {
+      const living = heroes.filter(hero => hero.hp > 0);
+      for (const tile of board.flat()) {
+        const move = phase2Move(board, living, selected.id, tile.x, tile.y);
+        if (move.error) continue;
+        bracket(outlines, tile, outlineMaterial, moveFill);
+      }
+    }
+    drawAbilityTargets();
+    drawAbilityPreview(hoveredTile);
+    for (const [tile, coin] of coins) coin.position.y = tileTop(tile) + 0.26;
+    const level = activeLevel();
+    const objective = {
+      Rout: 'Defeat all Raiders',
+      Crossing: 'Reach the crystal at (6,0)',
+      'Hold the Node': 'Hold the center crystal · ' + heldTurns + '/5 turns',
+      Ambush: 'Reach (0,0)',
+      'Camp Assault': 'Destroy the banner at (5,1) · ' + (banner?.hp ?? 0) + ' HP'
+    }[level.goal];
+    health.textContent = level.name + ' · ' + objective + ' · Coins ' + collected + '/3';
+    status.textContent = outcome || (enemyActing ? 'Enemy turn' : 'Turn ' + turn + (selected ? '' : ' · Select a hero on the board'));
+    tray.hidden = !selected || enemyActing || playerAttacking;
+    if (selected) {
+      const active = abilities.find(([id]) => id === ability);
+      const hint = ability === 'quake' ? 'Click Rune Warden to cast' :
+        ability === 'attack' ? 'Choose an adjacent target' :
+        active ? active[2].dataset.label + ' · Choose a target' : '';
+      trayTitle.textContent = hint || (selected.name + ' · ' + selected.mp + '/5 MP');
+      passive.hidden = Boolean(ability);
+      pips.style.display = ability ? 'none' : 'flex';
+      tray.style.setProperty('--hero-accent', heroColors[selected.id]);
+      const [passiveName, description] = passives[selected.id];
+      passive.textContent = passiveName;
+      passive.title = description;
+      pips.setAttribute('aria-label', selected.mp + ' of 5 movement points');
+      mpPips.forEach((pip, i) => {
+        pip.style.background = i < selected.mp ? heroColors[selected.id] : '#364468';
+      });
+      tray.append(toast);
+    } else {
+      panel.append(toast);
+    }
+    attackButton.hidden = Boolean(ability);
+    cancelButton.hidden = !ability;
+    const isWeaver = selected?.id === 'weaver';
+    terrainPicker.hidden = !isWeaver || Boolean(ability && ability !== 'terraform');
+    const roster = heroes.filter(hero => hero.hp > 0);
+    setCardReason(attackButton, !selected || selected.mp < 2 ? 'Needs 2 MP' :
+      roster.some(hero => basicAttack(board, selected, hero)) ? '' : 'No adjacent target');
+    for (const [id, owner, element] of abilities) {
+      const reason = selected?.id === owner ? powerState(id, roster) : '';
+      setCardReason(element, reason);
+      element.hidden = selected?.id !== owner || Boolean(ability);
+      element.setAttribute('aria-pressed', String(ability === id));
+    }
+
+  }
+
+  function select(hero) {
+    closePowerInfo();
+    selected = hero;
+    ability = null;
+    refresh();
+    notify(hero.name + ' selected.');
+  }
+
+  function hitsAt(point, roots) {
+    const rect = canvas.getBoundingClientRect();
+    ndc.set(
+      2 * (point.clientX - rect.left) / rect.width - 1,
+      1 - 2 * (point.clientY - rect.top) / rect.height
+    );
+    camera.updateMatrixWorld();
+    scene.updateMatrixWorld();
+    ray.setFromCamera(ndc, camera);
+    return ray.intersectObjects(roots, true);
+  }
+
+  function hoverTile(tile) {
+    if (hoveredTile !== tile) {
+      hoveredTile = tile;
+      drawAbilityPreview(tile);
+    }
+    marker.visible = Boolean(tile && (!selected || tile.x !== selected.x || tile.y !== selected.y));
+    if (tile) marker.position.set(tw(tile.x), tileTop(tile) + 0.03, tw(tile.y));
+    readout.textContent = tile
+      ? 'Tile ' + tile.x + ',' + tile.y + '  ' + TILE_LABEL[tile.type] + '  (top ' + tileTop(tile) + ')'
+      : '';
+  }
+
+  function pickBoard(point) {
+    if (!point) return { hero: null, tile: null };
+    const living = heroes.filter(hero => hero.hp > 0 && hero.mesh.visible);
+    const hits = hitsAt(point, [...tileGroups, ...living.map(hero => hero.mesh)]);
+    const unitHit = hits.find(hit => hit.object.userData.phase2Hero);
+    const hero = unitHit ? living.find(h => h.id === unitHit.object.userData.phase2Hero) : null;
+    const tile = hero ? board[hero.y][hero.x] : phase2PickTile(hits.find(phase2PickTile));
+    const objective = banner?.hp > 0 && tile?.x === banner.x && tile?.y === banner.y;
+    return { hero: hero ?? (objective ? banner : null), tile };
+  }
+
+  function updateHover() {
+    hoverTile(pickBoard(pointer).tile);
+  }
+
+  let drag = null;
+  let suppressClick = false;
+  const fingers = new Map();
+  let pinch = null;
+  let lastTouchRelease = null;
+  const fingerGap = () => {
+    const [a,b] = fingers.values();
+    return Math.max(1, Math.hypot(a.clientX-b.clientX, a.clientY-b.clientY));
+  };
+  canvas.style.touchAction = 'none';
+  canvas.addEventListener('pointerdown', event => {
+    if (event.pointerType === 'touch') {
+      fingers.set(event.pointerId, event);
+      if (fingers.size > 1) {
+        drag = null;
+        suppressClick = true;
+        pointer = null;
+        hoverTile(null);
+        if (fingers.size === 2) pinch = { distance: fingerGap(), zoom };
+        return;
+      }
+    }
+    if (!event.isPrimary || event.button !== 0) return;
+    suppressClick = false;
+    drag = { id: event.pointerId, x: event.clientX, y: event.clientY, yaw, pitch };
+  });
+  canvas.addEventListener('pointermove', event => {
+    if (fingers.has(event.pointerId)) {
+      fingers.set(event.pointerId, event);
+      if (pinch) {
+        zoom = THREE.MathUtils.clamp(pinch.zoom * fingerGap() / pinch.distance, ZOOM_MIN, ZOOM_MAX);
+        fitCamera();
+        return;
+      }
+    }
+    if (drag?.id === event.pointerId) {
+      const dx = event.clientX - drag.x;
+      const dy = event.clientY - drag.y;
+      const threshold = event.pointerType === 'touch' ? 12 : 6;
+      if (suppressClick || Math.hypot(dx, dy) >= threshold) {
+        if (!suppressClick) {
+          suppressClick = true;
+          canvas.setPointerCapture(event.pointerId);
+          canvas.style.cursor = 'grabbing';
+          pointer = null;
+          hoverTile(null);
+        }
+        yaw = drag.yaw - dx * 0.008;
+        pitch = THREE.MathUtils.clamp(drag.pitch + dy * 0.008, rad(12), rad(85));
+        orbitCamera();
+        return;
+      }
+    }
+    pointer = event;
+    updateHover();
+  });
+  function endOrbit(event) {
+    if (fingers.has(event.pointerId) && event.type === 'pointerup') {
+      lastTouchRelease = { x: event.clientX, y: event.clientY, time: performance.now() };
+      if (!suppressClick && fingers.size === 1 && drag?.id === event.pointerId &&
+          Math.hypot(event.clientX - drag.x, event.clientY - drag.y) < 12) {
+        const rect = canvas.getBoundingClientRect();
+        if (event.clientX >= rect.left && event.clientX < rect.right &&
+            event.clientY >= rect.top && event.clientY < rect.bottom) activateBoard(event);
+      }
+    }
+    if (fingers.delete(event.pointerId) && pinch) {
+      pinch = fingers.size >= 2 ? { distance: fingerGap(), zoom } : null;
+    }
+    if (drag?.id !== event.pointerId) return;
+    drag = null;
+    canvas.style.cursor = '';
+    if (suppressClick && event.type === 'pointerup' && event.pointerType === 'mouse') {
+      const rect = canvas.getBoundingClientRect();
+      if (event.clientX >= rect.left && event.clientX < rect.right &&
+          event.clientY >= rect.top && event.clientY < rect.bottom) {
+        pointer = event;
+        updateHover();
+      }
+    }
+  }
+  addEventListener('pointerup', endOrbit);
+  addEventListener('pointercancel', endOrbit);
+  canvas.addEventListener('lostpointercapture', endOrbit);
+  addEventListener('keydown', event => {
+    if (event.key.toLowerCase() !== 'r' || event.ctrlKey || event.metaKey || event.altKey || drag) return;
+    if (event.target instanceof HTMLSelectElement) return;
+    yaw = rad(CAM_YAW_DEG);
+    pitch = rad(CAM_PITCH_DEG);
+    zoom = 1;
+    orbitCamera();
+    fitCamera();
+    updateHover();
+  });
+  canvas.addEventListener('pointerleave', () => {
+    pointer = null;
+    hoverTile(null);
+  });
+  addEventListener('resize', updateHover);
+  addEventListener('wheel', updateHover, { passive: true });
+
+  function collect(hero, tile) {
+    if (hero.team !== 'player' || !coins.has(tile)) return '';
+    scene.remove(coins.get(tile));
+    coins.delete(tile);
+    collected += 1;
+    return ' Collect +1.';
+  }
+
+  function place(hero, tile) {
+    Object.assign(hero, { x: tile.x, y: tile.y, baseY: tileTop(tile) });
+    hero.mesh.position.set(tw(tile.x), hero.baseY, tw(tile.y));
+    return collect(hero, tile);
+  }
+
+  function dealDamage(attacker, target, amount, melee = false, deferHide = false) {
+    const before = target.hp;
+    target.hp = Math.max(0, before - (target.braced ? amount / 2 : amount));
+    if (!deferHide) target.mesh.visible = target.hp > 0;
+    if (target.braced && melee && !target.braceRecoiled && attacker?.team !== target.team) {
+      target.braceRecoiled = true;
+      attacker.hp = Math.max(0, attacker.hp - 1);
+      attacker.mesh.visible = attacker.hp > 0;
+      scatter(onTile(board[attacker.y][attacker.x], 0.6), '#ffca78', 5);
+      notify(target.name + ' countered with Brace for 1 damage.');
+    }
+    return before - target.hp;
+  }
+
+  function raiderDamage(target, amount) {
+    return mountainStance(target, board[target.y][target.x]) ? amount / 2 : amount;
+  }
+
+  async function enemyTurn() {
+    const events = [];
+    for (const enemy of heroes.filter(h => h.team === 'enemy' && h.hp > 0 && !h.concealed)) {
+      if (enemy.hp <= 0) continue;
+      enemy.braced = false;
+      enemy.braceRecoiled = false;
+      let mp = enemy.mp;
+      const start = board[enemy.y][enemy.x];
+      const fighter = isRaiderFighter(enemy);
+      const color = enemy.modelId === 'captain' ? '#ff5937' : '#ffad65';
+      const adjacent = party.some(hero => hero.hp > 0 &&
+        Math.abs(hero.x - enemy.x) + Math.abs(hero.y - enemy.y) === 1);
+      const chargeTarget = fighter && !adjacent
+        ? party.find(hero => raiderStrike(board, heroes, enemy, hero, true)) : null;
+      if (chargeTarget) {
+        const charge = raiderStrike(board, heroes, enemy, chargeTarget, true);
+        place(enemy, charge.approach);
+        streak(onTile(start, 0.18), onTile(charge.approach, 0.18), color, 0.075);
+        if (!reducedMotion.matches) await delay(130);
+        const damage = await performAttack(enemy, chargeTarget, raiderDamage(chargeTarget, charge.damage), color);
+        if (charge.push && chargeTarget.hp > 0) {
+          place(chargeTarget, charge.push);
+          const water = charge.push.type === 'water';
+          scatter(onTile(charge.push), water ? '#71e2ff' : color, 9);
+          ring(onTile(charge.push), water ? '#7ffaff' : color);
+        }
+        events.push(enemy.name + ' used Shoulder Charge for ' + damage + '.');
+        if (!reducedMotion.matches) await delay(100);
+        continue;
+      }
+      for (const tile of enemyPlan(board, heroes, enemy)) {
+        const cost = terrainMoveCost(enemy, tile);
+        if (mp < cost) break;
+        place(enemy, tile);
+        mp -= cost;
+      }
+      const origin = board[enemy.y][enemy.x];
+      const isArcher = enemy.modelId === 'archer';
+      if (start !== origin && !reducedMotion.matches) {
+        streak(onTile(start, 0.17), onTile(origin, 0.17), '#ad7555', 0.043);
+        await delay(135);
+      }
+      const target = party.find(h => h.hp > 0 && (isArcher
+        ? aimedShot(board, heroes, enemy, origin, h)
+        : Math.abs(h.x - enemy.x) + Math.abs(h.y - enemy.y) === 1));
+      if (!target) {
+        if (fighter) {
+          enemy.braced = true;
+          ring(onTile(origin, 0.65), '#ffcb7a', 1.25, true);
+          events.push(enemy.name + ' used Brace.');
+        }
+        continue;
+      }
+      const chop = fighter ? raiderStrike(board, heroes, enemy, target) : null;
+      const damage = isArcher ? aimedShot(board, heroes, enemy, origin, target).damage
+        : raiderDamage(target, chop?.damage ?? 4);
+      const dealt = await performAttack(enemy, target, damage, color);
+      if (chop?.splash?.hp > 0) {
+        const splash = chop.splash;
+        dealDamage(enemy, splash, raiderDamage(splash, 1));
+        scatter(onTile(board[splash.y][splash.x], 0.5), color, 5);
+      }
+      const action = isArcher ? 'Aimed Shot' : fighter ? 'Cleaver Chop' : 'Attack';
+      events.push(enemy.name + ' used ' + action + ' on ' + target.name + ' for ' + dealt + '.');
+      if (!reducedMotion.matches) await delay(100);
+    }
+    return events.join(' ') || 'Raiders took their turn.';
+  }
+
+  function changeTile(tile, changes) {
+    const index = tileGroups.findIndex(group =>
+      group.position.x === tw(tile.x) && group.position.z === tw(tile.y));
+    const old = tileGroups.splice(index, 1)[0];
+    scene.remove(old);
+    old.traverse(object => {
+      if (object.material === waterMat) object.geometry.dispose();
+    });
+    Object.assign(tile, changes);
+    buildTile(tile);
+  }
+
+  function castWarden(kind, tile) {
+    const result = wardenAction(board, heroes, kind, tile?.x, tile?.y, turn);
+    if (result.error) return notify(result.error);
+
+    let message;
+    if (kind === 'barrier') {
+      changeTile(tile, { type: 'rock', elevation: 2, terraformed: false, barrier: result.barrier });
+      selected.barrierReadyTurn = turn + 3;
+      message = 'Seismic Barrier raised for 2 turns.';
+    } else {
+      let damage = 0;
+      for (const hit of result.impacts) {
+        damage += dealDamage(selected, hit.target, hit.damage, kind === 'charge');
+        if (hit.target.hp > 0 && hit.destination) place(hit.target, hit.destination);
+      }
+      if (kind === 'charge') {
+        place(selected, result.destination);
+        selected.chargeReadyTurn = turn + 2;
+      } else {
+        selected.quakeTurn = turn;
+      }
+
+      message = (kind === 'charge' ? 'Bulwark Charge' : 'Quake Strike') +
+        (result.impacts.length ? ' dealt ' + damage + ' damage.' : ' hit no enemies.');
+    }
+    selected.mp = result.mp;
+    ability = null;
+    if (tile) hoverTile(tile);
+    refresh();
+    notify(message + ' ' + selected.mp + ' MP left.');
+  }
+
+
+  function castStalker(tile) {
+    const result = stalkerAction(board, heroes, ability, tile?.x, tile?.y, turn);
+    if (result.error) return notify(result.error);
+    for (const { unit, damage } of result.impacts) {
+      dealDamage(selected, unit, damage, true);
+    }
+    place(selected, result.destination);
+    selected.mp = result.mp;
+    (selected.readyTurns ??= {})[ability] = result.readyTurn;
+    let message = 'Shadow Step complete.';
+    if (ability === 'dash') message = 'Twin Blade Dash hit ' + result.impacts.length + ' enemies.';
+    if (ability === 'harvest') {
+      if (selected.harvestTurn !== turn) selected.harvestedNodes = [];
+      selected.harvestTurn = turn;
+      selected.harvestedNodes.push(...result.nodes);
+      message = 'Harvest Sprint recovered ' + result.nodes.length + ' MP.';
+    }
+    ability = null;
+    hoverTile(result.destination);
+    refresh();
+    notify(message + ' ' + selected.mp + ' MP left.');
+  }
+
+
+  const effects = [];
+  const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
+  const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
+  const onTile = (tile, height = 0.08) =>
+    new THREE.Vector3(tw(tile.x), tileTop(tile) + height, tw(tile.y));
+
+  function effect(geometry, color, duration, animate, finish) {
+    const material = new THREE.MeshBasicMaterial({
+      color, transparent: true, depthWrite: false, side: THREE.DoubleSide, toneMapped: false
+    });
+    const mesh = new THREE.Mesh(geometry, material);
+    mesh.renderOrder = 6;
+    scene.add(mesh);
+    animate(mesh, 0);
+    effects.push({ mesh, start: performance.now(), duration, animate, finish });
+  }
+
+  function tickEffects(now) {
+    for (let i = effects.length - 1; i >= 0; i--) {
+      const { mesh, start, duration, animate, finish } = effects[i];
+      const t = (now - start) / duration;
+      if (t < 1) {
+        animate(mesh, t);
+      } else {
+        scene.remove(mesh);
+        mesh.geometry.dispose();
+        mesh.material.dispose();
+        effects.splice(i, 1);
+        finish?.();
+      }
+    }
+  }
+
+  function ring(point, color, size = 1, upright = false) {
+    effect(new THREE.RingGeometry(0.38, 0.47, upright ? 6 : 24), color, 430, (mesh, t) => {
+      mesh.position.copy(point);
+      mesh.rotation.set(upright ? 0 : -Math.PI / 2, 0, t * 0.7);
+      if (upright) mesh.quaternion.copy(camera.quaternion);
+      mesh.scale.setScalar(0.28 + t * size);
+      mesh.material.opacity = 0.85 * (1 - t);
+    });
+  }
+
+  function scatter(point, color, count = 8, spread = 0.55, rising = false) {
+    for (let i = 0; i < count; i++) {
+      const angle = i * 2.39996;
+      const height = 0.18 + (i % 4) * 0.12;
+      effect(new THREE.DodecahedronGeometry(0.06 + (i % 3) * 0.025, 0), color, 460,
+        (mesh, t) => {
+          const distance = spread * (rising ? 1 - t : t);
+          mesh.position.copy(point);
+          mesh.position.x += Math.cos(angle) * distance;
+          mesh.position.z += Math.sin(angle) * distance;
+          mesh.position.y += rising ? t * height : Math.sin(t * Math.PI) * height;
+          mesh.rotation.set(angle + 4 * t, angle, 2 * t);
+          mesh.material.opacity = Math.sin(Math.PI * Math.min(1, 0.18 + t * 0.82));
+        });
+    }
+  }
+
+  function streak(from, to, color, radius = 0.035, projectile = false) {
+    const direction = to.clone().sub(from);
+    const length = direction.length();
+    if (!length) return;
+    const segment = projectile ? Math.min(0.65, length) : length;
+    const rotation = new THREE.Quaternion().setFromUnitVectors(
+      new THREE.Vector3(0, 1, 0), direction.clone().normalize());
+    effect(new THREE.CylinderGeometry(radius * 0.4, radius, segment, 5), color,
+      projectile ? 270 : 410, (mesh, t) => {
+        mesh.quaternion.copy(rotation);
+        mesh.position.copy(from).lerp(to, projectile ? t : 0.5);
+        mesh.material.opacity = projectile ? 1 : 0.95 * (1 - t);
+      });
+  }
+
+  function slash(point, color, offset = 0, size = 1, yaw = 0.35) {
+    effect(new THREE.RingGeometry(0.28, 0.42, 18, 1, 0, Math.PI * 1.12), color, 300,
+      (mesh, t) => {
+        mesh.position.copy(point);
+        mesh.position.y += offset;
+        mesh.rotation.set(-0.5, yaw, 1.5 - t * 3 + offset);
+        mesh.scale.setScalar(size * (0.65 + t));
+        mesh.material.opacity = 0.95 * (1 - t);
+      });
+  }
+
+
+  function animatePose(duration, pose) {
+    return new Promise(resolve => {
+      const start = performance.now();
+      function frame(now) {
+        const t = Math.min(1, (now - start) / duration);
+        pose(THREE.MathUtils.smoothstep(t, 0, 1));
+        if (t < 1) requestAnimationFrame(frame);
+        else resolve();
+      }
+      requestAnimationFrame(frame);
+    });
+  }
+
+  async function performAttack(attacker, target, damage, color) {
+    const mesh = attacker.mesh;
+    const from = onTile(board[attacker.y][attacker.x], 0.72);
+    const to = onTile(board[target.y][target.x], 0.64);
+    const dx = to.x - from.x, dz = to.z - from.z;
+    const yaw = Math.atan2(dx, dz);
+    const direction = new THREE.Vector3(dx, 0, dz).normalize();
+    const restYaw = yaw;
+    const initialYaw = mesh.rotation.y;
+    const archer = attacker.modelId === 'archer';
+    const captain = attacker.modelId === 'captain';
+    const twin = attacker.id === 'stalker';
+    const motion = !reducedMotion.matches;
+
+    function pose(distance, angle) {
+      mesh.position.x = from.x + direction.x * distance;
+      mesh.position.z = from.z + direction.z * distance;
+      mesh.rotation.y = angle;
+    }
+
+    if (motion) {
+      mesh.userData.attackPose = true;
+      const windup = archer ? 0.24 : captain ? 0.95 : 0.62;
+      await animatePose(captain ? 185 : archer ? 180 : 115, t =>
+        pose(-0.11 * t, initialYaw + Math.atan2(Math.sin(yaw - initialYaw), Math.cos(yaw - initialYaw)) * t - windup * t));
+      const reach = archer ? 0.04 : captain ? 0.39 : 0.32;
+      if (!archer) slash(from.clone().lerp(to, 0.48), color, 0, captain ? 1.35 : 1, yaw);
+      await animatePose(archer ? 65 : 85, t =>
+        pose(THREE.MathUtils.lerp(-0.11, reach, t), yaw + THREE.MathUtils.lerp(-windup, archer ? 0 : 0.57, t)));
+    }
+
+    if (archer) {
+      streak(from, to, '#ffdb9e', 0.04, true);
+      if (motion) await delay(270);
+    } else {
+      if (!motion) slash(to, color, 0, 1, yaw);
+      if (twin) {
+        if (motion) await animatePose(75, t => pose(0.32 - 0.06 * t, yaw + 0.57 - 1.14 * t));
+        slash(from.clone().lerp(to, 0.63), '#cafff7', 0.13, 0.92, yaw + Math.PI);
+      }
+    }
+
+    ring(to, color, captain ? 1.65 : 1.1, true);
+    scatter(to, color, captain ? 13 : 8);
+    const dealt = dealDamage(attacker, target, damage, !archer, true);
+
+    if (motion) {
+      const targetX = target.mesh.position.x, targetZ = target.mesh.position.z;
+      const strikeYaw = mesh.rotation.y;
+      const reach = (mesh.position.x - from.x) * direction.x + (mesh.position.z - from.z) * direction.z;
+      await animatePose(captain ? 215 : 165, t => {
+        const recoil = Math.sin(t * Math.PI) * (captain ? 0.24 : 0.16);
+        target.mesh.position.x = targetX + direction.x * recoil;
+        target.mesh.position.z = targetZ + direction.z * recoil;
+        pose(reach * (1 - t), strikeYaw + Math.atan2(Math.sin(restYaw - strikeYaw), Math.cos(restYaw - strikeYaw)) * t);
+      });
+      target.mesh.position.x = targetX;
+      target.mesh.position.z = targetZ;
+      pose(0, restYaw);
+      delete mesh.userData.attackPose;
+    }
+    target.mesh.visible = target.hp > 0;
+    return dealt;
+  }
+
+  function prismWarp(hero, from, to) {
+    const start = onTile(from, 0.75), end = onTile(to, 0.75);
+    if (reducedMotion.matches) {
+      ring(end, '#e4adff', 1.25, true);
+      return;
+    }
+    ring(start, '#d793ff', 2, true);
+    ring(end, '#8ef4ff', 2, true);
+    hero.mesh.visible = false;
+    for (let i = 0; i < 24; i++) {
+      const angle = i * Math.PI * 2 / 24;
+      const level = (i % 8 - 3.5) * 0.15;
+      const color = ['#df9cff', '#a369fa', '#8ef4ff', '#fff1ff'][i % 4];
+      effect(new THREE.OctahedronGeometry(0.115 + (i % 3) * 0.035), color, 650,
+        (mesh, t) => {
+          const travel = THREE.MathUtils.smoothstep(t, 0.12, 0.82);
+          const spin = angle + travel * Math.PI * 3;
+          const radius = 0.16 + Math.sin(t * Math.PI) * 0.42;
+          mesh.position.copy(start).lerp(end, travel);
+          mesh.position.x += Math.cos(spin) * radius;
+          mesh.position.z += Math.sin(spin) * radius;
+          mesh.position.y += level + Math.sin(travel * Math.PI) * 0.95;
+          mesh.rotation.set(angle + t * 7, spin, angle - t * 6);
+          mesh.material.opacity = t < 0.8 ? 0.94 : (1 - t) * 4.7;
+        }, i === 23 ? () => {
+          hero.mesh.visible = hero.hp > 0;
+          scatter(end, '#c9a8ff', 10, 0.55);
+        } : undefined);
+    }
+  }
+
+  function heroFlourish(kind, hero, from, destination, hits, result) {
+    const color = heroColors[hero.id];
+    const start = onTile(from, 0.55);
+    const end = onTile(destination, 0.55);
+    if (kind === 'shift') return prismWarp(hero, from, destination);
+    if (kind === 'terraform' || kind === 'barrier') {
+      scatter(onTile(destination), kind === 'barrier' ? '#b9a38b' : color, 12, 0.38, true);
+      ring(onTile(destination), color, 1.45);
+    } else if (kind === 'resonance') {
+      const node = board.flat().find(t => t.type === 'crystal' &&
+        Math.abs(t.x - from.x) + Math.abs(t.y - from.y) <= 1);
+      if (node) {
+        ring(onTile(node, 0.58), '#ff89e6', 1.35, true);
+        streak(onTile(node, 0.58), start, '#eb90ff');
+      }
+      for (const [i, beamColor] of ['#c080ff', '#ff9cdf', '#a3f3ff'].entries()) {
+        const offset = new THREE.Vector3(0, (i - 1) * 0.08, 0);
+        streak(start.clone().add(offset), end.clone().add(offset), beamColor, 0.027);
+      }
+    } else if (kind === 'quake') {
+      ring(onTile(from), color, 3.4);
+      for (const [dx, dy] of [[1,0],[-1,0],[0,1],[0,-1]]) {
+        const tile = board[from.y + dy]?.[from.x + dx];
+        if (tile) scatter(onTile(tile), '#d8b08a', 5, 0.37);
+      }
+    } else if (kind === 'shadow') {
+      ring(onTile(from, 0.44), '#357d9b', 1.4, true);
+      scatter(onTile(from), '#387c95', 9);
+      scatter(onTile(destination), color, 10, 0.55, true);
+      ring(onTile(destination), color, 1.2);
+    } else if (kind === 'dash') {
+      streak(start, end, color);
+      streak(start.clone().addScalar(0.08), end.clone().addScalar(0.08), '#e4fffa', 0.022);
+      for (const hit of hits) {
+        const point = onTile(board[hit.y][hit.x], 0.65);
+        slash(point, color, -0.1);
+        slash(point, '#b7fff6', 0.12);
+      }
+    } else if (kind === 'charge' || kind === 'harvest') {
+      streak(onTile(from, 0.16), onTile(destination, 0.16), color, 0.07);
+      scatter(onTile(destination), color, 8);
+      for (const node of result?.nodes ?? []) streak(onTile(node, 0.6), end, '#f397ff', 0.04, true);
+    }
+    for (const hit of hits) scatter(onTile(board[hit.y][hit.x], 0.5), color, 7);
+  }
+
+  function cast(tile) {
+    const kind = ability;
+    const hero = selected;
+    const from = board[hero.y][hero.x];
+    const health = new Map(heroes.map(unit => [unit, unit.hp]));
+    const result = tile ? abilityResult(tile, heroes.filter(unit => unit.hp > 0)) : null;
+    resolveCast(tile);
+    if (ability !== null) return;
+    const landing = board[hero.y][hero.x];
+    const destination = kind === 'quake' ? from : landing !== from ? landing : tile;
+    if (destination) heroFlourish(kind, hero, from, destination,
+      heroes.filter(unit => unit.hp < health.get(unit)), result);
+  }
+
+  function resolveCast(tile) {
+    if (selected.id === 'stalker') return castStalker(tile);
+
+    if (ability === 'quake') {
+      if (tile?.x !== selected.x || tile?.y !== selected.y) {
+        return notify('Click Rune Warden or his tile to cast Quake Strike.');
+      }
+      return castWarden(ability);
+    }
+    if (selected.id === 'warden') return castWarden(ability, tile);
+    const result = weaverAction(board, heroes, ability, tile?.x, tile?.y, turn, terrainPicker.value);
+    if (result.error) return notify(result.error);
+    const from = board[selected.y][selected.x];
+    let message;
+    if (ability === 'terraform') {
+      changeTile(tile, result.terrain);
+      message = 'Terraformed to ' + TILE_LABEL[tile.type] + '.';
+    } else if (ability === 'shift') {
+      if (result.target) place(result.target, from);
+      place(selected, tile);
+      selected.shiftReadyTurn = turn + 2;
+      message = result.target ? 'Aether Shift swapped positions.' : 'Aether Shift teleported.';
+    } else {
+      const target = result.target;
+      const damage = dealDamage(selected, target, result.damage);
+      selected.resonanceTurn = turn;
+      message = 'Prismic Resonance dealt ' + damage + ' damage.';
+    }
+    selected.mp = result.mp;
+    ability = null;
+    hoverTile(tile);
+    refresh();
+    notify(message + ' ' + selected.mp + ' MP left.');
+  }
+
+  addEventListener('keydown', event => {
+    if (event.key === 'Escape' && ability) {
+      ability = null;
+      refresh();
+      notify('Ability targeting cancelled.');
+    }
+  });
+  canvas.addEventListener('click', event => {
+    const fromTouch = event.pointerType === 'touch' || event.sourceCapabilities?.firesTouchEvents ||
+      (!event.pointerType && lastTouchRelease && performance.now() - lastTouchRelease.time < 800 &&
+        Math.hypot(event.clientX - lastTouchRelease.x, event.clientY - lastTouchRelease.y) < 16);
+    if (fromTouch || suppressClick) {
+      suppressClick = false;
+      return;
+    }
+    activateBoard(event);
+  });
+
+  async function activateBoard(event) {
+    if (outcome || enemyActing || playerAttacking) return;
+    const active = heroes.filter(hero => hero.hp > 0);
+    const { hero, tile } = pickBoard(event);
+    if (ability === 'attack') {
+      const attack = basicAttack(board, selected, hero);
+      if (!attack) return notify('Choose an adjacent enemy or the camp banner. Attack costs 2 MP.');
+      const attacker = selected;
+      playerAttacking = true;
+      attacker.mp -= attack.cost;
+      ability = null;
+      refresh();
+      let dealt;
+      try {
+        dealt = await performAttack(attacker, hero, attack.damage, heroColors[attacker.id]);
+        if (heroes.some(target => basicAttack(board, attacker, target))) {
+          ability = 'attack';
+        }
+      } finally {
+        playerAttacking = false;
+        refresh();
+      }
+      return notify('Attack hit for ' + dealt + ' damage.' +
+        (ability === 'attack' ? ' Click a Raider to attack again.' : ''));
+    }
+    if (ability) return cast(tile);
+    if (hero?.team === 'player') return select(hero);
+    if (hero) return notify(hero.name + ' · ' + hero.hp + '/' + (ENEMY_STATS[hero.modelId]?.hp ?? 12) + ' HP');
+
+    const move = phase2Move(board, active, selected?.id, tile?.x, tile?.y);
+    if (move.error) return notify(move.error);
+
+    selected.mp = move.mp;
+    const pickup = place(selected, tile);
+    hoverTile(tile);
+    refresh();
+    notify(selected.name + ' moved. ' + move.mp + ' MP left.' + pickup);
+  }
+
+  function makeHealthTag(hero) {
+    const enemy = hero.team !== 'player';
+    const height = hero === banner ? 0.55 : new THREE.Box3().setFromObject(hero.mesh).max.y - hero.mesh.position.y;
+    const tag = document.createElement(enemy ? 'div' : 'button');
+    if (!enemy) {
+      tag.type = 'button';
+      tag.addEventListener('click', () => { if (!outcome && !ability && !enemyActing && !playerAttacking) select(hero); });
+    }
+    Object.assign(tag.style, {
+      position: 'fixed', pointerEvents: enemy ? 'none' : 'auto', zIndex: '2',
+      transform: 'translate(-50%, -100%)', display: 'flex', alignItems: 'center',
+      gap: '4px', padding: '3px 5px', border: '1px solid #526488',
+      borderRadius: '999px', background: '#10182f', color: '#eef6ff',
+      boxShadow: '0 2px 5px #080d1e99', whiteSpace: 'nowrap', font: '600 10px system-ui'
+    });
+    const max = enemy ? (ENEMY_STATS[hero.modelId]?.hp ?? 12) : 20;
+    const heart = document.createElement('span');
+    heart.textContent = '♥';
+    heart.style.color = enemy ? '#ff729c' : '#6fe6ee';
+    heart.setAttribute('aria-hidden', 'true');
+    const track = document.createElement('span');
+    track.setAttribute('role', 'progressbar');
+    track.setAttribute('aria-label', hero.name + ' health');
+    track.setAttribute('aria-valuemax', String(max));
+    track.style.cssText = 'display:block;width:45px;height:6px;overflow:hidden;border-radius:999px;background:#364468';
+    const fill = document.createElement('span');
+    fill.style.cssText = 'display:block;height:100%;border-radius:inherit;transition:width 160ms ease-out';
+    fill.style.background = enemy ? 'linear-gradient(#ff9db9,#f34f83)' : 'linear-gradient(#a0f6ff,#41bfd5)';
+    track.append(fill);
+    const label = document.createElement('span');
+    const hpRow = document.createElement('span');
+    hpRow.style.cssText = 'display:flex;align-items:center;gap:4px';
+    const guard = document.createElement('span');
+    guard.textContent = '◆';
+    guard.title = 'Brace: half damage and push immunity';
+    guard.style.color = '#ffd394';
+    guard.hidden = true;
+    const pack = document.createElement('span');
+    pack.textContent = '●';
+    pack.title = 'Pack Hunter: +1 damage against a shared adjacent target';
+    pack.style.color = '#ff9b54';
+    pack.hidden = true;
+    hpRow.append(heart, track, label, guard, pack);
+    tag.append(hpRow);
+    let mpRow, mpLabel, mpPips;
+    if (!enemy) {
+      mpRow = document.createElement('span');
+      mpRow.style.cssText = 'display:flex;align-items:center;justify-content:center;gap:3px';
+      mpPips = Array.from({ length: 5 }, () => {
+        const pip = document.createElement('span');
+        pip.style.cssText = 'width:7px;height:4px;border-radius:2px';
+        pip.setAttribute('aria-hidden', 'true');
+        mpRow.append(pip);
+        return pip;
+      });
+      mpLabel = document.createElement('span');
+      mpLabel.style.cssText = 'margin-left:2px;font-size:9px';
+      mpRow.append(mpLabel);
+      tag.append(mpRow);
+      tag.style.flexDirection = 'column';
+      tag.style.gap = '2px';
+      tag.style.borderRadius = '8px';
+    }
+    tag.classList.add('unit-vitals');
+    const unitName = document.createElement('span');
+    unitName.textContent = hero.name;
+    unitName.style.fontSize = '9px';
+    unitName.hidden = !mobileLayout.matches;
+    tag.prepend(unitName);
+    (mobileLayout.matches ? vitals : document.body).append(tag);
+    return { hero, tag, label, track, fill, max, height, lastHP: hero.hp, mpLabel, mpPips, guard, pack, unitName };
+  }
+
+  const tags = heroes.map(makeHealthTag);
+  const screen = new THREE.Vector3();
+  const results = document.createElement('dialog');
+  results.style.cssText = 'width:min(340px,85vw);box-sizing:border-box;text-align:center;color:#fff4df;background:#201836;border:2px solid #e8cb83;border-radius:14px;padding:22px;box-shadow:0 12px 45px #08051c';
+  const resultTitle = document.createElement('h2');
+  resultTitle.id = 'victory-title';
+  results.setAttribute('aria-labelledby', resultTitle.id);
+  const resultStats = document.createElement('p');
+  results.append(resultTitle, resultStats);
+  const nextLevel = button('Next level →', () => startLevel(levelIndex + 1), results);
+  const replay = button('Play again', () => startLevel(levelIndex), results);
+  for (const control of [nextLevel, replay]) {
+    control.style.cssText = 'margin:4px;padding:8px 14px;border-radius:999px;border:1px solid #d6ba79;background:#473269;color:#fff4df;font-weight:700;cursor:pointer';
+  }
+  document.body.append(results);
+
+  function celebrate() {
+    resultTitle.textContent = activeLevel().name + ' secured!';
+    const defeated = heroes.filter(hero => hero.team === 'enemy' && hero.hp <= 0 && !hero.pending).length;
+    resultStats.textContent = defeated + ' Raiders defeated · ' + turn + ' turns · ' + collected + '/3 coins';
+    nextLevel.hidden = levelIndex + 1 >= LEVELS.length;
+    results.showModal();
+    if (reducedMotion.matches) return;
+    results.animate([{ opacity: 0, transform: 'scale(.86)' },
+      { opacity: 1, transform: 'scale(1.04)' }, { transform: 'scale(1)' }],
+      { duration: 360, easing: 'ease-out' });
+    for (let i = 0; i < 20; i++) {
+      const spark = document.createElement('span');
+      spark.textContent = i % 2 ? '✦' : '◆';
+      spark.style.cssText = 'position:fixed;left:50%;top:50%;pointer-events:none;color:' + (i % 2 ? '#e9c679' : '#c898ff');
+      results.append(spark);
+      const angle = i * Math.PI * 2 / 20;
+      spark.animate([{ transform: 'translate(0,0)', opacity: 1 },
+        { transform: 'translate(' + Math.cos(angle) * 175 + 'px,' + Math.sin(angle) * 130 + 'px) rotate(90deg)', opacity: 0 }],
+        { duration: 650, easing: 'ease-out' }).onfinish = () => spark.remove();
+    }
+  }
+
+  function startLevel(index) {
+    if (!LEVELS[index] || enemyActing || playerAttacking) return;
+    if (results.open) results.close();
+    levelIndex = index;
+    selected = null;
+    ability = null;
+    outcome = null;
+    turn = 1;
+    heldTurns = 0;
+    collected = 0;
+    banner = null;
+    hoverTile(null);
+    for (const state of tags) state.tag.remove();
+    for (const unit of heroes) {
+      if (unit.mixer) {
+        unit.mixer.stopAllAction();
+        unit.mixer.uncacheRoot(unit.mixer.getRoot());
+      }
+      scene.remove(unit.mesh);
+      unit.mesh.traverse(object => {
+        if (!object.isMesh) return;
+        for (const material of [object.material].flat()) material.dispose();
+      });
+    }
+    heroes.length = 0;
+    lights.length = 0;
+    const freshBoard = makeBoard(activeLevel());
+    for (const tile of board.flat()) {
+      delete tile.barrier;
+      delete tile.bridge;
+      changeTile(tile, freshBoard[tile.y][tile.x]);
+    }
+    drawBridge(activeLevel());
+    dressBoard(activeLevel());
+    for (const [tile, coin] of originalCoins) {
+      if (!coins.has(tile)) scene.add(coin);
+      coins.set(tile, coin);
+    }
+    const level = activeLevel();
+    party.splice(0, party.length, ...HERO_DEFS.map((hero, i) => {
+      const [x, y] = level.starts?.[i] ?? [hero.x, hero.y];
+      return buildUnit({ ...hero, x, y });
+    }));
+    heroes.push(...party);
+    spawnOpponents();
+    prepareUnits();
+    tags.splice(0, tags.length, ...heroes.map(makeHealthTag));
+    entries.replaceChildren();
+    turnBanner.hidden = true;
+    refresh();
+    notify(level.name + ' · ' + level.goal);
+  }
+
+  refresh();
+
+  function floatDamage(hero, height, damage) {
+    const number = document.createElement('span');
+    screen.set(tw(hero.x), hero.baseY + height + 0.32, tw(hero.y)).project(camera);
+    number.style.cssText = 'position:fixed;z-index:9;pointer-events:none;color:#ffb2c6;font:800 17px system-ui;text-shadow:0 1px 4px #0a1028';
+    number.style.left = ((screen.x + 1) * innerWidth / 2 + 18) + 'px';
+    number.style.top = ((1 - screen.y) * innerHeight / 2) + 'px';
+    number.textContent = '−' + damage;
+    document.body.append(number);
+    const animation = number.animate(
+      [{ transform: 'translateY(0)', opacity: 1 }, { transform: 'translateY(-28px)', opacity: 0 }],
+      { duration: 650, easing: 'ease-out' });
+    animation.onfinish = () => number.remove();
+  }
+
+  function positionActionTray() {
+    if (!selected || mobileLayout.matches) return;
+    const { height } = tags.find(({ hero }) => hero === selected);
+    screen.set(tw(selected.x), selected.baseY + height, tw(selected.y)).project(camera);
+    const x = (screen.x + 1) * innerWidth / 2;
+    const y = (1 - screen.y) * innerHeight / 2;
+    const width = tray.offsetWidth;
+    const left = x - width - 38 >= 8 ? x - width - 38 : x + 38;
+    tray.style.left = Math.max(8, Math.min(innerWidth - width - 8, left)) + 'px';
+    tray.style.top = Math.max(8, Math.min(innerHeight - tray.offsetHeight - 8, y - tray.offsetHeight - 6)) + 'px';
+  }
+
+  function drawHealthTags() {
+
+    positionActionTray();
+    const now = performance.now();
+    if (ripple.visible) {
+      const progress = Math.min(1, (now - rippleStart) / 390);
+      ripple.scale.setScalar(0.25 + 0.9 * progress);
+      rippleMaterial.opacity = 0.85 * (1 - progress);
+      ripple.visible = progress < 1;
+    }
+    tickEffects(now);
+    for (const state of tags) {
+      const { hero, tag, label, track, fill, max, height, guard, pack, unitName } = state;
+      const docked = mobileLayout.matches;
+      const parent = docked ? vitals : document.body;
+      if (tag.parentElement !== parent) parent.append(tag);
+      unitName.hidden = !docked;
+      if (hero.hp < state.lastHP) floatDamage(hero, height, state.lastHP - hero.hp);
+      state.lastHP = hero.hp;
+      tag.hidden = hero.hp <= 0 || Boolean(hero.concealed);
+      if (hero.team === 'player') {
+        tag.disabled = Boolean(ability || outcome || enemyActing || playerAttacking);
+        tag.style.pointerEvents = tag.disabled ? 'none' : 'auto';
+        tag.setAttribute('aria-pressed', String(hero === selected));
+      }
+      tag.style.display = tag.hidden ? 'none' : 'flex';
+      if (tag.hidden) continue;
+      guard.hidden = !hero.braced;
+      pack.hidden = !isRaiderFighter(hero) || !party.some(target => target.hp > 0 &&
+        Math.abs(hero.x - target.x) + Math.abs(hero.y - target.y) === 1 &&
+        raiderSupport(hero, target, heroes) > 0);
+      if (!docked) {
+        screen.set(hero.mesh.position.x, hero.mesh.position.y + height + 0.12, hero.mesh.position.z).project(camera);
+        tag.style.left = ((screen.x + 1) * innerWidth / 2) + 'px';
+        tag.style.top = ((1 - screen.y) * innerHeight / 2) + 'px';
+      }
+      const attack = (!ability || ability === 'attack') && basicAttack(board, selected, hero);
+      const text = (hero === banner ? '⚑ Banner · ' : '') + hero.hp + '/' + max + (attack ? ' · ' + attack.chance + '%' : '');
+      if (label.textContent !== text) label.textContent = text;
+      if (state.mpLabel && state.lastMP !== hero.mp) {
+        state.lastMP = hero.mp;
+        state.mpLabel.textContent = hero.mp + '/5 MP';
+        state.mpPips.forEach((pip, i) => {
+          pip.style.background = i < hero.mp ? heroColors[hero.id] : '#364468';
+        });
+      }
+      if (track.getAttribute('aria-valuenow') !== String(hero.hp)) {
+        track.setAttribute('aria-valuenow', String(hero.hp));
+        fill.style.width = (hero.hp / max * 100) + '%';
+      }
+      const summary = hero.name + ' · ' + hero.hp + '/' + max + ' HP' +
+        (state.mpLabel ? ' · ' + hero.mp + '/5 MP' : '');
+      if (tag.title !== summary) {
+        tag.title = summary;
+        if (state.mpLabel) tag.setAttribute('aria-label', 'Select ' + summary);
+      }
+    }
+  }
+  return { hoverTile, drawHealthTags };
+}
+
+/* ---------- loop ---------- */
+const clock = new THREE.Clock();
+let previousFrame = null;
+function frame() {
+  const t = clock.getElapsedTime();
+  const delta = previousFrame === null ? 0 : t - previousFrame;
+  const facingBlend = previousFrame === null ? 1 : 1 - Math.exp(-12 * delta);
+  previousFrame = t;
+  faceOpponents(heroes, facingBlend);
+  waterN1.offset.set(t * 0.030, t * 0.018);
+  waterN2.offset.set(-t * 0.021, t * 0.026);
+  pulsers.forEach(p => p.mat.emissiveIntensity = CRYSTAL_EMISSIVE + Math.sin(t * 2 + p.phase) * CRYSTAL_PULSE);
+  lights.forEach(l => l.pl.intensity = 5 + Math.sin(t * 2 + l.phase) * 1.2);
+  heroes.forEach((hero, i) => {
+    if (hero.mixer) {
+      if (hero.mesh.visible) hero.mixer.update(delta);
+      hero.mesh.position.y = hero.baseY;
+    } else {
+      hero.mesh.position.y = hero.baseY + Math.sin(t * 2.2 + i) * 0.012;
+    }
+  });
+  marker.material.opacity = 0.8 + Math.sin(t * 5) * 0.2;
+  composer.render();
+  drawHealthTags();
+  requestAnimationFrame(frame);
+}
+const { hoverTile, drawHealthTags } = initPhase2();
+window.__aetheria = { board, THREE, scene, camera, heroes,
+  hover: (x, y) => hoverTile(board[y]?.[x] ?? null) };
+frame();
+window.__ready = true;
+</script>
+</body>
+</html>
