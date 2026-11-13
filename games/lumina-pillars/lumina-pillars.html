@@ -380,11 +380,11 @@ const cellPos = (x, layer, z) => new THREE.Vector3(x - GRID.X / 2 + 0.5, layer -
   const tile = new THREE.MeshStandardMaterial({color: 0x48217f, roughness: 0.62, emissive: 0x280c50, emissiveIntensity: 0.45});
   const rail = new THREE.MeshBasicMaterial({color: new THREE.Color(0x14e4ff).multiplyScalar(1.9), toneMapped: false});
   const isl = new THREE.Group();
-  isl.add(part(new THREE.RoundedBoxGeometry(6.43, 0.46, 6.43, 3, 0.095), chassis, null, [0, -0.29, 0]));
+  isl.add(part(new RoundedBoxGeometry(6.43, 0.46, 6.43, 3, 0.095), chassis, null, [0, -0.29, 0]));
   isl.add(part(GEO.box, recess, [6.04, 0.072, 6.04], [0, -0.093, 0]));
-  const lip = new THREE.RoundedBoxGeometry(6.39, 0.12, 0.19, 3, 0.049);
-  const groove = new THREE.RoundedBoxGeometry(5.75, 0.095, 0.035, 2, 0.016);
-  const strip = new THREE.RoundedBoxGeometry(5.61, 0.041, 0.038, 2, 0.018);
+  const lip = new RoundedBoxGeometry(6.39, 0.12, 0.19, 3, 0.049);
+  const groove = new RoundedBoxGeometry(5.75, 0.095, 0.035, 2, 0.016);
+  const strip = new RoundedBoxGeometry(5.61, 0.041, 0.038, 2, 0.018);
   for (let side = 0; side < 4; side++) {
     const edge = new THREE.Group();
     edge.rotation.y = side * Math.PI / 2;
@@ -393,7 +393,7 @@ const cellPos = (x, layer, z) => new THREE.Vector3(x - GRID.X / 2 + 0.5, layer -
     edge.add(part(strip, rail, null, [0, -0.30, 3.221]));
     isl.add(edge);
   }
-  const tileGeo = new THREE.RoundedBoxGeometry(0.962, 0.067, 0.962, 2, 0.024);
+  const tileGeo = new RoundedBoxGeometry(0.962, 0.067, 0.962, 2, 0.024);
   const tiles = new THREE.InstancedMesh(tileGeo, tile, GRID.X * GRID.Z);
   const transform = new THREE.Matrix4();
   for (let z = 0; z < GRID.Z; z++) {
