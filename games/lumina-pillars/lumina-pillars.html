@@ -375,18 +375,34 @@ function createVoxelMesh(type, colorHex) {
 /* ============================== WORLD ============================== */
 const cellPos = (x, layer, z) => new THREE.Vector3(x - GRID.X / 2 + 0.5, layer - GRID.LAYER_MIN, z - GRID.Z / 2 + 0.5);
 (function buildIsland() {
-  const top = new THREE.MeshStandardMaterial({ color: 0x1b1040, roughness: 0.55, metalness: 0.2, emissive: 0x12072e, emissiveIntensity: 0.9 });
-  const rock = new THREE.MeshStandardMaterial({ color: 0x140a2e, roughness: 0.9 });
+  const chassis = new THREE.MeshStandardMaterial({color: 0x251450, roughness: 0.44, metalness: 0.32, emissive: 0x190a46, emissiveIntensity: 0.32});
+  const recess = new THREE.MeshStandardMaterial({color: 0x0c0922, roughness: 0.78});
+  const tile = new THREE.MeshStandardMaterial({color: 0x48217f, roughness: 0.62, emissive: 0x280c50, emissiveIntensity: 0.45});
+  const rail = new THREE.MeshBasicMaterial({color: new THREE.Color(0x14e4ff).multiplyScalar(1.9), toneMapped: false});
   const isl = new THREE.Group();
-  isl.add(part(GEO.rbox, top, [6.4, 0.3, 6.4], [0, -0.15, 0]));
-  let y = -0.3;
-  for (const [s, h] of [[5.6, 0.5], [4.4, 0.6], [3.1, 0.7], [1.8, 0.8], [0.8, 0.6]]) { isl.add(part(GEO.box, rock, [s, h, s * 0.95], [0, y - h / 2, 0])); y -= h; }
-  const grid = new THREE.GridHelper(6, 6, 0x2ff3ff, 0x6a3fd0); grid.position.y = 0.006; [].concat(grid.material).forEach(m => { m.toneMapped = false; m.color.multiplyScalar(1.5); }); isl.add(grid);
-  const trim = new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.BoxGeometry(6.4, 0.3, 6.4)), neonLine(0xff3df2, 2.2));
-  trim.position.y = -0.15; isl.add(trim);
-  const trim2 = new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.BoxGeometry(6.04, 0.001, 6.04)), neonLine(0x2ff3ff, 2.2));
-  trim2.position.y = 0.012; isl.add(trim2);
-  const rockTrim = new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.BoxGeometry(5.6, 0.5, 5.32)), neonLine(0x8a4dff, 1.3)); rockTrim.position.y = -0.55; isl.add(rockTrim);
+  isl.add(part(new THREE.RoundedBoxGeometry(6.43, 0.46, 6.43, 3, 0.095), chassis, null, [0, -0.29, 0]));
+  isl.add(part(GEO.box, recess, [6.04, 0.072, 6.04], [0, -0.093, 0]));
+  const lip = new THREE.RoundedBoxGeometry(6.39, 0.12, 0.19, 3, 0.049);
+  const groove = new THREE.RoundedBoxGeometry(5.75, 0.095, 0.035, 2, 0.016);
+  const strip = new THREE.RoundedBoxGeometry(5.61, 0.041, 0.038, 2, 0.018);
+  for (let side = 0; side < 4; side++) {
+    const edge = new THREE.Group();
+    edge.rotation.y = side * Math.PI / 2;
+    edge.add(part(lip, chassis, null, [0, -0.032, 3.115]));
+    edge.add(part(groove, recess, null, [0, -0.30, 3.211]));
+    edge.add(part(strip, rail, null, [0, -0.30, 3.221]));
+    isl.add(edge);
+  }
+  const tileGeo = new THREE.RoundedBoxGeometry(0.962, 0.067, 0.962, 2, 0.024);
+  const tiles = new THREE.InstancedMesh(tileGeo, tile, GRID.X * GRID.Z);
+  const transform = new THREE.Matrix4();
+  for (let z = 0; z < GRID.Z; z++) {
+    for (let x = 0; x < GRID.X; x++) {
+      const p = cellPos(x, GRID.LAYER_MIN, z);
+      tiles.setMatrixAt(z * GRID.X + x, transform.makeTranslation(p.x, -0.034, p.z));
+    }
+  }
+  isl.add(tiles);
   scene.add(isl);
   const n = 500, pts = new Float32Array(n * 3);
   for (let i = 0; i < n; i++) { const r = 40 + Math.random() * 50, a = Math.random() * 6.283, b = (Math.random() - 0.5) * 2.4;
@@ -400,7 +416,17 @@ const layerGrid = new THREE.Group();
 { const gh = new THREE.GridHelper(6, 6, 0xff3df2, 0xff3df2); gh.material.transparent = true; gh.material.opacity = 0.4; gh.material.toneMapped = false; layerGrid.add(gh);
   const pl = part(new THREE.PlaneGeometry(6, 6), new THREE.MeshBasicMaterial({ color: 0xff3df2, transparent: true, opacity: 0.05, side: THREE.DoubleSide, depthWrite: false }), null, null, [-Math.PI / 2, 0, 0]);
   layerGrid.add(pl); scene.add(layerGrid); }
-const ghost = new THREE.LineSegments(GEO.edges, new THREE.LineBasicMaterial({ color: 0xffd23f, toneMapped: false })); ghost.visible = false; scene.add(ghost);
+const ghost = new THREE.Group();
+const hoverFill = new THREE.MeshBasicMaterial({color: 0xffb632, transparent: true, opacity: 0.27, depthWrite: false, toneMapped: false});
+const hoverEdge = new THREE.MeshBasicMaterial({color: 0xffb632, toneMapped: false});
+ghost.add(part(new THREE.PlaneGeometry(0.91, 0.91), hoverFill, null, null, [-Math.PI / 2, 0, 0]));
+const hoverBar = new THREE.BoxGeometry(0.91, 0.003, 0.022);
+for (let side = 0; side < 4; side++) {
+  const angle = side * Math.PI / 2;
+  ghost.add(part(hoverBar, hoverEdge, null, [0.445 * Math.sin(angle), 0.002, 0.445 * Math.cos(angle)], [0, angle, 0]));
+}
+ghost.visible = false;
+scene.add(ghost);
 const pieces = new THREE.Group(), beams = new THREE.Group(); scene.add(pieces, beams);
 
 /* ============================== AUDIO (synth only, no files) ============================== */
@@ -557,7 +583,7 @@ function admireSaved(i) {                              // open a cleared level a
   for (const b of (progress.boards[LEVELS[i].title] || LEVELS[i].solution)) place(state, { ...b });
   refresh(true); $('admire').onclick(); savedView = true;
 }
-function showSelect() { $('win').classList.remove('show'); renderSelect(); $('select').classList.add('show'); }
+function showSelect() { ghost.visible = false; $('win').classList.remove('show'); renderSelect(); $('select').classList.add('show'); }
 function loadLevel(i) {
   leaveAdmire(false); assisted = false; disarm(); $('select').classList.remove('show'); setMoves(0); $('par').textContent = parOf(i);
   levelIndex = i; state = makeState(LEVELS[i]); selected = null; locked = false; litBefore = new Set();
@@ -662,6 +688,7 @@ function pickPieces() {
 }
 let down = null, pressTimer = null;
 canvas.addEventListener('pointerdown', e => {
+  ghost.visible = false;
   audio(); down = { x: e.clientX, y: e.clientY, t: performance.now(), moved: false, held: false };
   setRay(e); const target = pickPieces().find(b => !b.fixed);
   clearTimeout(pressTimer); down.target = target;
@@ -669,8 +696,8 @@ canvas.addEventListener('pointerdown', e => {
 });
 canvas.addEventListener('pointermove', e => {
   if (down && Math.hypot(e.clientX - down.x, e.clientY - down.y) > 8) { down.moved = true; clearTimeout(pressTimer); }
-  if (e.pointerType === 'mouse' && !down) { setRay(e); const c = pickCell();
-    ghost.visible = !!(c && selected && !state.cells.has(key(...c))); if (ghost.visible) ghost.position.copy(cellPos(...c)).add(new THREE.Vector3(0, 0.5, 0)); }
+  if (e.pointerType === 'mouse' && !down && !document.body.classList.contains('admire')) { setRay(e); const c = pickCell();
+    ghost.visible = !!c; if (c) { ghost.position.copy(cellPos(...c)); ghost.position.y += 0.015; } }
 });
 canvas.addEventListener('pointerup', e => {
   clearTimeout(pressTimer); const d = down; down = null;
@@ -684,7 +711,8 @@ canvas.addEventListener('pointerup', e => {
   if (onLayer) return doRotate(onLayer);
   if (hits[0]) { if (hits[0].pos[1] !== layer && !hits[0].fixed) setLayer(hits[0].pos[1]); return doRotate(hits[0]); }
 });
-canvas.addEventListener('pointercancel', () => { clearTimeout(pressTimer); down = null; });
+canvas.addEventListener('pointerleave', () => { ghost.visible = false; });
+canvas.addEventListener('pointercancel', () => { ghost.visible = false; clearTimeout(pressTimer); down = null; });
 canvas.addEventListener('contextmenu', e => { e.preventDefault(); setRay(e); const b = pickPieces().find(b => !b.fixed); if (b) doRemove(b); });
 
 /* ============================== LOOP ============================== */
