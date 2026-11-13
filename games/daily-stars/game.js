@@ -24,8 +24,9 @@ function buildCells(board,values,interactive){board.replaceChildren();puzzle.reg
  board.append(cell);
  });paint(board,values,interactive);}
 function paint(board,values,interactive){const bad=interactive&&prefs.mistakes?conflicts(values,puzzle.regions).bad:new Set();[...board.children].forEach((cell,i)=>{
- const value=values[i],mark=cell.querySelector('.mark');if(value===2)mark.innerHTML=STAR;else mark.textContent=value===1?(activeBoard==='nebula'&&!short?'○':'•'):'';cell.classList.toggle('star',value===2);cell.classList.toggle('dot',value===1);cell.classList.toggle('error',bad.has(i));cell.classList.toggle('given',interactive&&i===givenIndex(puzzle));cell.querySelector('.region-letter').hidden=short||!(prefs.letters||(interactive&&activeBoard==='nebula'));
- cell.setAttribute('aria-label',`Row ${Math.floor(i/7)+1}, column ${i%7+1}, ${COLORS[puzzle.regions[i]]} region, ${value===2?'star':value===1?'dot':'empty'}${interactive&&i===givenIndex(puzzle)?', starting clue':''}${bad.has(i)?', conflict':''}`);
+ const automatic=interactive&&values[i]===0&&hasDotSource(i);
+ const value=automatic?1:values[i],mark=cell.querySelector('.mark');if(value===2)mark.innerHTML=STAR;else mark.textContent=value===1?(activeBoard==='nebula'&&!short?'○':'•'):'';cell.classList.toggle('star',value===2);cell.classList.toggle('dot',value===1);cell.classList.toggle('error',bad.has(i));cell.classList.toggle('given',interactive&&i===givenIndex(puzzle));cell.querySelector('.region-letter').hidden=short||!(prefs.letters||(interactive&&activeBoard==='nebula'));
+ cell.setAttribute('aria-label',`Row ${Math.floor(i/7)+1}, column ${i%7+1}, ${COLORS[puzzle.regions[i]]} region, ${value===2?'star':value===1?(automatic?'automatic dot':'dot'):'empty'}${interactive&&i===givenIndex(puzzle)?', starting clue':''}${bad.has(i)?', conflict':''}`);
  if(interactive){cell.setAttribute('aria-disabled',String(state.solved));cell.title=value===2?'Hold to dot this row and column (keyboard: Shift+Enter)':'';}
  });}
 function showShort(){document.documentElement.classList.add('short-mode','night-play');$('short').hidden=false;$('play').hidden=true;
@@ -45,13 +46,13 @@ function openBoards(){if($('preferences').open)$('preferences').close();const li
  modal('wardrobe');}
 function load(){history=[];const saved=read(key()),grid=saved?.grid;
  state=grid?.length===49&&grid.every(v=>[0,1,2].includes(v))?{grid:[...grid],elapsed:Math.max(0,Number(saved.elapsed)||0),started:saved.started===true,hints:Math.max(0,Number(saved.hints)||0),solved:false}:{grid:freshGrid(puzzle),elapsed:0,started:false,hints:0,solved:false};
- state.grid[givenIndex(puzzle)]=2;state.solved=solved(state.grid,puzzle.regions);lastTick=!document.hidden&&state.started&&!state.solved?performance.now():null;
+ state.grid[givenIndex(puzzle)]=2;state.dotSources=Array.isArray(saved?.dotSources)?[...new Set(saved.dotSources.filter(i=>Number.isInteger(i)&&state.grid[i]===2))]:[];state.solved=solved(state.grid,puzzle.regions);lastTick=!document.hidden&&state.started&&!state.solved?performance.now():null;
 }
 function tick(){const now=performance.now();if(lastTick!==null)state.elapsed+=Math.max(0,now-lastTick);lastTick=!document.hidden&&state.started&&!state.solved?now:null;$('timer').textContent=timeText(state.elapsed);}
 function save(){write(key(),state);}
 function start(){if(!state.started){state.started=true;if(!document.hidden)lastTick=performance.now();}}
 function tone(kind){if(!prefs.sound)return;try{audio??=new(window.AudioContext||window.webkitAudioContext)();audio.resume();const notes=kind==='win'?[523,659,784,1047]:kind==='star'?[660,880]:kind==='error'?[180]:[420];notes.forEach((frequency,i)=>{const oscillator=audio.createOscillator(),gain=audio.createGain(),at=audio.currentTime+i*.09;oscillator.type='sine';oscillator.frequency.value=frequency;gain.gain.setValueAtTime(.0001,at);gain.gain.exponentialRampToValueAtTime(.065,at+.01);gain.gain.exponentialRampToValueAtTime(.0001,at+.19);oscillator.connect(gain);gain.connect(audio.destination);oscillator.start(at);oscillator.stop(at+.2);});}catch{}}
-function snapshot(){history.push([...state.grid]);if(history.length>150)history.shift();}
+function snapshot(){history.push({grid:[...state.grid],dotSources:[...state.dotSources]});if(history.length>150)history.shift();}
 function bindPress(cell,i){let timer=null,origin=null,suppressClick=false;const cancel=()=>{clearTimeout(timer);timer=null;origin=null;};
  cell.addEventListener('pointerdown',event=>{cancel();suppressClick=false;if(event.button!==0||!event.isPrimary||state.solved||state.grid[i]!==2)return;origin={x:event.clientX,y:event.clientY};const day=N;timer=setTimeout(()=>{timer=null;if(!origin||document.hidden||day!==N||(!challenge&&!preview&&day!==dayNumber()))return;suppressClick=true;dotLines(i);},550);});
  cell.addEventListener('pointermove',event=>{if(origin&&Math.hypot(event.clientX-origin.x,event.clientY-origin.y)>10)cancel();});
@@ -59,8 +60,17 @@ function bindPress(cell,i){let timer=null,origin=null,suppressClick=false;const 
  cell.addEventListener('contextmenu',event=>{if(state.grid[i]===2)event.preventDefault();});
  cell.addEventListener('click',event=>{if(suppressClick&&event.detail!==0){suppressClick=false;event.preventDefault();return;}tap(i);});
 }
-function dotLines(i){rollover();if(state.solved||state.grid[i]!==2)return;const row=Math.floor(i/7),col=i%7,targets=state.grid.flatMap((v,j)=>v===0&&(Math.floor(j/7)===row||j%7===col)?[j]:[]);
- if(!targets.length){$('status').textContent='That row and column are already marked.';return;}tick();start();snapshot();for(const j of targets)state.grid[j]=1;$('status').textContent=`${targets.length} empty cells dotted in row ${row+1} and column ${col+1}.`;tone('dot');render();save();
+function hasDotSource(i){
+ return state.dotSources.some(j=>Math.floor(j/7)===Math.floor(i/7)||j%7===i%7);
+}
+function dotLines(i){
+ rollover();
+ if(state.solved||state.grid[i]!==2)return;
+ tick();start();snapshot();
+ const enabled=state.dotSources.includes(i);
+ state.dotSources=enabled?state.dotSources.filter(j=>j!==i):[...state.dotSources,i];
+ $('status').textContent=enabled?'This star’s dots are off.':'This star now dots its row and column.';
+ tone('dot');render();save();
 }
 function render(){paint($('board'),state.grid,true);$('edition').textContent=`No. ${N}${preview?' · Preview':''}`;$('progress').textContent=`${state.grid.filter(v=>v===2).length} / 7 stars`;$('undo').disabled=!history.length||state.solved;$('reset').disabled=state.solved;$('hint').disabled=state.solved;$('share').hidden=!state.solved;
  if(boardPreview)$('edition').textContent=`No. ${N} · Board preview`;
@@ -77,7 +87,10 @@ function render(){paint($('board'),state.grid,true);$('edition').textContent=`No
 function finish(){if(!solved(state.grid,puzzle.regions))return;tick();state.solved=true;lastTick=null;
  if(!preview&&!challenge&&!boardPreview){const day=serial(date);if(!stats.days.includes(day)){stats.days.push(day);stats.best=stats.best===null?state.elapsed:Math.min(stats.best,state.elapsed);}const unlocked=updateRewards(true);if(unlocked.length){$('unlock-message').textContent=`Unlocked: ${unlocked.map(t=>t.name).join(', ')}. Choose it in Settings → Your boards.`;$('unlock-message').hidden=false;}write('room-for-play:completed:daily-stars',date);parent.postMessage({type:'room:completed',id:'daily-stars',date},location.origin);}
  tone('win');}
-function tap(i){rollover();if(state.solved||i===givenIndex(puzzle))return;tick();start();snapshot();state.grid[i]=prefs.dots?(state.grid[i]+1)%3:state.grid[i]===2?0:2;$('status').textContent='';tone(state.grid[i]===2?'star':'dot');finish();render();save();}
+function tap(i){rollover();if(state.solved||i===givenIndex(puzzle))return;tick();start();snapshot();const value=state.grid[i];
+ if(value===2)state.dotSources=state.dotSources.filter(j=>j!==i);
+ const visibleValue=value===0&&hasDotSource(i)?1:value;
+ state.grid[i]=prefs.dots?(visibleValue+1)%3:value===2?0:2;$('status').textContent='';tone(state.grid[i]===2?'star':'dot');finish();render();save();}
 function check(){rollover();const result=conflicts(state.grid,puzzle.regions);$('status').textContent=result.messages.length?result.messages.join('\n'):state.solved?`Solved in ${timeText(state.elapsed)}`:'Not complete';if(result.bad.size)tone('error');}
 function hint(){rollover();if(state.solved)return;const row=puzzle.solution.findIndex((c,r)=>state.grid[r*7+c]!==2);if(row<0){$('status').textContent='All correct stars are placed. Remove the conflicting extras.';return;}
  tick();start();snapshot();state.grid[row*7+puzzle.solution[row]]=2;state.hints++;$('status').textContent=`A guiding star in row ${row+1}.`;tone('star');finish();render();save();}
@@ -99,7 +112,7 @@ if(short){showShort();}else if(invalidChallenge){if(parent!==window)document.doc
  $('howto').addEventListener('close',()=>{write(prefix+'instructions',true);parent.postMessage({type:'room:stars-help'},location.origin);});
  for(const id of Object.keys(defaults)){$(id).checked=prefs[id];$(id).onchange=()=>{prefs[id]=$(id).checked;write(prefix+'settings',prefs);render();fit();};}
  $('night').checked=document.documentElement.classList.contains('night-play');$('night').onchange=()=>{night=read('room-for-play:night')||{};night.overrides={...night.overrides,'daily-stars':$('night').checked};write('room-for-play:night',night);document.documentElement.classList.toggle('night-play',$('night').checked);parent.postMessage({type:'room:stars-theme',enabled:$('night').checked},location.origin);};
- $('undo').onclick=()=>{if(!history.length||state.solved)return;tick();state.grid=history.pop();$('status').textContent='Move undone.';render();save();};$('reset').onclick=()=>modal('reset-dialog');$('confirm-reset').onclick=()=>{tick();snapshot();state.grid=freshGrid(puzzle);$('reset-dialog').close();$('status').textContent='A clean sky. Timer and hints kept.';render();save();};$('check').onclick=check;$('hint').onclick=hint;
+ $('undo').onclick=()=>{if(!history.length||state.solved)return;tick();Object.assign(state,history.pop());$('status').textContent='Move undone.';render();save();};$('reset').onclick=()=>modal('reset-dialog');$('confirm-reset').onclick=()=>{tick();snapshot();state.grid=freshGrid(puzzle);state.dotSources=[];$('reset-dialog').close();$('status').textContent='A clean sky. Timer and hints kept.';render();save();};$('check').onclick=check;$('hint').onclick=hint;
  $('share').onclick=async()=>{const text=`Daily Stars No. ${N} ⭐ ${timeText(state.elapsed)}, ${state.hints?`${state.hints} hint${state.hints===1?'':'s'} used`:'no hints'}, pocketplayroom.com${preview||boardPreview?' (preview)':''}`;try{if(navigator.share)await navigator.share({text});else{await navigator.clipboard.writeText(text);$('status').textContent='Result copied.';}}catch(error){if(error.name!=='AbortError'){$('share-copy').value=text;modal('share-dialog');$('share-copy').select();}}};
  $('challenge-friends').onclick=async()=>{if(!state.solved||preview||boardPreview)return;const day=challenge?.day||date,url=window.PocketChallenge.link('daily-stars',{day,value:Math.floor(state.elapsed/1000),hints:state.hints});const text=`Daily Stars No. ${N} ⭐ Can you beat ${timeText(state.elapsed)}? ${state.hints?`At most ${state.hints} hint${state.hints===1?'':'s'}.`:'No hints.'} Play my exact puzzle.`;
  if(navigator.share)try{await navigator.share({title:'Daily Stars · Challenge friends',text,url});$('status').textContent='Challenge shared.';return;}catch(error){if(error.name==='AbortError')return;}
