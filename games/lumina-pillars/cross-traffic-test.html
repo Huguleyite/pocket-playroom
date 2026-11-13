@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Cross Traffic · Lumina Pillars</title>
+<style>
+body{background:#11091f;color:#f7efff;font:16px system-ui;margin:0}main{max-width:480px;margin:auto;padding:20px}a{color:#9deeff}h1{margin-bottom:4px}p{line-height:1.45}.board{display:grid;grid-template-columns:repeat(6,1fr);gap:3px;background:#331b54;padding:4px;border-radius:12px}button{font:inherit;color:inherit;background:#301e4a;border:1px solid #71559c;border-radius:8px;cursor:pointer;min-height:44px}button:focus-visible{outline:3px solid white;outline-offset:2px}.cell{aspect-ratio:1;position:relative;isolation:isolate;font-size:clamp(14px,4vw,25px)}.controls{display:flex;gap:10px;margin-top:14px}.controls button{padding:0 12px}.beam{position:absolute;z-index:-1;pointer-events:none}.h{left:0;right:0;top:48%;border-top:3px solid #57f1ff}.v{top:0;bottom:0;left:48%;border-left:3px solid #ffc367}.under{border-top-style:dashed;opacity:.75}.cyan{color:#57f1ff}.amber{color:#ffc367}.wall{background:#20152d}.bridge{outline:2px solid #57f1ff}
+</style>
+<main><a href="/#home">← Back to Pocket Playroom</a><h1>Cross Traffic</h1>
+<p>Place a bridge in the cyan beam. It dives under the next two tiles and resurfaces on the third, keeping its direction. The amber beam stays on the surface.</p>
+<div id="board" class="board" aria-label="Cross Traffic puzzle"></div>
+<div class="controls"><button id="rotate" type="button">Bridge direction →</button><button id="reset" type="button">Reset</button></div>
+<p id="status" role="status"></p></main>
+<script>
+const board = document.querySelector('#board');
+const status = document.querySelector('#status');
+const rotate = document.querySelector('#rotate');
+const cells = [];
+const directions = ['→','↓','←','↑'];
+let direction = 0;
+let bridge = null;
+
+function render() {
+  const entrance = bridge?.row === 2 && bridge.column < 4 ? bridge.column : null;
+  const exit = entrance !== null && direction === 0 ? entrance + 3 : null;
+  const solved = exit === 5;
+  const wall = 4;
+  for (const {button,row,column} of cells) {
+    const placed = bridge?.row === row && bridge.column === column;
+    const fixed = row === 2 && [0,4,5].includes(column) || column === 3 && [0,5].includes(row);
+    const cyan = row === 2 && (column <= Math.min(entrance ?? wall,wall) || exit !== null && exit <= 5 && column <= (exit === wall ? wall : 5));
+    const under = cyan && exit !== null && column > entrance && column < exit;
+    const amber = column === 3;
+    const mark = placed ? directions[direction] : row === 2 ? ({0:'▶',4:'▧',5:solved?'●':'○'}[column] || (column === exit ? '⇥' : '')) : amber ? ({0:'▼',5:'●'}[row] || '') : '';
+    button.className = 'cell' + (row === 2 && column === wall ? ' wall' : '') + (placed ? ' bridge cyan' : row === 2 && !amber ? ' cyan' : amber ? ' amber' : '');
+    button.innerHTML = (cyan ? '<span class="beam h'+(under?' under':'')+'"></span>' : '') + (amber ? '<span class="beam v"></span>' : '') + mark;
+    button.setAttribute('aria-label', 'Row '+(row+1)+', column '+(column+1)+(placed?', bridge '+directions[direction]:column===exit && row===2?', bridge exit':fixed?', fixed piece':''));
+    button.disabled = fixed;
+  }
+  rotate.textContent = 'Bridge direction '+directions[direction];
+  status.textContent = solved ? 'Both cores lit! The cyan beam passes under the amber beam and the wall.' : 'Amber core lit. Route cyan under the crossing and wall to its core.';
+}
+
+for (let row = 0; row < 6; row++) {
+  for (let column = 0; column < 6; column++) {
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.onclick = () => {
+      if (bridge?.row === row && bridge.column === column) direction = (direction + 1) % directions.length;
+      else bridge = {row,column};
+      render();
+    };
+    cells.push({button,row,column});
+    board.append(button);
+  }
+}
+rotate.onclick = () => { direction = (direction + 1) % directions.length; render(); };
+document.querySelector('#reset').onclick = () => { bridge = null; direction = 0; render(); };
+render();
+</script></html>
