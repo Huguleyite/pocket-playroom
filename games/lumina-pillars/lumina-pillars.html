@@ -1,0 +1,713 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>Lumina Pillars</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Bungee&family=Rubik:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root { --ink:#e8f4ff; --dim:#8fa3bd; --panel:rgba(18,8,40,.82); --line:rgba(255,61,242,.35); --cyan:#00F0FF; --mag:#ff3df2; --gold:#ffd23f; --emer:#3dffa0; --font-d:'Bungee','Rubik',system-ui,sans-serif; }
+  * { box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  html,body { margin:0; height:100%; overflow:hidden; background:#0b0618; color:var(--ink);
+    font-family:'Rubik',system-ui,-apple-system,"Segoe UI",Roboto,sans-serif; user-select:none; -webkit-user-select:none; }
+  canvas { position:fixed; inset:0; width:100%; height:100%; display:block; touch-action:none; }
+  .bar { position:fixed; left:0; right:0; display:flex; align-items:center; gap:8px; padding:10px 12px; pointer-events:none; }
+  .bar > * { pointer-events:auto; }
+  #top { top:0; justify-content:space-between; padding-top:max(10px, env(safe-area-inset-top)); }
+  #title { font-family:var(--font-d); letter-spacing:.08em; text-transform:uppercase; font-size:14px; color:var(--cyan); text-shadow:0 0 10px rgba(0,240,255,.8), 0 0 22px rgba(255,61,242,.45); }
+  #levelName { font-size:15px; margin-top:2px; }
+  #goal { font-size:12px; color:var(--dim); margin-top:2px; }
+  button { font:inherit; color:var(--ink); background:var(--panel); border:1px solid var(--line); border-radius:10px;
+    padding:9px 12px; min-height:42px; cursor:pointer; backdrop-filter:blur(6px); }
+  button:active { transform:scale(.97); }
+  button.on { border-color:var(--cyan); box-shadow:0 0 0 1px var(--cyan), 0 0 14px rgba(0,240,255,.45); }
+  #layers { position:fixed; right:10px; top:50%; transform:translateY(-50%); display:flex; flex-direction:column; gap:6px; align-items:center; }
+  #layers span { font-size:10px; letter-spacing:.1em; color:var(--dim); text-transform:uppercase; }
+  #layers button { width:46px; padding:0; }
+  #tray { bottom:0; flex-direction:column; align-items:stretch; padding-bottom:max(10px, env(safe-area-inset-bottom)); }
+  #inv { display:flex; gap:8px; justify-content:center; flex-wrap:wrap; }
+  #inv button { display:flex; align-items:center; gap:8px; }
+  #inv button[disabled] { opacity:.35; }
+  .sw { width:14px; height:14px; border-radius:4px; box-shadow:0 0 8px currentColor; background:currentColor; }
+  .ct { color:var(--dim); font-variant-numeric:tabular-nums; }
+  #answer.ghost { align-self:center; margin-top:8px; min-height:34px; padding:5px 14px; font-size:12px; border-color:rgba(255,210,63,.4); color:var(--gold); background:transparent; }
+  #answer.ghost.arm { border-color:var(--gold); box-shadow:0 0 12px rgba(255,210,63,.45); }
+  #hint { text-align:center; font-size:12px; color:var(--dim); margin-bottom:6px; pointer-events:none; }
+  #admirebar { position:fixed; left:0; right:0; bottom:max(18px,env(safe-area-inset-bottom)); display:none; align-items:center; justify-content:center; gap:8px; flex-wrap:wrap; padding:0 12px; z-index:6; }
+  #admirebar.on { display:flex; } #admirebar span { width:100%; text-align:center; color:var(--dim); font-size:13px; text-shadow:0 0 8px #000; }
+  body.admire #top, body.admire #layers, body.admire #tray { opacity:0; pointer-events:none; }
+  #win { position:fixed; inset:0; display:none; align-items:flex-end; justify-content:center; padding-bottom:120px; background:rgba(3,5,10,.25); }
+  #win.show { display:flex; }
+  #win > div { background:var(--panel); border:2px solid var(--cyan); border-radius:18px; padding:22px 26px; text-align:center;
+    box-shadow:0 0 40px rgba(0,240,255,.35), 0 0 80px rgba(255,61,242,.2); max-width:86vw; }
+  #win h2 { margin:0 0 6px; font-size:22px; }
+  #win p { margin:0 0 14px; color:var(--dim); font-size:14px; }
+  #stats { display:flex; gap:14px; margin-top:4px; font-size:12px; color:var(--dim); font-variant-numeric:tabular-nums; }
+  #stats b { color:var(--gold); font-weight:700; text-shadow:0 0 8px rgba(255,210,63,.6); }
+  .stars { font-family:var(--font-d); letter-spacing:.12em; color:#3a2a5c; }
+  .stars i { font-style:normal; }
+  .stars i.f { color:var(--gold); text-shadow:0 0 8px rgba(255,210,63,.9), 0 0 18px rgba(255,210,63,.5); }
+  #select { position:fixed; inset:0; display:none; flex-direction:column; align-items:center; overflow-y:auto; padding:max(18px,env(safe-area-inset-top)) 16px 28px;
+    background:radial-gradient(ellipse at 50% -10%, #2a0f58 0%, #0b0618 60%); z-index:5; }
+  #select.show { display:flex; }
+  #select h1 { font-family:var(--font-d); font-weight:400; margin:6px 0 2px; font-size:clamp(28px,7vw,48px); letter-spacing:.06em; text-transform:uppercase; color:#fff;
+    text-shadow:0 0 6px #2ff3ff, 0 0 18px #2ff3ff, 3px 3px 0 #ff3df2, 0 0 30px rgba(255,61,242,.7); }
+  #select .sub { color:var(--dim); font-size:13px; margin-bottom:6px; }
+  #select .total { font-family:var(--font-d); color:var(--gold); font-size:14px; margin-bottom:14px; text-shadow:0 0 10px rgba(255,210,63,.6); }
+  #worlds { width:100%; max-width:560px; }
+  .wname { font-family:var(--font-d); font-size:13px; letter-spacing:.1em; text-transform:uppercase; color:var(--mag); margin:16px 2px 8px; text-shadow:0 0 10px rgba(255,61,242,.7); }
+  .grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(84px,1fr)); gap:10px; }
+  .tile { display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px; min-height:84px; padding:8px 4px; border-radius:14px; background:rgba(26,12,56,.9);
+    border:2px solid var(--cyan); box-shadow:0 0 12px rgba(47,243,255,.35), inset 0 0 12px rgba(47,243,255,.12); }
+  .tile { position:relative; }
+  .tile .eye { position:absolute; top:3px; right:5px; font-size:15px; line-height:1; padding:3px; opacity:.75; cursor:pointer; filter:drop-shadow(0 0 4px var(--cyan)); }
+  .tile .n { font-family:var(--font-d); font-size:24px; color:#fff; text-shadow:0 0 8px var(--cyan); }
+  .tile .stars { font-size:12px; }
+  .tile.done { border-color:var(--gold); box-shadow:0 0 14px rgba(255,210,63,.4), inset 0 0 12px rgba(255,210,63,.12); }
+  .tile.done .n { text-shadow:0 0 8px var(--gold); }
+  .tile[disabled] { opacity:.4; border-color:#3a2a5c; box-shadow:none; }
+  .tile[disabled] .n { text-shadow:none; color:#7a6a9c; }
+  #win .stars { font-size:34px; margin:2px 0 8px; display:block; }
+  #win .row { display:flex; gap:8px; justify-content:center; flex-wrap:wrap; }
+  #win h2 { font-family:var(--font-d); font-weight:400; }
+  #win .row button { border-color:var(--mag); }
+  #win .row button.on { border-color:var(--cyan); }
+  button { white-space:nowrap; }
+  @media (max-width:560px) {
+    #top { flex-wrap:wrap; row-gap:2px; }
+    #topL { display:contents; }
+    #title { order:1; font-size:13px; }
+    #top > div:last-child { order:2; margin-left:auto; gap:6px !important; }
+    #top button { padding:6px 10px; min-height:36px; font-size:13px; }
+    #levelName { order:3; flex-basis:100%; margin:0; font-size:14px; }
+    #stats { order:4; flex-basis:100%; margin:0; }
+    #goal { display:none; }
+  }
+  #err { position:fixed; inset:auto 12px 50% 12px; text-align:center; color:#ffb4b4; display:none; }
+</style>
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+} }
+</script>
+</head>
+<body>
+<canvas id="c"></canvas>
+<div id="top" class="bar">
+  <div id="topL"><div id="title">Lumina Pillars</div><div id="levelName"></div><div id="goal">Light every core with its matching color.</div><div id="stats"><span>Moves <b id="moves">0</b></span><span>Par <b id="par">0</b></span><span class="stars" id="liveStars"></span></div></div>
+  <div style="display:flex;gap:8px"><button id="levels" aria-label="Level select">Levels</button><button id="reset" aria-label="Reset level">Reset</button><button id="mute" aria-label="Toggle sound effects">Sound</button><button id="music" aria-label="Toggle music">Music</button></div>
+</div>
+<div id="layers"><span>Layer</span></div>
+<div id="tray" class="bar"><div id="hint"></div><div id="inv"></div><button id="answer" class="ghost">Show answer</button></div>
+<div id="win"><div><h2 id="winTitle"></h2><span class="stars" id="winStars"></span><p id="winText"></p><div class="row"><button id="admire">Admire</button><button id="replay">Replay</button><button id="winLevels">Levels</button><button id="next" class="on"></button></div></div></div>
+<div id="admirebar"><span id="admireTitle"></span><button id="admNext" class="on">Next level</button><button id="admLevels">Levels</button><button id="admBack">Back</button></div>
+<div id="select"><h1>Lumina Pillars</h1><div class="sub">Route the light. Light every core.</div><div class="total" id="total"></div><div id="worlds"></div></div>
+<div id="err">This game needs WebGL and an internet connection to load its 3D library.</div>
+
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
+import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
+import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
+
+/* ============================== BEAM ENGINE (tested headless: 42 checks) ============================== */
+// Lumina Pillars beam engine (pure logic, no rendering)
+const GRID = { X: 6, LAYERS: 4, Z: 6, LAYER_MIN: 1 };          // coords are (x, layer, z); layers 1..4
+const REQUIRE_SUPPORT = false;
+const DIRS = { E:[1,0,0], W:[-1,0,0], N:[0,0,1], S:[0,0,-1], U:[0,1,0], D:[0,-1,0] };
+const OPP = { E:'W', W:'E', N:'S', S:'N', U:'D', D:'U' };
+const HORIZ = d => d !== 'U' && d !== 'D';
+const COLORS = { CYAN:'#00F0FF', EMERALD:'#00FF66', MAGENTA:'#FF00AA', AMBER:'#FFAA00', GREEN:'#00FF66', VIOLET:'#9D00FF', YELLOW_GREEN:'#AAFF00' };
+const MIX = { 'CYAN+EMERALD':'GREEN', 'CYAN+MAGENTA':'VIOLET', 'AMBER+EMERALD':'YELLOW_GREEN' };
+const SPLIT = { GREEN:['CYAN','EMERALD'], VIOLET:['CYAN','MAGENTA'], YELLOW_GREEN:['AMBER','EMERALD'] };   // Spectrum prism: [straight, child]
+const key = (x,y,z) => x+','+y+','+z;
+const inBounds = (x,y,z) => x>=0 && x<GRID.X && z>=0 && z<GRID.Z && y>=GRID.LAYER_MIN && y<GRID.LAYER_MIN+GRID.LAYERS;
+
+function makeState(level) {
+  const cells = new Map();
+  for (const b of level.fixed) cells.set(key(...b.pos), { ...b, fixed:true });
+  return { level, cells, inventory: { ...level.inventory } };
+}
+const invKey = b => b.type === 'FILTER' ? 'FILTER_' + b.color : b.type;
+function place(state, b, requireSupport = REQUIRE_SUPPORT) {
+  const [x,y,z] = b.pos, k = key(x,y,z);
+  if (!inBounds(x,y,z)) return { ok:false, why:'out of bounds' };
+  if (state.cells.has(k)) return { ok:false, why:'cell occupied' };
+  if (!(state.inventory[invKey(b)] > 0)) return { ok:false, why:'none left' };
+  if (requireSupport && y > GRID.LAYER_MIN && !state.cells.has(key(x,y-1,z))) return { ok:false, why:'needs support' };
+  if (b.type === 'REFLECTOR' && !HORIZ(b.facing)) return { ok:false, why:'bad facing' };
+  if ((b.type === 'PRISM' || b.type === 'SPECTRUM') && !HORIZ(b.childDir)) return { ok:false, why:'bad orientation' };
+  state.cells.set(k, { ...b }); state.inventory[invKey(b)]--; return { ok:true };
+}
+function remove(state, pos) {
+  const k = key(...pos), b = state.cells.get(k);
+  if (!b || b.fixed) return { ok:false, why: b ? 'fixed block' : 'empty' };
+  state.cells.delete(k); state.inventory[invKey(b)]++; return { ok:true };
+}
+function trace(state) {
+  const segments = [], lit = new Set(), seen = new Set(), queue = [];
+  for (const b of state.cells.values()) if (b.type === 'EMITTER') queue.push({ pos:b.pos, dir:b.facing, color:b.color });
+  while (queue.length) {
+    let { pos:[x,y,z], dir, color } = queue.shift();
+    for (;;) {
+      const from = [x,y,z], d = DIRS[dir];
+      x += d[0]; y += d[1]; z += d[2];
+      if (!inBounds(x,y,z)) { segments.push({ from, to:[x,y,z], color, end:'edge' }); break; }
+      const g = key(x,y,z)+dir+color;
+      if (seen.has(g)) break; seen.add(g);
+      segments.push({ from, to:[x,y,z], color });
+      const b = state.cells.get(key(x,y,z));
+      if (!b) continue;
+      if (b.type === 'OBSIDIAN' || b.type === 'EMITTER') break;
+      if (b.type === 'CORE') { if (b.color === color) lit.add(key(x,y,z)); break; }
+      if (b.type === 'REFLECTOR') { if (dir === OPP[b.facing]) break; dir = b.facing; continue; }
+      if (b.type === 'ELEVATOR') { if (dir === 'D') break; dir = 'U'; continue; }
+      if (b.type === 'FILTER') { color = MIX[color+'+'+b.color] || color; continue; }
+      if (b.type === 'SPECTRUM') { const sp = SPLIT[color]; if (sp && HORIZ(dir) && dir !== b.childDir && dir !== OPP[b.childDir]) { queue.push({ pos:[x,y,z], dir:b.childDir, color:sp[1] }); color = sp[0]; } continue; }
+      if (b.type === 'PRISM') { if (HORIZ(dir) && dir !== b.childDir && dir !== OPP[b.childDir]) queue.push({ pos:[x,y,z], dir:b.childDir, color }); continue; }
+    }
+  }
+  const cores = [...state.cells.values()].filter(b => b.type === 'CORE');
+  return { segments, lit, won: cores.length > 0 && cores.every(c => lit.has(key(...c.pos))) };
+}
+const LEVELS = [
+  { name:'Level 1', fixed:[ {type:'EMITTER',pos:[0,1,2],facing:'E',color:'CYAN'}, {type:'CORE',pos:[4,1,5],color:'CYAN'} ],
+    inventory:{ REFLECTOR:1 },
+    solution:[ {type:'REFLECTOR',pos:[4,1,2],facing:'N'} ] },
+  { name:'Level 2', fixed:[ {type:'EMITTER',pos:[0,1,3],facing:'E',color:'CYAN'}, {type:'OBSIDIAN',pos:[4,1,3]}, {type:'CORE',pos:[5,3,3],color:'VIOLET'} ],
+    inventory:{ ELEVATOR:1, REFLECTOR:1, FILTER_MAGENTA:1 },
+    solution:[ {type:'ELEVATOR',pos:[2,1,3]}, {type:'REFLECTOR',pos:[2,3,3],facing:'E'}, {type:'FILTER',pos:[3,3,3],color:'MAGENTA'} ] },
+  { name:'Level 3', fixed:[ {type:'EMITTER',pos:[0,1,2],facing:'E',color:'CYAN'}, {type:'CORE',pos:[5,1,5],color:'CYAN'}, {type:'CORE',pos:[5,3,4],color:'GREEN'} ],
+    inventory:{ PRISM:1, REFLECTOR:2, ELEVATOR:1, FILTER_EMERALD:1 },
+    solution:[ {type:'PRISM',pos:[2,1,2],childDir:'N'}, {type:'REFLECTOR',pos:[5,1,2],facing:'N'}, {type:'ELEVATOR',pos:[2,1,4]},
+               {type:'REFLECTOR',pos:[2,3,4],facing:'E'}, {type:'FILTER',pos:[3,3,4],color:'EMERALD'} ] },
+  { name:'Level 4', fixed:[{"type":"EMITTER","pos":[5,1,2],"facing":"W","color":"CYAN"},{"type":"CORE","pos":[0,1,2],"color":"CYAN"},{"type":"CORE","pos":[4,1,5],"color":"EMERALD"}],
+    inventory:{"FILTER_EMERALD":1,"SPECTRUM":1,"REFLECTOR":1},
+    solution:[{"type":"FILTER","pos":[4,1,2],"color":"EMERALD"},{"type":"SPECTRUM","pos":[3,1,2],"childDir":"N"},{"type":"REFLECTOR","pos":[3,1,5],"facing":"E"}] },
+  { name:'Level 5', fixed:[{"type":"EMITTER","pos":[0,1,1],"facing":"E","color":"CYAN"},{"type":"CORE","pos":[5,1,5],"color":"CYAN"},{"type":"CORE","pos":[5,1,2],"color":"MAGENTA"}],
+    inventory:{"FILTER_MAGENTA":1,"SPECTRUM":1,"REFLECTOR":2},
+    solution:[{"type":"FILTER","pos":[2,1,1],"color":"MAGENTA"},{"type":"REFLECTOR","pos":[3,1,1],"facing":"N"},{"type":"SPECTRUM","pos":[3,1,2],"childDir":"E"},{"type":"REFLECTOR","pos":[3,1,5],"facing":"E"}] },
+  { name:'Level 6', fixed:[{"type":"EMITTER","pos":[3,1,0],"facing":"N","color":"AMBER"},{"type":"CORE","pos":[5,1,4],"color":"AMBER"},{"type":"CORE","pos":[1,1,1],"color":"EMERALD"},{"type":"OBSIDIAN","pos":[2,1,2]}],
+    inventory:{"FILTER_EMERALD":1,"SPECTRUM":1,"REFLECTOR":2},
+    solution:[{"type":"REFLECTOR","pos":[3,1,4],"facing":"E"},{"type":"SPECTRUM","pos":[3,1,3],"childDir":"W"},{"type":"FILTER","pos":[3,1,2],"color":"EMERALD"},{"type":"REFLECTOR","pos":[1,1,3],"facing":"S"}] },
+  { name:'Level 7', fixed:[{"type":"EMITTER","pos":[3,1,5],"facing":"S","color":"CYAN"},{"type":"CORE","pos":[3,4,4],"color":"CYAN"},{"type":"CORE","pos":[1,4,1],"color":"EMERALD"}],
+    inventory:{"FILTER_EMERALD":1,"SPECTRUM":1,"REFLECTOR":1,"ELEVATOR":1},
+    solution:[{"type":"ELEVATOR","pos":[3,1,0]},{"type":"REFLECTOR","pos":[3,4,0],"facing":"N"},{"type":"SPECTRUM","pos":[3,4,1],"childDir":"W"},{"type":"FILTER","pos":[3,1,1],"color":"EMERALD"}] },
+  { name:'Level 8', fixed:[{"type":"EMITTER","pos":[1,1,5],"facing":"S","color":"CYAN"},{"type":"CORE","pos":[1,1,0],"color":"CYAN"},{"type":"CORE","pos":[4,1,5],"color":"CYAN"},{"type":"CORE","pos":[4,1,1],"color":"MAGENTA"}],
+    inventory:{"PRISM":1,"FILTER_MAGENTA":1,"SPECTRUM":1,"REFLECTOR":1},
+    solution:[{"type":"FILTER","pos":[1,1,3],"color":"MAGENTA"},{"type":"PRISM","pos":[1,1,4],"childDir":"E"},{"type":"REFLECTOR","pos":[4,1,4],"facing":"N"},{"type":"SPECTRUM","pos":[1,1,1],"childDir":"E"}] },
+  { name:'Level 9', fixed:[{"type":"EMITTER","pos":[3,1,0],"facing":"N","color":"AMBER"},{"type":"CORE","pos":[5,2,4],"color":"AMBER"},{"type":"CORE","pos":[0,1,5],"color":"EMERALD"}],
+    inventory:{"FILTER_EMERALD":1,"SPECTRUM":1,"REFLECTOR":2,"ELEVATOR":1},
+    solution:[{"type":"REFLECTOR","pos":[3,1,4],"facing":"E"},{"type":"SPECTRUM","pos":[3,1,3],"childDir":"W"},{"type":"FILTER","pos":[3,1,2],"color":"EMERALD"},{"type":"REFLECTOR","pos":[0,1,3],"facing":"N"},{"type":"ELEVATOR","pos":[5,1,4]}] },
+];
+LEVELS[0].title = 'First Light'; LEVELS[1].title = 'Rise and Shine'; LEVELS[2].title = 'Prism Split & Sky Ascent';
+["Split Decision","Color Me Magenta","Amber Alert","Rise and Split","Triple Threat","Spectrum Sunrise"].forEach((t, i) => LEVELS[3 + i].title = t);
+// World 1 levels 2-5, 7-10 and 12 (generated, each verified to need every piece), slotted around the three hand-built ones
+const W1_NEW = [{"fixed":[{"type":"EMITTER","pos":[5,1,2],"facing":"W","color":"CYAN"},{"type":"CORE","pos":[3,1,5],"color":"CYAN"},{"type":"OBSIDIAN","pos":[3,1,3]}],"inventory":{"REFLECTOR":2},"solution":[{"type":"REFLECTOR","pos":[0,1,2],"facing":"N"},{"type":"REFLECTOR","pos":[0,1,5],"facing":"E"}],"title":"Around the Block"},{"fixed":[{"type":"EMITTER","pos":[5,1,1],"facing":"W","color":"CYAN"},{"type":"CORE","pos":[5,1,5],"color":"CYAN"},{"type":"OBSIDIAN","pos":[4,1,3]},{"type":"OBSIDIAN","pos":[2,1,5]},{"type":"OBSIDIAN","pos":[3,1,2]}],"inventory":{"REFLECTOR":3},"solution":[{"type":"REFLECTOR","pos":[0,1,1],"facing":"N"},{"type":"REFLECTOR","pos":[0,1,4],"facing":"E"},{"type":"REFLECTOR","pos":[5,1,4],"facing":"N"}],"title":"Triple Bounce"},{"fixed":[{"type":"EMITTER","pos":[5,1,1],"facing":"W","color":"CYAN"},{"type":"CORE","pos":[5,1,3],"color":"VIOLET"},{"type":"OBSIDIAN","pos":[2,1,2]}],"inventory":{"REFLECTOR":2,"FILTER_MAGENTA":1},"solution":[{"type":"REFLECTOR","pos":[1,1,1],"facing":"N"},{"type":"REFLECTOR","pos":[1,1,3],"facing":"E"},{"type":"FILTER","pos":[4,1,3],"color":"MAGENTA"}],"title":"Violet Hour"},{"fixed":[{"type":"EMITTER","pos":[2,1,0],"facing":"N","color":"CYAN"},{"type":"CORE","pos":[5,4,1],"color":"CYAN"}],"inventory":{"ELEVATOR":1,"REFLECTOR":1},"solution":[{"type":"ELEVATOR","pos":[2,1,1]},{"type":"REFLECTOR","pos":[2,4,1],"facing":"E"}],"title":"Going Up"},{"fixed":[{"type":"EMITTER","pos":[1,1,0],"facing":"N","color":"CYAN"},{"type":"CORE","pos":[3,4,0],"color":"GREEN"},{"type":"OBSIDIAN","pos":[1,1,4]},{"type":"OBSIDIAN","pos":[3,3,0]},{"type":"OBSIDIAN","pos":[1,2,2]}],"inventory":{"ELEVATOR":1,"REFLECTOR":2,"FILTER_EMERALD":1},"solution":[{"type":"ELEVATOR","pos":[1,1,3]},{"type":"REFLECTOR","pos":[1,4,3],"facing":"S"},{"type":"REFLECTOR","pos":[1,4,0],"facing":"E"},{"type":"FILTER","pos":[1,1,1],"color":"EMERALD"}],"title":"Green Light, High Rise"},{"fixed":[{"type":"EMITTER","pos":[4,1,0],"facing":"N","color":"CYAN"},{"type":"CORE","pos":[4,1,5],"color":"CYAN"},{"type":"CORE","pos":[0,1,5],"color":"CYAN"},{"type":"OBSIDIAN","pos":[3,1,1]}],"inventory":{"PRISM":1,"REFLECTOR":1},"solution":[{"type":"PRISM","pos":[4,1,4],"childDir":"W"},{"type":"REFLECTOR","pos":[0,1,4],"facing":"N"}],"title":"Fork in the Road"},{"fixed":[{"type":"EMITTER","pos":[0,1,3],"facing":"E","color":"CYAN"},{"type":"CORE","pos":[0,1,0],"color":"CYAN"},{"type":"CORE","pos":[2,1,5],"color":"CYAN"},{"type":"OBSIDIAN","pos":[4,1,1]}],"inventory":{"PRISM":1,"REFLECTOR":2},"solution":[{"type":"REFLECTOR","pos":[5,1,3],"facing":"S"},{"type":"REFLECTOR","pos":[5,1,0],"facing":"W"},{"type":"PRISM","pos":[2,1,3],"childDir":"N"}],"title":"Double Take"},{"fixed":[{"type":"EMITTER","pos":[5,1,2],"facing":"W","color":"CYAN"},{"type":"CORE","pos":[5,1,5],"color":"VIOLET"},{"type":"CORE","pos":[2,1,0],"color":"CYAN"},{"type":"OBSIDIAN","pos":[1,1,3]},{"type":"OBSIDIAN","pos":[4,1,3]}],"inventory":{"PRISM":1,"REFLECTOR":2,"FILTER_MAGENTA":1},"solution":[{"type":"PRISM","pos":[2,1,2],"childDir":"S"},{"type":"REFLECTOR","pos":[0,1,2],"facing":"N"},{"type":"REFLECTOR","pos":[0,1,5],"facing":"E"},{"type":"FILTER","pos":[4,1,5],"color":"MAGENTA"}],"title":"Violet Fork"},{"fixed":[{"type":"EMITTER","pos":[4,1,5],"facing":"S","color":"AMBER"},{"type":"CORE","pos":[4,4,5],"color":"YELLOW_GREEN"},{"type":"CORE","pos":[5,1,5],"color":"AMBER"}],"inventory":{"PRISM":1,"REFLECTOR":2,"ELEVATOR":1,"FILTER_EMERALD":1},"solution":[{"type":"ELEVATOR","pos":[4,1,2]},{"type":"FILTER","pos":[4,3,2],"color":"EMERALD"},{"type":"REFLECTOR","pos":[4,4,2],"facing":"N"},{"type":"PRISM","pos":[4,1,4],"childDir":"E"},{"type":"REFLECTOR","pos":[5,1,4],"facing":"N"}],"title":"Golden Hour"}];
+{ const old = LEVELS.splice(0), n = W1_NEW; LEVELS.push(old[0], n[0], n[1], n[2], n[3], old[1], n[4], n[5], n[6], n[7], old[2], n[8], ...old.slice(3)); }
+
+/* ============================== ASSET BRIDGE ============================== */
+const USE_EXTERNAL_MODELS = new URLSearchParams(location.search).has('glb') ? true : false;  // procedural-first
+const MODEL_URL = 'assets/lumina_voxels.glb';
+const MODEL_ROOTS = { OBSIDIAN:'voxel_obsidian', PRISM:'voxel_prism', REFLECTOR:'voxel_reflector', ELEVATOR:'voxel_elevator',
+                      FILTER:'voxel_filter', EMITTER:'voxel_emitter', CORE:'voxel_core' };
+const TINT_PARTS = { FILTER:'Filter_Pane', CORE:'Core_Crystal', EMITTER:'Emitter_Lens' };
+const loadedGLTFModels = {};
+async function loadExternalModels() {
+  if (!USE_EXTERNAL_MODELS) return;
+  try {
+    const { GLTFLoader } = await import('three/addons/loaders/GLTFLoader.js');
+    const gltf = await new GLTFLoader().loadAsync(MODEL_URL);
+    for (const [type, name] of Object.entries(MODEL_ROOTS)) {
+      const root = gltf.scene.getObjectByName(name);
+      if (root) { root.position.set(0, 0, 0); loadedGLTFModels[type] = root; }
+    }
+  } catch (e) { console.warn('GLB load failed, using procedural voxels', e); }
+}
+function cloneExternalModel(type, colorHex) {
+  const g = loadedGLTFModels[type].clone(true);
+  const part = TINT_PARTS[type] && g.getObjectByName(TINT_PARTS[type]);
+  if (part && colorHex) {
+    part.material = part.material.clone();
+    part.material.color.set(colorHex); part.material.emissive.set(colorHex);
+    g.userData.tintMat = part.material;
+  }
+  if (type === 'CORE') g.userData.spin = g.getObjectByName('Core_Crystal');
+  return g;
+}
+
+/* ============================== RENDERER ============================== */
+const canvas = document.getElementById('c');
+let renderer;
+try { renderer = new THREE.WebGLRenderer({ canvas, antialias: true, powerPreference: 'high-performance' }); }
+catch (e) { document.getElementById('err').style.display = 'block'; throw e; }
+renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.1;
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x0b0618);
+
+{ const pm = new THREE.PMREMGenerator(renderer); scene.environment = pm.fromScene(new RoomEnvironment(), 0.04).texture; scene.environmentIntensity = 0.5; }
+const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 200);
+camera.position.set(5.5, 8.5, 10.5);
+const controls = new OrbitControls(camera, canvas);
+controls.target.set(0, 1.2, 0); controls.enablePan = false; controls.enableDamping = true;
+controls.minDistance = 7; controls.maxDistance = 26; controls.maxPolarAngle = Math.PI * 0.49;
+scene.add(new THREE.HemisphereLight(0xc9b8ff, 0x2a0f58, 1.7));
+const sun = new THREE.DirectionalLight(0xffffff, 2.0); sun.position.set(5, 10, 6); scene.add(sun);
+const rimM = new THREE.DirectionalLight(0xff3df2, 1.6); rimM.position.set(-7, 4, -6); scene.add(rimM);   // magenta rim
+const rimC = new THREE.DirectionalLight(0x2ff3ff, 1.1); rimC.position.set(8, 2, -5); scene.add(rimC);       // cyan rim
+
+const composer = new EffectComposer(renderer);
+composer.addPass(new RenderPass(scene, camera));
+const bloom = new UnrealBloomPass(new THREE.Vector2(1, 1), 0.55, 0.42, 0.86);
+composer.addPass(bloom);
+composer.addPass(new OutputPass());
+function resize() {
+  const w = window.innerWidth, h = window.innerHeight;
+  renderer.setSize(w, h, false); composer.setSize(w, h);
+  camera.aspect = w / h; camera.fov = w < h ? 58 : 45; camera.updateProjectionMatrix();
+}
+window.addEventListener('resize', resize); resize();
+if (window.innerWidth < window.innerHeight) camera.position.sub(controls.target).multiplyScalar(1.3).add(controls.target);   // pull back on phones
+
+/* ============================== SHARED GEOMETRY + MATERIALS ============================== */
+const GEO = {
+  rbox: new RoundedBoxGeometry(1, 1, 1, 3, 0.04),
+  box: new THREE.BoxGeometry(1, 1, 1),
+  tri: new THREE.CylinderGeometry(0.44, 0.44, 1, 3),
+  cyl: new THREE.CylinderGeometry(1, 1, 1, 20),
+  cone: new THREE.ConeGeometry(0.3, 0.26, 4),
+  octa: new THREE.OctahedronGeometry(0.34),
+  ring: new THREE.TorusGeometry(0.46, 0.018, 6, 40),
+  beam: new THREE.CylinderGeometry(0.04, 0.04, 1, 10),
+  edges: new THREE.EdgesGeometry(new THREE.BoxGeometry(0.98, 0.98, 0.98)),
+};
+const MAT = {
+  obsidian: new THREE.MeshStandardMaterial({ color: 0x0d0618, roughness: 0.2, metalness: 0.2 }),
+  frame: new THREE.MeshStandardMaterial({ color: 0x3a2370, roughness: 0.4, metalness: 0.3, emissive: 0x1a0a40, emissiveIntensity: 0.8 }),
+  mirror: new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.03, metalness: 1, emissive: 0x7fa8ff, emissiveIntensity: 0.45, envMapIntensity: 3 }),
+  prism: new THREE.MeshStandardMaterial({ color: 0xccf2ff, roughness: 0.05, emissive: 0x99e6ff, emissiveIntensity: 0.6, transparent: true, opacity: 0.6 }),
+  spectrum: new THREE.MeshStandardMaterial({ color: 0xf2e6ff, roughness: 0.05, emissive: 0xc9a8ff, emissiveIntensity: 0.7, transparent: true, opacity: 0.55 }),
+  elev: new THREE.MeshStandardMaterial({ color: 0xffbf33, roughness: 0.3, emissive: 0xffb326, emissiveIntensity: 0.9 }),
+  mark: new THREE.MeshStandardMaterial({ color: 0xffffff, emissive: 0xffffff, emissiveIntensity: 0.8 }),
+  line: new THREE.LineBasicMaterial({ color: 0x5c6f8f }),
+};
+const neonLine = (hex, k = 1.9) => new THREE.LineBasicMaterial({ color: new THREE.Color(hex).multiplyScalar(k), toneMapped: false });
+const NEON = { frame: neonLine(0xff3df2), obsidian: neonLine(0xff3d6e, 1.5) };
+const edgeCache = new Map();
+function neonOutline(g) {                       // hot neon edges on every frame / obsidian block
+  g.traverse(o => {
+    if (!o.isMesh) return;
+    const kind = o.material === MAT.frame ? 'frame' : o.material === MAT.obsidian ? 'obsidian' : null; if (!kind) return;
+    let eg = edgeCache.get(o.geometry); if (!eg) { eg = new THREE.EdgesGeometry(o.geometry, 35); edgeCache.set(o.geometry, eg); }
+    o.add(new THREE.LineSegments(eg, NEON[kind]));
+  });
+  return g;
+}
+const colorMats = new Map();
+function colorMat(kind, hex) {             // one material per (kind, color), reused by every voxel
+  const k = kind + hex; if (colorMats.has(k)) return colorMats.get(k);
+  let m;
+  if (kind === 'pane') m = new THREE.MeshStandardMaterial({ color: hex, emissive: hex, emissiveIntensity: 0.7, transparent: true, opacity: 0.5, roughness: 0.1, depthWrite: false });
+  else if (kind === 'lens') m = new THREE.MeshStandardMaterial({ color: hex, emissive: hex, emissiveIntensity: 1.3 });
+  else if (kind === 'beam') m = new THREE.MeshBasicMaterial({ color: new THREE.Color(hex).multiplyScalar(1.6), toneMapped: false });
+  colorMats.set(k, m); return m;
+}
+function part(geo, mat, s, p, r) {
+  const m = new THREE.Mesh(geo, mat);
+  if (s) m.scale.set(...s); if (p) m.position.set(...p); if (r) m.rotation.set(...r);
+  return m;
+}
+const FACE_ROT = { N: 0, E: Math.PI / 2, S: Math.PI, W: -Math.PI / 2 };          // models face +Z (North) at rest
+const CHILD_ROT = { E: 0, N: -Math.PI / 2, W: Math.PI, S: Math.PI / 2 };         // prism child exits +X (East) at rest
+
+const EDGES_TRI = new THREE.EdgesGeometry(GEO.tri);
+const lineCache = new Map(), glassCache = new Map();
+const edgeMat = (hex, k = 2.2) => { const id = hex + ':' + k; if (!lineCache.has(id)) lineCache.set(id, new THREE.LineBasicMaterial({ color: new THREE.Color(hex).multiplyScalar(k), toneMapped: false })); return lineCache.get(id); };
+const glassMat = (tint, op, em) => { const id = tint + ':' + op + ':' + em; if (!glassCache.has(id)) glassCache.set(id, new THREE.MeshPhysicalMaterial({ color: tint, metalness: 0, roughness: 0.05, transparent: true, opacity: op, depthWrite: false, envMapIntensity: 0.7, clearcoat: 0.6, clearcoatRoughness: 0.08, emissive: tint, emissiveIntensity: em })); return glassCache.get(id); };
+function shell(g, edgeHex, tint, op, em) {       // a clear glass cube with a hot neon edge
+  const m = part(GEO.rbox, glassMat(tint, op, em), [0.98, 0.98, 0.98], [0, 0.5, 0]); m.renderOrder = 2; g.add(m);
+  const e = new THREE.LineSegments(GEO.edges, edgeMat(edgeHex)); e.position.y = 0.5; e.scale.setScalar(1.02); g.add(e);
+}
+// Every voxel: origin bottom-center, occupies y 0..1
+function createVoxelMesh(type, colorHex) {
+  if (USE_EXTERNAL_MODELS && loadedGLTFModels[type]) return cloneExternalModel(type, colorHex);
+  const g = new THREE.Group();
+  if (type === 'OBSIDIAN') g.add(part(GEO.rbox, MAT.obsidian, null, [0, 0.5, 0]));
+  else if (type === 'EMITTER') {                                   // solid cube, square lens window on the firing face
+    g.add(part(GEO.rbox, MAT.frame, [1, 1, 1], [0, 0.5, 0]));
+    g.add(part(GEO.box, MAT.obsidian, [0.64, 0.64, 0.06], [0, 0.5, 0.5]));
+    g.add(part(GEO.box, colorMat('lens', colorHex), [0.5, 0.5, 0.05], [0, 0.5, 0.535]));
+  } else if (type === 'CORE') {                                    // clear cube holding a glowing cube; lights up when its beam arrives
+    shell(g, colorHex, colorHex, 0.2, 0.12);
+    const mat = new THREE.MeshStandardMaterial({ color: colorHex, emissive: colorHex, emissiveIntensity: 0.25, roughness: 0.25 });
+    const c = part(GEO.rbox, mat, [0.46, 0.46, 0.46], [0, 0.5, 0]); g.add(c);
+    g.userData.spin = c; g.userData.tintMat = mat;
+  } else if (type === 'REFLECTOR') {                               // mirror sealed inside clear glass; arrow on top shows where the beam leaves
+    shell(g, 0x2ff3ff, 0xb8dcff, 0.12, 0.0);
+    g.add(part(GEO.box, MAT.mirror, [1.15, 0.8, 0.03], [0, 0.5, 0], [0, -Math.PI / 4, 0]));
+    g.add(part(GEO.tri, MAT.mark, [0.4, 0.02, 0.4], [0, 0.99, 0.3]));
+  } else if (type === 'ELEVATOR') {                                // amber lift shaft: stacked chevrons between two rings
+    shell(g, 0xffaa22, 0xffe9c8, 0.2, 0.05);
+    for (let i = 0; i < 3; i++) { const y = 0.24 + i * 0.26;
+      g.add(part(GEO.box, MAT.elev, [0.28, 0.05, 0.06], [-0.1, y, 0], [0, 0, 0.75])); g.add(part(GEO.box, MAT.elev, [0.28, 0.05, 0.06], [0.1, y, 0], [0, 0, -0.75])); }
+    g.add(part(GEO.ring, MAT.elev, [0.74, 0.74, 0.74], [0, 0.07, 0], [Math.PI / 2, 0, 0])); g.add(part(GEO.ring, MAT.elev, [0.74, 0.74, 0.74], [0, 0.93, 0], [Math.PI / 2, 0, 0]));
+  } else if (type === 'FILTER') {                                  // tinted glass cube with a glowing core of colour
+    shell(g, colorHex, colorHex, 0.38, 0.35);
+    g.add(part(GEO.rbox, colorMat('pane', colorHex), [0.56, 0.56, 0.56], [0, 0.5, 0]));
+  } else if (type === 'PRISM' || type === 'SPECTRUM') {            // clear cube holding a crystal prism; top marker shows the side beam
+    const sp = type === 'SPECTRUM';
+    shell(g, sp ? 0xff3df2 : 0xaaf4ff, sp ? 0xf3e6ff : 0xe3fbff, 0.18, 0.04);
+    const pr = part(GEO.tri, sp ? MAT.spectrum : MAT.prism, [1, 0.7, 1], [0, 0.5, 0], [0, Math.PI / 2, 0]);
+    pr.add(new THREE.LineSegments(EDGES_TRI, edgeMat(sp ? 0xff9af8 : 0xaaf4ff, 1.5))); g.add(pr);
+    if (sp) [['#00F0FF', 0.14], ['#FF00AA', 0], ['#FFAA00', -0.14]].forEach(([c, z]) => g.add(part(GEO.box, colorMat('lens', c), [0.3, 0.05, 0.1], [0.34, 0.985, z])));
+    else g.add(part(GEO.tri, MAT.mark, [0.4, 0.02, 0.4], [0.3, 0.99, 0], [0, Math.PI / 2, 0]));
+  }
+  return neonOutline(g);
+}
+
+/* ============================== WORLD ============================== */
+const cellPos = (x, layer, z) => new THREE.Vector3(x - GRID.X / 2 + 0.5, layer - GRID.LAYER_MIN, z - GRID.Z / 2 + 0.5);
+(function buildIsland() {
+  const top = new THREE.MeshStandardMaterial({ color: 0x1b1040, roughness: 0.55, metalness: 0.2, emissive: 0x12072e, emissiveIntensity: 0.9 });
+  const rock = new THREE.MeshStandardMaterial({ color: 0x140a2e, roughness: 0.9 });
+  const isl = new THREE.Group();
+  isl.add(part(GEO.rbox, top, [6.4, 0.3, 6.4], [0, -0.15, 0]));
+  let y = -0.3;
+  for (const [s, h] of [[5.6, 0.5], [4.4, 0.6], [3.1, 0.7], [1.8, 0.8], [0.8, 0.6]]) { isl.add(part(GEO.box, rock, [s, h, s * 0.95], [0, y - h / 2, 0])); y -= h; }
+  const grid = new THREE.GridHelper(6, 6, 0x2ff3ff, 0x6a3fd0); grid.position.y = 0.006; [].concat(grid.material).forEach(m => { m.toneMapped = false; m.color.multiplyScalar(1.5); }); isl.add(grid);
+  const trim = new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.BoxGeometry(6.4, 0.3, 6.4)), neonLine(0xff3df2, 2.2));
+  trim.position.y = -0.15; isl.add(trim);
+  const trim2 = new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.BoxGeometry(6.04, 0.001, 6.04)), neonLine(0x2ff3ff, 2.2));
+  trim2.position.y = 0.012; isl.add(trim2);
+  const rockTrim = new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.BoxGeometry(5.6, 0.5, 5.32)), neonLine(0x8a4dff, 1.3)); rockTrim.position.y = -0.55; isl.add(rockTrim);
+  scene.add(isl);
+  const n = 500, pts = new Float32Array(n * 3);
+  for (let i = 0; i < n; i++) { const r = 40 + Math.random() * 50, a = Math.random() * 6.283, b = (Math.random() - 0.5) * 2.4;
+    pts[i * 3] = Math.cos(a) * Math.cos(b) * r; pts[i * 3 + 1] = Math.sin(b) * r; pts[i * 3 + 2] = Math.sin(a) * Math.cos(b) * r; }
+  const cols = new Float32Array(n * 3), pal = [[0.18, 0.95, 1], [1, 0.24, 0.95], [1, 0.82, 0.25], [1, 1, 1]];
+  for (let i = 0; i < n; i++) { const c = pal[(Math.random() * pal.length) | 0], k = 0.5 + Math.random() * 0.5; cols.set([c[0] * k, c[1] * k, c[2] * k], i * 3); }
+  const sg = new THREE.BufferGeometry(); sg.setAttribute('position', new THREE.BufferAttribute(pts, 3)); sg.setAttribute('color', new THREE.BufferAttribute(cols, 3));
+  scene.add(new THREE.Points(sg, new THREE.PointsMaterial({ vertexColors: true, size: 0.4, fog: false })));
+})();
+const layerGrid = new THREE.Group();
+{ const gh = new THREE.GridHelper(6, 6, 0xff3df2, 0xff3df2); gh.material.transparent = true; gh.material.opacity = 0.4; gh.material.toneMapped = false; layerGrid.add(gh);
+  const pl = part(new THREE.PlaneGeometry(6, 6), new THREE.MeshBasicMaterial({ color: 0xff3df2, transparent: true, opacity: 0.05, side: THREE.DoubleSide, depthWrite: false }), null, null, [-Math.PI / 2, 0, 0]);
+  layerGrid.add(pl); scene.add(layerGrid); }
+const ghost = new THREE.LineSegments(GEO.edges, new THREE.LineBasicMaterial({ color: 0xffd23f, toneMapped: false })); ghost.visible = false; scene.add(ghost);
+const pieces = new THREE.Group(), beams = new THREE.Group(); scene.add(pieces, beams);
+
+/* ============================== AUDIO (synth only, no files) ============================== */
+const Snd = (() => {
+  let ctx = null, master, bus, send, timer = null, ci = 0, sfxOn = true, musOn = true, unlocked = false;
+  try { sfxOn = localStorage.getItem('lumina.sfx') !== '0'; musOn = localStorage.getItem('lumina.music') !== '0'; } catch (e) {}
+  const save = () => { try { localStorage.setItem('lumina.sfx', sfxOn ? '1' : '0'); localStorage.setItem('lumina.music', musOn ? '1' : '0'); } catch (e) {} };
+  function init() {
+    if (ctx) return ctx;
+    try {
+      ctx = new (window.AudioContext || window.webkitAudioContext)();
+      const comp = ctx.createDynamicsCompressor(); master = ctx.createGain(); master.gain.value = 0.7; master.connect(comp); comp.connect(ctx.destination);
+      bus = ctx.createGain(); bus.connect(master);
+      const d = ctx.createDelay(1); d.delayTime.value = 0.27; const fb = ctx.createGain(); fb.gain.value = 0.36; const lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 2600;
+      send = ctx.createGain(); send.gain.value = 0.32; send.connect(d); d.connect(lp); lp.connect(fb); fb.connect(d); lp.connect(master);
+    } catch (e) { ctx = null; }
+    return ctx;
+  }
+  function tone(f, dur = 0.15, type = 'sine', vol = 0.2, when = 0, slide = 0, wet = 1) {
+    if (!sfxOn || !init()) return; voice(f, dur, type, vol, when, slide, wet, 0.012);
+  }
+  function voice(f, dur, type, vol, when, slide, wet, atk) {
+    const t = ctx.currentTime + when, o = ctx.createOscillator(), g = ctx.createGain();
+    o.type = type; o.frequency.setValueAtTime(f, t); if (slide) o.frequency.exponentialRampToValueAtTime(slide, t + dur);
+    g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(vol, t + atk); g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    o.connect(g); g.connect(bus); if (wet) { const w = ctx.createGain(); w.gain.value = wet; g.connect(w); w.connect(send); }
+    o.start(t); o.stop(t + dur + 0.05);
+  }
+  const PITCH = { CYAN: 880, EMERALD: 1047, MAGENTA: 784, AMBER: 698, GREEN: 1175, VIOLET: 740, YELLOW_GREEN: 1319 };
+  const SFX = {
+    place: () => { tone(300, 0.09, 'triangle', 0.3, 0, 150, 0.2); tone(660, 0.18, 'sine', 0.14, 0.03); tone(990, 0.22, 'sine', 0.07, 0.07); },
+    rotate: () => { tone(900, 0.05, 'square', 0.06, 0, 0, 0.2); tone(1350, 0.07, 'sine', 0.07, 0.025); },
+    remove: () => tone(420, 0.2, 'sine', 0.2, 0, 120, 0.3),
+    deny: () => { tone(160, 0.12, 'sawtooth', 0.07, 0, 0, 0); tone(130, 0.12, 'sawtooth', 0.06, 0.09, 0, 0); },
+    select: () => tone(560, 0.06, 'sine', 0.1, 0, 0, 0.3),
+    level: () => { tone(180, 0.5, 'sine', 0.12, 0, 720, 0.5); tone(540, 0.4, 'triangle', 0.05, 0.1, 1080, 0.5); },
+    core: c => { const f = PITCH[c] || 880; tone(f, 0.7, 'sine', 0.2); tone(f * 2, 0.6, 'sine', 0.08, 0.04); tone(f * 1.5, 0.8, 'triangle', 0.05, 0.09); },
+    win: s => { const n = Math.max(3, Math.min(5, (s || 3) + 2)), sc = [523, 659, 784, 1047, 1319]; for (let i = 0; i < n; i++) tone(sc[i], 0.6, 'triangle', 0.2, i * 0.12, 0, 0.7); const t0 = n * 0.12; [523, 659, 784].forEach(f => tone(f * 2, 1.4, 'sine', 0.09, t0)); },
+  };
+  // generative ambient pad: slow A-minor progression, soft plucks on a pentatonic scale
+  const CH = [110, 87.31, 130.81, 98], PENT = [1, 1.2, 1.5, 1.8, 2, 2.4, 3];
+  function bar() {
+    if (!musOn || !ctx || ctx.state !== 'running') return;
+    const r = CH[ci++ % 4], t = 0;
+    [1, 1.5, 2].forEach((m, i) => voice(r * m * (i ? 1.003 : 1), 5.2, 'triangle', 0.045, 0, 0, 0.5, 1.6));
+    voice(r * 0.5, 5.2, 'sine', 0.06, 0, 0, 0, 1.2);
+    for (let i = 0; i < 4; i++) if (Math.random() < 0.8) voice(r * 4 * PENT[Math.floor(Math.random() * PENT.length)], 1.4, 'sine', 0.035, 0.6 + i * 1.15 + Math.random() * 0.3, 0, 0.9, 0.01);
+  }
+  // music goes through its own gain so it never competes with effects
+  function startMusic() { if (timer || !musOn || !init()) return; bar(); timer = setInterval(bar, 4600); }
+  function stopMusic() { clearInterval(timer); timer = null; }
+  document.addEventListener('visibilitychange', () => { if (!ctx) return; if (document.hidden) { stopMusic(); ctx.suspend(); } else { ctx.resume().then(startMusic); } });
+  return {
+    sfx: SFX,
+    unlock() { if (!init()) return; if (ctx.state === 'suspended') ctx.resume(); if (!unlocked) { unlocked = true; startMusic(); } },
+    toggleSfx() { sfxOn = !sfxOn; save(); if (sfxOn) { this.unlock(); SFX.select(); } return sfxOn; },
+    toggleMusic() { musOn = !musOn; save(); if (musOn) { this.unlock(); startMusic(); } else stopMusic(); return musOn; },
+    get sfxOn() { return sfxOn; }, get musOn() { return musOn; }, get ctx() { return ctx; },
+  };
+})();
+const SFX = Snd.sfx; function audio() { Snd.unlock(); return true; } window.Snd = Snd;
+
+/* ============================== GAME STATE ============================== */
+const ROT = ['E', 'N', 'W', 'S'];
+const NAMES = { REFLECTOR: 'Reflector', PRISM: 'Prism', SPECTRUM: 'Spectrum Prism', ELEVATOR: 'Elevator', FILTER_EMERALD: 'Emerald Filter', FILTER_MAGENTA: 'Magenta Filter' };
+const SWATCH = { REFLECTOR: '#bfd9f2', PRISM: '#99e6ff', SPECTRUM: 'linear-gradient(90deg,#00F0FF,#FF00AA,#FFAA00)', ELEVATOR: '#ffb326', FILTER_EMERALD: COLORS.EMERALD, FILTER_MAGENTA: COLORS.MAGENTA };
+let levelIndex = 0, state = null, selected = null, layer = GRID.LAYER_MIN, locked = false, litBefore = new Set();
+try { levelIndex = Math.min(LEVELS.length - 1, Math.max(0, parseInt(localStorage.getItem('lumina.level') || '0', 10) || 0)); } catch (e) {}
+const $ = id => document.getElementById(id);
+
+function blockColorHex(b) { return b.color ? COLORS[b.color] : null; }
+function orient(g, b) {
+  if (b.type === 'PRISM' || b.type === 'SPECTRUM') g.rotation.y = CHILD_ROT[b.childDir];
+  else if (b.facing) g.rotation.y = FACE_ROT[b.facing];
+}
+const PICK_MAT = new THREE.MeshBasicMaterial({ visible: false });
+function rebuildPieces() {
+  pieces.clear();
+  for (const b of state.cells.values()) {
+    const g = createVoxelMesh(b.type, blockColorHex(b));
+    g.position.copy(cellPos(...b.pos)); orient(g, b); g.userData.block = b;
+    const pk = new THREE.Mesh(GEO.box, PICK_MAT); pk.scale.setScalar(0.6); pk.position.y = 0.5; pk.userData.pick = true; g.add(pk);   // tap target: only a piece's solid centre, so its glass never blocks the tile behind it
+    pieces.add(g);
+  }
+}
+function rebuildBeams(result) {
+  beams.clear();
+  const up = new THREE.Vector3(0, 1, 0), half = new THREE.Vector3(0, 0.5, 0);
+  for (const s of result.segments) {
+    const a = cellPos(...s.from).add(half), b = cellPos(...s.to).add(half);
+    if (s.end === 'edge') b.lerp(a, 0.5);
+    const m = new THREE.Mesh(GEO.beam, colorMat('beam', COLORS[s.color]));
+    m.position.copy(a).lerp(b, 0.5); m.scale.y = a.distanceTo(b);
+    m.quaternion.setFromUnitVectors(up, b.clone().sub(a).normalize()); beams.add(m);
+  }
+}
+function refresh(silent) {
+  const result = trace(state);
+  rebuildPieces(); rebuildBeams(result);
+  for (const g of pieces.children) if (g.userData.block.type === 'CORE') {
+    const on = result.lit.has(key(...g.userData.block.pos)); g.userData.lit = on;
+    if (g.userData.tintMat) g.userData.tintMat.emissiveIntensity = on ? 2.4 : 0.25;
+  }
+  if (!silent) for (const k of result.lit) if (!litBefore.has(k)) SFX.core(state.cells.get(k)?.color);
+  litBefore = result.lit; renderInventory();
+  if (result.won && !locked) { locked = true; const wonOn = levelIndex; setTimeout(() => { if (levelIndex !== wonOn || !locked) return; SFX.win(assisted ? 1 : starsFor(moves, parOf(levelIndex))); showWin(); }, 1200); }
+  return result;
+}
+/* ---------- progress, par and stars ---------- */
+const SAVE_KEY = 'lumina-pillars-v1';
+const WORLDS = [{ name: 'World 1 · Foundations', from: 0, to: 12 }, { name: 'World 2 · Spectrum', from: 12, to: 18 }];
+let progress = { best: {} };                       // keyed by level title: { stars, moves }
+try { progress = JSON.parse(localStorage.getItem(SAVE_KEY)) || progress; if (!progress.best) progress.best = {}; if (!progress.boards) progress.boards = {}; } catch (e) {}
+progress.boards = progress.boards || {};   // keyed by level title: the pieces you placed on your best run
+function saveProgress() { try { localStorage.setItem(SAVE_KEY, JSON.stringify(progress)); } catch (e) {} }
+const bestOf = i => progress.best[LEVELS[i].title];
+const parOf = i => LEVELS[i].solution.reduce((n, b) => n + 1 + ((b.type === 'REFLECTOR' || b.type === 'PRISM' || b.type === 'SPECTRUM') ? ROT.indexOf(b.facing || b.childDir) : 0), 0);
+const starsFor = (moves, par) => moves <= par ? 3 : moves <= par + 3 ? 2 : 1;
+function disarm() { clearTimeout(armTimer); const b = $('answer'); b.classList.remove('arm'); b.textContent = 'Show answer'; }
+function showAnswer() {
+  if (locked) return;
+  const b = $('answer');
+  if (!b.classList.contains('arm')) { b.classList.add('arm'); b.textContent = 'Tap again: 1 star max'; clearTimeout(armTimer); armTimer = setTimeout(disarm, 3500); return; }
+  const i = levelIndex; loadLevel(i); assisted = true; setMoves(0);
+  for (const sb of LEVELS[i].solution) place(state, { ...sb });
+  hint('Here is one way. Replay the level to earn more stars.'); refresh();
+}
+const starHtml = (n, total = 3) => Array.from({ length: total }, (_, k) => `<i class="${k < n ? 'f' : ''}">★</i>`).join('');
+const isUnlocked = i => i === 0 || !!bestOf(i - 1) || !!bestOf(i);
+let moves = 0, assisted = false, armTimer = null;
+function setMoves(n) {
+  moves = n; $('moves').textContent = n; const par = parOf(levelIndex);
+  $('liveStars').innerHTML = starHtml(assisted ? 1 : starsFor(Math.max(n, 0), par));
+}
+function renderSelect() {
+  const root = $('worlds'); root.innerHTML = ''; let total = 0;
+  for (const w of WORLDS) {
+    const h = document.createElement('div'); h.className = 'wname'; h.textContent = w.name; root.appendChild(h);
+    const g = document.createElement('div'); g.className = 'grid'; root.appendChild(g);
+    for (let i = w.from; i < Math.min(w.to, LEVELS.length); i++) {
+      const best = bestOf(i); if (best) total += best.stars;
+      const t = document.createElement('button'); t.className = 'tile' + (best ? ' done' : ''); t.disabled = !isUnlocked(i);
+      t.setAttribute('aria-label', `Level ${i + 1} ${LEVELS[i].title}` + (best ? `, ${best.stars} stars` : ''));
+      t.innerHTML = `<span class="n">${i + 1}</span><span class="stars">${starHtml(best ? best.stars : 0)}</span>`;
+      t.onclick = () => { audio(); SFX.select(); loadLevel(i); }; g.appendChild(t);
+      if (best) { const e = document.createElement('span'); e.className = 'eye'; e.textContent = '👁'; e.setAttribute('role', 'button'); e.setAttribute('aria-label', `Admire level ${i + 1}`); e.onclick = ev => { ev.stopPropagation(); admireSaved(i); }; t.appendChild(e); }
+    }
+  }
+  $('total').textContent = `★ ${total} / ${LEVELS.length * 3}`;
+}
+let savedView = false;
+function admireSaved(i) {                              // open a cleared level as a finished board: your own pieces if saved, otherwise the built-in answer
+  audio(); SFX.select(); loadLevel(i); locked = true;
+  for (const b of (progress.boards[LEVELS[i].title] || LEVELS[i].solution)) place(state, { ...b });
+  refresh(true); $('admire').onclick(); savedView = true;
+}
+function showSelect() { $('win').classList.remove('show'); renderSelect(); $('select').classList.add('show'); }
+function loadLevel(i) {
+  leaveAdmire(false); assisted = false; disarm(); $('select').classList.remove('show'); setMoves(0); $('par').textContent = parOf(i);
+  levelIndex = i; state = makeState(LEVELS[i]); selected = null; locked = false; litBefore = new Set();
+  try { localStorage.setItem('lumina.level', String(i)); } catch (e) {}
+  $('levelName').textContent = `Level ${i + 1} · ${LEVELS[i].title}`;
+  $('win').classList.remove('show'); setLayer(GRID.LAYER_MIN); refresh(true); hint(); setMoves(0);
+}
+function hint(msg) { $('hint').textContent = msg || (selected ? `Tap a cell on layer ${layer} to place the ${NAMES[selected]}.` : 'Pick a piece, then tap a cell. Tap a placed piece to turn it. Hold to remove.'); }
+function renderInventory() {
+  const inv = $('inv'); inv.innerHTML = '';
+  for (const [k, n] of Object.entries(state.inventory)) {
+    const b = document.createElement('button'); b.dataset.piece = k; b.disabled = n === 0;
+    if (selected === k && n > 0) b.classList.add('on');
+    const sw = SWATCH[k], swCss = sw.startsWith('linear') ? `color:#fff;background:${sw}` : `color:${sw}`;
+    b.innerHTML = `<span class="sw" style="${swCss}"></span><span>${NAMES[k]}</span><span class="ct">×${n}</span>`;
+    b.onclick = () => { audio(); selected = selected === k ? null : k; SFX.select(); renderInventory(); hint(); };
+    inv.appendChild(b);
+  }
+  if (selected && !(state.inventory[selected] > 0)) { selected = null; hint(); }
+}
+function setLayer(l) {
+  layer = l; layerGrid.position.y = l - GRID.LAYER_MIN + 0.004;
+  document.querySelectorAll('#layers button').forEach(b => b.classList.toggle('on', +b.dataset.layer === l));
+  ghost.visible = false; hint();
+}
+for (let l = GRID.LAYER_MIN + GRID.LAYERS - 1; l >= GRID.LAYER_MIN; l--) {
+  const b = document.createElement('button'); b.textContent = l; b.dataset.layer = l; b.setAttribute('aria-label', 'Layer ' + l);
+  b.onclick = () => { audio(); SFX.select(); setLayer(l); }; $('layers').appendChild(b);
+}
+function newBlock(k, pos) {
+  if (k === 'REFLECTOR') return { type: k, pos, facing: 'E' };
+  if (k === 'PRISM' || k === 'SPECTRUM') return { type: k, pos, childDir: 'E' };
+  if (k.startsWith('FILTER_')) return { type: 'FILTER', pos, color: k.slice(7) };
+  return { type: k, pos };
+}
+function doPlace(pos) {
+  if (locked || !selected) return false;
+  const r = place(state, newBlock(selected, pos));
+  if (!r.ok) { SFX.deny(); hint(r.why === 'cell occupied' ? 'That cell is taken.' : 'Not there.'); return false; }
+  SFX.place(); setMoves(moves + 1); refresh(); hint(); return true;
+}
+function doRotate(b) {
+  if (locked || b.fixed) { if (b.fixed) { SFX.deny(); hint('That one is fixed in place.'); } return; }
+  const f = b.type === 'REFLECTOR' ? 'facing' : (b.type === 'PRISM' || b.type === 'SPECTRUM') ? 'childDir' : null;
+  if (!f) { hint('Nothing to turn on this piece. Hold to remove it.'); return; }
+  b[f] = ROT[(ROT.indexOf(b[f]) + 1) % 4]; SFX.rotate(); setMoves(moves + 1); refresh();
+}
+function doRemove(b) {
+  if (locked) return;
+  if (remove(state, b.pos).ok) { SFX.remove(); setMoves(moves + 1); refresh(); hint(); } else { SFX.deny(); hint('That one is fixed in place.'); }
+}
+function showWin() {
+  const last = levelIndex === LEVELS.length - 1, par = parOf(levelIndex), stars = assisted ? 1 : starsFor(moves, par), prev = bestOf(levelIndex);
+  const improved = !prev || stars > prev.stars || (stars === prev.stars && moves < prev.moves);
+  if (improved) { progress.best[LEVELS[levelIndex].title] = { stars, moves }; saveProgress(); }
+  if (improved || !progress.boards[LEVELS[levelIndex].title]) { progress.boards[LEVELS[levelIndex].title] = [...state.cells.values()].filter(b => !b.fixed).map(({ fixed, ...r }) => r); saveProgress(); }
+  $('winTitle').textContent = last ? 'Every core is lit' : `Level ${levelIndex + 1} complete`;
+  $('winStars').innerHTML = starHtml(stars);
+  const shown = bestOf(levelIndex);
+  $('winText').textContent = assisted ? 'Answer shown, so this one earns 1 star. Replay to earn more.' : `${moves} moves (par ${par}).` + (assisted ? '' : stars === 3 ? ' Perfect.' : ` Replay for ${stars === 2 ? 'the third' : 'more'} star${stars === 2 ? '' : 's'}.`) + (prev && !improved ? ` Best: ${shown.stars}★ in ${shown.moves}.` : '');
+  $('next').textContent = last ? 'All levels' : 'Next level';
+  $('win').classList.add('show');
+}
+function leaveAdmire(showCard) {
+  savedView = false;
+  document.body.classList.remove('admire'); $('admirebar').classList.remove('on'); controls.autoRotate = false; layerGrid.visible = true;
+  if (showCard && locked) $('win').classList.add('show');
+}
+$('admire').onclick = () => {                         // look at the finished board: card and HUD tuck away, camera drifts slowly
+  audio(); SFX.select(); $('win').classList.remove('show'); document.body.classList.add('admire'); layerGrid.visible = false; ghost.visible = false;
+  const b = bestOf(levelIndex); $('admireTitle').textContent = `${levelIndex + 1} · ${LEVELS[levelIndex].title}` + (b ? '  ' + '★'.repeat(b.stars) + '☆'.repeat(3 - b.stars) : '') + '  ·  drag to look around';
+  $('admNext').textContent = levelIndex === LEVELS.length - 1 ? 'All levels' : 'Next level';
+  $('admirebar').classList.add('on'); controls.autoRotate = true; controls.autoRotateSpeed = 1.4;
+};
+$('admBack').onclick = () => { audio(); SFX.select(); const sv = savedView; leaveAdmire(!sv); if (sv) showSelect(); };
+$('admNext').onclick = () => { leaveAdmire(false); $('next').onclick(); };
+$('admLevels').onclick = () => { leaveAdmire(false); audio(); SFX.select(); showSelect(); };
+$('next').onclick = () => levelIndex === LEVELS.length - 1 ? showSelect() : loadLevel(levelIndex + 1);
+$('replay').onclick = () => { audio(); SFX.remove(); loadLevel(levelIndex); };
+$('winLevels').onclick = () => { audio(); SFX.select(); showSelect(); };
+$('levels').onclick = () => { audio(); SFX.select(); showSelect(); };
+$('answer').onclick = () => { audio(); SFX.select(); showAnswer(); };
+$('reset').onclick = () => { audio(); SFX.remove(); loadLevel(levelIndex); };
+function paintMute() { $('mute').textContent = Snd.sfxOn ? 'Sound' : 'Sound off'; $('music').textContent = Snd.musOn ? 'Music' : 'Music off'; }
+$('mute').onclick = () => { Snd.toggleSfx(); paintMute(); };
+$('music').onclick = () => { Snd.toggleMusic(); paintMute(); };
+paintMute();
+
+/* ============================== INPUT ============================== */
+const ray = new THREE.Raycaster(), ndc = new THREE.Vector2(), plane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0), hit = new THREE.Vector3();
+function setRay(e) { const r = canvas.getBoundingClientRect(); ndc.set(((e.clientX - r.left) / r.width) * 2 - 1, -((e.clientY - r.top) / r.height) * 2 + 1); ray.setFromCamera(ndc, camera); }
+function pickCell() {
+  plane.constant = -(layer - GRID.LAYER_MIN);
+  if (!ray.ray.intersectPlane(plane, hit)) return null;
+  const x = Math.floor(hit.x + GRID.X / 2), z = Math.floor(hit.z + GRID.Z / 2);
+  return x >= 0 && x < GRID.X && z >= 0 && z < GRID.Z ? [x, layer, z] : null;
+}
+function pickPieces() {
+  const out = [];
+  for (const h of ray.intersectObjects(pieces.children, true)) { if (!h.object.userData.pick) continue; let o = h.object; while (o && !o.userData.block) o = o.parent; if (o && !out.includes(o.userData.block)) out.push(o.userData.block); }
+  return out;
+}
+let down = null, pressTimer = null;
+canvas.addEventListener('pointerdown', e => {
+  audio(); down = { x: e.clientX, y: e.clientY, t: performance.now(), moved: false, held: false };
+  setRay(e); const target = pickPieces().find(b => !b.fixed);
+  clearTimeout(pressTimer); down.target = target;
+  if (target) pressTimer = setTimeout(() => { if (down && !down.moved) { down.held = true; doRemove(target); } }, 520);
+});
+canvas.addEventListener('pointermove', e => {
+  if (down && Math.hypot(e.clientX - down.x, e.clientY - down.y) > 8) { down.moved = true; clearTimeout(pressTimer); }
+  if (e.pointerType === 'mouse' && !down) { setRay(e); const c = pickCell();
+    ghost.visible = !!(c && selected && !state.cells.has(key(...c))); if (ghost.visible) ghost.position.copy(cellPos(...c)).add(new THREE.Vector3(0, 0.5, 0)); }
+});
+canvas.addEventListener('pointerup', e => {
+  clearTimeout(pressTimer); const d = down; down = null;
+  if (!d || d.moved || d.held || e.button === 2) return;
+  if (d.target && performance.now() - d.t >= 500) return doRemove(d.target);   // hold registered even if the timer ran late
+  setRay(e); const hits = pickPieces(), cell = pickCell();
+  const free = cell && !state.cells.has(key(...cell));
+  if (selected && free) return doPlace(cell);                       // a piece in hand: the tile you tap is where it goes, whatever glass is in the way
+  if (cell && !free) { const here = state.cells.get(key(...cell)); if (here) return doRotate(here); }   // tapping a tile that holds a piece turns that piece
+  const onLayer = hits.find(b => b.pos[1] === layer && !b.fixed) || hits.find(b => b.pos[1] === layer);
+  if (onLayer) return doRotate(onLayer);
+  if (hits[0]) { if (hits[0].pos[1] !== layer && !hits[0].fixed) setLayer(hits[0].pos[1]); return doRotate(hits[0]); }
+});
+canvas.addEventListener('pointercancel', () => { clearTimeout(pressTimer); down = null; });
+canvas.addEventListener('contextmenu', e => { e.preventDefault(); setRay(e); const b = pickPieces().find(b => !b.fixed); if (b) doRemove(b); });
+
+/* ============================== LOOP ============================== */
+const clock = new THREE.Clock();
+function frame() {
+  const dt = Math.min(clock.getDelta(), 0.05), t = clock.elapsedTime;
+  for (const g of pieces.children) if (g.userData.spin) { g.userData.spin.rotation.y += dt * (g.userData.lit ? 2.6 : 0.6); g.userData.spin.position.y = 0.5 + Math.sin(t * 2 + g.position.x) * 0.03; }
+  beams.children.forEach((m, i) => { const p = 1 + Math.sin(t * 6 + i * 0.7) * 0.08; m.scale.x = m.scale.z = p; });
+  controls.update(); composer.render();
+  requestAnimationFrame(frame);
+}
+await loadExternalModels();
+loadLevel(levelIndex);
+if (!new URLSearchParams(location.search).has('play')) showSelect();
+frame();
+
+// Test + integration hooks
+window.__lumina = {
+  LEVELS, get state() { return state; }, get level() { return levelIndex; }, get layer() { return layer; }, get locked() { return locked; },
+  loadLevel, setLayer, showSelect, get assisted() { return assisted; }, get moves() { return moves; }, parOf, progress, trace: () => trace(state), externalModels: () => Object.keys(loadedGLTFModels),
+  cellToScreen(x, l, z, mid) { const v = cellPos(x, l, z); if (mid) v.y += 0.5; v.project(camera); const r = canvas.getBoundingClientRect();
+    return { x: r.left + (v.x + 1) / 2 * r.width, y: r.top + (1 - v.y) / 2 * r.height }; },
+};
+</script>
+</body>
+</html>
