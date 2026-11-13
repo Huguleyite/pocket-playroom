@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<title>Aetheria: Patchwork Realm · Test</title>
+<title>Aetheria: Patchwork Realm</title>
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <style>
   html,body{margin:0;height:100%;background:#0d0630;overflow:hidden;font-family:system-ui,-apple-system,"Segoe UI",sans-serif}
@@ -66,19 +66,18 @@
   "three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
 }}
 </script>
-<script>window.HERO_GLB={}</script>
+<script>window.HERO_GLB = {}; window.TILE_GLB = {};</script>
 <script src="hero_glb-1.js"></script>
 <script src="hero_glb-2.js"></script>
 <script src="hero_glb-3.js"></script>
 <script src="hero_glb-4.js"></script>
 <script src="hero_glb-5.js"></script>
 <script src="hero_glb-6.js"></script>
-<script>window.TILE_GLB={}</script>
 <script src="tile_glb-1.js"></script>
 </head>
 <body>
 <a class="return-pocket" href="https://pocketplayroom.com/#big-screen/aetheria">← Pocket Playroom</a>
-<div id="hud"><h1>Aetheria: Patchwork Realm · Test</h1>
+<div id="hud"><h1>Aetheria: Patchwork Realm</h1>
 <p>Drag = orbit &middot; wheel = zoom &middot; R = reset view</p></div>
 <div id="readout"></div>
 <script type="module">
@@ -219,6 +218,7 @@ const LEVELS = [
     layout: 'GGGFGGCG GGGGGRGG GGGGGGGG WWWGWWWW WWWGWWWW GGGGGGGG GGRGGGFG GGGGGGGG'.split(' '),
     starts: [[1,5],[3,5],[5,6]], enemies: raiders([[3,2],[1,1],[6,5]]) },
   { name: 'Crystal Quarry', goal: 'Hold the Node', point: [4,4],
+    platforms: [[4,3],[4,4],[5,3]], stairs: [[3,4,1,0],[4,5,0,-1]],
     layout: 'RRGGGGRR RGGCGGGR GGGRGGGG GGRGGCGG GGGGCRGG GGGGGGGG RGGGGGGR RRGGGGRR'.split(' '),
     starts: [[0,3],[1,4],[0,5]], enemies: raiders([[7,3],[6,2]]),
     wave: raiders([[7,5],[6,6]]) },
@@ -234,6 +234,1306 @@ const LEVELS = [
       ...raiders([[6,1]], 'captain'), ...raiders([[4,0],[5,2]], 'archer'), ...raiders([[4,3],[6,3]])
     ] }
 ];
+LEVELS.push(...[
+  {
+    "name": "Twin Bastions",
+    "goal": "Rout",
+    "point": null,
+    "layout": [
+      "FGGFGGGG",
+      "GGGGGGGG",
+      "GGGGGGGG",
+      "GGGGGGGG",
+      "GGGGGGGF",
+      "GGGGGGGG",
+      "GGGGGGGG",
+      "GGGGGGGF"
+    ],
+    "starts": [
+      [
+        0,
+        5
+      ],
+      [
+        1,
+        6
+      ],
+      [
+        0,
+        7
+      ]
+    ],
+    "enemies": [
+      {
+        "x": 6,
+        "y": 1,
+        "modelId": "raider",
+        "concealed": false
+      },
+      {
+        "x": 6,
+        "y": 5,
+        "modelId": "archer",
+        "concealed": false
+      },
+      {
+        "x": 5,
+        "y": 5,
+        "modelId": "raider",
+        "concealed": false
+      }
+    ],
+    "terraces": [
+      [
+        3,
+        0,
+        1
+      ],
+      [
+        4,
+        0,
+        2
+      ],
+      [
+        5,
+        0,
+        3
+      ],
+      [
+        6,
+        0,
+        3
+      ],
+      [
+        7,
+        0,
+        3
+      ],
+      [
+        3,
+        1,
+        1
+      ],
+      [
+        4,
+        1,
+        2
+      ],
+      [
+        5,
+        1,
+        3
+      ],
+      [
+        6,
+        1,
+        3
+      ],
+      [
+        7,
+        1,
+        3
+      ],
+      [
+        2,
+        2,
+        1
+      ],
+      [
+        3,
+        2,
+        2
+      ],
+      [
+        4,
+        2,
+        3
+      ],
+      [
+        5,
+        2,
+        3
+      ],
+      [
+        6,
+        2,
+        3
+      ],
+      [
+        7,
+        2,
+        3
+      ],
+      [
+        5,
+        3,
+        3
+      ],
+      [
+        6,
+        3,
+        3
+      ],
+      [
+        7,
+        3,
+        3
+      ],
+      [
+        6,
+        4,
+        1
+      ],
+      [
+        7,
+        4,
+        2
+      ],
+      [
+        3,
+        5,
+        1
+      ],
+      [
+        4,
+        5,
+        2
+      ],
+      [
+        5,
+        5,
+        3
+      ],
+      [
+        6,
+        5,
+        3
+      ],
+      [
+        7,
+        5,
+        3
+      ],
+      [
+        3,
+        6,
+        1
+      ],
+      [
+        4,
+        6,
+        2
+      ],
+      [
+        5,
+        6,
+        2
+      ],
+      [
+        6,
+        6,
+        3
+      ],
+      [
+        7,
+        6,
+        3
+      ],
+      [
+        4,
+        7,
+        1
+      ],
+      [
+        5,
+        7,
+        2
+      ],
+      [
+        6,
+        7,
+        2
+      ],
+      [
+        7,
+        7,
+        2
+      ]
+    ]
+  },
+  {
+    "name": "Cascade Crossing",
+    "goal": "Crossing",
+    "point": [
+      6,
+      0
+    ],
+    "layout": [
+      "FGGFGGCG",
+      "GGGGGGGG",
+      "GGGGGGGG",
+      "WWWGWGWW",
+      "GGGGGGGF",
+      "GGGGGGGG",
+      "GGGGGGGG",
+      "GGGGGGGF"
+    ],
+    "starts": [
+      [
+        0,
+        5
+      ],
+      [
+        1,
+        6
+      ],
+      [
+        0,
+        7
+      ]
+    ],
+    "enemies": [
+      {
+        "x": 5,
+        "y": 2,
+        "modelId": "raider",
+        "concealed": false
+      },
+      {
+        "x": 6,
+        "y": 4,
+        "modelId": "archer",
+        "concealed": false
+      },
+      {
+        "x": 4,
+        "y": 2,
+        "modelId": "raider",
+        "concealed": false
+      }
+    ],
+    "terraces": [
+      [
+        2,
+        0,
+        1
+      ],
+      [
+        3,
+        0,
+        2
+      ],
+      [
+        4,
+        0,
+        3
+      ],
+      [
+        5,
+        0,
+        4
+      ],
+      [
+        6,
+        0,
+        4
+      ],
+      [
+        7,
+        0,
+        4
+      ],
+      [
+        2,
+        1,
+        1
+      ],
+      [
+        3,
+        1,
+        2
+      ],
+      [
+        4,
+        1,
+        3
+      ],
+      [
+        5,
+        1,
+        4
+      ],
+      [
+        6,
+        1,
+        4
+      ],
+      [
+        7,
+        1,
+        4
+      ],
+      [
+        2,
+        2,
+        1
+      ],
+      [
+        3,
+        2,
+        2
+      ],
+      [
+        4,
+        2,
+        3
+      ],
+      [
+        5,
+        2,
+        4
+      ],
+      [
+        6,
+        2,
+        4
+      ],
+      [
+        7,
+        2,
+        4
+      ],
+      [
+        6,
+        3,
+        3
+      ],
+      [
+        7,
+        3,
+        4
+      ],
+      [
+        5,
+        4,
+        1
+      ],
+      [
+        6,
+        4,
+        2
+      ],
+      [
+        7,
+        4,
+        3
+      ],
+      [
+        4,
+        5,
+        1
+      ],
+      [
+        5,
+        5,
+        2
+      ],
+      [
+        6,
+        5,
+        3
+      ],
+      [
+        7,
+        5,
+        4
+      ],
+      [
+        3,
+        6,
+        1
+      ],
+      [
+        4,
+        6,
+        2
+      ],
+      [
+        5,
+        6,
+        2
+      ],
+      [
+        6,
+        6,
+        3
+      ],
+      [
+        7,
+        6,
+        4
+      ],
+      [
+        4,
+        7,
+        1
+      ],
+      [
+        5,
+        7,
+        2
+      ],
+      [
+        6,
+        7,
+        3
+      ],
+      [
+        7,
+        7,
+        4
+      ]
+    ]
+  },
+  {
+    "name": "Crown of Quartz",
+    "goal": "Hold the Node",
+    "point": [
+      4,
+      4
+    ],
+    "layout": [
+      "FGGFGGGG",
+      "GGGGGGGG",
+      "GGGGGGGG",
+      "GGGGGGGG",
+      "GGGGCGGF",
+      "GGGGGGGG",
+      "GGGGGGGG",
+      "GGGGGGGF"
+    ],
+    "starts": [
+      [
+        0,
+        5
+      ],
+      [
+        1,
+        6
+      ],
+      [
+        0,
+        7
+      ]
+    ],
+    "enemies": [
+      {
+        "x": 6,
+        "y": 2,
+        "modelId": "raider",
+        "concealed": false
+      },
+      {
+        "x": 6,
+        "y": 5,
+        "modelId": "archer",
+        "concealed": false
+      },
+      {
+        "x": 4,
+        "y": 4,
+        "modelId": "raider",
+        "concealed": false
+      }
+    ],
+    "terraces": [
+      [
+        3,
+        0,
+        1
+      ],
+      [
+        4,
+        0,
+        2
+      ],
+      [
+        5,
+        0,
+        3
+      ],
+      [
+        6,
+        0,
+        4
+      ],
+      [
+        7,
+        0,
+        4
+      ],
+      [
+        3,
+        1,
+        1
+      ],
+      [
+        4,
+        1,
+        2
+      ],
+      [
+        5,
+        1,
+        4
+      ],
+      [
+        6,
+        1,
+        4
+      ],
+      [
+        7,
+        1,
+        4
+      ],
+      [
+        3,
+        2,
+        1
+      ],
+      [
+        4,
+        2,
+        2
+      ],
+      [
+        5,
+        2,
+        4
+      ],
+      [
+        6,
+        2,
+        4
+      ],
+      [
+        7,
+        2,
+        4
+      ],
+      [
+        2,
+        3,
+        1
+      ],
+      [
+        3,
+        3,
+        2
+      ],
+      [
+        4,
+        3,
+        3
+      ],
+      [
+        5,
+        3,
+        4
+      ],
+      [
+        6,
+        3,
+        4
+      ],
+      [
+        7,
+        3,
+        4
+      ],
+      [
+        3,
+        4,
+        2
+      ],
+      [
+        4,
+        4,
+        4
+      ],
+      [
+        5,
+        4,
+        4
+      ],
+      [
+        6,
+        4,
+        4
+      ],
+      [
+        7,
+        4,
+        4
+      ],
+      [
+        3,
+        5,
+        2
+      ],
+      [
+        4,
+        5,
+        3
+      ],
+      [
+        5,
+        5,
+        4
+      ],
+      [
+        6,
+        5,
+        4
+      ],
+      [
+        7,
+        5,
+        4
+      ],
+      [
+        3,
+        6,
+        1
+      ],
+      [
+        4,
+        6,
+        2
+      ],
+      [
+        5,
+        6,
+        3
+      ],
+      [
+        6,
+        6,
+        4
+      ],
+      [
+        7,
+        6,
+        4
+      ],
+      [
+        4,
+        7,
+        1
+      ],
+      [
+        5,
+        7,
+        2
+      ],
+      [
+        6,
+        7,
+        3
+      ],
+      [
+        7,
+        7,
+        3
+      ]
+    ]
+  },
+  {
+    "name": "Cloudstep Pass",
+    "goal": "Ambush",
+    "point": [
+      7,
+      0
+    ],
+    "layout": [
+      "FGGFGGGG",
+      "GGGGGGGG",
+      "GGGGGGGG",
+      "GGGGGGGG",
+      "GGGGGGGF",
+      "GGGGGGGG",
+      "GGGGGGGG",
+      "GGGGGGGF"
+    ],
+    "starts": [
+      [
+        0,
+        5
+      ],
+      [
+        1,
+        6
+      ],
+      [
+        0,
+        7
+      ]
+    ],
+    "enemies": [
+      {
+        "x": 6,
+        "y": 1,
+        "modelId": "raider",
+        "concealed": true
+      },
+      {
+        "x": 5,
+        "y": 2,
+        "modelId": "archer",
+        "concealed": false
+      },
+      {
+        "x": 6,
+        "y": 5,
+        "modelId": "raider",
+        "concealed": false
+      }
+    ],
+    "terraces": [
+      [
+        0,
+        0,
+        1
+      ],
+      [
+        1,
+        0,
+        2
+      ],
+      [
+        2,
+        0,
+        3
+      ],
+      [
+        3,
+        0,
+        4
+      ],
+      [
+        4,
+        0,
+        5
+      ],
+      [
+        5,
+        0,
+        5
+      ],
+      [
+        6,
+        0,
+        5
+      ],
+      [
+        7,
+        0,
+        5
+      ],
+      [
+        0,
+        1,
+        1
+      ],
+      [
+        1,
+        1,
+        2
+      ],
+      [
+        2,
+        1,
+        3
+      ],
+      [
+        3,
+        1,
+        4
+      ],
+      [
+        4,
+        1,
+        5
+      ],
+      [
+        5,
+        1,
+        5
+      ],
+      [
+        6,
+        1,
+        5
+      ],
+      [
+        7,
+        1,
+        5
+      ],
+      [
+        5,
+        2,
+        5
+      ],
+      [
+        6,
+        2,
+        5
+      ],
+      [
+        7,
+        2,
+        5
+      ],
+      [
+        5,
+        3,
+        5
+      ],
+      [
+        6,
+        3,
+        5
+      ],
+      [
+        7,
+        3,
+        5
+      ],
+      [
+        3,
+        4,
+        1
+      ],
+      [
+        4,
+        4,
+        2
+      ],
+      [
+        5,
+        4,
+        3
+      ],
+      [
+        6,
+        4,
+        4
+      ],
+      [
+        7,
+        4,
+        5
+      ],
+      [
+        2,
+        5,
+        1
+      ],
+      [
+        3,
+        5,
+        2
+      ],
+      [
+        4,
+        5,
+        3
+      ],
+      [
+        5,
+        5,
+        4
+      ],
+      [
+        6,
+        5,
+        5
+      ],
+      [
+        7,
+        5,
+        5
+      ],
+      [
+        3,
+        6,
+        1
+      ],
+      [
+        4,
+        6,
+        2
+      ],
+      [
+        5,
+        6,
+        3
+      ],
+      [
+        6,
+        6,
+        4
+      ],
+      [
+        7,
+        6,
+        5
+      ],
+      [
+        4,
+        7,
+        1
+      ],
+      [
+        5,
+        7,
+        2
+      ],
+      [
+        6,
+        7,
+        3
+      ],
+      [
+        7,
+        7,
+        4
+      ]
+    ]
+  },
+  {
+    "name": "Citadel of the Last Banner",
+    "goal": "Camp Assault",
+    "point": [
+      5,
+      1
+    ],
+    "layout": [
+      "FGGFGGGG",
+      "GGGGGBGG",
+      "GGGGGGGG",
+      "GGGGGGGG",
+      "GGGGGGGF",
+      "GGGGGGGG",
+      "GGGGGGGG",
+      "GGGGGGGF"
+    ],
+    "starts": [
+      [
+        4,
+        7
+      ],
+      [
+        3,
+        7
+      ],
+      [
+        2,
+        7
+      ]
+    ],
+    "enemies": [
+      {
+        "x": 6,
+        "y": 1,
+        "modelId": "captain",
+        "concealed": false
+      },
+      {
+        "x": 4,
+        "y": 1,
+        "modelId": "archer",
+        "concealed": false
+      },
+      {
+        "x": 5,
+        "y": 2,
+        "modelId": "raider",
+        "concealed": false
+      },
+      {
+        "x": 6,
+        "y": 4,
+        "modelId": "raider",
+        "concealed": false
+      }
+    ],
+    "terraces": [
+      [
+        0,
+        0,
+        4
+      ],
+      [
+        1,
+        0,
+        5
+      ],
+      [
+        2,
+        0,
+        6
+      ],
+      [
+        3,
+        0,
+        6
+      ],
+      [
+        4,
+        0,
+        6
+      ],
+      [
+        5,
+        0,
+        6
+      ],
+      [
+        6,
+        0,
+        6
+      ],
+      [
+        7,
+        0,
+        6
+      ],
+      [
+        0,
+        1,
+        3
+      ],
+      [
+        1,
+        1,
+        5
+      ],
+      [
+        2,
+        1,
+        6
+      ],
+      [
+        3,
+        1,
+        6
+      ],
+      [
+        4,
+        1,
+        6
+      ],
+      [
+        5,
+        1,
+        6
+      ],
+      [
+        6,
+        1,
+        6
+      ],
+      [
+        7,
+        1,
+        6
+      ],
+      [
+        0,
+        2,
+        2
+      ],
+      [
+        1,
+        2,
+        5
+      ],
+      [
+        2,
+        2,
+        6
+      ],
+      [
+        3,
+        2,
+        5
+      ],
+      [
+        4,
+        2,
+        5
+      ],
+      [
+        5,
+        2,
+        5
+      ],
+      [
+        6,
+        2,
+        5
+      ],
+      [
+        7,
+        2,
+        6
+      ],
+      [
+        0,
+        3,
+        1
+      ],
+      [
+        1,
+        3,
+        5
+      ],
+      [
+        2,
+        3,
+        6
+      ],
+      [
+        3,
+        3,
+        4
+      ],
+      [
+        4,
+        3,
+        4
+      ],
+      [
+        5,
+        3,
+        4
+      ],
+      [
+        6,
+        3,
+        4
+      ],
+      [
+        7,
+        3,
+        5
+      ],
+      [
+        1,
+        4,
+        5
+      ],
+      [
+        2,
+        4,
+        6
+      ],
+      [
+        3,
+        4,
+        3
+      ],
+      [
+        4,
+        4,
+        3
+      ],
+      [
+        5,
+        4,
+        3
+      ],
+      [
+        6,
+        4,
+        3
+      ],
+      [
+        7,
+        4,
+        4
+      ],
+      [
+        1,
+        5,
+        5
+      ],
+      [
+        2,
+        5,
+        6
+      ],
+      [
+        3,
+        5,
+        2
+      ],
+      [
+        4,
+        5,
+        2
+      ],
+      [
+        5,
+        5,
+        2
+      ],
+      [
+        6,
+        5,
+        2
+      ],
+      [
+        7,
+        5,
+        3
+      ],
+      [
+        3,
+        6,
+        1
+      ],
+      [
+        4,
+        6,
+        1
+      ],
+      [
+        5,
+        6,
+        1
+      ],
+      [
+        6,
+        6,
+        1
+      ],
+      [
+        7,
+        6,
+        2
+      ],
+      [
+        7,
+        7,
+        1
+      ]
+    ]
+  }
+]);
 let levelIndex = 0;
 const activeLevel = () => LEVELS[levelIndex];
 
@@ -250,9 +1550,12 @@ function makeBoard(level = PATCHWORK_MEADOW) {
   }
   if (level.layout === LAYOUT) for (const [x, y] of FOREST_TILES) tiles[y][x].type = 'forest';
   for (const [x, y] of level.bridge ?? []) tiles[y][x].bridge = true;
+  for (const [x,y] of level.platforms ?? []) tiles[y][x].lift = 0.8;
+  for (const [x,y,dx,dy] of level.stairs ?? []) Object.assign(tiles[y][x], { lift: 0.4, stair: [dx,dy] });
+  for (const [x,y,tier] of level.terraces ?? []) tiles[y][x].lift = tier * 0.4;
   return tiles;
 }
-const tileTop = (t) => t.bridge && kit.Tile_Bridge_2Tile ? 1.05 : t.elevation;               // top surface height (water = surface 0.8)
+const tileTop = (t) => (t.bridge && kit.Tile_Bridge_2Tile ? 1.05 : t.elevation) + (t.lift ?? 0);               // top surface height (water = surface 0.8)
 const TILE_LABEL = { grass: 'Grass', water: 'Water', rock: 'Rock', crystal: 'Crystal Node', forest: 'Forest' };
 
 /* =====================================================================
@@ -303,7 +1606,8 @@ function orbitCamera() {
 orbitCamera();
 function fitCamera() {
   const aspect = innerWidth / innerHeight;
-  const halfH = Math.max(VIEW_HALF_H, VIEW_HALF_W / aspect) / zoom;
+  const rise = Math.max(0, ...(activeLevel().terraces ?? []).map(([, , tier]) => tier * 0.4));
+  const halfH = Math.max(VIEW_HALF_H + rise * 0.6, VIEW_HALF_W / aspect) / zoom;
   camera.left = -halfH * aspect; camera.right = halfH * aspect;
   camera.top = halfH; camera.bottom = -halfH;
   camera.updateProjectionMatrix();
@@ -528,7 +1832,7 @@ function dressBoard(level) {
       tree.position.set(tw(x) + ox, 0.98, tw(y) + oz);
       terrainDressing.add(tree);
     }
-  } else if (level.name === 'Raider Camp') {
+  } else if (level.goal === 'Camp Assault') {
     for (const [x, y] of [[3,0],[4,0],[6,0],[7,0],[7,1],[7,2],[7,3]]) {
       const side = x === 7;
       const x0 = tw(x) + (side ? 0.41 : 0);
@@ -541,7 +1845,8 @@ function dressBoard(level) {
       }
     }
     campFlag = new THREE.Group();
-    campFlag.position.set(tw(5), 1, tw(1));
+    const [x,y] = level.point;
+    campFlag.position.set(tw(x), tileTop(board[y][x]), tw(y));
     terrainDressing.add(campFlag);
     add(campFlag, rbox(0.08, 1.62, 0.08, 0.014), timberMat, 0, 0.81, 0);
     add(campFlag, rbox(0.59, 0.06, 0.06, 0.012), timberMat, 0, 1.53, 0);
@@ -554,7 +1859,17 @@ function dressBoard(level) {
 
 function buildTile(t) {
   const g = new THREE.Group();
-  g.position.set(tw(t.x), 0, tw(t.y));
+  g.position.set(tw(t.x), t.lift ?? 0, tw(t.y));
+  if (t.lift) add(g, rbox(0.99, t.lift, 0.99, 0.015), slateMat, 0, 1 - t.lift / 2, 0);
+  if (t.stair) {
+    const [dx, dy] = t.stair;
+    for (let i = 0; i < 4; i++) {
+      const offset = (i - 1.5) * 0.24;
+      const step = add(g, rbox(0.76, 0.09 + i * 0.10, 0.24, 0.012), paleSlateMat,
+        dx * offset, 0.82 + i * 0.08, dy * offset);
+      step.rotation.y = dx ? Math.PI / 2 : 0;
+    }
+  }
   add(g, rbox(1, 1.2, 1, 0.012), M_UNDER, 0, -0.6, 0);               // clean square underside block
   const inst = kit[kitKey(t)].clone(true);
   inst.rotation.y = Math.floor(hash(t.x, t.y) * 4) * Math.PI / 2;     // vary details; footprint stays square
@@ -775,6 +2090,15 @@ function wardenAction(tiles, roster, kind, x, y, turn) {
   return { mp: warden.mp - cost - landingCost, impacts, destination };
 }
 
+function stepCost(unit, from, to) {
+  const uphill = activeLevel().terraces && (to.lift ?? 0) - (from.lift ?? 0) > 0.01;
+  return terrainMoveCost(unit, to) + (uphill ? 1 : 0);
+}
+
+function canTraversePlatform(from, to) {
+  return Math.abs((from.lift ?? 0) - (to.lift ?? 0)) <= 0.41;
+}
+
 function phase2Move(tiles, roster, id, x, y) {
   const hero = roster.find(h => h.id === id);
   if (!hero) return { error: 'Select a hero first.' };
@@ -786,7 +2110,8 @@ function phase2Move(tiles, roster, id, x, y) {
   if (roster.some(h => h.x === x && h.y === y)) return { error: 'That tile is occupied.' };
 
   if (tile.barrier) return { error: 'Units cannot stop on a Seismic Barrier.' };
-  const cost = terrainMoveCost(hero, tile);
+  if (!canTraversePlatform(tiles[hero.y][hero.x], tile)) return { error: 'Ledge too steep. Use the stairs.' };
+  const cost = stepCost(hero, tiles[hero.y][hero.x], tile);
   if (hero.mp < cost) return { error: 'This move costs ' + cost + ' MP.' };
   const refund = hero.id === 'weaver' && tile.terraformed ? 1 : 0;
   return { x, y, baseY: tileTop(tile), mp: Math.min(5, hero.mp - cost + refund) };
@@ -888,7 +2213,7 @@ function weaverAction(tiles, roster, kind, x, y, turn, terrain) {
   function blocked() {
     // Intersect the center-to-center line with interiors of intermediate cells.
     return tiles.flat().some(t => {
-      if (t === tile || distance(t, weaver) === 0 || t.type !== 'rock' || t.elevation < 2) return false;
+      if (t === tile || distance(t, weaver) === 0) return false;
       let enter = 0, exit = 1;
       for (const [start, delta, center] of [[weaver.x, dx, t.x], [weaver.y, dy, t.y]]) {
         if (!delta) {
@@ -900,7 +2225,13 @@ function weaverAction(tiles, roster, kind, x, y, turn, terrain) {
         enter = Math.max(enter, Math.min(a, b));
         exit = Math.min(exit, Math.max(a, b));
       }
-      return enter < exit;
+      if (enter >= exit) return false;
+      if (t.type === 'rock' && t.elevation >= 2) return true;
+      if (!t.lift) return false;
+      const originHeight = tileTop(tiles[weaver.y][weaver.x]);
+      const rise = tileTop(tile) - originHeight;
+      const sightHeight = originHeight + rise * (rise >= 0 ? enter : exit) + 0.6;
+      return tileTop(t) >= sightHeight;
     });
   }
 
@@ -1019,14 +2350,17 @@ function aimedShot(tiles, roster, archer, origin, target) {
 
   const dx = target.x - origin.x, dy = target.y - origin.y;
   const range = Math.max(Math.abs(dx), Math.abs(dy));
-  const maxRange = origin.type === 'rock' ? 5 : 4;
+  const destination = tiles[target.y][target.x];
+  const highGround = (origin.lift ?? 0) > (destination.lift ?? 0) + 0.41;
+  const maxRange = origin.type === 'rock' || highGround ? 5 : 4;
   if (range < 2 || range > maxRange || (dx && dy && Math.abs(dx) !== Math.abs(dy))) return null;
 
   for (let step = 1; step < range; step++) {
     const x = origin.x + step * Math.sign(dx);
     const y = origin.y + step * Math.sign(dy);
     const tile = tiles[y]?.[x];
-    if (!tile || tile.type === 'rock' || roster.some(unit =>
+    const shotHeight = tileTop(origin) + (tileTop(destination) - tileTop(origin)) * step / range + 0.6;
+    if (!tile || tileTop(tile) >= shotHeight || tile.type === 'rock' || roster.some(unit =>
       unit !== archer && unit.hp > 0 && unit.x === x && unit.y === y)) return null;
   }
 
@@ -1056,7 +2390,8 @@ function enemyPlan(board, roster, enemy) {
     for (const [dx, dy] of [[1,0], [0,1], [-1,0], [0,-1]]) {
       const next = board[tile.y + dy]?.[tile.x + dx];
       if (!next || occupied.has(next) || next.barrier) continue;
-      const nextCost = cost + terrainMoveCost(enemy, next);
+      if (!canTraversePlatform(tile, next)) continue;
+      const nextCost = cost + stepCost(enemy, tile, next);
       if (nextCost >= (distances.get(next) ?? Infinity)) continue;
       distances.set(next, nextCost);
       previous.set(next, tile);
@@ -1366,7 +2701,27 @@ function initPhase2() {
     borderRadius: '7px', font: '12px system-ui'
   });
   const trayTitle = document.createElement('div');
-  trayTitle.style.marginBottom = '5px';
+  const trayHeader = document.createElement('div');
+  trayHeader.style.cssText = 'display:flex;align-items:center;justify-content:space-between;gap:8px';
+  const trayBody = document.createElement('div');
+  trayBody.id = 'hero-ability-menu';
+  trayBody.style.marginTop = '5px';
+  const trayToggle = document.createElement('button');
+  trayToggle.type = 'button';
+  trayToggle.setAttribute('aria-controls', trayBody.id);
+  trayToggle.style.cssText = 'flex:none;min-height:32px;padding:3px 8px;border:1px solid #526488;border-radius:7px;background:#1c2946;color:#eef6ff;font:600 11px system-ui;cursor:pointer';
+  function updateTrayToggle() {
+    const expanded = !trayBody.hidden;
+    trayToggle.textContent = expanded ? '−' : '+ Powers';
+    trayToggle.setAttribute('aria-label', expanded ? 'Minimize abilities' : 'Expand abilities');
+    trayToggle.setAttribute('aria-expanded', String(expanded));
+  }
+  trayToggle.addEventListener('click', () => {
+    trayBody.hidden = !trayBody.hidden;
+    (trayBody.hidden ? panel : trayBody).append(toast);
+    updateTrayToggle();
+  });
+  updateTrayToggle();
   const pips = document.createElement('div');
   pips.style.cssText = 'display:flex;gap:3px;margin:4px 0 7px';
   const mpPips = Array.from({ length: 5 }, () => {
@@ -1379,7 +2734,9 @@ function initPhase2() {
   passive.style.cssText = 'font-size:11px;color:#bbd5ef';
   const trayControls = document.createElement('div');
   trayControls.className = 'power-controls';
-  tray.append(trayTitle, passive, pips, trayControls);
+  trayHeader.append(trayTitle, trayToggle);
+  trayBody.append(passive, pips, trayControls);
+  tray.append(trayHeader, trayBody);
   document.body.append(tray);
   const boardEnd = document.createElement('div');
   let turnReady = false;
@@ -1425,10 +2782,32 @@ function initPhase2() {
   }, boardEnd);
   endButton.style.cssText = 'cursor:pointer;border:2px solid #e8cb83;border-radius:999px;background:#423268;color:#fff4d5;padding:7px 17px;font:800 14px system-ui;box-shadow:0 3px 0 #211735';
 
+  const progressKey = 'aetheria.campaign.wins.v1';
+  let completedLevels = 0;
+  try {
+    const saved = Number(localStorage.getItem(progressKey));
+    if (Number.isInteger(saved) && saved >= 0 && saved <= LEVELS.length) completedLevels = saved;
+  } catch {
+    // The campaign still works for the current session.
+  }
   const levelPicker = document.createElement('select');
-  levelPicker.setAttribute('aria-label', 'Choose a level');
-  LEVELS.forEach((level, index) => levelPicker.add(new Option((index + 1) + '. ' + level.name, index)));
-  levelPicker.addEventListener('change', () => startLevel(Number(levelPicker.value)));
+  levelPicker.setAttribute('aria-label', 'Replay a completed level');
+  levelPicker.addEventListener('change', () => {
+    if (levelPicker.value !== '' && Number(levelPicker.value) < completedLevels) {
+      startLevel(Number(levelPicker.value));
+    }
+  });
+  const continueCampaign = button('Continue campaign', () => startLevel(completedLevels));
+  function updateCampaignControls() {
+    levelPicker.hidden = completedLevels === 0;
+    levelPicker.replaceChildren(new Option('Replay a completed level', ''));
+    for (let index = 0; index < completedLevels; index++) {
+      levelPicker.add(new Option((index + 1) + '. ' + LEVELS[index].name, index));
+    }
+    levelPicker.value = '';
+    continueCampaign.hidden = completedLevels >= LEVELS.length || levelIndex >= completedLevels;
+    continueCampaign.disabled = enemyActing || playerAttacking;
+  }
   panel.append(levelPicker);
   button('Restart encounter', () => startLevel(levelIndex));
   const icons = { attack: '⚔', terraform: '▧', resonance: '✦', shift: '⇄', quake: 'ϟ',
@@ -1677,7 +3056,10 @@ function initPhase2() {
     return '';
   }
 
+  let pendingTouchMove = null;
+
   function refresh() {
+    pendingTouchMove = null;
     updateAmbush();
     const previous = outcome;
     outcome = levelResult();
@@ -1689,7 +3071,7 @@ function initPhase2() {
     }
     endButton.disabled = Boolean(outcome) || enemyActing || playerAttacking;
     levelPicker.disabled = enemyActing || playerAttacking;
-    levelPicker.value = String(levelIndex);
+    updateCampaignControls();
     const living = heroes.filter(hero => hero.hp > 0);
     const ready = !outcome && !enemyActing && !playerAttacking && !partyHasMove(board, living);
     endButton.title = ready ? 'No allies can move' : 'End the turn early';
@@ -1729,9 +3111,9 @@ function initPhase2() {
     const level = activeLevel();
     const objective = {
       Rout: 'Defeat all Raiders',
-      Crossing: 'Reach the crystal at (6,0)',
+      Crossing: 'Reach the crystal at (' + level.point + ')',
       'Hold the Node': 'Hold the center crystal · ' + heldTurns + '/5 turns',
-      Ambush: 'Reach (0,0)',
+      Ambush: 'Reach (' + level.point + ')',
       'Camp Assault': 'Destroy the banner at (5,1) · ' + (banner?.hp ?? 0) + ' HP'
     }[level.goal];
     health.textContent = level.name + ' · ' + objective + ' · Coins ' + collected + '/3';
@@ -1753,7 +3135,7 @@ function initPhase2() {
       mpPips.forEach((pip, i) => {
         pip.style.background = i < selected.mp ? heroColors[selected.id] : '#364468';
       });
-      tray.append(toast);
+      (trayBody.hidden ? panel : trayBody).append(toast);
     } else {
       panel.append(toast);
     }
@@ -1793,6 +3175,14 @@ function initPhase2() {
     return ray.intersectObjects(roots, true);
   }
 
+  function archerExposure(unit, tile) {
+    const projected = { ...unit, x: tile.x, y: tile.y };
+    const roster = heroes.map(hero => hero === unit ? projected : hero);
+    const count = heroes.filter(archer => archer.mesh.visible &&
+      aimedShot(board, roster, archer, board[archer.y][archer.x], projected)).length;
+    return count ? count + (count === 1 ? ' Archer has' : ' Archers have') + ' a clear shot' : '';
+  }
+
   function hoverTile(tile) {
     if (hoveredTile !== tile) {
       hoveredTile = tile;
@@ -1803,6 +3193,19 @@ function initPhase2() {
     readout.textContent = tile
       ? 'Tile ' + tile.x + ',' + tile.y + '  ' + TILE_LABEL[tile.type] + '  (top ' + tileTop(tile) + ')'
       : '';
+    if (!tile || !selected || ability || outcome ||
+        Math.abs(tile.x - selected.x) + Math.abs(tile.y - selected.y) !== 1) return;
+    const move = phase2Move(board, heroes.filter(h => h.hp > 0), selected.id, tile.x, tile.y);
+    if (move.error) {
+      readout.textContent += ' · ' + move.error;
+      return;
+    }
+    const origin = board[selected.y][selected.x];
+    const cost = stepCost(selected, origin, tile);
+    const climb = cost > terrainMoveCost(selected, tile) ? ' (includes +1 uphill)' : '';
+    const refund = selected.id === 'weaver' && tile.terraformed ? ' · +1 MP refund' : '';
+    const exposure = archerExposure(selected, tile);
+    readout.textContent += ' · ' + cost + ' MP' + climb + refund + (exposure ? ' · ' + exposure : '');
   }
 
   function pickBoard(point) {
@@ -1883,7 +3286,7 @@ function initPhase2() {
           Math.hypot(event.clientX - drag.x, event.clientY - drag.y) < 12) {
         const rect = canvas.getBoundingClientRect();
         if (event.clientX >= rect.left && event.clientX < rect.right &&
-            event.clientY >= rect.top && event.clientY < rect.bottom) activateBoard(event);
+            event.clientY >= rect.top && event.clientY < rect.bottom) activateBoard(event, true);
       }
     }
     if (fingers.delete(event.pointerId) && pinch) {
@@ -1984,7 +3387,7 @@ function initPhase2() {
         continue;
       }
       for (const tile of enemyPlan(board, heroes, enemy)) {
-        const cost = terrainMoveCost(enemy, tile);
+        const cost = stepCost(enemy, board[enemy.y][enemy.x], tile);
         if (mp < cost) break;
         place(enemy, tile);
         mp -= cost;
@@ -2400,10 +3803,12 @@ function initPhase2() {
     activateBoard(event);
   });
 
-  async function activateBoard(event) {
+  async function activateBoard(event, touch = false) {
     if (outcome || enemyActing || playerAttacking) return;
     const active = heroes.filter(hero => hero.hp > 0);
     const { hero, tile } = pickBoard(event);
+    const confirmedMove = touch && pendingTouchMove === tile;
+    pendingTouchMove = null;
     if (ability === 'attack') {
       const attack = basicAttack(board, selected, hero);
       if (!attack) return notify('Choose an adjacent enemy or the camp banner. Attack costs 2 MP.');
@@ -2427,16 +3832,28 @@ function initPhase2() {
     }
     if (ability) return cast(tile);
     if (hero?.team === 'player') return select(hero);
-    if (hero) return notify(hero.name + ' · ' + hero.hp + '/' + (ENEMY_STATS[hero.modelId]?.hp ?? 12) + ' HP');
+    if (hero) {
+      const shot = selected && aimedShot(board, active, hero, board[hero.y][hero.x], selected);
+      return notify(hero.name + ' · ' + hero.hp + '/' + (ENEMY_STATS[hero.modelId]?.hp ?? 12) + ' HP' +
+        (hero.modelId === 'archer' && selected ? (shot ? ' · Clear shot at ' + selected.name :
+          ' · No clear shot at ' + selected.name) : ''));
+    }
 
     const move = phase2Move(board, active, selected?.id, tile?.x, tile?.y);
     if (move.error) return notify(move.error);
+
+    if (touch && !confirmedMove) {
+      pendingTouchMove = tile;
+      hoverTile(tile);
+      return notify(readout.textContent + ' · Tap again to move');
+    }
 
     selected.mp = move.mp;
     const pickup = place(selected, tile);
     hoverTile(tile);
     refresh();
-    notify(selected.name + ' moved. ' + move.mp + ' MP left.' + pickup);
+    const exposure = archerExposure(selected, tile);
+    notify(selected.name + ' moved. ' + move.mp + ' MP left.' + pickup + (exposure ? ' ' + exposure + '.' : ''));
   }
 
   function makeHealthTag(hero) {
@@ -2529,6 +3946,12 @@ function initPhase2() {
   document.body.append(results);
 
   function celebrate() {
+    completedLevels = Math.max(completedLevels, levelIndex + 1);
+    try {
+      localStorage.setItem(progressKey, String(completedLevels));
+    } catch {
+      // Keep the win in memory when browser storage is unavailable.
+    }
     resultTitle.textContent = activeLevel().name + ' secured!';
     const defeated = heroes.filter(hero => hero.team === 'enemy' && hero.hp <= 0 && !hero.pending).length;
     resultStats.textContent = defeated + ' Raiders defeated · ' + turn + ' turns · ' + collected + '/3 coins';
@@ -2551,9 +3974,10 @@ function initPhase2() {
   }
 
   function startLevel(index) {
-    if (!LEVELS[index] || enemyActing || playerAttacking) return;
+    if (!LEVELS[index] || index > completedLevels || enemyActing || playerAttacking) return;
     if (results.open) results.close();
     levelIndex = index;
+    fitCamera();
     selected = null;
     ability = null;
     outcome = null;
@@ -2580,6 +4004,8 @@ function initPhase2() {
     for (const tile of board.flat()) {
       delete tile.barrier;
       delete tile.bridge;
+      delete tile.lift;
+      delete tile.stair;
       changeTile(tile, freshBoard[tile.y][tile.x]);
     }
     drawBridge(activeLevel());
