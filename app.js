@@ -1,7 +1,7 @@
 (() => {
   'use strict';
   const wilds={id:'wilds',name:'Little Wilds',category:'Gentle garden-restoration puzzle',help:'Restore ten gardens with water, sunlight, shade and little crossings. Best on laptop or tablet; phones supported.'};const games = [
-    {id:'lumina-pillars-3d',genre:'Logic',name:'Lumina Pillars 3D',category:'Replayable · Beam-routing puzzle',line:'Route the beam. Light every core.',tile:'#ded8fa',ink:'#52368c',art:['✦'],href:'/games/lumina-pillars/lumina-pillars.html',cardDetail:'18 levels · Best on a recent phone or desktop'},
+    {id:'lumina-pillars-3d',genre:'Logic',name:'Lumina Pillars 3D',category:'Replayable · Beam-routing puzzle',line:'Route the beam. Light every core.',tile:'#ded8fa',ink:'#52368c',art:['✦'],href:'/games/lumina-pillars/lumina-pillars.html',cardDetail:'36 levels · Best on a recent phone or desktop'},
     {id:'lumina-pillars-2d',genre:'Logic',name:'Lumina Pillars 2D',category:'Replayable · Beam-routing puzzle',line:'Route the beam. Light every core.',tile:'#d8efed',ink:'#216e65',art:['✧'],href:'/games/lumina-pillars/lumina-pillars-2d.html',cardDetail:'24 levels · Lightweight for any phone'},
     {id:'chroma-zen',genre:'Logic',name:'Chroma Zen',category:'Replayable · Color puzzle',line:'Put a little color back in order.',tile:'#ebd9f4',ink:'#65447b'},
     {id:'picnic-siege',genre:'Arcade',name:'Picnic Siege'},
