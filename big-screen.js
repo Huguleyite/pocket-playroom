@@ -1,21 +1,24 @@
 window.renderBigScreen = function(main) {
   if (location.hash === '#big-screen/aetheria') {
+    document.body.classList.add('aetheria-page');
     const tabs = `<nav class="big-game-tabs" aria-label="Big Screen games"><a href="#big-screen/chronodeck" aria-current="page">ChronoDeck: Breach</a><a href="#big-screen/lineage">Lineage: Kingdom Architect</a><a href="#big-screen/hex-gambit">Hex-Gambit: Rogue Checkers</a><a href="#big-screen/quantum-draft">Quantum Draft</a><a href="#big-screen/little-wilds">Little Wilds</a><a href="#big-screen/frequency-1984">Frequency: 1984 · Test</a><a href="#big-screen/blackout">Blackout · Test</a><a href="#big-screen/aetheria">Aetheria: Patchwork Realm · Test <small>· In development</small></a></nav>`;
     main.innerHTML = `<div class="big-section-label">More room. Deeper play.</div>${tabs}
     <section class="chrono-hero" aria-labelledby="aetheria-title">
       <div class="chrono-copy">
         <p class="chrono-kicker">Turn-based tactics · Five levels · Test</p>
         <h1 id="aetheria-title">AETHERIA<span>PATCHWORK REALM</span></h1>
+        <p class="chrono-tagline">Shape the terrain. Turn the tide.</p>
         <p class="chrono-description">Lead three heroes across floating battlefields. Reshape terrain, hold crystal nodes, and assault the Raider camp.</p>
         <div class="chrono-actions"><a class="chrono-play" href="games/aetheria/index.html">Play Aetheria →</a><button id="aetheria-help">How to play</button></div>
         <p class="chrono-device">In development · Supports mouse and touch</p>
       </div>
-      <div class="chrono-art"><img src="assets/aetheria/board-concept.png" alt="Aetheria board concept with turquoise pools and glowing crystals" style="width:100%;object-fit:contain"></div>
+      <div class="chrono-art"><img src="assets/aetheria/board-concept.png" alt="Aetheria board concept with turquoise pools and glowing crystals"></div>
     </section>
+    <section class="chrono-preview" aria-labelledby="aetheria-preview"><div class="chrono-preview-title"><h2 id="aetheria-preview">A look inside Patchwork Realm</h2><p>Gameplay preview</p></div><img src="assets/aetheria/gameplay.png" alt="Aetheria gameplay preview with an isometric board, heroes, water, and crystal nodes" loading="lazy"></section>
     <section class="chrono-features" aria-label="Game features">
-      <div><h2>Lead three heroes</h2><p>Combine Aether-Weaver, Rune Warden, and Mist Stalker abilities.</p></div>
-      <div><h2>Reshape the board</h2><p>Terraform tiles, raise barriers, and cross the river bridge.</p></div>
-      <div><h2>Complete five objectives</h2><p>Fight through meadows, a quarry, and the Raider camp.</p></div>
+      <div><span aria-hidden="true">♟</span><h2>Lead three heroes</h2><p>Combine Aether-Weaver, Rune Warden, and Mist Stalker abilities.</p></div>
+      <div><span aria-hidden="true">◇</span><h2>Reshape the board</h2><p>Terraform tiles, raise barriers, and cross the river bridge.</p></div>
+      <div><span aria-hidden="true">⚑</span><h2>Complete five objectives</h2><p>Fight through meadows, a quarry, and the Raider camp.</p></div>
     </section>
     <dialog id="aetheria-guide"><form method="dialog"><button aria-label="Close instructions">Close</button></form><h2>How to play</h2><p>Select a hero, then choose a highlighted tile or an ability. Use End turn to let enemies act. Drag to orbit and scroll or pinch to zoom.</p></dialog>`;
     for (const link of main.querySelectorAll('.big-game-tabs a')) {
