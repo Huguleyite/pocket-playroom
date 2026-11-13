@@ -41,8 +41,11 @@ body.admire #bar,body.admire #stats,body.admire #tray,body.admire #acts,body.adm
 #card{background:rgb(20,10,48);border:2px solid var(--mg);border-radius:20px;padding:22px 26px;text-align:center;box-shadow:0 0 30px rgba(255,61,242,.5)}
 #stars{font-size:44px;letter-spacing:6px;color:var(--gd);text-shadow:0 0 18px var(--gd)}
 #card .row{display:flex;gap:8px;justify-content:center;margin-top:14px;flex-wrap:wrap}
+
+.playroom-home{display:inline-flex;align-items:center;justify-content:center;min-height:44px;color:#e9dbff;font-size:13px;text-decoration:none;padding:0 10px;border-radius:8px}
+.playroom-home:hover,.playroom-home:focus-visible{background:#38235a;color:#fff;text-decoration:underline}
 </style></head><body>
-<div id="app">
+<div id="app"><a class="playroom-home" href="/#home">← Back to Pocket Playroom</a>
  <div id="bar"><button id="menu">☰</button><div class="t" id="title">Lumina Pillars</div><button id="reset" class="mg">↺</button></div>
  <div id="stats"><span>Moves <b id="mv">0</b></span><span>Par <b id="pr">0</b></span><span id="asst" style="color:var(--mg)"></span></div>
  <div id="wrap"><canvas id="c"></canvas></div>
@@ -51,7 +54,7 @@ body.admire #bar,body.admire #stats,body.admire #tray,body.admire #acts,body.adm
  <div id="hint">Pick a piece, tap a tile to place it. Tap a placed piece to turn it. Hold to remove.</div>
 </div>
 <div id="abar"><div id="atitle"></div><button id="anext">Next ›</button><button id="alev">Levels</button><button id="aback" class="mg">Back</button></div>
-<div class="screen on" id="select"><h1>LUMINA PILLARS</h1><p>2D · route the light to every core</p><div id="grid"></div></div>
+<div class="screen on" id="select"><a class="playroom-home" href="/#home">← Back to Pocket Playroom</a><h1>LUMINA PILLARS</h1><p>2D · route the light to every core</p><div id="grid"></div></div>
 <div class="screen" id="win"><div id="card"><h1 style="font-size:26px">Signal Locked</h1><div id="stars">★★★</div><p id="wl" style="margin:8px 0 0"></p><div class="row"><button id="admire">👁 Admire</button><button id="rep" class="gd">▶ Replay</button><button id="again" class="mg">Retry</button><button id="next">Next ›</button></div><div class="row"><button id="tosel">Levels</button></div></div></div>
 <script>
 /* ---------- engine (same rules as the 3D game, one layer) ---------- */

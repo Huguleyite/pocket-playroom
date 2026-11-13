@@ -84,6 +84,9 @@
     #goal { display:none; }
   }
   #err { position:fixed; inset:auto 12px 50% 12px; text-align:center; color:#ffb4b4; display:none; }
+
+.playroom-home{display:inline-flex;align-items:center;justify-content:center;min-height:44px;color:#e9dbff;font-size:13px;text-decoration:none;padding:0 10px;border-radius:8px}
+.playroom-home:hover,.playroom-home:focus-visible{background:#38235a;color:#fff;text-decoration:underline}
 </style>
 <script type="importmap">
 { "imports": {
@@ -95,14 +98,14 @@
 <body>
 <canvas id="c"></canvas>
 <div id="top" class="bar">
-  <div id="topL"><div id="title">Lumina Pillars</div><div id="levelName"></div><div id="goal">Light every core with its matching color.</div><div id="stats"><span>Moves <b id="moves">0</b></span><span>Par <b id="par">0</b></span><span class="stars" id="liveStars"></span></div></div>
+  <div id="topL"><a class="playroom-home" href="/#home">← Back to Pocket Playroom</a><div id="title">Lumina Pillars</div><div id="levelName"></div><div id="goal">Light every core with its matching color.</div><div id="stats"><span>Moves <b id="moves">0</b></span><span>Par <b id="par">0</b></span><span class="stars" id="liveStars"></span></div></div>
   <div style="display:flex;gap:8px"><button id="levels" aria-label="Level select">Levels</button><button id="reset" aria-label="Reset level">Reset</button><button id="mute" aria-label="Toggle sound effects">Sound</button><button id="music" aria-label="Toggle music">Music</button></div>
 </div>
 <div id="layers"><span>Layer</span></div>
 <div id="tray" class="bar"><div id="hint"></div><div id="inv"></div><button id="answer" class="ghost">Show answer</button></div>
 <div id="win"><div><h2 id="winTitle"></h2><span class="stars" id="winStars"></span><p id="winText"></p><div class="row"><button id="admire">Admire</button><button id="replay">Replay</button><button id="winLevels">Levels</button><button id="next" class="on"></button></div></div></div>
 <div id="admirebar"><span id="admireTitle"></span><button id="admNext" class="on">Next level</button><button id="admLevels">Levels</button><button id="admBack">Back</button></div>
-<div id="select"><h1>Lumina Pillars</h1><div class="sub">Route the light. Light every core.</div><div class="total" id="total"></div><div id="worlds"></div></div>
+<div id="select"><a class="playroom-home" href="/#home">← Back to Pocket Playroom</a><h1>Lumina Pillars</h1><div class="sub">Route the light. Light every core.</div><div class="total" id="total"></div><div id="worlds"></div></div>
 <div id="err">This game needs WebGL and an internet connection to load its 3D library.</div>
 
 <script type="module">
@@ -377,7 +380,7 @@ const cellPos = (x, layer, z) => new THREE.Vector3(x - GRID.X / 2 + 0.5, layer -
 (function buildIsland() {
   const chassis = new THREE.MeshStandardMaterial({color: 0x251450, roughness: 0.44, metalness: 0.32, emissive: 0x190a46, emissiveIntensity: 0.32});
   const recess = new THREE.MeshStandardMaterial({color: 0x0c0922, roughness: 0.78});
-  const tile = new THREE.MeshStandardMaterial({color: 0x48217f, roughness: 0.62, emissive: 0x280c50, emissiveIntensity: 0.45});
+  const tile = new THREE.MeshStandardMaterial({color: 0x32145f, roughness: 0.53, emissive: 0x280c50, emissiveIntensity: 0.45});
   const rail = new THREE.MeshBasicMaterial({color: new THREE.Color(0x14e4ff).multiplyScalar(1.9), toneMapped: false});
   const isl = new THREE.Group();
   isl.add(part(new RoundedBoxGeometry(6.43, 0.46, 6.43, 3, 0.095), chassis, null, [0, -0.29, 0]));
@@ -393,7 +396,7 @@ const cellPos = (x, layer, z) => new THREE.Vector3(x - GRID.X / 2 + 0.5, layer -
     edge.add(part(strip, rail, null, [0, -0.30, 3.221]));
     isl.add(edge);
   }
-  const tileGeo = new RoundedBoxGeometry(0.962, 0.067, 0.962, 2, 0.024);
+  const tileGeo = new RoundedBoxGeometry(0.948, 0.067, 0.948, 2, 0.024);
   const tiles = new THREE.InstancedMesh(tileGeo, tile, GRID.X * GRID.Z);
   const transform = new THREE.Matrix4();
   for (let z = 0; z < GRID.Z; z++) {
@@ -403,6 +406,32 @@ const cellPos = (x, layer, z) => new THREE.Vector3(x - GRID.X / 2 + 0.5, layer -
     }
   }
   isl.add(tiles);
+  // The chassis bottom meets the floor at y = -0.52.
+  const floor = new THREE.Mesh(new THREE.PlaneGeometry(90, 90), new THREE.ShaderMaterial({
+    uniforms: {},
+    vertexShader: `
+      varying vec2 floorPos;
+      void main() {
+        floorPos = position.xy;
+        gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+      }`,
+    fragmentShader: `
+      varying vec2 floorPos;
+      void main() {
+        vec2 p = abs(floorPos);
+        float violet = exp(-dot(floorPos, floorPos) * 0.019);
+        float sideX = exp(-abs(p.x - 3.28) * 2.8) * (1.0 - smoothstep(2.45, 3.15, p.y));
+        float sideZ = exp(-abs(p.y - 3.28) * 2.8) * (1.0 - smoothstep(2.45, 3.15, p.x));
+        vec3 color = mix(vec3(0.009, 0.003, 0.023), vec3(0.064, 0.014, 0.135), violet);
+        color += vec3(0.004, 0.14, 0.25) * max(sideX, sideZ);
+        gl_FragColor = vec4(color, 1.0);
+        #include <tonemapping_fragment>
+        #include <colorspace_fragment>
+      }`
+  }));
+  floor.rotation.x = -Math.PI / 2;
+  floor.position.y = -0.521;
+  scene.add(floor);
   scene.add(isl);
   const n = 500, pts = new Float32Array(n * 3);
   for (let i = 0; i < n; i++) { const r = 40 + Math.random() * 50, a = Math.random() * 6.283, b = (Math.random() - 0.5) * 2.4;
