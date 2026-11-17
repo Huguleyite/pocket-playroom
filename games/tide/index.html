@@ -219,7 +219,7 @@ const copyPath = path => path.map(({ row, col }) => ({ row, col }));
  * touch a moved/refilled cell. Overlapping matches clear their union once.
  * Each wave scores length² per distinct path; initial submission costs one move.
  */
-function createWordDrop(dateString = window.PocketDay.today()) {
+function createWordDrop(dateString = window.PocketDay.today(), { legacyCascades = false } = {}) {
   const random = createDailyRandom(dateString);
   const pick = pool => pool[Math.floor(random() * pool.length)];
   const freshLetter = () => pick(random() < 0.4 ? VOWELS : CONSONANTS);
@@ -303,13 +303,29 @@ function createWordDrop(dateString = window.PocketDay.today()) {
     let matches = [{ word, path: copyPath(pathCoords) }];
     const waves = [];
     let points = 0;
-    // One player clear plus at most ten automatic waves; pending matches remain.
-    for (let wave = 0; wave <= 10 && matches.length; wave++) {
+    for (let wave = 0; matches.length && (!legacyCascades || wave <= 10); wave++) {
       const { changed, event } = clearAndDrop(matches);
       const earned = matches.reduce((sum, match) => sum + match.word.length ** 2, 0);
       points += earned;
-      waves.push({ ...event, bonus: wave > 0, points: earned });
       matches = findCascadeMatches(changed);
+      // Give a dry drop a seeded chance to complete a word with one new tile.
+      if (!legacyCascades && !matches.length && random() < 0.45 / (wave + 1)) {
+        for (let attempt = 0; attempt < 12; attempt++) {
+          const spawn = pick(event.spawns);
+          const { row, col } = spawn.to;
+          const letter = freshLetter();
+          if (letter === spawn.letter) continue;
+          board[row][col] = letter;
+          matches = findCascadeMatches(changed);
+          if (matches.length) {
+            spawn.letter = letter;
+            event.after[row][col] = letter;
+            break;
+          }
+          board[row][col] = spawn.letter;
+        }
+      }
+      waves.push({ ...event, bonus: wave > 0, points: earned });
     }
     score += points;
     return { accepted: true, word, points, ...state(), waves,
@@ -360,15 +376,9 @@ const $ = id => document.getElementById(id);
 const STORAGE = 'worddrop:v1';
 const utcDay = () => window.PocketDay.today();
 const date = utcDay();
-const game = createWordDrop(date);
 const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
-// Begin at one second per word and smoothly accelerate over ten seconds.
-const wait = ms => {
- const remaining = Math.max(0, 10000 - (performance.now() - cascadeStartedAt));
- const pace = (remaining / 10000) ** 2;
- const delay = Math.min(remaining, (ms / 650) * 1000 * pace);
- return new Promise(resolve => setTimeout(resolve, reduced || skipCascade ? 0 : delay));
-};
+const wait = ms => new Promise(resolve =>
+ setTimeout(resolve, reduced || skipCascade ? 0 : ms));
 let storageOK = true;
 let saved = { version:1, days:{} };
 try {
@@ -380,6 +390,9 @@ let history = [];
 // Replaying at most ten accepted paths restores the PRNG as well as the board.
 // Do not trust stored scores or move counts; derive them from the engine.
 const candidate = saved.days[date];
+// Replay existing boards with their original rules to preserve board and score.
+const legacyCascades = Boolean(candidate && candidate.cascadeRules !== 2);
+const game = createWordDrop(date, { legacyCascades });
 if(candidate && Array.isArray(candidate.paths)) {
  for(const path of candidate.paths.slice(0,10)) {
   const result = game.processWordClear(path);
@@ -389,7 +402,7 @@ if(candidate && Array.isArray(candidate.paths)) {
  }
  record.finished = candidate.finished === true || game.getState().moves === 10;
 }
-let skipCascade = false, cascadeStartedAt = 0;
+let skipCascade = false;
 let busy = false, path = [], dragging = false, touchId = null, lastPoint = null;
 let soundOn = false, audio;
 const board = $('board');
@@ -417,7 +430,7 @@ function best() { return Math.max(0,...Object.values(saved.days).map(day=>Number
 function persist() {
  if(record.finished)window.roomComplete?.('tide',date);
  const state=game.getState();
- saved.days[date]={...record,score:state.score,movesRemaining:state.movesRemaining,history:history.map(r=>({word:r.word,points:r.points,combos:r.waves.length-1}))};
+ saved.days[date]={...record,cascadeRules:legacyCascades ? 1 : 2,score:state.score,movesRemaining:state.movesRemaining,history:history.map(r=>({word:r.word,points:r.points,combos:r.waves.length-1}))};
  saved.highScore=best(); saved.currentStreak=streak();
  try { window.PocketChallenge.storage.setItem(STORAGE,JSON.stringify(saved)); } catch {storageOK=false;}
 }
@@ -526,7 +539,7 @@ function buildBreakdown(result, through=result.waves.length-1) {
  const base=result.waves[0].points,earned=result.waves.slice(0,through+1).reduce((sum,w)=>sum+w.points,0),total=document.createElement('p');
  total.className='score-total';total.textContent=`Your word ${base} + cascades ${earned-base} = ${earned} points${through<result.waves.length-1?' so far':' this move'}`;
  content.append(list,total);
- if(through===result.waves.length-1){const note=document.createElement('p');note.textContent=result.cascadeLimitReached?'Stopped at the 10-wave cascade limit. Remaining words stay on the board.':result.waves.length===1?'No automatic straight-line words matched after this drop.':'Cascade complete. No further automatic matches after the last drop.';content.append(note);}
+ if(through===result.waves.length-1){const note=document.createElement('p');note.textContent=result.cascadeLimitReached?'Stopped at the original 10-wave cascade limit. Remaining words stay on the board.':result.waves.length===1?'No automatic straight-line words matched after this drop.':'Cascade complete. No further automatic matches after the last drop.';content.append(note);}
  return content;
 }
 function showBreakdown(result,through=result.waves.length-1) {
@@ -549,19 +562,21 @@ function showBreakdown(result,through=result.waves.length-1) {
  if(busy && !skipCascade){const skip=document.createElement('button');skip.className='secondary';skip.textContent='Show final breakdown';skip.addEventListener('click',()=>{skipCascade=true;skip.disabled=true;skip.textContent='Finishing cascade…';});panel.append(skip);}
 }
 async function animateWave(wave,n,result) {
+ const pace = Math.max(0.38, 0.76 ** n);
+ const drop = Math.round(280 * pace);
+ board.style.setProperty('--drop', `${drop}ms`);
  renderBoard(wave.before);
  showBreakdown(result,n);
  message(n?`Cascade ${n}: falling or new tiles formed ${wave.matches.length} scoring word${wave.matches.length===1?'':'s'}. No multiplier.`:`Your word: ${result.word.length} × ${result.word.length} = ${wave.points} points.`);
  for(const match of wave.matches){
-  if(performance.now()-cascadeStartedAt>=10000)break;
   cells.forEach(tile=>tile.classList.remove('scoring-word'));
   match.path.forEach(p=>cells[index(p)].classList.add('scoring-word'));
   $('word').textContent=`${match.word} · ${match.word.length} × ${match.word.length} = ${match.word.length**2}`;
   $('word').classList.remove('idle');
-  await wait(650);
+  await wait(340 * pace / wave.matches.length);
  }
  wave.removed.forEach(p=>cells[index(p)].classList.add('pop'));
- tone(440+n*65); await wait(200);
+ tone(440+n*65); await wait(100 * pace);
  renderBoard(wave.after);
  const distance=cells[5].getBoundingClientRect().top-cells[0].getBoundingClientRect().top;
  const moving=[];
@@ -572,7 +587,7 @@ async function animateWave(wave,n,result) {
  moving.forEach(tile=>{tile.classList.add('falling');tile.style.transform='translateY(0)';tile.style.opacity='1';});
  popup(n?`Cascade ${n} · +${wave.points}`:`Your word · +${wave.points}`);
  $('score').textContent=(result.score-result.points+result.waves.slice(0,n+1).reduce((sum,w)=>sum+w.points,0)).toLocaleString();
- await wait(450);
+ await wait(drop);
 }
 async function submit() {
  if(busy||record.finished)return;
@@ -582,10 +597,10 @@ async function submit() {
  if(!isValidWord(selectedWord())){clearPath();message('That word is not in our dictionary. Try another.');tone(180);return;}
  const result=game.processWordClear(chosen);
  if(!result.accepted){clearPath();message(result.reason);return;}
- skipCascade=false;cascadeStartedAt=performance.now();busy=true;record.paths.push(chosen);history.push(result);
+ skipCascade=false;busy=true;record.paths.push(chosen);history.push(result);
  if(result.movesRemaining===0)record.finished=true;
  persist();clearPath();message(`${result.word} · +${result.points}${result.waves.length>1?' · bonus cascade!':''}`);
- try {for(let i=0;i<result.waves.length;i++)await animateWave(result.waves[i],i,result);}
+ try {for(let i=0;i<result.waves.length && !skipCascade;i++)await animateWave(result.waves[i],i,result);}
  finally {busy=false;renderBoard();clearPath();showBreakdown(result);message(`${result.word}: ${result.waves[0].points} word + ${result.points-result.waves[0].points} cascade = ${result.points} points. Breakdown below.`);if(record.finished)showResults();}
  if(!storageOK)message('Progress is available this session, but browser storage is unavailable.');
 }

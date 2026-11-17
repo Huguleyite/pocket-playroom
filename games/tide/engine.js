@@ -172,7 +172,7 @@ const copyPath = path => path.map(({ row, col }) => ({ row, col }));
  * touch a moved/refilled cell. Overlapping matches clear their union once.
  * Each wave scores length² per distinct path; initial submission costs one move.
  */
-export function createWordDrop(dateString = new Date().toISOString().slice(0, 10)) {
+export function createWordDrop(dateString = new Date().toISOString().slice(0, 10), { legacyCascades = false } = {}) {
   const random = createDailyRandom(dateString);
   const pick = pool => pool[Math.floor(random() * pool.length)];
   const freshLetter = () => pick(random() < 0.4 ? VOWELS : CONSONANTS);
@@ -256,13 +256,29 @@ export function createWordDrop(dateString = new Date().toISOString().slice(0, 10
     let matches = [{ word, path: copyPath(pathCoords) }];
     const waves = [];
     let points = 0;
-    // One player clear plus at most ten automatic waves; pending matches remain.
-    for (let wave = 0; wave <= 10 && matches.length; wave++) {
+    for (let wave = 0; matches.length && (!legacyCascades || wave <= 10); wave++) {
       const { changed, event } = clearAndDrop(matches);
       const earned = matches.reduce((sum, match) => sum + match.word.length ** 2, 0);
       points += earned;
-      waves.push({ ...event, bonus: wave > 0, points: earned });
       matches = findCascadeMatches(changed);
+      // Give a dry drop a seeded chance to complete a word with one new tile.
+      if (!legacyCascades && !matches.length && random() < 0.45 / (wave + 1)) {
+        for (let attempt = 0; attempt < 12; attempt++) {
+          const spawn = pick(event.spawns);
+          const { row, col } = spawn.to;
+          const letter = freshLetter();
+          if (letter === spawn.letter) continue;
+          board[row][col] = letter;
+          matches = findCascadeMatches(changed);
+          if (matches.length) {
+            spawn.letter = letter;
+            event.after[row][col] = letter;
+            break;
+          }
+          board[row][col] = spawn.letter;
+        }
+      }
+      waves.push({ ...event, bonus: wave > 0, points: earned });
     }
     score += points;
     return { accepted: true, word, points, ...state(), waves,
