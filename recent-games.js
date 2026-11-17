@@ -3,6 +3,7 @@
  'use strict';
  const base=new URL('./',document.currentScript.src),key='room-for-play:last';
  const games={
+  overclock:['OVERCLOCK: Daily Run','games/overclock/'],
   'tilt-and-tumble':['Tilt & Tumble','#games/tilt-and-tumble'],
   'spot-the-dot':['Spot the Dot','#games/spot-the-dot'],
   'daily-stars':['Daily Stars','#games/daily-stars'],
