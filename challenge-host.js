@@ -1,6 +1,7 @@
 (() => {
   const titles={weave:'Weave It to Me',tide:'Tile Tide',shift:'Shift & Lock',lock:'LetterLock',deli:'Stack to the Future',binario:'Binario / Neon Logic',futoshiki:'Futoshiki',signal:'Signal Flow',draw:'The Draw','draw-scorecard':'The Draw: Scorecard'};
   let version=0;
+  titles['tilt-and-tumble']='Cascade Club';
   titles['daily-stars']='Daily Stars';
   const clock=s=>`${Math.floor(s/60)}:${String(s%60).padStart(2,'0')}`;
   window.PocketChallengeHost={render(){
@@ -33,8 +34,8 @@
       const access=await window.roomAdAccess.check();if(n!==version)return;
       if(access==='blocked'){status.textContent='Please allow ads for Pocket Playroom, then try again.';start.disabled=false;return;}
       const frame=document.createElement('iframe');frame.id='game-frame';frame.title='Play '+titles[c.id];frame.allow='web-share; clipboard-write';
-      const file=c.id==='draw-scorecard'?'draw/scorecard.html':c.id+'/index.html';
-      frame.src='games/'+file+'?challenge='+encodeURIComponent(token);
+      const file=c.id==='tilt-and-tumble'?'tilt-and-tumble/play.html':c.id==='draw-scorecard'?'draw/scorecard.html':c.id+'/index.html';
+      frame.src='games/'+file+(c.id==='tilt-and-tumble'?'?club&challenge=':'?challenge=')+encodeURIComponent(token);
       frame.onload=()=>{status.textContent='';intro.hidden=true;};
       main.append(frame);
       const onHeight=e=>{if(e.source!==frame.contentWindow||e.origin!==location.origin)return;if(e.data?.type==='room:height'&&Number.isFinite(e.data.height))frame.style.height=Math.max(350,Math.min(5000,e.data.height))+'px';if(stars&&e.data?.type==='room:stars-board'&&['classic','prismatic','moonstone','aurora','orrery','starforge','nebula'].includes(e.data.board))document.documentElement.dataset.starsBoard=e.data.board;if(stars&&e.data?.type==='room:stars-theme')document.documentElement.classList.toggle('night-play',e.data.enabled===true);};

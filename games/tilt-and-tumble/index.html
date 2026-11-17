@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#110e2c">
+<title>Tilt &amp; Tumble</title>
+<script>
+  const mode = new URLSearchParams(location.search);
+  document.documentElement.classList.add(mode.has('games') ? 'show-games' : 'show-splash');
+  if (['play','delivery','tutorial','sideways','heist','lightline','club','campaign','club-campaign'].some(key => mode.has(key))) {
+    location.replace('play.html' + location.search + location.hash);
+  }
+</script>
+<style>
+  :root{color-scheme:dark;--mint:#8fffe0;--violet:#bb9bff;--edge:#8c80d7}
+  *{box-sizing:border-box}
+  body{margin:0;min-height:100svh;display:grid;place-items:center;padding:clamp(16px,5vw,64px);color:#eeecff;background:radial-gradient(ellipse at 48% 22%,#302466,#151132 48%,#09091f 90%);font-family:Inter,system-ui,sans-serif;isolation:isolate}
+  body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:-1;background:repeating-linear-gradient(90deg,transparent 0 12%,#afa1ff12 12.1% 12.2%);mask-image:linear-gradient(transparent,#000)}
+  main{width:min(100%,840px)}
+  header{text-align:center;margin-bottom:clamp(16px,4vw,30px)}
+  h1{margin:0;font-size:clamp(34px,7vw,72px);line-height:1.04;letter-spacing:-.05em;text-shadow:0 0 28px #9d83ff8a}
+  h1 span{color:var(--mint)}
+  header p{margin:9px 0 0;color:#c6c0ea}
+  nav{display:grid;grid-template-columns:1fr 1fr;gap:clamp(14px,3vw,23px)}
+  a{min-width:0;color:inherit;text-decoration:none;display:grid;grid-template-rows:auto 1fr auto;gap:13px;padding:clamp(12px,3vw,24px);border:1px solid var(--edge);border-radius:19px;background:linear-gradient(155deg,#3b3069,#1b193b 45%,#14142e);box-shadow:inset 0 1px 3px #e6dbff82,0 15px 35px #08071f87}
+  a:hover,a:focus-visible{border-color:var(--mint);outline:2px solid #90ffe06e;outline-offset:3px}
+  h2{margin:0;font-size:clamp(21px,4vw,30px)}
+  p{line-height:1.4}
+  .description{margin:5px 0 0;color:#cbc6ea;font-size:clamp(13px,2.5vw,16px)}
+  .play{justify-self:start;border-radius:9px;padding:7px 12px;color:var(--mint);background:#31305d;border:1px solid #8783cd;box-shadow:inset 0 1px 2px #c8b8ff61;font-weight:700}
+  .preview{height:clamp(115px,20vw,172px);display:grid;place-items:center;overflow:hidden;border-radius:11px;background:radial-gradient(ellipse,#271b5a,#101230);border:1px solid #8c7bdf;box-shadow:inset 0 4px 10px #0a0a24,0 0 13px #7e5eff45}
+  .grid{position:relative;width:calc(var(--cell) * var(--cols));height:calc(var(--cell) * var(--rows));--cell:clamp(14px,2.25vw,24px);background:repeating-linear-gradient(90deg,#9c89e65e 0 1px,transparent 1px var(--cell)),repeating-linear-gradient(0deg,#9c89e65e 0 1px,transparent 1px var(--cell));outline:1px solid #ad95ff;border-radius:2px}
+  .piece{position:absolute;left:calc(var(--x) * var(--cell) + 1px);top:calc(var(--y) * var(--cell) + 1px);width:calc(var(--cell) - 2px);height:calc(var(--cell) - 2px);background:linear-gradient(150deg,#eee5ff,var(--fill,var(--violet)) 31%,#5e40c7);border-radius:3px;box-shadow:inset 0 1px 2px #fff,0 0 8px #a289ff83}
+  .triangle{clip-path:polygon(0 100%,100% 0,100% 100%)}
+  .mint{--fill:#52f5bf}
+  .dock{background:none;border:1px dashed var(--mint);box-shadow:0 0 6px #83ffcf70}
+  @media(max-width:540px){nav{grid-template-columns:1fr;gap:10px}a{grid-template-columns:82px minmax(0,1fr);grid-template-rows:auto auto;gap:7px 10px}.preview{grid-row:1 / span 2;height:84px}.grid{--cell:10px}.play{font-size:13px;padding:4px 9px}}
+
+.show-games #splash,.show-splash #game-picker{display:none}
+#splash{display:grid;justify-items:center;text-align:center;gap:clamp(18px,5vw,36px)}
+#splash h1{font-size:clamp(46px,10vw,104px)}
+a.splash-play{display:block;padding:12px 42px;color:var(--mint);font-weight:800;font-size:21px;border-radius:13px}
+.splash-art{position:relative;width:clamp(120px,28vw,236px);aspect-ratio:1;transform:rotate(-14deg);border:1px solid #a194ff;border-radius:20px;background:repeating-linear-gradient(0deg,#a194ff3a 0 1px,transparent 1px 25%),repeating-linear-gradient(90deg,#a194ff3a 0 1px,transparent 1px 25%),radial-gradient(#33316e,#15143b);box-shadow:0 0 33px #8565ff80,inset 0 0 22px #aa83ffaa}
+.splash-art i{position:absolute;width:26%;height:26%;border-radius:6px;background:linear-gradient(140deg,#eee7ff,#a48aff 30%,#5e40c7);box-shadow:0 0 19px #a68aff}
+.splash-art i:nth-child(1){left:15%;top:49%}
+.splash-art i:nth-child(2){left:43%;top:48%;clip-path:polygon(0 100%,100% 0,100% 100%);background:linear-gradient(120deg,#e2fff4,#50ffbd)}
+.splash-art i:nth-child(3){left:42%;top:20%;transform:rotate(10deg);clip-path:polygon(0 0,100% 0,0 100%)}
+nav{grid-template-columns:repeat(3,minmax(0,1fr))}
+.home-link{display:block;width:max-content;margin:14px auto 0;padding:5px 12px;font-size:13px}
+.pink{--fill:#f985de}.gold{--fill:#ffe678}.rose{--mint:#ff86e5}
+@media(max-width:680px){nav{grid-template-columns:1fr}nav a{grid-template-columns:82px minmax(0,1fr);grid-template-rows:auto auto;gap:7px 10px}.preview{grid-row:1 / span 2;height:84px}.grid{--cell:10px}}
+.light-preview-beam{position:absolute;left:0;top:calc(4.5 * var(--cell));width:calc(4.5 * var(--cell));height:calc(3 * var(--cell));transform:translateY(-100%);border-right:2px solid #afffed;border-bottom:2px solid #afffed;filter:drop-shadow(0 0 4px #72ffd3)}
+@media(min-width:681px){nav{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.daily-card{border-color:#9cefd8}
+@media(min-width:681px){.daily-card{grid-column:1/-1;grid-template-columns:minmax(150px,27%) 1fr;grid-template-rows:auto auto;align-items:center;column-gap:18px}.daily-card .preview{grid-row:1/span 2;height:110px}.daily-card .grid{--cell:15px}}
+#daily-played{display:inline-block;vertical-align:middle;margin-left:4px;border:1px solid #8effdc78;border-radius:20px;padding:2px 7px;color:var(--mint);font-size:11px;white-space:nowrap}#daily-played[hidden]{display:none}
+.campaign-links{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;margin-top:14px}
+.campaign-links a{display:block;padding:7px 12px;font-size:13px;color:var(--mint)}
+.split-card{min-width:0;display:grid;grid-template-rows:auto 1fr auto;gap:13px;padding:clamp(12px,3vw,24px);border:1px solid var(--edge);border-radius:19px;background:linear-gradient(155deg,#3b3069,#1b193b 45%,#14142e);box-shadow:inset 0 1px 3px #e6dbff82,0 15px 35px #08071f87}
+.split-card.daily-card{border-color:#9cefd8}
+.split-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;min-width:0}
+.split-actions .play{display:block;width:100%;min-height:44px;padding:6px 4px;text-align:center;font-size:clamp(11px,3vw,15px)}
+.split-actions .play small{display:block;color:#ddd8f8;font-size:10px}
+@media(max-width:680px){.split-card{grid-template-columns:82px minmax(0,1fr);grid-template-rows:auto auto;gap:7px 10px}.split-actions{grid-column:2}}
+@media(max-width:370px){.split-card{grid-template-columns:62px minmax(0,1fr)}.split-card .grid{--cell:8px}}
+</style>
+<main id="splash"><a class="home-link" href="../../#home">← Pocket Playroom</a>
+  <div class="splash-art" aria-hidden="true"><i></i><i></i><i></i></div>
+  <h1>Tilt <span>&amp; Tumble</span></h1>
+  <a class="splash-play" href="?games">Play <span aria-hidden="true">→</span></a>
+</main>
+<main id="game-picker">
+  <header><h1>Tilt <span>&amp; Tumble</span></h1><p>Choose a game</p></header>
+  <nav aria-label="Games">
+    <article class="daily-card split-card">
+      <div class="preview" aria-hidden="true"><div class="grid" style="--cols:6;--rows:6">
+        <i class="piece mint" style="--x:0;--y:5"></i><i class="piece mint" style="--x:1;--y:5"></i><i class="piece mint" style="--x:2;--y:5"></i><i class="piece mint" style="--x:4;--y:5"></i><i class="piece mint" style="--x:5;--y:5"></i><i class="piece gold" style="--x:3;--y:2"></i>
+      </div></div>
+      <div><h2>Cascade Club <span id="daily-played" hidden>✓ Played today</span></h2><p class="description" id="daily-description">Today’s challenge. Same board, same five pieces. How high can you score?</p></div>
+      <div class="split-actions">
+        <a class="play" href="play.html?club"><span id="daily-action">Play daily</span> <span aria-hidden="true">→</span></a>
+        <a class="play" href="play.html?club-campaign">Campaign <span aria-hidden="true">→</span><small>12 replayable stages</small></a>
+      </div>
+    </article>
+    <article class="split-card">
+      <div class="preview" aria-hidden="true"><div class="grid" style="--cols:6;--rows:6">
+        <i class="piece" style="--x:1;--y:5"></i><i class="piece mint" style="--x:2;--y:5"></i><i class="piece triangle" style="--x:3;--y:5"></i><i class="piece" style="--x:5;--y:5"></i><i class="piece mint" style="--x:1;--y:4"></i><i class="piece triangle mint" style="--x:3;--y:1"></i><i class="piece mint" style="--x:2;--y:1"></i>
+      </div></div>
+      <div><h2>Classic</h2><p class="description">Drop pieces, fit triangle halves, and turn the board to set off scoring cascades.</p></div>
+      <div class="split-actions">
+        <a class="play" href="play.html?play">Play Classic <span aria-hidden="true">→</span></a>
+        <a class="play" href="play.html?campaign">Campaign <span aria-hidden="true">→</span></a>
+      </div>
+    </article>
+    <a href="play.html?delivery">
+      <div class="preview" aria-hidden="true"><div class="grid" style="--cols:6;--rows:6">
+        <i class="piece dock" style="--x:4;--y:1"></i><i class="piece triangle mint" style="--x:2;--y:3"></i><i class="piece triangle" style="--x:1;--y:4"></i><i class="piece triangle" style="--x:2;--y:4"></i><i class="piece triangle" style="--x:4;--y:5"></i><i class="piece triangle" style="--x:5;--y:5"></i>
+      </div></div>
+      <div><h2>Prism Delivery</h2><p class="description">Guide a mint prism to its dock in a limited number of turns. 27 puzzles to solve.</p></div>
+      <span class="play">Play Prism Delivery <span aria-hidden="true">→</span></span>
+    </a>
+    <a href="play.html?heist">
+      <div class="preview" aria-hidden="true"><div class="grid" style="--cols:6;--rows:6">
+        <i class="piece dock" style="--x:4;--y:1"></i><i class="piece dock rose" style="--x:5;--y:1"></i><i class="piece triangle mint" style="--x:2;--y:3"></i><i class="piece triangle pink" style="--x:1;--y:4"></i><i class="piece triangle gold" style="--x:4;--y:4"></i><i class="piece" style="--x:2;--y:5"></i>
+      </div></div>
+      <div><h2>Tumble Heist</h2><p class="description">Tilt 21 vaults to collect their gems. Use your remaining turns to chase bonus loot.</p></div>
+      <span class="play">Play Tumble Heist <span aria-hidden="true">→</span></span>
+    </a>
+    <a href="play.html?lightline">
+      <div class="preview" aria-hidden="true"><div class="grid" style="--cols:6;--rows:6">
+        <i class="piece dock" style="--x:4;--y:1"></i><i class="piece triangle mint" style="--x:4;--y:4"></i><i class="piece triangle" style="--x:1;--y:4"></i><i class="light-preview-beam"></i>
+      </div></div>
+      <div><h2>Lightline</h2><p class="description">Turn mirrors and tilt the board to light the receiver across 27 puzzles.</p></div>
+      <span class="play">Play Lightline <span aria-hidden="true">→</span></span>
+    </a>
+  </nav>
+  <a class="home-link" href="./">Back to title</a><a class="home-link" href="../../#home">← Pocket Playroom</a>
+</main>
+<script>
+  const dailyDefault = document.querySelector('#daily-description').textContent;
+  function updateDailyCard() {
+    let played = null;
+    try {
+      const date = new Date().toISOString().slice(0,10);
+      const result = JSON.parse(localStorage.getItem('tilt-tumble.club.'+date));
+      if (Number.isSafeInteger(result?.score) && result.score >= 0 &&
+          Number.isInteger(result.pieces) && result.pieces >= 0 && result.pieces <= 5) played = result;
+    } catch {}
+    document.querySelector('#daily-played').hidden = !played;
+    document.querySelector('#daily-description').textContent = played
+      ? 'Final score: '+played.score.toLocaleString()
+      : dailyDefault;
+    document.querySelector('#daily-action').textContent = played ? 'Daily result' : 'Play daily';
+  }
+  updateDailyCard();
+  window.addEventListener('pageshow',updateDailyCard);
+  window.addEventListener('storage',updateDailyCard);
+  document.addEventListener('visibilitychange',()=>{
+    if (!document.hidden) updateDailyCard();
+  });
+  if (mode.has('games')) setInterval(updateDailyCard,30000);
+</script>
+</html>
