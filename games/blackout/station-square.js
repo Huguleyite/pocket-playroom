@@ -1,10 +1,23 @@
 /* Direct local entry to the first Meridian Station level. */
 (() => {
   if (!window.location) return;
-  const entry = new URLSearchParams(location.search).get('level');
-  if (!/^(9|1[0-6])$/.test(entry??'')) return;
+  const query = new URLSearchParams(location.search);
+  const entry = query.get('level');
+  if (!window.MeridianLevels) return;
 
-  const chapter = Number(entry)-1;
+  const chapter = /^(9|1[0-6])$/.test(entry??'') ? Number(entry)-1 : 0;
+  Campaign.entryChapter=chapter;
+  const traction=chapter===14&&query.get('traction')==='1';
+  Campaign.tractionPreview=traction;
+  Campaign.chasePreview=chapter===10&&query.get('chase')==='1';
+  const tractionSteps=['Release the brake interlock','Secure the passenger doors','Restore traction power','Start the express from the cab'];
+  const hooks=[
+    [ChapterAbilities,['timing','timeline','fusePoint']],
+    [EncounterPatterns,['tip']],
+    [Districts,['apply','hint','draw']],
+    [CityScene,['story','rooftops','background','foreground']],
+    [Soundtrack,['choose']]
+  ].flatMap(([owner,names])=>names.map(name=>({owner,name,city:owner[name]})));
   const level = {
     name: 'Station Square',
     subtitle: 'Meridian Station',
@@ -64,6 +77,7 @@
   function link() {
     const boss=ChapterAbilities.boss;
     if (boss) {
+      if (stationLevel().sorterReceivers) return false;
       if (stationLevel().sequence) return linkSequence(boss);
       const lane=laneFor(boss);
       const state=ChapterAbilities.encounterState(boss);
@@ -107,6 +121,30 @@
   }
 
   function updateBoss(boss,dt) {
+    const receivers=stationLevel().sorterReceivers;
+    if(receivers){
+      const previous=boss.clock%4.5;
+      boss.clock+=dt;
+      if(previous>=2||boss.clock%4.5<2||p.x<Campaign.arena||p.y+p.h<279||p.teleport)return;
+      window.BlackoutAudio?.effect('bossStrike');
+      const index=receivers.findIndex(x=>standingAt(x,300));
+      const shielded=time<Combat2D.shieldUntil&&time>=Combat2D.invulnerableUntil;
+      Combat2D.hurt('sorter pulse');
+      if(!shielded||index<0)return;
+      boss.receivers??=[false,false];
+      if(boss.receivers[index])return;
+      boss.receivers[index]=true;
+      boss.health=receivers.length-boss.receivers.filter(Boolean).length;
+      flashLink(receivers[index],273,Campaign.core,218);
+      if(boss.health===0){
+        ChapterAbilities.defeated=true;
+        ChapterAbilities.defeatedAt=time;
+        ChapterAbilities.boss=null;
+        window.Soundtrack?.setEncounter(null);
+        window.Progress?.save();
+      }
+      return;
+    }
     if (stationLevel().sequence) {
       if (boss.sequenceUntil && time>=boss.sequenceUntil) {
         boss.sequence=0;
@@ -140,6 +178,10 @@
   }
 
   function bossMessage(boss) {
+    if(stationLevel().sorterReceivers){
+      const phase=boss.clock%4.5;
+      return {phase:phase<2?'FLOOR PULSE INCOMING':'FLOOR PULSE CLEARED',remaining:phase<2?2-phase:4.5-phase,total:phase<2?2:2.5,tip:'Stand at an uncharged receiver and shield the floor pulse. Jump over it while crossing.',tone:phase<2?'warning':'open'};
+    }
     if (stationLevel().sequence) {
       const remaining=boss.sequenceUntil?Math.max(0,boss.sequenceUntil-time):stationLevel().sequenceTime;
       return {phase:`${stationLevel().sequenceName??'DEPARTURE BOARD'} · RELAY ${(boss.sequence||0)+1} / 3`,remaining,total:stationLevel().sequenceTime,tip:'Arc Link the cyan relays in order. The timer starts at relay 1.',tone:'open'};
@@ -175,9 +217,15 @@
 
   window.StationSquare = {chapter, get completionTitle(){return stationLevel().finish},get pads(){return stationLevel().pads},
     get sequence(){return stationLevel().sequence},get blink(){return stationLevel().blink},capacity,link,updateBoss,bossMessage,laneFor,
-    coreLinked:(boss,cycleId)=>!stationLevel().sequence&&boss.linkedCycle===cycleId,
+    get sorterReceivers(){return stationLevel().sorterReceivers},
+    coreLinked:(boss,cycleId)=>!stationLevel().sorterReceivers&&!stationLevel().sequence&&boss.linkedCycle===cycleId,
     doorCountFor:index=>Campaign.levels[index]?.station?.gates.length,
     allGatesOpen:()=>grid.doors.every(door=>door.open||door.optional)};
+  if(traction){
+    StationSquare.tractionObjective=()=>tractionSteps[grid.generators.findIndex(device=>!device.on)]??'The express is ready';
+    StationSquare.tractionReady=()=>p.ground&&p.x>grid.generators[3].x-80&&grid.generators.every(device=>device.on);
+    StationSquare.tractionBlocked=device=>'checkpoint'in device&&grid.generators.slice(0,device.checkpoint-1).some(previous=>!previous.on);
+  }
   StationSquare.finishReady = () => {
     if(!stationLevel().departure)return true;
     if(departureAt===null){
@@ -189,17 +237,25 @@
   };
   EncounterPatterns.tip = boss => bossMessage(boss).tip;
   Campaign.levels.push(level,...MeridianLevels);
+  if(traction){
+    const original=Campaign.levels[14];
+    Campaign.levels[14]={...original,subtitle:'Restore Traction',
+      story:'Board the stranded train and bring its systems back car by car. Release the brake interlock, Shield the door-controller pulse, and restore traction before starting the train from the cab.',
+      ending:'The traction motors hum and the passenger lights come on. The driver radios Eastbound Signal for clearance.',
+      shieldReceiver:{x:2327,y:332,relay:2},
+      station:{...original.station,pads:[],gates:[],sequence:undefined,sequenceName:undefined,
+        hint:'Follow the marked equipment through the cars. Keep two charges for the door-controller pulse.'}};
+    Campaign.advance=()=>false;
+  }
   if(window.UnderRiverEscape){
     Campaign.levels[13]=UnderRiverEscape.configure(Campaign.levels[13]);
     Campaign.advance=()=>false;
   }
-  if(window.PlatformNine){
-    Campaign.levels[10]=PlatformNine.level;
-    Campaign.advance=()=>false;
-  }
+  if(window.PlatformNineChase)Campaign.levels[10]=PlatformNineChase.level;
+  if(Campaign.chasePreview)Campaign.advance=()=>false;
   const validateCampaign=Campaign.valid.bind(Campaign);
   Campaign.valid = save => {
-    if((save?.chapter===8&&save.completed?.length===9)||(save?.chapter>=8&&save.chapter<12&&save.completed?.length===12)) {
+    if((save?.chapter<8&&save.completed?.length===8)||(save?.chapter===8&&save.completed?.length===9)||(save?.chapter>=8&&save.chapter<12&&save.completed?.length===12)) {
       const completed=Array.from({length:Campaign.levels.length},(_,i)=>save.completed[i]??false);
       return validateCampaign({...save,completed});
     }
@@ -208,14 +264,16 @@
   const showIntro=Campaign.intro.bind(Campaign);
   Campaign.intro = () => {
     showIntro();
-    document.querySelector('#overlay span').textContent = `DAWN / ${Campaign.level.name.toUpperCase()}`;
+    if(Campaign.index>=8)document.querySelector('#overlay span').textContent = `DAWN / ${Campaign.level.name.toUpperCase()}`;
   };
   Campaign.reset = function () {
     this.completed = Array.from({length:this.levels.length}, (_, i) => i < chapter);
     this.apply(chapter);
-    this.intro();
+    if(chapter)this.intro();
   };
-  Campaign.isComplete = () => false;
+  const isComplete=Campaign.isComplete.bind(Campaign);
+  Campaign.isComplete = () => chapter===0&&isComplete();
+  Campaign.doorCountFor = index => index<8 ? 1 : Campaign.levels[index]?.station?.gates.length;
 
   Districts.apply = () => {
     const stage=stationLevel();
@@ -297,12 +355,27 @@
   for(let i=8;i<16;i++)WorldArt.themes[i]=WorldArt.themes[[7,3,4,5,4,6,3,7][i-8]];
   CityScene.story = () => '';
   Districts.draw = () => {
+    if(traction)for(const [i,device] of grid.generators.entries()){
+      ctx.save();
+      ctx.font='bold 10px monospace';
+      ctx.textAlign='center';
+      const label=['BRAKE INTERLOCK','DOOR CONTROL','TRACTION POWER','DRIVER CAB'][i];
+      rect(device.x-54,device.y-55,108,17,'#12232e');
+      ctx.fillStyle=device.on?'#98f1cc':'#ffcd92';
+      ctx.fillText(label,device.x,device.y-43);
+      ctx.restore();
+    }
     for(const [i,pad] of stationLevel().pads.entries())drawPad(pad.x,pad.y,gateFor(pad,i).open?'LINKED':'E / ARC LINK');
     const boss=ChapterAbilities.boss;
     if(stationLevel().sequence){
       const count=ChapterAbilities.defeated?3:boss?.sequence||0;
       drawDepartureBoard(count);
       if(boss)for(const [i,x] of stationLevel().sequence.entries())drawPad(x,300,i<count?'LINKED':i===count?`${i+1} / ARC LINK`:`RELAY ${i+1}`);
+    }else if(stationLevel().sorterReceivers){
+      if(boss||ChapterAbilities.defeated)for(const [i,x] of stationLevel().sorterReceivers.entries()){
+        drawPad(x,300,ChapterAbilities.defeated||boss?.receivers?.[i]?'CHARGED':'SHIELD PULSE');
+      }
+      if(boss&&boss.clock%4.5<2.18)rect(Campaign.arena,295,Campaign.width-Campaign.arena,5,boss.clock%4.5<2?'#e7a467':'#fff0b8');
     }else if(boss){
       const safe=laneFor(boss);
       const state=ChapterAbilities.encounterState(boss);
@@ -327,7 +400,7 @@
 
   StationSquare.drawBossLabel = () => {
     const boss=ChapterAbilities.boss;
-    if(!boss||stationLevel().sequence)return;
+    if(!boss||stationLevel().sequence||stationLevel().sorterReceivers)return;
     const {cycle,timing:current}=ChapterAbilities.encounterState(boss);
     const x=laneFor(boss).pad, y=245;
     const label=cycle<current.open?'SAFE RELAY':'E / ARC LINK';
@@ -647,5 +720,15 @@
     rect(x-3,y-3,6,5,'#ffbd79');
     rect(x-2,y-3,3,2,'#fff0c0');
   };
-  document.querySelector('#journey').hidden = true;
+  const stationRules=window.StationSquare;
+  for(const hook of hooks)hook.meridian=hook.owner[hook.name];
+  const apply=Campaign.apply.bind(Campaign);
+  Campaign.apply=index=>{
+    const meridian=index>=8;
+    window.PlatformNine=index===10?window.PlatformNineChase:undefined;
+    window.StationSquare=meridian?stationRules:undefined;
+    for(const hook of hooks)hook.owner[hook.name]=meridian?hook.meridian:hook.city;
+    document.querySelector('#journey').hidden=chapter>0;
+    apply(index);
+  };
 })();

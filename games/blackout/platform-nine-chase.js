@@ -1,8 +1,6 @@
-/* Platform Nine pursuit playtest. The train decks are moving collision surfaces. */
+/* Platform Nine pursuit. The train decks are moving collision surfaces. */
 (() => {
   if(!window.location)return;
-  const query=new URLSearchParams(location.search);
-  if(query.get('level')!=='11'||query.get('chase')!=='1')return;
 
   const limit=22;
   const trainSpeed=56;
@@ -19,9 +17,9 @@
   let startedAt, launchOffset, stationOffset, stopped, recharge;
 
   const level={
-    name:'Platform Nine',subtitle:'Catch the Runaway',width:4520,arena:4400,core:4450,
+    name:'Platform Nine',subtitle:'Catch the Runaway',boss:'Runaway maintenance car',width:4520,arena:4400,core:4450,
     story:'Board the carriage, then chase down the runaway maintenance car. Hold Down under roof gantries or take the sheltered aisles. Save one charge to Arc Link the brake and finish Platform Nine.',
-    ending:'Platform Nine complete. The maintenance car has stopped and the passenger line is clear.',
+    ending:'Platform Nine complete. The maintenance car has stopped. A service stair leads down to the baggage line.',
     platforms:[[0,420,335]],generators:[],hazards:[],enemies:[],
     checkpoints:[{x:70,y:386},{x:465,y:366},{x:465,y:366},{x:465,y:366}],
     station:{art:[.382,.698],style:'platform',music:'district5',finish:'The runaway is stopped.',pads:[],gates:[]}
@@ -167,7 +165,7 @@
     ctx.fillStyle=color;ctx.fillText(text,x,y);ctx.restore();
   }
 
-  window.PlatformNine={level,createSurfaces,move,brake,checkBeams,drawTrain,complete:()=>stopped,
+  window.PlatformNineChase={level,createSurfaces,move,brake,checkBeams,drawTrain,complete:()=>stopped,
     respawn(){resetMotion();if(checkpoint===1){p.charges=2;p.charge=true;}},
     restoreStopped(){stopped=true;p.x=cars.at(-1).x+160;p.y=cars.at(-1).y-p.h;},
     speed(){return checkpoint===1&&p.y+p.h>=385&&p.x<platforms.find(surface=>surface.car?.runaway).x?162:p.h===20?195:235;},

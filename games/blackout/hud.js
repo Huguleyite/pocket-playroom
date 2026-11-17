@@ -1,7 +1,7 @@
 /* Readable player status and contextual mission UI. Gameplay rules stay in their systems. */
 (() => {
  const $=s=>document.querySelector(s),healthSlots=[...$('#health-slots').children],energySlots=[...$('#energy-slots').children];
- if(window.StationSquare){const slot=document.createElement('i');slot.textContent='ϟ';slot.hidden=true;$('#energy-slots').append(slot);energySlots.push(slot)}
+ if(window.Campaign?.levels.length>8){const slot=document.createElement('i');slot.textContent='ϟ';slot.hidden=true;$('#energy-slots').append(slot);energySlots.push(slot)}
  const energyCaption=document.createElement('span');energyCaption.id='energy-caption';$('.energy-block').append(energyCaption);let lastEnergy=null,energyUntil=0,energyChange='';
  const portrait=$('#hud-portrait').getContext('2d');const feedback=document.createElement('div');feedback.id='boss-feedback';feedback.setAttribute('role','status');feedback.setAttribute('aria-live','polite');$('.hud').append(feedback);
  let previousHealth=null,previousDeaths=0,damageUntil=0,damageStart=3;
@@ -13,9 +13,10 @@
  $('header .eyebrow').textContent='RAIN / ROOFTOPS / ONE LAST DELIVERY';
  const objectives=()=>{
   if(window.PlatformNine)return PlatformNine.objective();if(window.UnderRiverEscape)return UnderRiverEscape.objective();
-  const b=window.ChapterAbilities?.boss;
+  if(window.StationSquare?.tractionObjective)return StationSquare.tractionObjective(); const b=window.ChapterAbilities?.boss;
+  if(b&&window.StationSquare?.sorterReceivers)return 'Charge the sorter receivers · '+(b.receivers?.filter(Boolean).length??0)+'/'+StationSquare.sorterReceivers.length;
   if(b)return window.StationSquare?.sequence?'Restore the departure board':'Disable '+Campaign.level.boss;
-  if(window.ChapterAbilities?.defeated)return 'Power the final relay';
+  if(window.ChapterAbilities?.defeated)return grid.generators[3]?.on?'Power restored':'Restore the final relay';
   const next=grid.generators.find(g=>!g.on);
   if(!next)return 'Reach the delivery point';
   if(grid.doors.some(d=>!d.open&&d.x>p.x-65&&d.x<next.x))return 'Find energy and open the route';
@@ -24,8 +25,38 @@
   if(enemy&&Math.abs(enemy.x-p.x)<350)return 'Clear the guard protecting the next generator';
   const r=window.Combat2D?.receiver;
   if(r&&!Combat2D.shieldVerified&&r.relay===next.checkpoint&&Math.abs(r.x-p.x)<300)return 'Block the marked pulse to charge the receiver';
-  return 'Restore feeder '+next.checkpoint+' of 3';
+  const feeders=grid.generators.filter(g=>g.checkpoint<4);
+  return 'Restore the feeders · '+feeders.filter(g=>g.on).length+'/'+feeders.length;
  };
+ const inputLabels={power:['E','Power'],fire:['Q','Bolt'],shield:['F','Shield'],teleport:['T','Teleport'],dash:['Shift','Dash'],jump:['Space','Jump']};
+ const controllerLabels=['A','B','X','Y','LB','RB','LT','RT','View','Menu','LS','RS','D-pad ↑','D-pad ↓','D-pad ←','D-pad →'];
+ function actionLabel(action){
+  const [key,touch]=inputLabels[action];
+  const bindings=window.Controller?.exportBindings().bindings;
+  if($('#input-mode').textContent.startsWith('CONTROLLER')&&bindings){
+   const button=bindings[action];
+   return button<0?'assign '+touch+' in Settings':controllerLabels[button]??'Button '+button;
+  }
+  return matchMedia('(pointer: coarse)').matches?touch:key;
+ }
+ function gateHint(ca){
+  if(ca?.boss){
+   if(window.StationSquare?.sorterReceivers)return 'Shield the floor pulse at each receiver · '+actionLabel('shield')+' · 2 energy';
+   if(Campaign.level.rangedBoss&&ca.encounterState().coreOpen)return 'Fire a bolt at the exposed core · '+actionLabel('fire')+' · 1 energy';
+   return '';
+  }
+  if(ca?.defeated)return '';
+  const combat=window.Combat2D;
+  const next=grid.generators.find(g=>!g.on);
+  if(!combat||!next)return '';
+  const guard=combat.enemies.find(e=>e.relay===next.checkpoint&&e.hp>0&&Math.abs(e.x-p.x)<350);
+  if(guard)return 'Face the relay guard and fire a bolt · '+actionLabel('fire')+' · 1 energy';
+  const receiver=combat.receiver;
+  if(receiver&&!combat.shieldVerified&&receiver.relay===next.checkpoint&&Math.abs(receiver.x-p.x)<300){
+   return 'Stand in the marked zone and raise your shield before the pulse · '+actionLabel('shield')+' · 2 energy';
+  }
+  return '';
+ }
  window.CourierHUD={
  pauseTools(show){tools.hidden=!show;controls.hidden=!show;$('#overlay').classList.toggle('is-paused',show)},
  update(){
@@ -39,7 +70,10 @@
   const capacity=p.capacity||1;$('#energy-count').textContent=(p.charges||0)+' / '+capacity;$('#energy-slots').setAttribute('aria-label',(p.charges||0)+' of '+capacity+' energy');
   energySlots.forEach((el,i)=>{el.hidden=i>=capacity;el.className=i<(p.charges||0)?'filled':''});
   $('#damage-notice').hidden=time>=damageUntil;$('.hud').classList.toggle('was-hit',time<damageUntil);
-  $('#objective').textContent=objectives();
+  const objective=objectives();
+  $('#objective').textContent=objective;
+  const countdown=window.PlatformNine?.status();
+  $('#progress').textContent=objective+(countdown?' · '+countdown:' · Retries '+deaths);
   const ca=window.ChapterAbilities;$('.hud').classList.toggle('is-fighting',!!ca?.boss);
   const awakening=ca?.boss&&time-ca.boss.enteredAt<1.5;feedback.hidden=!(ca?.defeated||time<(ca?.hitNoticeUntil||0)||awakening);
   feedback.textContent=ca?.defeated?(grid.generators[3].on?'GUARDIAN DEFEATED · Relay restored':'GUARDIAN DEFEATED · Power the final relay'):time<(ca?.hitNoticeUntil||0)?'HIT CONFIRMED · '+(ca.boss?.health||0)+' hits remaining':awakening?Campaign.level.boss+' awakened · Evade, then attack the exposed chest':'';
@@ -54,16 +88,16 @@
    else if(!p.charges)hint='Touch a glowing cyan cabinet to recharge';
    else if(!grid.messageTime)hint='Move toward the next lit rooftop edge';
   }
-  const lesson=window.AbilityCoach?.lesson();if(lesson&&grid.messagePriority<2&&!current){$('#objective').textContent=lesson.title;hint=lesson.tip}else if(!lesson&&!current&&grid.messagePriority<2&&window.CopperRow?.hint())hint=CopperRow.hint();
+  const lesson=window.AbilityCoach?.lesson();if(lesson&&grid.messagePriority<2&&!current){hint=lesson.tip}else if(!lesson&&!current&&grid.messagePriority<2&&window.CopperRow?.hint())hint=CopperRow.hint();
   if(!lesson&&!current&&!context&&p.charges>0&&grid.messagePriority<2&&window.Districts?.hint())hint=Districts.hint();
   if(ca?.boss&&window.EncounterPatterns&&!ca.encounterState().coreOpen)hint=ca.encounterState().recovering?'Hit confirmed. Recover energy and prepare for the next attack.':EncounterPatterns.tip(ca.boss);
   if(window.PlatformNine)hint=PlatformNine.hint();else if(window.UnderRiverEscape)hint=UnderRiverEscape.hint();
   const pad=window.Controller?.exportBindings();
   if($('#input-mode').textContent.startsWith('CONTROLLER')&&pad){
-   const names=['A','B','X','Y','LB','RB','LT','RT','View','Menu'];
-   for(const [action,key]of [['power','E'],['fire','Q'],['shield','F'],['teleport','T'],['dash','Shift'],['jump','Space']])hint=hint.replace(new RegExp('\\b'+key+'\\b','g'),names[pad.bindings[action]]||action);
+   for(const [action,[key]]of Object.entries(inputLabels))hint=hint.replace(new RegExp('\\b'+key+'\\b','g'),actionLabel(action));
   }else if(matchMedia('(pointer: coarse)').matches)hint=hint.replace(/\s*\/\s*(Space|Shift|[EQFT])\b/g,'');
-  $('#hint').textContent=hint.replace(/^GUARD \d\/3 · /,'');
+  const contextual=window.PlatformNine||window.UnderRiverEscape?'':gateHint(ca);
+  $('#hint').textContent=contextual||hint.replace(/^GUARD \d\/3 · /,'');
   portrait.clearRect(0,0,72,64);portrait.imageSmoothingEnabled=false;portrait.drawImage(CourierArt.image('idle',time,p.charge),0,0,72,64,0,0,72,64);
  }
  };

@@ -38,8 +38,8 @@
         hint:'Amber signals warn of a live line. Take the lower step, wait, or cross with Shield or Teleport.'}
     }),
     makeLevel({
-      name:'Baggage Below',subtitle:'Bring the Sorter Online',boss:'Baggage Sorter',width:4140,
-      story:'Follow the belts through the service vaults. Restore the baggage power bank to unlock a third energy slot, then use the sorter’s service signals to reach its core.',
+      name:'Baggage Below',subtitle:'Bring the Sorter Online',boss:'Baggage Sorter',width:4140,health:2,
+      story:'Follow the belts through the service vaults. Restore the baggage power bank to unlock a third energy slot. At the sorter, shield its floor pulse at both receivers to shut it down.',
       ending:'The baggage line is running again. Beyond the sorting vault, the switching yard waits.',
       platforms:[[0,420,375],[430,406,220],[710,381,245],[1015,352,280],[1360,374,230],[1655,339,195],[1915,365,265],[2245,348,275],[2585,319,190],[2840,348,225],[3130,320,230],[3425,310,190],[3690,300,450]],
       feeds:[[1130,352],[2415,348],[3500,310],[4065,300]],
@@ -50,7 +50,7 @@
         branches:[[1870,316,36],[1945,272,135],[2090,291,30]],branchNode:{x:2010,y:241,type:'node'},
         belts:[{left:1020,right:1292,y:352,speed:68},{left:1920,right:2176,y:365,speed:-63},{left:3140,right:3355,y:320,speed:79},
           {left:3696,right:3835,y:300,speed:43},{left:3990,right:4134,y:300,speed:-43}],
-        powerBank:2,laneOrder:[0,2,1],strike:1.65,
+        powerBank:2,sorterReceivers:[3790,3980],supplies:[{x:3760,y:270},{x:3950,y:270}],
         hint:'Use the lift or jump the gap. The baggage power bank adds a third energy slot.'}
     }),
     makeLevel({
