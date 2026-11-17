@@ -371,12 +371,7 @@
       const count=ChapterAbilities.defeated?3:boss?.sequence||0;
       drawDepartureBoard(count);
       if(boss)for(const [i,x] of stationLevel().sequence.entries())drawPad(x,300,i<count?'LINKED':i===count?`${i+1} / ARC LINK`:`RELAY ${i+1}`);
-    }else if(stationLevel().sorterReceivers){
-      if(boss||ChapterAbilities.defeated)for(const [i,x] of stationLevel().sorterReceivers.entries()){
-        drawPad(x,300,ChapterAbilities.defeated||boss?.receivers?.[i]?'CHARGED':'SHIELD PULSE');
-      }
-      if(boss&&boss.clock%4.5<2.18)rect(Campaign.arena,295,Campaign.width-Campaign.arena,5,boss.clock%4.5<2?'#e7a467':'#fff0b8');
-    }else if(boss){
+    }else if(boss&&!stationLevel().sorterReceivers){
       const safe=laneFor(boss);
       const state=ChapterAbilities.encounterState(boss);
       const {cycle,timing:current}=state;
@@ -400,7 +395,31 @@
 
   StationSquare.drawBossLabel = () => {
     const boss=ChapterAbilities.boss;
-    if(!boss||stationLevel().sequence||stationLevel().sorterReceivers)return;
+    const receivers=stationLevel().sorterReceivers;
+    if(receivers){
+      if(!boss&&!ChapterAbilities.defeated)return;
+      if(boss&&boss.clock%4.5<2.18)rect(Campaign.arena,298,Campaign.width-Campaign.arena,2,boss.clock%4.5<2?'#e7a467':'#fff0b8');
+      ctx.save();
+      ctx.font='bold 13px monospace';
+      ctx.textAlign='center';
+      for(const [i,x] of receivers.entries()){
+        const charged=ChapterAbilities.defeated||boss?.receivers?.[i];
+        const color=charged?'#91ffd9':'#ffda91';
+        rect(x-29,302,58,5,color);
+        rect(x-29,295,2,8,color);
+        rect(x+27,295,2,8,color);
+        rect(x-1,225,2,50,color);
+        rect(x-4,272,8,3,color);
+        rect(x-2,275,4,3,color);
+        rect(x-77,202,154,24,'#101d27');
+        rect(x-77,224,154,2,color);
+        ctx.fillStyle=color;
+        ctx.fillText(charged?`PAD ${i+1} CHARGED`:`PAD ${i+1} · SHIELD HERE`,x,219);
+      }
+      ctx.restore();
+      return;
+    }
+    if(!boss||stationLevel().sequence)return;
     const {cycle,timing:current}=ChapterAbilities.encounterState(boss);
     const x=laneFor(boss).pad, y=245;
     const label=cycle<current.open?'SAFE RELAY':'E / ARC LINK';
