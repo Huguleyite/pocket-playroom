@@ -1,0 +1,1813 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>LUMINA // KINETIC CONSOLE · Pocket Playroom</title>
+  <link rel="canonical" href="https://pocketplayroom.com/games/lumina/">
+  <meta property="og:title" content="Lumina · Pocket Playroom">
+  <meta property="og:description" content="Tap, sweep, and slide glowing tiles to make music.">
+  <meta property="og:url" content="https://pocketplayroom.com/games/lumina/">
+  <meta property="og:image" content="https://pocketplayroom.com/assets/lumina-card.png">
+  <style>
+    :root {
+      --bg-deep: #080e18;
+      --bg-mid: #101b2d;
+      --glass: rgba(14, 23, 38, 0.76);
+      --glass-border: rgba(148, 184, 232, 0.18);
+      --text-main: #e6f0ff;
+      --text-dim: #7f95b5;
+      --mint: #d4f7b8;
+      --cyan: #7ab8ff;
+      --coral: #f24c4c;
+      --violet: #c49bff;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+      -webkit-user-select: none;
+      -webkit-touch-callout: none;
+    }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: radial-gradient(circle at 50% 45%, var(--bg-mid) 0%, var(--bg-deep) 85%);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Inter, monospace;
+      color: var(--text-main);
+    }
+
+    canvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+      touch-action: none;
+      cursor: grab;
+    }
+
+    canvas:active {
+      cursor: grabbing;
+    }
+
+    /* Subtle LCD / CRT scanline texture */
+    .scanlines {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background: linear-gradient(
+        rgba(18, 16, 16, 0) 50%,
+        rgba(0, 0, 0, 0.22) 50%
+      );
+      background-size: 100% 3px;
+      z-index: 5;
+      opacity: 0.09;
+    }
+
+    .vignette {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background: radial-gradient(circle at center, transparent 58%, rgba(3, 7, 14, 0.72) 100%);
+      z-index: 4;
+    }
+
+    /* Top HUD Bar */
+    .hud {
+      --hud-inset: 16px;
+      position: fixed;
+      top: calc(var(--play-top, 0px) + var(--hud-inset));
+      left: var(--play-center, 50%);
+      transform: translateX(-50%);
+      z-index: 20;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 8px 14px;
+      background: var(--glass);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border: 1px solid var(--glass-border);
+      border-radius: 6px;
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45);
+      width: max-content;
+      max-width: calc(var(--play-width, 100vw) - 16px);
+      font-family: ui-monospace, Consolas, monospace;
+    }
+
+    .brand {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.16em;
+      color: var(--mint);
+      padding-right: 8px;
+      border-right: 1px solid var(--glass-border);
+      white-space: nowrap;
+    }
+
+    .pill-group {
+      display: flex;
+      background: rgba(6, 11, 20, 0.65);
+      border-radius: 4px;
+      padding: 2px;
+      border: 1px solid rgba(148, 184, 232, 0.1);
+    }
+
+    button {
+      background: transparent;
+      border: none;
+      color: var(--text-dim);
+      font-family: inherit;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      padding: 6px 10px;
+      border-radius: 3px;
+      cursor: pointer;
+      transition: all 0.18s ease;
+      white-space: nowrap;
+    }
+
+    button:hover {
+      color: var(--text-main);
+      background: rgba(122, 184, 255, 0.1);
+    }
+
+    button.active {
+      background: rgba(212, 247, 184, 0.16);
+      color: var(--mint);
+      box-shadow: inset 0 0 0 1px rgba(212, 247, 184, 0.35);
+    }
+
+    button.toggle-on {
+      background: rgba(122, 184, 255, 0.18);
+      color: var(--cyan);
+      box-shadow: inset 0 0 0 1px rgba(122, 184, 255, 0.4);
+    }
+
+    /* Record Button */
+    #recBtn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      border: 1px solid rgba(242, 76, 76, 0.35);
+      color: #ff9c9c;
+      background: rgba(242, 76, 76, 0.08);
+    }
+
+    #recBtn:hover {
+      background: rgba(242, 76, 76, 0.18);
+      color: #ffffff;
+    }
+
+    #recBtn.recording {
+      background: rgba(242, 76, 76, 0.28);
+      border-color: var(--coral);
+      color: #ffffff;
+      box-shadow: 0 0 14px rgba(242, 76, 76, 0.45);
+    }
+
+    .rec-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--coral);
+      display: inline-block;
+    }
+
+    #recBtn.recording .rec-dot {
+      animation: pulseDot 0.8s infinite alternate;
+    }
+
+    @keyframes pulseDot {
+      from { opacity: 1; transform: scale(1.15); }
+      to { opacity: 0.35; transform: scale(0.85); }
+    }
+
+    /* Bottom Micro Hint */
+    .hint-bar {
+      position: fixed;
+      bottom: calc(var(--play-bottom, 0px) + 14px);
+      left: var(--play-center, 50%);
+      transform: translateX(-50%);
+      z-index: 20;
+      font-size: 11px;
+      letter-spacing: 0.08em;
+      color: var(--text-dim);
+      background: rgba(10, 17, 29, 0.65);
+      padding: 6px 14px;
+      border-radius: 4px;
+      border: 1px solid rgba(148, 184, 232, 0.12);
+      pointer-events: none;
+      text-align: center;
+      white-space: nowrap;
+    }
+
+    /* Toast Notification for Recorded WAV */
+    .toast {
+      position: fixed;
+      top: 72px;
+      right: calc(var(--play-right, 0px) + 12px);
+      z-index: 30;
+      background: rgba(13, 22, 37, 0.92);
+      backdrop-filter: blur(14px);
+      border: 1px solid rgba(212, 247, 184, 0.35);
+      border-radius: 6px;
+      padding: 12px 14px;
+      box-shadow: 0 14px 36px rgba(0, 0, 0, 0.55);
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      min-width: 240px;
+      transform: translateY(-10px);
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+      transition: all 0.25s ease;
+    }
+
+    .toast.show {
+      transform: translateY(0);
+      opacity: 1;
+      visibility: visible;
+      pointer-events: auto;
+    }
+
+    .toast-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      color: var(--mint);
+    }
+
+    .toast-actions {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .toast-btn {
+      background: rgba(212, 247, 184, 0.14);
+      border: 1px solid rgba(212, 247, 184, 0.35);
+      color: var(--mint);
+      padding: 5px 10px;
+      border-radius: 4px;
+      font-size: 11px;
+      text-decoration: none;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .toast-btn:hover {
+      background: rgba(212, 247, 184, 0.25);
+    }
+
+    .toast-close {
+      color: var(--text-dim);
+      font-size: 14px;
+      padding: 2px 6px;
+    }
+
+    @media (max-width: 680px) {
+      .brand { display: none; }
+      .hint-bar { font-size: 10px; max-width: 92vw; white-space: normal; }
+    }
+
+    .sound-controls {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    #volumeSlider {
+      width: 76px;
+      margin: 0 4px;
+      accent-color: var(--mint);
+      cursor: pointer;
+    }
+
+    .hud button { min-height: 32px; }
+    .hud button.active { background: #a2f8ca; color: #080e18; }
+    .toast { min-width: min(240px, calc(var(--play-width, 100vw) - 24px)); max-width: calc(var(--play-width, 100vw) - 24px); }
+    .hint-bar { max-width: calc(var(--play-width, 100vw) - 24px); }
+    :focus-visible { outline: 2px solid var(--mint); outline-offset: 3px; }
+    #shareBtn, .playroom-home { border: 1px solid var(--glass-border); color: var(--text-main); }
+    .playroom-home { display: grid; place-items: center; min-height: 32px; padding: 4px 8px; border-radius: 3px; font-size: 11px; text-decoration: none; white-space: nowrap; }
+    .share-fields { padding: 14px 18px; }
+    .share-fields input { width: 100%; color: var(--text-main); background: var(--bg-deep); border: 1px solid var(--glass-border); padding: 10px; user-select: text; }
+    #shareStatus { font-size: 13px; color: var(--mint); }
+    #guideBtn { border: 1px solid var(--glass-border); color: var(--text-main); }
+
+    .guide {
+      position: fixed;
+      inset: var(--play-top, 0px) var(--play-right, 0px) var(--play-bottom, 0px) var(--play-left, 0px);
+      width: min(640px, calc(var(--play-width, 100vw) - 24px));
+      max-height: calc(var(--play-height, 100vh) - 24px);
+      margin: auto;
+      overflow: auto;
+      overscroll-behavior: contain;
+      touch-action: pan-y pinch-zoom;
+      padding: 0;
+      background: #101b2b;
+      border: 1px solid var(--glass-border);
+      border-radius: 12px;
+      color: var(--text-main);
+      box-shadow: 0 16px 60px #000a;
+    }
+
+    .mode-intro { width: min(390px, calc(var(--play-width, 100vw) - 24px)); }
+    .mode-intro p { padding: 16px 18px 20px; color: #c4d4e8; font-size: 15px; line-height: 1.55; }
+    .guide::backdrop { background: #030810bc; }
+    .guide header {
+      position: sticky;
+      top: 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 12px 18px;
+      background: #101b2b;
+      border-bottom: 1px solid var(--glass-border);
+      z-index: 1;
+    }
+    .guide h2 { font-size: 18px; }
+    .guide button { min-height: 44px; color: var(--mint); }
+    .guide details { border-bottom: 1px solid var(--glass-border); }
+    .guide summary { padding: 14px 18px; cursor: pointer; font-weight: 650; color: var(--mint); }
+    .guide dl { padding: 0 18px 16px; font-size: 14px; line-height: 1.5; }
+    .guide dt { font-weight: 650; margin-top: 8px; }
+    .guide dd { color: #b5c7de; margin-bottom: 8px; }
+    .viewport-probe { position: fixed; top: -1px; left: -1px; height: 0; width: 0; visibility: hidden; pointer-events: none; }
+
+    @media (max-width: 600px), (horizontal-viewport-segments: 2) {
+      .hud { --hud-inset: 8px; gap: 4px 6px; padding: 6px; }
+      .hud button { padding-inline: 8px; min-height: 44px; }
+      #volumeSlider { height: 44px; }
+      .brand { display: none; }
+      .hint-bar { width: calc(var(--play-width, 100vw) - 24px); text-align: center; }
+    }
+    @media (max-width: 420px), (horizontal-viewport-segments: 2) {
+      .hud {
+        display: grid;
+        grid-template-columns: repeat(6, minmax(0, 1fr));
+        width: calc(var(--play-width, 100vw) - 16px);
+      }
+      .hud button { min-width: 0; padding-inline: 4px; letter-spacing: 0.03em; }
+      #modeGroup { grid-column: span 4; justify-content: space-evenly; }
+      #guideBtn, #morphBtn, #resetBtn, #recBtn, #soundBtn { grid-column: span 2; }
+      #scaleBtn, #voiceBtn { grid-column: span 3; }
+      #scaleBtn, #voiceBtn { white-space: normal; }
+      #recBtn { justify-content: center; }
+      .sound-controls { display: contents; }
+      .playroom-home, #shareBtn { grid-column: span 3; min-height: 44px; }
+
+      #volumeSlider { grid-column: span 4; width: calc(100% - 16px); margin: 0 8px; }
+      #guideBtn { grid-column: 5 / 7; grid-row: 1; }
+      #recBtn { grid-column: 5 / 7; grid-row: 3; }
+      .hint-bar { display: none; }
+    }
+    @media (max-height: 420px), (vertical-viewport-segments: 2) {
+      .hud { --hud-inset: 6px; gap: 3px; padding: 4px; }
+      .brand, .hint-bar { display: none; }
+      .hud button { min-height: 36px; padding-inline: 6px; }
+      #volumeSlider { height: 36px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="vignette"></div>
+  <div class="scanlines"></div>
+
+  <div class="hud">
+    <div class="brand">LUMINA // KINETIC CONSOLE</div>
+
+    <div class="pill-group" id="modeGroup">
+      <button data-mode="drift" aria-pressed="true" class="active">DRIFT</button>
+      <button data-mode="pulse" aria-pressed="false">PULSE</button>
+      <button data-mode="harmony" aria-pressed="false">HARMONY</button>
+    </div>
+
+    <button id="scaleBtn" title="Cycle Musical Scale">SCALE: F LYDIAN</button>
+    <button id="voiceBtn" title="Cycle Synth Voice">VOICE: GLASS CHIME</button>
+    <button id="morphBtn" aria-pressed="false" title="Tap tiles to resize width & pitch">MORPH: OFF</button>
+    <button id="resetBtn" title="Reset Grid">RESET</button>
+
+    <div class="sound-controls" role="group" aria-label="Playback sound">
+      <button id="soundBtn" aria-label="Sound" aria-pressed="true" class="toggle-on">SOUND ON</button>
+      <input id="volumeSlider" type="range" min="0" max="100" value="100" aria-label="Volume">
+    </div>
+
+    <button id="guideBtn" aria-haspopup="dialog">HOW TO PLAY</button>
+    <a class="playroom-home" href="../../#home">← PLAYROOM</a>
+    <button id="shareBtn" type="button">SHARE</button>
+    <button id="recBtn" title="Record up to 10 seconds of stereo WAV audio">
+      <span class="rec-dot"></span>
+      <span id="recLabel">REC 10s</span>
+    </button>
+  </div>
+
+  <dialog class="guide mode-intro" id="shareDialog" aria-labelledby="shareTitle">
+    <header>
+      <h2 id="shareTitle">Share Lumina</h2>
+      <form method="dialog"><button>DONE</button></form>
+    </header>
+    <div class="share-fields">
+      <input id="shareUrl" type="url" readonly aria-label="Lumina game link">
+      <button id="copyShareBtn" type="button">COPY LINK</button>
+      <div id="shareStatus" role="status"></div>
+    </div>
+  </dialog>
+
+  <dialog class="guide mode-intro" id="modeIntro" aria-labelledby="modeIntroTitle" aria-describedby="modeIntroText">
+    <header>
+      <h2 id="modeIntroTitle"></h2>
+      <form method="dialog"><button autofocus>GOT IT</button></form>
+    </header>
+    <p id="modeIntroText"></p>
+  </dialog>
+
+  <dialog class="guide" id="playGuide" aria-labelledby="guideTitle">
+    <header>
+      <h2 id="guideTitle">How to play LUMINA</h2>
+      <form method="dialog"><button autofocus>DONE</button></form>
+    </header>
+    <details open>
+      <summary>Play and reshape tiles</summary>
+      <dl>
+        <dt>Strike</dt><dd>Tap or click a tile to light it and play a note.</dd>
+        <dt>Harp sweep</dt><dd>In Drift, sweep immediately in any direction, including sideways. Faster sweeps make brighter strikes. In Pulse or Harmony, start a sideways sweep in a gutter.</dd>
+        <dt>Slide</dt><dd>In Drift, press a tile briefly before dragging sideways. Bars can overlap slightly when crowded and separate when you let go. In Pulse or Harmony, drag sideways right away. Quick collisions can chime.</dd>
+        <dt>Morph</dt><dd>Double-tap a tile in Drift or Harmony, scroll over it with a mouse wheel, or turn MORPH on and tap in any mode. Each action cycles its width. Narrow tiles sound an octave higher and wide ones an octave lower.</dd>
+      </dl>
+    </details>
+    <details>
+      <summary>Drift, Pulse, and Harmony</summary>
+      <dl>
+        <dt>Drift</dt><dd>Play freely. Try a quick diagonal sweep, then drag one glowing tile sideways.</dd>
+        <dt>Pulse</dt><dd>Tap a tile to add it to the loop. Tap it again to take it out. Sweep across tiles to add several. The beam plays the loop about once every 3.2 seconds. RESET clears the whole pattern.</dd>
+        <dt>Harmony</dt><dd>Tiles show their matching colors even when idle. Slide matching colors until their centers line up across at least three neighboring tracks. A white-blue surge and a major-ninth chord mark the match.</dd>
+      </dl>
+    </details>
+    <details>
+      <summary>Scales, voices, and volume</summary>
+      <dl>
+        <dt>Scale</dt><dd>Tap SCALE to cycle F Lydian, C Pentatonic, E-flat Major / C Minor, D Dorian, Hirajoshi, and Whole Tone. Each change plays a preview.</dd>
+        <dt>Voice</dt><dd>Tap VOICE to preview and cycle Glass Chime, Felt Piano, Analog Pad, Marimba Wood, and FM Celesta.</dd>
+        <dt>Sound and volume</dt><dd>SOUND mutes and unmutes live playback and WAV previews. The slider sets their volume. Recording captures the synth at its original level.</dd>
+        <dt>Reset</dt><dd>Clear tile charges and restore the starting widths and positions. Your mode, scale, voice, and sound settings stay selected.</dd>
+      </dl>
+    </details>
+    <details>
+      <summary>Record and save a WAV</summary>
+      <dl>
+        <dt>Start and stop</dt><dd>Tap REC 10s, then play the board. The countdown stops at ten seconds, or you can tap REC again to finish early.</dd>
+        <dt>Preview and save</dt><dd>Use PLAY or STOP in the recording card. The browser may download the stereo WAV automatically. Use SAVE .WAV to save it manually.</dd>
+      </dl>
+    </details>
+  </dialog>
+
+  <div class="toast" id="audioToast" aria-hidden="true">
+    <div class="toast-header">
+      <span id="toastTitle" role="status">CAPTURED 10.0s WAV</span>
+      <button aria-label="Close recording preview" class="toast-close" id="closeToast">✕</button>
+    </div>
+    <div class="toast-actions">
+      <button class="toast-btn" id="previewBtn">▶ PLAY</button>
+      <a class="toast-btn" id="downloadLink" download="lumina-chime.wav">⬇ SAVE .WAV</a>
+    </div>
+  </div>
+
+  <div class="hint-bar" id="hintBar">
+    TAP OR FLICK TO PLAY · HOLD THEN DRAG TO SLIDE · DOUBLE-TAP TO MORPH
+  </div>
+
+  <canvas id="canvas" aria-label="Eight tracks of interactive light tiles"></canvas>
+
+  <script>
+    (() => {
+      const canvas = document.getElementById('canvas');
+      const ctx = canvas.getContext('2d');
+
+      // --- PALETTE & SCALES ---
+      const PALETTES = [
+        { name: 'mint',   hex: '#d4f7b8', rgb: [212, 247, 184], glow: 'rgba(212, 247, 184,' },
+        { name: 'cyan',   hex: '#7ab8ff', rgb: [122, 184, 255], glow: 'rgba(122, 184, 255,' },
+        { name: 'coral',  hex: '#f24c4c', rgb: [242, 76, 76],   glow: 'rgba(242, 76, 76,'   },
+        { name: 'violet', hex: '#c49bff', rgb: [196, 155, 255], glow: 'rgba(196, 155, 255,' }
+      ];
+
+      // Frequencies across 6 rows (top = high crystalline, bottom = warm bass)
+      const SCALES = [
+        {
+          name: 'F LYDIAN',
+          rows: [
+            [698.46, 783.99, 880.00, 987.77, 1046.50, 1174.66],
+            [523.25, 587.33, 659.25, 698.46, 783.99, 880.00],
+            [349.23, 392.00, 440.00, 493.88, 523.25, 587.33],
+            [261.63, 293.66, 329.63, 349.23, 392.00, 440.00],
+            [174.61, 196.00, 220.00, 246.94, 261.63, 293.66],
+            [87.31,  110.00, 130.81, 146.83, 174.61, 196.00]
+          ]
+        },
+        {
+          name: 'C PENTATONIC',
+          rows: [
+            [783.99, 880.00, 1046.50, 1174.66, 1318.51, 1567.98],
+            [523.25, 587.33, 659.25, 783.99, 880.00, 1046.50],
+            [392.00, 440.00, 523.25, 587.33, 659.25, 783.99],
+            [261.63, 293.66, 329.63, 392.00, 440.00, 523.25],
+            [196.00, 220.00, 261.63, 293.66, 329.63, 392.00],
+            [130.81, 146.83, 164.81, 196.00, 220.00, 261.63]
+          ]
+        },
+        {
+          name: 'EB MAJ / C MIN',
+          rows: [
+            [622.25, 698.46, 783.99, 932.33, 1046.50, 1244.51],
+            [466.16, 523.25, 587.33, 622.25, 698.46, 783.99],
+            [311.13, 349.23, 392.00, 466.16, 523.25, 587.33],
+            [233.08, 261.63, 293.66, 311.13, 349.23, 392.00],
+            [155.56, 174.61, 196.00, 233.08, 261.63, 293.66],
+            [77.78,  98.00,  116.54, 130.81, 155.56, 196.00]
+          ]
+        },
+        {
+          name: 'D DORIAN',
+          rows: [
+            [587.33, 659.25, 698.46, 783.99, 880.00, 987.77],
+            [440.00, 493.88, 523.25, 587.33, 659.25, 698.46],
+            [293.66, 329.63, 349.23, 392.00, 440.00, 493.88],
+            [220.00, 246.94, 261.63, 293.66, 329.63, 349.23],
+            [146.83, 164.81, 174.61, 196.00, 220.00, 246.94],
+            [73.42,  110.00, 130.81, 146.83, 164.81, 174.61]
+          ]
+        },
+        {
+          name: 'HIRAJOSHI',
+          rows: [
+            [659.25, 739.99, 783.99, 987.77, 1046.50, 1318.51],
+            [493.88, 523.25, 659.25, 739.99, 783.99, 987.77],
+            [329.63, 369.99, 392.00, 493.88, 523.25, 659.25],
+            [246.94, 261.63, 329.63, 369.99, 392.00, 493.88],
+            [164.81, 185.00, 196.00, 246.94, 261.63, 329.63],
+            [82.41,  123.47, 130.81, 164.81, 196.00, 246.94]
+          ]
+        },
+        {
+          name: 'WHOLE TONE',
+          rows: [
+            [523.25, 587.33, 659.25, 739.99, 830.61, 932.33],
+            [415.30, 466.16, 523.25, 587.33, 659.25, 739.99],
+            [261.63, 293.66, 329.63, 369.99, 415.30, 466.16],
+            [207.65, 233.08, 261.63, 293.66, 329.63, 369.99],
+            [130.81, 146.83, 164.81, 185.00, 207.65, 233.08],
+            [65.41,  92.50,  116.54, 130.81, 164.81, 207.65]
+          ]
+        }
+      ];
+
+      // --- 5 PROCEDURAL SYNTH VOICES ---
+      const VOICES = [
+        'GLASS CHIME',
+        'FELT PIANO',
+        'ANALOG PAD',
+        'MARIMBA WOOD',
+        'FM CELESTA'
+      ];
+
+      // --- STATE ---
+      let width = 0;
+      let height = 0;
+      let dpr = 1;
+      const NUM_ROWS = 8;
+      const GUTTER = 6;
+      let boardRect = { x: 0, y: 0, w: 0, h: 0 };
+      let rows = [];
+      let mode = 'drift'; // 'drift' | 'pulse' | 'harmony'
+      let scaleIdx = 0;
+      let voiceIdx = 0;
+      let morphMode = false;
+      let pulseX = 0;
+      let lastPulseX = 0;
+      let harmonyColumn = null;
+      const registeredTouches = new Set();
+      let harmonyKeys = new Set();
+      let harmonyFlash = 0;
+
+      // Pointer tracking
+      const pointers = new Map();
+      let lastTapTime = 0;
+      let lastTapBlock = null;
+
+      // --- WEB AUDIO & 10s WAV RECORDER ---
+      let audioCtx = null;
+      let masterGain = null;
+      let playbackGain = null;
+      let soundOn = true;
+      let delayNode = null;
+      let recorderNode = null;
+      let isRecording = false;
+      let previewURL = null;
+      let recLeftChunks = [];
+      let recRightChunks = [];
+      let recSampleCount = 0;
+      const MAX_REC_SECONDS = 10;
+      let previewAudio = null;
+
+      function initAudio() {
+        if (audioCtx) {
+          if (audioCtx.state !== 'running') audioCtx.resume().catch(() => {});
+          return;
+        }
+        const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+        if (!AudioContextClass) return;
+        audioCtx = new AudioContextClass();
+        if (audioCtx.state !== 'running') audioCtx.resume().catch(() => {});
+
+        const compressor = audioCtx.createDynamicsCompressor();
+        compressor.threshold.setValueAtTime(-16, audioCtx.currentTime);
+        compressor.knee.setValueAtTime(18, audioCtx.currentTime);
+        compressor.ratio.setValueAtTime(4, audioCtx.currentTime);
+        compressor.attack.setValueAtTime(0.005, audioCtx.currentTime);
+        compressor.release.setValueAtTime(0.2, audioCtx.currentTime);
+
+        masterGain = audioCtx.createGain();
+        masterGain.gain.setValueAtTime(0.75, audioCtx.currentTime);
+
+        // Alternate echoes across the stereo field.
+        delayNode = audioCtx.createDelay(1);
+        const rightDelay = audioCtx.createDelay(1);
+        delayNode.delayTime.value = 0.29;
+        rightDelay.delayTime.value = 0.29;
+
+        function routeEcho(delay, next, pan, feedback) {
+          const lowpass = audioCtx.createBiquadFilter();
+          lowpass.type = 'lowpass';
+          lowpass.frequency.value = 2100;
+          const level = audioCtx.createGain();
+          level.gain.value = feedback;
+          const output = audioCtx.createStereoPanner();
+          output.pan.value = pan;
+          delay.connect(lowpass).connect(level);
+          level.connect(next);
+          level.connect(output).connect(masterGain);
+        }
+        routeEcho(delayNode, rightDelay, -0.85, 0.36);
+        routeEcho(rightDelay, delayNode, 0.85, 0.65);
+
+        masterGain.connect(compressor);
+        playbackGain = audioCtx.createGain();
+        playbackGain.gain.value = outputVolume();
+        compressor.connect(playbackGain).connect(audioCtx.destination);
+
+        // Tap output for lossless 10s WAV recording
+        recorderNode = audioCtx.createScriptProcessor(4096, 2, 2);
+        compressor.connect(recorderNode);
+        const silent = audioCtx.createGain();
+        silent.gain.value = 0;
+        recorderNode.connect(silent).connect(audioCtx.destination);
+
+        recorderNode.onaudioprocess = (e) => {
+          if (!isRecording) return;
+          const left = e.inputBuffer.getChannelData(0);
+          const right = e.inputBuffer.getChannelData(1);
+          const count = Math.min(left.length, audioCtx.sampleRate * MAX_REC_SECONDS - recSampleCount);
+          recLeftChunks.push(left.slice(0, count));
+          recRightChunks.push(right.slice(0, count));
+          recSampleCount += count;
+
+          if (recSampleCount >= audioCtx.sampleRate * MAX_REC_SECONDS) {
+            stopRecording();
+          }
+        };
+      }
+
+      function playChime(block, velocity = 0.8, frequency, offset = 0) {
+        if (!audioCtx) return;
+
+        const now = audioCtx.currentTime + offset;
+        const scale = SCALES[scaleIdx];
+        const rowFreqs = scale.rows[Math.round(block.row * (scale.rows.length - 1) / (NUM_ROWS - 1))];
+        const normX = Math.max(0, Math.min(0.999, (block.x - boardRect.x) / Math.max(1, boardRect.w)));
+        const noteIdx = Math.floor(normX * rowFreqs.length);
+        let freq = rowFreqs[noteIdx];
+
+        if (block.widthTier === 2) freq *= 0.5;
+        if (block.widthTier === 0) freq *= 2.0;
+
+        freq = frequency ?? freq;
+        const previewLevel = velocity < 0.4 ? 0.54 : 1;
+        const vel = Math.max(0.15, Math.min(1.2, velocity));
+        const voice = VOICES[voiceIdx];
+
+        if (voice === 'GLASS CHIME') {
+          const duration = block.widthTier === 2 ? 2.4 : (block.row >= 4 ? 1.9 : 1.35);
+          const osc1 = audioCtx.createOscillator();
+          const osc2 = audioCtx.createOscillator();
+          const osc2Gain = audioCtx.createGain();
+          const filter = audioCtx.createBiquadFilter();
+          const env = audioCtx.createGain();
+
+          osc1.type = block.row >= 4 ? 'triangle' : 'sine';
+          osc2.type = 'sine';
+          osc1.frequency.setValueAtTime(freq, now);
+          osc2.frequency.setValueAtTime(freq * 2.002, now);
+          osc2Gain.gain.setValueAtTime(0.14 * vel, now);
+
+          filter.type = 'lowpass';
+          filter.frequency.setValueAtTime(480 + vel * 2600, now);
+          filter.frequency.exponentialRampToValueAtTime(320, now + duration);
+
+          const peak = (0.14 + vel * 0.12) * (block.row === NUM_ROWS - 1 ? 1.15 : 0.95);
+          env.gain.setValueAtTime(0.0001, now);
+          env.gain.linearRampToValueAtTime(peak * previewLevel, now + 0.014);
+          env.gain.exponentialRampToValueAtTime(0.0001, now + duration);
+
+          osc1.connect(filter);
+          osc2.connect(osc2Gain);
+          osc2Gain.connect(filter);
+          filter.connect(env);
+          env.connect(masterGain);
+          env.connect(delayNode);
+
+          osc1.start(now);
+          osc2.start(now);
+          osc1.stop(now + duration + 0.05);
+          osc2.stop(now + duration + 0.05);
+        } else if (voice === 'FELT PIANO') {
+          const duration = block.row >= 4 ? 2.6 : 1.9;
+          const osc1 = audioCtx.createOscillator();
+          const subOsc = audioCtx.createOscillator();
+          const subGain = audioCtx.createGain();
+          const thumpOsc = audioCtx.createOscillator();
+          const thumpGain = audioCtx.createGain();
+          const filter = audioCtx.createBiquadFilter();
+          const env = audioCtx.createGain();
+
+          osc1.type = 'triangle';
+          osc1.frequency.setValueAtTime(freq, now);
+
+          subOsc.type = 'sine';
+          subOsc.frequency.setValueAtTime(freq * 0.5, now);
+          subGain.gain.setValueAtTime(0.24, now);
+
+          // Soft felt hammer mechanical thump
+          thumpOsc.type = 'sine';
+          thumpOsc.frequency.setValueAtTime(115, now);
+          thumpOsc.frequency.exponentialRampToValueAtTime(42, now + 0.045);
+          thumpGain.gain.setValueAtTime(0.08 * vel, now);
+          thumpGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.05);
+
+          filter.type = 'lowpass';
+          filter.frequency.setValueAtTime(340 + vel * 1250, now);
+          filter.frequency.exponentialRampToValueAtTime(210, now + duration);
+
+          const peak = (0.16 + vel * 0.13);
+          env.gain.setValueAtTime(0.0001, now);
+          env.gain.linearRampToValueAtTime(peak * previewLevel, now + 0.018);
+          env.gain.exponentialRampToValueAtTime(0.0001, now + duration);
+
+          osc1.connect(filter);
+          subOsc.connect(subGain);
+          subGain.connect(filter);
+          thumpOsc.connect(thumpGain);
+          thumpGain.connect(masterGain);
+
+          filter.connect(env);
+          env.connect(masterGain);
+          env.connect(delayNode);
+
+          osc1.start(now);
+          subOsc.start(now);
+          thumpOsc.start(now);
+          osc1.stop(now + duration + 0.05);
+          subOsc.stop(now + duration + 0.05);
+          thumpOsc.stop(now + 0.06);
+        } else if (voice === 'ANALOG PAD') {
+          const duration = 3.2;
+          const osc1 = audioCtx.createOscillator();
+          const osc2 = audioCtx.createOscillator();
+          const filter = audioCtx.createBiquadFilter();
+          const env = audioCtx.createGain();
+
+          osc1.type = 'sawtooth';
+          osc2.type = 'triangle';
+          osc1.frequency.setValueAtTime(freq, now);
+          osc2.frequency.setValueAtTime(freq, now);
+          osc1.detune.setValueAtTime(-7, now);
+          osc2.detune.setValueAtTime(7, now);
+
+          filter.type = 'lowpass';
+          filter.Q.setValueAtTime(2.6, now);
+          filter.frequency.setValueAtTime(240, now);
+          filter.frequency.exponentialRampToValueAtTime(620 + vel * 1100, now + 0.35);
+          filter.frequency.exponentialRampToValueAtTime(220, now + duration);
+
+          const peak = (0.09 + vel * 0.07);
+          env.gain.setValueAtTime(0.0001, now);
+          env.gain.linearRampToValueAtTime(peak * previewLevel, now + 0.24);
+          env.gain.exponentialRampToValueAtTime(0.0001, now + duration);
+
+          osc1.connect(filter);
+          osc2.connect(filter);
+          filter.connect(env);
+          env.connect(masterGain);
+          env.connect(delayNode);
+
+          osc1.start(now);
+          osc2.start(now);
+          osc1.stop(now + duration + 0.05);
+          osc2.stop(now + duration + 0.05);
+        } else if (voice === 'MARIMBA WOOD') {
+          const duration = 0.72;
+          const osc1 = audioCtx.createOscillator();
+          const overtone = audioCtx.createOscillator();
+          const overGain = audioCtx.createGain();
+          const env = audioCtx.createGain();
+
+          osc1.type = 'sine';
+          // Classic mallet pitch drop on initial transient
+          osc1.frequency.setValueAtTime(freq * 1.035, now);
+          osc1.frequency.exponentialRampToValueAtTime(freq, now + 0.024);
+
+          overtone.type = 'sine';
+          overtone.frequency.setValueAtTime(freq * 4.0, now);
+          overGain.gain.setValueAtTime(0.11 * vel, now);
+          overGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.09);
+
+          const peak = (0.20 + vel * 0.14);
+          env.gain.setValueAtTime(0.0001, now);
+          env.gain.linearRampToValueAtTime(peak * previewLevel, now + 0.006);
+          env.gain.exponentialRampToValueAtTime(0.0001, now + duration);
+
+          const body = audioCtx.createBiquadFilter();
+          body.type = 'peaking';
+          body.frequency.value = Math.min(680, freq * 1.8);
+          body.Q.value = 1.3;
+          body.gain.value = 4;
+          osc1.connect(body).connect(env);
+          overtone.connect(overGain);
+          overGain.connect(env);
+          env.connect(masterGain);
+          env.connect(delayNode);
+
+          osc1.start(now);
+          overtone.start(now);
+          osc1.stop(now + duration + 0.04);
+          overtone.stop(now + 0.12);
+        } else if (voice === 'FM CELESTA') {
+          const duration = 1.65;
+          const carrier = audioCtx.createOscillator();
+          const modulator = audioCtx.createOscillator();
+          const modGain = audioCtx.createGain();
+          const env = audioCtx.createGain();
+
+          carrier.type = 'sine';
+          carrier.frequency.setValueAtTime(freq, now);
+
+          modulator.type = 'sine';
+          modulator.frequency.setValueAtTime(freq * 3.5, now);
+
+          modGain.gain.setValueAtTime(freq * (1.2 + vel * 1.4), now);
+          modGain.gain.exponentialRampToValueAtTime(1.0, now + 0.28);
+
+          const peak = (0.14 + vel * 0.10);
+          env.gain.setValueAtTime(0.0001, now);
+          env.gain.linearRampToValueAtTime(peak * previewLevel, now + 0.009);
+          env.gain.exponentialRampToValueAtTime(0.0001, now + duration);
+
+          modulator.connect(modGain);
+          modGain.connect(carrier.frequency);
+          carrier.connect(env);
+          env.connect(masterGain);
+          env.connect(delayNode);
+
+          carrier.start(now);
+          modulator.start(now);
+          carrier.stop(now + duration + 0.05);
+          modulator.stop(now + duration + 0.05);
+        }
+      }
+
+      // --- WAV ENCODING HELPERS ---
+      function encodeWAV(leftChunks, rightChunks, totalSamples, sampleRate) {
+        const numChannels = 2;
+        const bytesPerSample = 2;
+        const dataLength = totalSamples * numChannels * bytesPerSample;
+        const buffer = new ArrayBuffer(44 + dataLength);
+        const view = new DataView(buffer);
+
+        const writeString = (offset, str) => {
+          for (let i = 0; i < str.length; i++) {
+            view.setUint8(offset + i, str.charCodeAt(i));
+          }
+        };
+
+        writeString(0, 'RIFF');
+        view.setUint32(4, 36 + dataLength, true);
+        writeString(8, 'WAVE');
+        writeString(12, 'fmt ');
+        view.setUint32(16, 16, true);
+        view.setUint16(20, 1, true); // PCM
+        view.setUint16(22, numChannels, true);
+        view.setUint32(24, sampleRate, true);
+        view.setUint32(28, sampleRate * numChannels * bytesPerSample, true);
+        view.setUint16(32, numChannels * bytesPerSample, true);
+        view.setUint16(34, 16, true);
+        writeString(36, 'data');
+        view.setUint32(40, dataLength, true);
+
+        let offset = 44;
+        for (let c = 0; c < leftChunks.length; c++) {
+          const L = leftChunks[c];
+          const R = rightChunks[c];
+          for (let i = 0; i < L.length; i++) {
+            const sL = Math.max(-1, Math.min(1, L[i]));
+            const sR = Math.max(-1, Math.min(1, R[i]));
+            view.setInt16(offset, sL < 0 ? sL * 0x8000 : sL * 0x7FFF, true);
+            offset += 2;
+            view.setInt16(offset, sR < 0 ? sR * 0x8000 : sR * 0x7FFF, true);
+            offset += 2;
+          }
+        }
+        return new Blob([buffer], { type: 'audio/wav' });
+      }
+
+      const soundBtn = document.getElementById('soundBtn');
+      const volumeSlider = document.getElementById('volumeSlider');
+
+      function outputVolume() {
+        return soundOn ? Number(volumeSlider.value) / 100 : 0;
+      }
+
+      function updateOutputVolume() {
+        const volume = outputVolume();
+        if (playbackGain) {
+          playbackGain.gain.setTargetAtTime(volume, audioCtx.currentTime, 0.015);
+        }
+        if (previewAudio) {
+          previewAudio.muted = !soundOn;
+          previewAudio.volume = Number(volumeSlider.value) / 100;
+        }
+      }
+
+      soundBtn.addEventListener('click', () => {
+        soundOn = !soundOn;
+        soundBtn.textContent = soundOn ? 'SOUND ON' : 'SOUND OFF';
+        soundBtn.setAttribute('aria-pressed', String(soundOn));
+        soundBtn.classList.toggle('toggle-on', soundOn);
+        updateOutputVolume();
+      });
+
+      volumeSlider.addEventListener('input', updateOutputVolume);
+
+      const recBtn = document.getElementById('recBtn');
+      const recLabel = document.getElementById('recLabel');
+      const audioToast = document.getElementById('audioToast');
+      const toastTitle = document.getElementById('toastTitle');
+      const previewBtn = document.getElementById('previewBtn');
+      const downloadLink = document.getElementById('downloadLink');
+
+      function startRecording() {
+        initAudio();
+        if (!audioCtx) return;
+        recLeftChunks = [];
+        recRightChunks = [];
+        recSampleCount = 0;
+        isRecording = true;
+
+        recBtn.classList.add('recording');
+        audioToast.classList.remove('show');
+        audioToast.setAttribute('aria-hidden', 'true');
+        if (previewAudio) {
+          previewAudio.pause();
+          previewAudio = null;
+        }
+      }
+
+      function stopRecording() {
+        if (!isRecording) return;
+        isRecording = false;
+        recBtn.classList.remove('recording');
+        recLabel.textContent = 'REC 10s';
+
+        if (recSampleCount === 0) return;
+
+        const durationSec = (recSampleCount / audioCtx.sampleRate).toFixed(1);
+        const wavBlob = encodeWAV(recLeftChunks, recRightChunks, recSampleCount, audioCtx.sampleRate);
+        if (previewURL) URL.revokeObjectURL(previewURL);
+        const url = previewURL = URL.createObjectURL(wavBlob);
+
+        const stamp = new Date().toISOString().replace(/[:.]/g, '-');
+        const filename = `lumina-chime-${stamp}.wav`;
+
+        downloadLink.href = url;
+        downloadLink.download = filename;
+        toastTitle.textContent = `CAPTURED ${durationSec}s WAV`;
+        previewBtn.textContent = '▶ PLAY';
+        audioToast.classList.add('show');
+        audioToast.setAttribute('aria-hidden', 'false');
+
+        // Trigger automatic download
+        const autoA = document.createElement('a');
+        autoA.href = url;
+        autoA.download = filename;
+        document.body.appendChild(autoA);
+        autoA.click();
+        document.body.removeChild(autoA);
+
+        previewAudio = new Audio(url);
+        updateOutputVolume();
+        previewAudio.onended = () => {
+          previewBtn.textContent = '▶ PLAY';
+        };
+      }
+
+      recBtn.addEventListener('click', () => {
+        if (isRecording) stopRecording();
+        else startRecording();
+      });
+
+      previewBtn.addEventListener('click', () => {
+        if (!previewAudio) return;
+        if (previewAudio.paused) {
+          previewAudio.play().then(() => { previewBtn.textContent = '■ STOP'; }).catch(() => {});
+        } else {
+          previewAudio.pause();
+          previewAudio.currentTime = 0;
+          previewBtn.textContent = '▶ PLAY';
+        }
+      });
+
+      document.getElementById('closeToast').addEventListener('click', () => {
+        audioToast.classList.remove('show');
+        audioToast.setAttribute('aria-hidden', 'true');
+        if (previewAudio) {
+          previewAudio.pause();
+          previewAudio.currentTime = 0;
+        }
+        previewBtn.textContent = '▶ PLAY';
+      });
+
+      // --- GRID & BLOCK CONSTRUCTION ---
+      const TIERS = [0.68, 1.05, 1.65];
+      const shareBtn = document.getElementById('shareBtn');
+      const shareDialog = document.getElementById('shareDialog');
+      const shareUrl = document.getElementById('shareUrl');
+      const shareStatus = document.getElementById('shareStatus');
+      const publicGameUrl = 'https://pocketplayroom.com/games/lumina/';
+      shareUrl.value = publicGameUrl;
+
+      shareBtn.addEventListener('click', async () => {
+        if (navigator.share) {
+          try {
+            await navigator.share({ title: 'Lumina · Pocket Playroom', url: publicGameUrl });
+            return;
+          } catch (error) {
+            if (error.name === 'AbortError') return;
+          }
+        }
+        shareStatus.textContent = '';
+        shareDialog.showModal();
+        shareUrl.focus();
+        shareUrl.select();
+      });
+
+      document.getElementById('copyShareBtn').addEventListener('click', async () => {
+        try {
+          await navigator.clipboard.writeText(publicGameUrl);
+          shareStatus.textContent = 'Link copied.';
+        } catch {
+          shareUrl.focus();
+          shareUrl.select();
+          shareStatus.textContent = 'Select and copy the game link.';
+        }
+      });
+
+      const guide = document.getElementById('playGuide');
+      const guideBtn = document.getElementById('guideBtn');
+      guideBtn.addEventListener('click', () => {
+        pointers.clear();
+        guide.showModal();
+      });
+      guide.addEventListener('close', () => guideBtn.focus());
+
+      const hud = document.querySelector('.hud');
+      const hint = document.getElementById('hintBar');
+
+      const viewportProbe = document.createElement('div');
+      viewportProbe.className = 'viewport-probe';
+      viewportProbe.setAttribute('aria-hidden', 'true');
+      document.body.append(viewportProbe);
+
+      function viewportInset(expression) {
+        viewportProbe.style.marginLeft = expression;
+        return parseFloat(getComputedStyle(viewportProbe).marginLeft) || 0;
+      }
+
+      function updatePlayArea() {
+        const safe = ['left', 'top', 'right', 'bottom'].map((edge) =>
+          viewportInset(`env(safe-area-inset-${edge}, 0px)`));
+        const segments = window.viewport?.segments;
+        const panes = segments?.length > 1 ? Array.from(segments) : [];
+        if (!panes.length) {
+          for (let row = 0; row < 2; row++) {
+            for (let col = 0; col < 2; col++) {
+              const value = (edge) => viewportInset(`env(viewport-segment-${edge} ${col} ${row}, 0px)`);
+              const w = value('width');
+              const h = value('height');
+              if (w && h) panes.push({ left: value('left'), top: value('top'), width: w, height: h });
+            }
+          }
+        }
+        const pane = panes.reduce((largest, next) =>
+          !largest || next.width * next.height > largest.width * largest.height ? next : largest, null);
+        const left = Math.max(safe[0], pane?.left ?? 0);
+        const top = Math.max(safe[1], pane?.top ?? 0);
+        const right = Math.min(width - safe[2], pane ? pane.left + pane.width : width);
+        const bottom = Math.min(height - safe[3], pane ? pane.top + pane.height : height);
+        const w = Math.max(1, right - left);
+        const h = Math.max(1, bottom - top);
+        for (const [key, value] of Object.entries({
+          left, top, right: width - right, bottom: height - bottom, width: w, height: h, center: left + w / 2
+        })) {
+          document.documentElement.style.setProperty(`--play-${key}`, `${value}px`);
+        }
+        return { left, top, w, h };
+      }
+
+      function trackWidths(desired, budget) {
+        const floor = Math.min(26, budget / desired.length);
+        const capped = desired.map((value) => Math.max(floor, value));
+        const total = capped.reduce((amount, value) => amount + value, 0);
+        if (total <= budget) return capped;
+        const flexible = total - floor * desired.length;
+        if (flexible <= 0) return desired.map(() => budget / desired.length);
+        const ratio = (budget - floor * desired.length) / flexible;
+        return capped.map((value) => floor + (value - floor) * ratio);
+      }
+
+      function buildGrid() {
+        pointers.clear();
+        lastTapBlock = null;
+        harmonyFlash = 0;
+        harmonyKeys.clear();
+        dpr = window.devicePixelRatio || 1;
+        width = Math.max(1, window.innerWidth);
+        height = Math.max(1, window.innerHeight);
+        canvas.width = Math.max(1, Math.round(width * dpr));
+        canvas.height = Math.max(1, Math.round(height * dpr));
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+        const play = updatePlayArea();
+        const topPad = Math.ceil(hud.getBoundingClientRect().bottom) + Math.min(42, Math.max(8, play.h * 0.045));
+        const botPad = hint.offsetHeight ? hint.offsetHeight + 26 : 12;
+        const sidePad = Math.min(play.w * 0.12, Math.max(6, play.w * 0.025));
+        boardRect = {
+          x: play.left + sidePad,
+          y: topPad,
+          w: play.w - sidePad * 2,
+          h: Math.max(GUTTER * (NUM_ROWS - 1) + NUM_ROWS, play.top + play.h - topPad - botPad), edgeSlack: Math.max(0, sidePad - 2)
+        };
+        audioToast.style.top = `${Math.ceil(hud.getBoundingClientRect().bottom) + 10}px`;
+
+        const rowHeight = (boardRect.h - GUTTER * (NUM_ROWS - 1)) / NUM_ROWS;
+        rows = [];
+
+        // Wide bars share track edges while the seams stagger between tracks.
+        const rowPatterns = [
+          [1.31, 1.51, 1.60],
+          [1.15, 1.87, 0.24, 1.13],
+          [0.62, 1.54, 0.91, 1.63],
+          [1.18, 1.55, 1.17, 0.46],
+          [1.67, 1.49, 1.16],
+          [0.94, 1.70, 0.40, 1.29],
+          [1.12, 1.62, 0.17, 1.45],
+          [1.41, 1.82, 1.10]
+        ];
+        const givenColors = [
+          { 1: 3, 2: 0 }, { 1: 0 }, { 1: 1, 3: 1 }, { 0: 0, 1: 2, 2: 3 },
+          { 1: 1 }, { 1: 0, 2: 0 }, { 1: 3 }, { 1: 0 }
+        ];
+
+        for (let r = 0; r < NUM_ROWS; r++) {
+          const pattern = rowPatterns[r];
+          const totalWeight = pattern.reduce((a, b) => a + b, 0);
+          const availableW = Math.max(1, boardRect.w - GUTTER * (pattern.length - 1));
+          const unitW = availableW * 0.96 / totalWeight;
+
+          const targets = pattern.map((ratio) => ratio * unitW);
+          const initialWidths = trackWidths(targets, availableW * 0.96);
+          let curX = boardRect.x + availableW * 0.02;
+          const y = boardRect.y + r * (rowHeight + GUTTER);
+          const blocks = [];
+          for (let c = 0; c < pattern.length; c++) {
+            const w = initialWidths[c];
+            // Weight palette toward luminous mint & ice cyan with coral/violet accents
+            let palIdx = 0;
+            if ((r + c) % 4 === 1) palIdx = 1;
+            else if ((r * 3 + c) % 7 === 2) palIdx = 2;
+            else if ((r + c * 2) % 6 === 4) palIdx = 3;
+
+            const color = givenColors[r][c] ?? palIdx;
+
+            const tier = pattern[c] < 0.85 ? 0 : (pattern[c] > 1.35 ? 2 : 1);
+
+            blocks.push({
+              id: `${r}-${c}`,
+              row: r,
+              x: curX,
+              y: y,
+              w: w,
+              targetW: targets[c],
+              baseUnitW: unitW,
+              h: rowHeight,
+              vx: 0,
+              glow: 0,
+              strike: 0,
+              compression: 0,
+              pulseFlash: 0,
+              pulseArmed: false,
+              scalePop: 0,
+              palette: PALETTES[color],
+              widthTier: tier,
+              lastHitTime: -Infinity
+            });
+            curX += w + GUTTER;
+          }
+          rows.push(blocks);
+        }
+        pulseX = boardRect.x;
+      }
+
+      function triggerBlock(block, intensity = 1.0, playSound = true) {
+        const now = performance.now();
+        if (now - block.lastHitTime < 55 && intensity < 1.1) return;
+        block.lastHitTime = now;
+        block.glow = Math.min(1.65, Math.max(block.glow, intensity));
+        if (mode === 'drift') {
+          block.strike = Math.max(block.strike, Math.min(1, (intensity - 0.45) / 0.85));
+        } else {
+          block.scalePop = 1.0;
+        }
+
+        if (playSound) {
+          playChime(block, Math.min(1.2, intensity * 0.85));
+        }
+      }
+
+      function morphBlockWidth(block) {
+        block.widthTier = (block.widthTier + 1) % 3;
+        block.targetW = block.baseUnitW * TIERS[block.widthTier];
+        triggerBlock(block, 1.25, true);
+      }
+
+      // --- POINTER INTERACTION ---
+      function getBlockAt(px, py) {
+        for (const row of rows) {
+          // The tile painted on top also owns the overlap for pointer input.
+          for (let i = row.length - 1; i >= 0; i--) {
+            const b = row[i];
+            if (px >= b.x && px <= b.x + b.w && py >= b.y && py <= b.y + b.h) return b;
+          }
+        }
+        return null;
+      }
+
+      canvas.addEventListener('pointerdown', (e) => {
+        if (e.button !== 0) return;
+        if (e.pointerType !== 'mouse') registeredTouches.add(e.pointerId);
+        initAudio();
+        canvas.setPointerCapture(e.pointerId);
+        const block = getBlockAt(e.clientX, e.clientY);
+        if (block && !morphMode && mode !== 'pulse') triggerBlock(block, 0.96 + e.pressure * 0.42);
+        pointers.set(e.pointerId, {
+          startX: e.clientX, startY: e.clientY, x: e.clientX, y: e.clientY,
+          time: e.timeStamp, startedAt: e.timeStamp, block, hover: block, gesture: null
+        });
+      });
+
+      canvas.addEventListener('pointermove', (e) => {
+        const p = pointers.get(e.pointerId);
+        if (!p) return;
+        const dx = e.clientX - p.startX;
+        const dy = e.clientY - p.startY;
+        const travel = Math.hypot(dx, dy);
+        const horizontal = Math.abs(dx) > 1.3 * Math.abs(dy);
+        const held = e.timeStamp - p.startedAt >= 140;
+        if (!p.gesture && travel > (mode === 'drift' && horizontal && !held ? 12 : 7)) {
+          p.gesture = p.block && horizontal && (mode !== 'drift' || held) ? 'slide' : 'sweep';
+          p.anchor = p.block?.x;
+        }
+        if (!p.gesture) return;
+        if (p.gesture === 'sweep') {
+          const distance = Math.hypot(e.clientX - p.x, e.clientY - p.y);
+          const steps = Math.ceil(distance / 8);
+          const strength = Math.min(1.65, 0.72 + distance / Math.max(8, e.timeStamp - p.time) * 0.52);
+          for (let i = 1; i <= steps; i++) {
+            const x = p.x + (e.clientX - p.x) * i / steps;
+            const y = p.y + (e.clientY - p.y) * i / steps;
+            const block = getBlockAt(x, y);
+            if (block === p.hover) continue;
+            p.hover = block;
+            if (block) {
+              if (mode === 'pulse') block.pulseArmed = true;
+              triggerBlock(block, strength);
+            }
+          }
+          p.time = e.timeStamp;
+        }
+        p.x = e.clientX;
+        p.y = e.clientY;
+      });
+
+      canvas.addEventListener('pointerup', (e) => {
+        if (registeredTouches.delete(e.pointerId)) initAudio();
+        const p = pointers.get(e.pointerId);
+        pointers.delete(e.pointerId);
+        if (!p?.block || p.gesture) return;
+        if (mode === 'pulse' && !morphMode) {
+          const block = p.block;
+          block.pulseArmed = !block.pulseArmed;
+          if (block.pulseArmed) {
+            triggerBlock(block, 1.22);
+          } else {
+            block.glow = 0;
+            block.pulseFlash = 0;
+            block.scalePop = 0;
+          }
+          lastTapBlock = null;
+          return;
+        }
+        const now = performance.now();
+        if (morphMode || (p.block === lastTapBlock && now - lastTapTime < 320)) {
+          morphBlockWidth(p.block);
+          lastTapBlock = null;
+        } else {
+          lastTapBlock = p.block;
+          lastTapTime = now;
+        }
+      });
+      for (const event of ['pointercancel', 'lostpointercapture']) {
+        canvas.addEventListener(event, (e) => {
+          pointers.delete(e.pointerId);
+          registeredTouches.delete(e.pointerId);
+        });
+      }
+
+      let lastWheel = -Infinity;
+      // Mouse wheel morphing
+      canvas.addEventListener('wheel', (e) => {
+        e.preventDefault();
+        const block = getBlockAt(e.clientX, e.clientY);
+        if (!block || performance.now() - lastWheel < 180) return;
+        lastWheel = performance.now();
+        initAudio();
+        morphBlockWidth(block);
+      }, { passive: false });
+
+      // --- HUD CONTROLS ---
+      const modeIntro = document.getElementById('modeIntro');
+      const modeHelp = {
+        drift: ['Drift', 'Tap a tile to play it, or flick across several to leave a trail of light. Hold a tile briefly, then drag it sideways to slide it.'],
+        pulse: ['Pulse', 'Tap tiles to add them to the loop. Tap a lit tile again to remove it. The beam plays selected tiles on each pass.'],
+        harmony: ['Harmony', 'Slide tiles of the same color until their centers line up across three neighboring rows. A white-blue flash and a chord mark the match.']
+      };
+      const seenModes = new Set();
+
+      function showModeIntro(nextMode) {
+        const key = `lumina.mode-intro.${nextMode}`;
+        if (seenModes.has(nextMode) || modeIntro.open) return;
+        try {
+          if (localStorage.getItem(key)) return;
+        } catch {
+          // The in-memory set also covers embedded browsers that block storage.
+        }
+        const [title, description] = modeHelp[nextMode];
+        document.getElementById('modeIntroTitle').textContent = title;
+        document.getElementById('modeIntroText').textContent = description;
+        modeIntro.showModal();
+        seenModes.add(nextMode);
+        try {
+          localStorage.setItem(key, '1');
+        } catch {
+          // Keep the current session usable without storage.
+        }
+      }
+
+      document.querySelectorAll('#modeGroup button').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          document.querySelectorAll('#modeGroup button').forEach((b) => b.classList.remove('active'));
+          btn.classList.add('active');
+          document.querySelectorAll('#modeGroup button').forEach((b) => b.setAttribute('aria-pressed', String(b === btn)));
+          mode = btn.dataset.mode;
+          harmonyKeys.clear();
+          pulseX = boardRect.x;
+          initAudio();
+
+          const hintBar = document.getElementById('hintBar');
+          if (mode === 'drift') {
+            hintBar.textContent = 'TAP OR FLICK TO PLAY · HOLD THEN DRAG TO SLIDE · DOUBLE-TAP TO MORPH';
+          } else if (mode === 'pulse') {
+            hintBar.textContent = 'PULSE · TAP TO ADD OR REMOVE A TILE · RESET CLEARS THE LOOP';
+          } else if (mode === 'harmony') {
+            hintBar.textContent = 'HARMONY MODE · SLIDE MATCHING-COLOR TILES INTO VERTICAL ALIGNMENT FOR A CHORD SURGE';
+          }
+          showModeIntro(mode);
+        });
+      });
+
+      const scaleBtn = document.getElementById('scaleBtn');
+      scaleBtn.addEventListener('click', () => {
+        scaleIdx = (scaleIdx + 1) % SCALES.length;
+        scaleBtn.textContent = `SCALE: ${SCALES[scaleIdx].name}`;
+        previewCenterChime();
+      });
+
+      const voiceBtn = document.getElementById('voiceBtn');
+      voiceBtn.addEventListener('click', () => {
+        voiceIdx = (voiceIdx + 1) % VOICES.length;
+        voiceBtn.textContent = `VOICE: ${VOICES[voiceIdx]}`;
+        previewCenterChime();
+      });
+
+      function previewCenterChime() {
+        initAudio();
+        const tile = rows[2][1];
+        triggerBlock(tile, 0.92, false);
+        playChime(tile, 0.32);
+      }
+
+      const morphBtn = document.getElementById('morphBtn');
+      morphBtn.addEventListener('click', () => {
+        morphMode = !morphMode;
+        morphBtn.setAttribute('aria-pressed', String(morphMode));
+        morphBtn.textContent = `MORPH: ${morphMode ? 'ON' : 'OFF'}`;
+        morphBtn.classList.toggle('toggle-on', morphMode);
+      });
+
+      document.getElementById('resetBtn').addEventListener('click', () => {
+        buildGrid();
+      });
+
+      // --- PHYSICS & SIMULATION STEP ---
+      function update(dt) {
+        if (isRecording) {
+          const remaining = MAX_REC_SECONDS - recSampleCount / audioCtx.sampleRate;
+          recLabel.textContent = `REC ${remaining.toFixed(1).padStart(4, '0')}s`;
+        }
+
+        const right = boardRect.x + boardRect.w;
+        if (mode === 'pulse') {
+          lastPulseX = pulseX;
+          pulseX += boardRect.w * dt / 3.2;
+          if (pulseX >= right) pulseX -= boardRect.w;
+        }
+
+        for (const p of pointers.values()) {
+          if (p.gesture !== 'slide') continue;
+          const target = p.anchor + p.x - p.startX;
+          p.block.vx += (target - p.block.x) * 125 * dt;
+          p.block.glow = Math.max(p.block.glow, 0.42);
+        }
+
+        const drift = mode === 'drift';
+        const edgeTravel = drift ? Math.min(32, boardRect.w * 0.045, boardRect.edgeSlack) : 0;
+        for (const row of rows) {
+          const budget = Math.max(1, boardRect.w - GUTTER * (row.length - 1));
+          const widths = trackWidths(row.map((b) => b.targetW), budget * 0.96 + edgeTravel * 2);
+          for (let i = 0; i < row.length; i++) {
+            const b = row[i];
+            b.w += (widths[i] - b.w) * (1 - Math.exp(-12 * dt));
+            b.vx *= Math.exp(-14 * dt);
+            b.x += b.vx * dt;
+            b.glow *= Math.exp(-(mode === 'pulse' ? 0.58 : drift ? 0.87 : 1.18) * dt);
+            b.strike *= Math.exp(-5.2 * dt);
+            b.compression = drift ? b.compression * Math.exp(-10 * dt) : 0;
+            b.scalePop = Math.max(0, b.scalePop - 4.5 * dt);
+            b.pulseFlash *= Math.exp(-2.7 * dt);
+
+            if (mode === 'pulse') {
+              const center = b.x + b.w * 0.5;
+              const crossed = lastPulseX <= pulseX
+                ? center >= lastPulseX && center < pulseX
+                : center >= lastPulseX || center < pulseX;
+              if (crossed && b.pulseArmed) {
+                triggerBlock(b, Math.min(1.28, Math.max(1.06, b.glow + 0.31)));
+                b.pulseFlash = Math.min(0.43, b.glow * 0.7);
+              }
+            }
+          }
+
+          // Resolve impacts first, then pack inward from both edges.
+          for (let i = 1; i < row.length; i++) {
+            const a = row[i - 1];
+            const b = row[i];
+            const approach = a.vx - b.vx;
+            const gap = a.x + a.w + GUTTER - b.x;
+            if (drift && gap > 0) {
+              const press = Math.max(0, approach) * 0.032 + gap * 0.22;
+              b.compression = Math.max(b.compression, Math.min(GUTTER + 12, press));
+            }
+            const overlap = gap - b.compression;
+            if (overlap <= 0) continue;
+            a.x -= overlap * 0.5;
+            b.x += overlap * 0.5;
+            if (approach <= 0) continue;
+            const impulse = approach * 0.68;
+            a.vx -= impulse;
+            b.vx += impulse;
+            if (approach > 82 && performance.now() - b.lastHitTime > 115) {
+              triggerBlock(a, 0.48);
+              triggerBlock(b, 0.54);
+            }
+          }
+          const leftLimit = boardRect.x - edgeTravel;
+          const rightLimit = right + edgeTravel;
+          let edge = leftLimit;
+          for (let i = 0; i < row.length; i++) {
+            const b = row[i];
+            const floor = i === 0 ? edge : edge - b.compression;
+            if (b.x < floor) {
+              b.x = floor;
+              if (i === 0 && b.vx < 0) b.vx *= -0.3;
+            }
+            edge = b.x + b.w + GUTTER;
+          }
+          edge = rightLimit;
+          for (let i = row.length - 1; i >= 0; i--) {
+            const b = row[i];
+            if (b.x + b.w > edge) {
+              b.x = edge - b.w;
+              if (i === row.length - 1 && b.vx > 0) b.vx *= -0.3;
+            }
+            edge = b.x - GUTTER + b.compression;
+          }
+        }
+
+        harmonyFlash = Math.max(0, harmonyFlash - dt * 1.5);
+        if (mode === 'harmony') checkVerticalHarmony();
+      }
+
+      function checkVerticalHarmony() {
+        const matches = new Set();
+        let newColumn = null;
+        // A playable alignment spans at least three consecutive tracks.
+        for (const row of rows.slice(0, -2)) {
+          for (const tile of row) {
+            const column = [tile];
+            const x = tile.x + tile.w / 2;
+            for (let r = tile.row + 1; r < rows.length; r++) {
+              const match = rows[r].find((b) =>
+                b.palette === tile.palette &&
+                Math.abs(b.x + b.w / 2 - x) <= Math.min(24, tile.w * .32, b.w * .32));
+              if (!match) break;
+              column.push(match);
+            }
+            if (column.length < 3) continue;
+            const key = column.map((b) => b.id).join(':');
+            matches.add(key);
+            if (!harmonyKeys.has(key) && (!newColumn || column.length > newColumn.length)) {
+              newColumn = column;
+            }
+          }
+        }
+        harmonyKeys = matches;
+        if (!newColumn) return;
+        harmonyColumn = newColumn;
+        harmonyFlash = 1;
+        newColumn.forEach((b) => triggerBlock(b, 1.65, false));
+        const root = [174.61, 130.81, 155.56, 146.83, 146.83, 130.81][scaleIdx];
+        [0, 4, 7, 11, 14].forEach((semi, i) =>
+          playChime(newColumn[i % newColumn.length], 0.38, root * 2 ** (semi / 12), i * 0.025));
+      }
+
+      // --- RENDER PIPELINE ---
+      // Reuse the same fine glass grain so it stays still as the light changes.
+      const grainCanvas = document.createElement('canvas');
+      grainCanvas.width = grainCanvas.height = 128;
+      const grainContext = grainCanvas.getContext('2d');
+      const grainPixels = grainContext.createImageData(128, 128);
+      for (let i = 0; i < grainPixels.data.length; i += 4) {
+        const shade = Math.random() < 0.5 ? 0 : 255;
+        grainPixels.data[i] = shade;
+        grainPixels.data[i + 1] = shade;
+        grainPixels.data[i + 2] = shade;
+        grainPixels.data[i + 3] = 5 + Math.random() * 22;
+      }
+      grainContext.putImageData(grainPixels, 0, 0);
+      const grainPattern = ctx.createPattern(grainCanvas, 'repeat');
+
+      function drawDiffuseLight(x, y, radiusX, radiusY, color, opacity) {
+        ctx.save();
+        ctx.translate(x, y);
+        ctx.scale(radiusX, radiusY);
+        const light = ctx.createRadialGradient(0, 0, 0, 0, 0, 1);
+        light.addColorStop(0, `${color}${opacity})`);
+        light.addColorStop(0.38, `${color}${opacity * 0.78})`);
+        light.addColorStop(0.7, `${color}${opacity * 0.23})`);
+        light.addColorStop(1, `${color}0)`);
+        ctx.fillStyle = light;
+        ctx.fillRect(-1, -1, 2, 2);
+        ctx.restore();
+      }
+
+      function renderTile(b) {
+        const pop = b.scalePop * 1.6;
+        const x = b.x + pop;
+        const y = b.y + pop;
+        const w = Math.max(1, b.w - pop * 2);
+        const h = Math.max(1, b.h - pop * 2);
+        const shimmer = mode === 'pulse' && b.pulseArmed
+          ? Math.exp(-Math.abs(pulseX - x - w / 2) / Math.max(1, w * 0.34)) * 0.22
+          : 0;
+        const baseLight = mode === 'pulse' && b.pulseArmed ? Math.max(0.26, b.glow) : b.glow;
+        const energy = baseLight + (mode === 'pulse' ? b.pulseFlash + shimmer : 0);
+        const light = Math.min(1, energy * 1.22);
+        const heat = mode === 'drift' ? b.strike : Math.min(1, Math.max(0, (energy - 0.92) / 0.64));
+        const gel = harmonyFlash > 0 && harmonyColumn?.includes(b) ? PALETTES[1] : b.palette;
+        const focus = x + w * (0.37 + (b.row % 3) * 0.09);
+
+        const slate = ctx.createLinearGradient(x, y, x, y + h);
+        slate.addColorStop(0, '#101d2e');
+        slate.addColorStop(1, '#0b1625');
+        ctx.fillStyle = slate;
+        ctx.fillRect(x, y, w, h);
+        if (mode === 'harmony') {
+          ctx.fillStyle = `${b.palette.glow}0.27)`;
+          ctx.fillRect(x, y, w, h);
+        }
+
+        if (energy > 0.015) {
+          // Spread the light along the bar, with a cooler shadow at the far end.
+          const panel = ctx.createLinearGradient(x, y, x + w, y + h * 0.65);
+          panel.addColorStop(0, `${gel.glow}${light * 0.60})`);
+          panel.addColorStop(0.44, `${gel.glow}${light * 0.96})`);
+          panel.addColorStop(1, `${gel.glow}${light * 0.42})`);
+          ctx.fillStyle = panel;
+          ctx.fillRect(x, y, w, h);
+
+          ctx.save();
+          ctx.beginPath();
+          ctx.rect(x, y, w, h);
+          ctx.clip();
+          const ice = gel === PALETTES[1];
+          const mint = gel === PALETTES[0];
+          const frost = ice ? 'rgba(224, 255, 255,'
+            : mint ? (mode === 'drift' ? 'rgba(255, 255, 219,' : 'rgba(193, 255, 169,')
+            : gel === PALETTES[2] ? 'rgba(255, 211, 238,' : 'rgba(204, 110, 255,';
+          drawDiffuseLight(focus, y + h * 0.5, w * 0.69, h * 0.81,
+            frost, light * light * 0.09 + heat * (ice ? 0.76 : mode === 'drift' ? (mint ? 0.82 : 0.49) : 0.26));
+
+          // The luminous core can approach white without flattening the whole face.
+          ctx.globalCompositeOperation = 'lighter';
+          const core = ice ? 'rgba(66, 132, 255,' : mint ? 'rgba(8, 180, 2,'
+            : gel === PALETTES[2] ? 'rgba(224, 0, 3,' : 'rgba(127, 6, 167,';
+          drawDiffuseLight(focus, y + h * 0.5, w * 0.68, h * 0.81,
+            core, light * light * (ice ? 0.04 : 0.18) + heat * (ice ? 0.15 : 0.03));
+          ctx.restore();
+        }
+
+        ctx.globalAlpha = 0.05 + light * 0.65;
+        ctx.fillStyle = grainPattern;
+        ctx.fillRect(x, y, w, h);
+        ctx.globalAlpha = 1;
+
+        if (w > 1 && h > 1) {
+          ctx.strokeStyle = mode === 'harmony' ? `${b.palette.glow}0.58)` : 'rgba(145, 181, 216, 0.33)';
+          ctx.strokeRect(x + 0.5, y + 0.5, w - 1, h - 1);
+          if (light > 0.04) {
+            ctx.strokeStyle = `${gel.glow}${light * 0.35 + heat * 0.21})`;
+            ctx.strokeRect(x + 0.5, y + 0.5, w - 1, h - 1);
+          }
+        }
+      }
+
+      function renderBloom(b) {
+        const flash = mode === 'pulse' ? b.pulseFlash : 0;
+        const energy = Math.min(1, (b.glow + flash) * 1.28);
+        const bloom = mode === 'drift'
+          ? Math.min(1, b.strike * 0.78 + energy * energy * 0.25)
+          : energy * energy;
+        if (energy < 0.09) return;
+
+        const gel = harmonyFlash > 0 && harmonyColumn?.includes(b) ? PALETTES[1] : b.palette;
+        const glowColor = gel === PALETTES[0] ? 'rgba(129, 245, 89,'
+          : gel === PALETTES[3] ? 'rgba(178, 100, 255,' : gel.glow;
+        const spill = gel === PALETTES[1] ? 1.28 : 1;
+        const x = b.x + b.w * (0.37 + (b.row % 3) * 0.09);
+        const y = b.y + b.h * 0.5;
+
+        // A tight halo defines the face. A wider layer lights nearby seams.
+        drawDiffuseLight(x, y, b.w * 0.82 + 18, b.h * 0.93 + 12,
+          glowColor, bloom * 0.25 * spill);
+        drawDiffuseLight(x, y, b.w * 0.93 + 34, b.h * 1.35 + 24,
+          glowColor, bloom * 0.15 * spill);
+      }
+
+      function renderPulse() {
+        const padding = Math.min(28, boardRect.h * 0.07);
+        const top = boardRect.y - padding;
+        const beamHeight = boardRect.h + padding * 2;
+        ctx.save();
+        ctx.translate(pulseX, top);
+
+        // Diffuse spill and a fine white-gold filament share a soft vertical taper.
+        drawDiffuseLight(0, beamHeight / 2, 25, beamHeight * 0.55, 'rgba(249, 255, 199,', 0.22);
+        drawDiffuseLight(0, beamHeight / 2, 8, beamHeight * 0.52, 'rgba(249, 255, 213,', 0.31);
+        const filament = ctx.createLinearGradient(0, 0, 0, beamHeight);
+        filament.addColorStop(0, 'rgba(249, 255, 213, 0)');
+        filament.addColorStop(0.075, 'rgba(249, 255, 213, 0.72)');
+        filament.addColorStop(0.925, 'rgba(249, 255, 213, 0.72)');
+        filament.addColorStop(1, 'rgba(249, 255, 213, 0)');
+        ctx.fillStyle = filament;
+        ctx.fillRect(-0.65, 0, 1.3, beamHeight);
+        ctx.restore();
+      }
+
+      function render() {
+        ctx.clearRect(0, 0, width, height);
+        ctx.lineWidth = 1;
+        for (const row of rows) {
+          for (let i = 0; i < row.length; i++) {
+            const block = row[i];
+            renderTile(block);
+            if (mode !== 'drift' || i === 0) continue;
+            const behind = row[i - 1];
+            const overlap = Math.min(block.w, behind.x + behind.w - block.x);
+            if (overlap <= 0) continue;
+            ctx.fillStyle = `${behind.palette.glow}${Math.min(0.42, 0.07 + behind.glow * 0.23)})`;
+            ctx.fillRect(block.x, block.y, overlap, block.h);
+          }
+        }
+
+        ctx.save();
+        ctx.globalCompositeOperation = 'screen';
+        for (const row of rows) {
+          for (const block of row) renderBloom(block);
+        }
+        ctx.globalCompositeOperation = 'lighter';
+        if (mode === 'pulse') renderPulse();
+        ctx.restore();
+      }
+
+      // --- MAIN LOOP ---
+      let lastTime = performance.now();
+      function loop(now) {
+        const dt = Math.min(0.05, (now - lastTime) / 1000);
+        lastTime = now;
+        update(dt);
+        render();
+        requestAnimationFrame(loop);
+      }
+
+      let resizeFrame = null;
+      function scheduleResize() {
+        if (resizeFrame !== null) return;
+        resizeFrame = requestAnimationFrame(() => {
+          resizeFrame = null;
+          resizeGrid();
+        });
+      }
+      window.addEventListener('resize', scheduleResize);
+      window.visualViewport?.addEventListener('resize', scheduleResize);
+      if ('ResizeObserver' in window) {
+        const observer = new ResizeObserver(scheduleResize);
+        observer.observe(canvas);
+        observer.observe(hud);
+        observer.observe(hint);
+      }
+      function resizeGrid() {
+        const previous = boardRect;
+        const phase = (pulseX - previous.x) / previous.w;
+        const tiles = rows;
+        buildGrid();
+        pulseX = boardRect.x + boardRect.w * phase;
+        lastPulseX = pulseX;
+        for (let r = 0; r < rows.length; r++) {
+          for (let c = 0; c < rows[r].length; c++) {
+            const b = rows[r][c];
+            const old = tiles[r][c];
+            const span = boardRect.w / previous.w;
+            b.x = boardRect.x + (old.x - previous.x) * span;
+            b.w = old.w * span;
+            b.targetW = old.targetW * b.baseUnitW / old.baseUnitW;
+            for (const key of ['widthTier', 'glow', 'strike', 'pulseFlash', 'pulseArmed']) b[key] = old[key];
+          }
+        }
+      }
+      buildGrid();
+      showModeIntro(mode);
+      requestAnimationFrame(loop);
+    })();
+  </script>
+</body>
+</html>
