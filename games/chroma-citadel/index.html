@@ -1,0 +1,181 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Chroma Citadel | Sanctuary Defense</title>
+<style>
+:root{color-scheme:dark;font:15px system-ui;color:#e7faff;background:#080f20}
+*{box-sizing:border-box}body{margin:0;overflow:hidden}canvas{position:fixed;inset:0;display:block;touch-action:none}
+#hud{position:fixed;inset:0;pointer-events:none;display:flex;flex-direction:column;justify-content:space-between;padding:max(10px,env(safe-area-inset-top)) 12px max(12px,env(safe-area-inset-bottom))}
+.glass{background:#0a1425de;border:1px solid #a6d8ff47;border-radius:16px;padding:10px 12px;box-shadow:0 8px 28px #0007}
+header,footer{width:min(100%,760px);margin-inline:auto}header{display:grid;gap:6px}.row{display:flex;align-items:center;flex-wrap:wrap;gap:8px 14px}.muted,small{color:#abc1d6}strong{letter-spacing:.08em}
+.barriers{display:grid;grid-template-columns:1fr 1fr;gap:12px}.barriers label{font-size:.78em;color:#b8cde0}meter{display:block;width:100%;height:13px;accent-color:#6cf3ff}meter::-webkit-meter-optimum-value{background:#6cf3ff}meter::-webkit-meter-suboptimum-value{background:#ffbd58}meter::-webkit-meter-even-less-good-value{background:#ff627c}
+footer{display:grid;gap:8px;text-align:center}button,input{pointer-events:auto}button{min-height:44px;padding:5px 9px;border:1px solid #91bdd45e;border-radius:9px;background:#142940;color:inherit;font:inherit;cursor:pointer;touch-action:manipulation}button[aria-pressed=true]{border-color:var(--ink,#7eefff);box-shadow:inset 0 0 14px #76ccff38}button:disabled{opacity:.4;cursor:default}.action{background:#8af3ff;color:#061424;font-weight:750}.swatch{display:inline-block;width:9px;height:9px;border-radius:50%;background:var(--ink);border:1px solid #ffffff66}#audio{margin-left:auto}#volume{width:66px;min-height:44px}#frost{position:fixed;inset:0;pointer-events:none;box-shadow:inset 0 0 22vmin 5vmin #b7e9ff;opacity:0}#impact{position:fixed;inset:0;pointer-events:none;z-index:30}#result{pointer-events:auto;text-align:center;margin:auto;position:fixed;inset:0;width:min(90vw,370px);height:max-content;padding:22px}#status{min-height:1.4em;text-shadow:0 1px 4px black} [hidden]{display:none!important}
+@media(max-width:480px){#hud{font-size:13px}.row{gap:4px 9px}}
+#dock{display:grid;grid-template-columns:repeat(6,1fr);gap:8px}
+.card{--ink:#7eefff;position:relative;display:grid;justify-items:center;align-content:start;gap:2px;min-height:118px;padding:9px 6px 8px;
+  border:1px solid #91bdd43d;border-radius:14px;background:linear-gradient(180deg,#16304a,#0d1c30);color:inherit;font:inherit;text-align:center;
+  cursor:pointer;touch-action:manipulation;transition:transform .12s,border-color .12s,box-shadow .12s}
+.card img,.card svg{width:56px;height:56px;color:var(--ink);filter:drop-shadow(0 4px 6px #0009);transition:transform .12s}
+.card.obsidian img{border-radius:10px;background:radial-gradient(ellipse,#a4bbce 0%,#607d99 65%,#344d69 100%);box-shadow:inset 0 0 0 1px #c9def45c;padding:3px}
+.card b{font-size:.82em;letter-spacing:.02em;line-height:1.15}
+.card small{font-size:.7em;color:#abc1d6;line-height:1.2}
+.card .cost{margin-top:3px;padding:1px 9px;border-radius:99px;background:#07101d;border:1px solid #ffffff1f;font-size:.74em;font-weight:700;color:#ffe9a8}
+.card .key{position:absolute;top:5px;left:7px;padding:0 4px;border:1px solid #ffffff26;border-radius:5px;font-size:.66em;color:#8fa6bd}
+.card:hover{border-color:color-mix(in srgb,var(--ink) 55%,transparent)}
+.card:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+.card[aria-pressed=true]{border-color:var(--ink);background:linear-gradient(180deg,color-mix(in srgb,var(--ink) 22%,#16304a),#0d1c30);
+  box-shadow:0 0 0 1px var(--ink),0 6px 22px color-mix(in srgb,var(--ink) 35%,transparent);transform:translateY(-3px)}
+.card[aria-pressed=true] img,.card[aria-pressed=true] svg{transform:scale(1.12)}
+.card.poor{opacity:.55}
+.card.poor .cost{color:#ff8fa3}
+@media(max-width:560px){#dock{grid-template-columns:repeat(3,1fr)}.card{min-height:98px}.card small{display:none}}
+@media(max-width:560px){#hint{display:none}}
+
+#exterior{position:fixed;top:clamp(105px,19vh,165px);right:12px;width:clamp(136px,24vw,320px);aspect-ratio:16/10;border:1px solid #89d7e9;border-radius:4px;pointer-events:none}
+#exterior span{position:absolute;bottom:0;left:0;background:#081724e8;padding:3px 7px;font-size:.72rem}
+#exterior-toggle{margin-left:auto}
+.card .power-state{font-size:.72em;font-weight:700;color:#bde2f4}.card .power-state.active{color:#a5ffbf}
+
+/* Raised controls with a fixed lower edge and a moving face. */
+#dock, #hud {
+  border-color: #97b8ca55;
+  box-shadow: inset 0 1px #deedf433, inset 0 -3px #050b16aa, 0 9px 24px #03091366;
+}
+#dock { border-top-color: #dfc89c88; }
+#dock .card, .action, #audio, #exterior-toggle {
+  --button-depth: 4px;
+  --button-base: #050c17;
+  box-shadow: inset 0 1px 0 #e5f7ff45, inset 0 -1px 0 #0008,
+    0 var(--button-depth) 0 var(--button-base), 0 6px 9px #03081466;
+  transition: transform .12s ease, box-shadow .12s ease, filter .12s ease;
+}
+#dock .card { background: linear-gradient(165deg,#24425b 0%,#152b42 42%,#0d1c30 100%); }
+#dock .card[aria-pressed=true] {
+  --button-depth: 2px;
+  transform: translateY(2px);
+  background: linear-gradient(165deg,color-mix(in srgb,var(--ink) 28%,#183044),#102038 75%);
+  box-shadow: inset 0 1px 0 #ffffff55, 0 2px 0 #050c17,
+    0 3px 12px color-mix(in srgb,var(--ink) 33%,transparent);
+}
+.action {
+  --button-base: #206375;
+  border-color: #c1f7ff;
+  background: linear-gradient(180deg,#d0fbff,#86edf8 50%,#59c5da);
+}
+@media (hover:hover) {
+  #dock .card:not(:disabled):hover, button.action:not(:disabled):hover,
+  #audio:hover, #exterior-toggle:hover { filter: brightness(1.13); }
+}
+#dock .card:not(:disabled):active, button.action:not(:disabled):active,
+#audio:active, #exterior-toggle:active {
+  transform: translateY(4px);
+  box-shadow: inset 0 2px 4px #06101b77, inset 0 -1px #ddf5ff35;
+}
+button:focus-visible { outline: 2px solid #c1f7ff; outline-offset: 3px; }
+@media (prefers-reduced-motion: reduce) {
+  #dock .card, .action, #audio, #exterior-toggle { transition: none; }
+}
+
+/* Give the selector caps a visible front face against the dark dock. */
+#dock .card {
+  --card-rim: color-mix(in srgb, var(--ink) 46%, #496278);
+  border: 1px solid #6c8ca4;
+  border-top-color: #acc7d8;
+  background: linear-gradient(180deg,#3a5870 0%,#243f58 16%,#182e45 58%,#102238 100%);
+  box-shadow: inset 0 2px #d9f2ff65, inset 0 -2px #030d1a,
+    0 2px #263d54, 0 5px var(--card-rim), 0 8px #101e2c, 0 10px 10px #0008;
+  margin-bottom: 8px;
+}
+#dock .card[aria-pressed=true] {
+  transform: translateY(3px);
+  box-shadow: inset 0 2px #e5f6ff80, inset 0 -2px #030d1a,
+    0 2px var(--card-rim), 0 5px #101e2c;
+}
+#dock .card:not(:disabled):active {
+  transform: translateY(7px);
+  box-shadow: inset 0 3px 6px #04101bbb, 0 1px var(--card-rim);
+}
+
+.mobile-only{display:none}
+@media (max-width:900px), (pointer:coarse) {
+  .mobile-only:not([hidden]){display:block}
+  #hud{font-size:13px}
+  #hud header{gap:3px;padding:6px 9px}
+  #mobile-top{display:flex;align-items:center;justify-content:space-between;gap:6px}
+  #mobile-details:not([open]) #details-content{display:none}
+  #mobile-details summary{cursor:pointer;pointer-events:auto;padding:8px 4px}
+  #details-content{display:grid;gap:5px;padding-top:4px}
+  #build{padding:0;background:none;border:0;box-shadow:none}
+  #build:not(.tray-open) #dock,#build #hint,#build-status-placeholder{display:none}
+  #hud:has(#build:not([hidden])) #status{display:none}
+  #dock{pointer-events:auto;grid-template-columns:repeat(3,minmax(0,1fr));padding:8px;background:#0a1425f5;border-radius:13px;max-height:45dvh;overflow:auto}
+  #dock .card{min-height:68px;padding:4px}
+  #dock .card img,#dock .card svg{width:32px;height:32px}
+  #dock .card small,#dock .key{display:none}
+  #mobile-tools{display:flex;align-items:center;justify-content:center;gap:8px;margin:6px 0 38px}
+  #mobile-selection{background:#0a1425ec;border-radius:9px;padding:8px;max-width:55%}
+}
+</style>
+</head>
+<body>
+<div id="frost"></div>
+<div id="impact" hidden aria-hidden="true"></div>
+<div id="hud">
+<header class="glass">
+<div id="mobile-top" class="mobile-only"><span id="mobile-stats"></span></div>
+<div id="details-content"><div class="row"><strong>CHROMA CITADEL</strong><span id="phase"></span><button id="audio" aria-pressed="false">Mute</button><input id="volume" aria-label="Master volume" type="range" min="0" max="1" step=".01" value=".45"></div>
+<div class="row"><span id="lumens"></span><span id="wave"></span><span id="count"></span><span id="integrity"></span></div>
+<div class="barriers">
+<label>Window <meter id="glass" min="0" max="1" low=".25" high=".65" optimum="1" value="1"></meter></label>
+<label>Door <meter id="door" min="0" max="1" low=".25" high=".65" optimum="1" value="1"></meter></label>
+</div>
+</div>
+</header>
+<aside id="exterior" hidden><span>Exterior · looking toward the house</span></aside>
+<footer><div id="status" role="status">Loading the sanctuary…</div>
+<div class="glass" id="build" hidden><div id="dock"></div><div id="mobile-tools" class="mobile-only"><button id="tray-toggle" aria-controls="dock" aria-expanded="false">Change block ▴</button><span id="mobile-selection" aria-live="polite"></span></div><p id="hint"></p><button id="start" class="action">Start Wave</button></div>
+<button id="exterior-toggle" hidden aria-pressed="true">Exterior view</button>
+<button id="pulse" class="action" hidden>Overcharge Pulse</button>
+</footer>
+<section id="result" class="glass" hidden><h1 id="outcome"></h1><p id="report"></p><button id="restart" class="action">Restart</button></section>
+</div>
+<script>
+setTimeout(() => {
+  if (!document.getElementById('phase').textContent &&
+      document.getElementById('status').textContent === 'Loading the sanctuary…') {
+    document.getElementById('status').textContent = 'Still loading. Check that your browser can reach unpkg.com.';
+  }
+}, 8000);
+</script>
+<script type="module" src="./game.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>
+<!--
+Manual test checklist
+1. Open directly and check the Prism Keep, basalt pad, and five block cards. Place each block and test keys 1–6. Serve over HTTP to try optional GLBs in ./assets/.
+2. Orbit and zoom. Build three matching cubes vertically for each node type and check the markers.
+   Try an invalid placement and demolish a cube to verify the half refund.
+3. Start a wave. Check the 1.8 s transition, drag limits, and hold/release zoom through the glass.
+4. Watch for turret beams, Amber reinforcement, Emerald charge and pulse, mine rings and block debris.
+5. Verify enemy types unlock on waves 3, 4 and 5. Confirm losing both entrances ends the run after the current wave. Clear wave 10 with at least one intact entrance to win. Test each breach and verify
+   the attacker lunges, the impact flashes, and the wave resumes after the stun. Verify Restart,
+   resize, mute, volume and touch controls.
+-->
