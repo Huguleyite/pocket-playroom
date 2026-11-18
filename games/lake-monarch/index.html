@@ -502,6 +502,19 @@
     <p style="margin:12px 0">Stop beside a mussel to crack it. Collect five, then reach the gate on the right at high tide. Pale sandbars block crossings at low tide. When the fish winds up, dash away or hold Shift, right-click, or Stealth over dark mud to bury yourself.</p>
     <form method="dialog"><button class="primary-btn" autofocus>Start scuttling</button></form>
   </dialog>
+  <dialog id="first-play-guide" aria-labelledby="first-play-title" style="margin:auto;width:min(460px,calc(100vw - 24px));padding:24px;border:1px solid #65888b;border-radius:22px;background:#143343;color:#ecf5e8">
+    <p style="color:#e6ca83;font-size:13px;font-weight:700;letter-spacing:2px">YOUR FIRST SWIM</p>
+    <h2 id="first-play-title" style="margin:8px 0 16px">Little fish. Big lake.</h2>
+    <div style="display:grid;gap:14px;line-height:1.5;font-size:15px">
+      <p><strong>Swim & boost.</strong> Drag your left thumb on the left half to steer. Hold DASH to swim faster; release to refill stamina. Both thumbs can work together.</p>
+      <p><strong>Eat, then explore.</strong> Start with glowing food and fish marked with a green dot. Bigger fish carry a warning. Your first goal: grow from 0.5 to 50 lbs.</p>
+      <p><strong>Hide to survive.</strong> Swim into the reeds and look for “In cover.” Hold STEALTH to move cautiously. Reach 4 lbs and find a glowing mate for an extra life.</p>
+      <p><strong>Be careful with bait.</strong> Nibble hook bait cautiously when craving rises. If hooked, tap DASH rapidly to escape. Below 8 lbs you get thrown back; at 8 lbs or more, being reeled in ends your run.</p>
+    </div>
+    <details class="desktop-help"><summary>Desktop controls</summary><p>Mouse or WASD / arrows to steer. Hold left-click or Space to boost. Shift or right-click for stealth. Click or press Space repeatedly to escape hooks. P / Escape pauses.</p></details>
+    <p style="font-size:14px;color:#bbd8df;margin:14px 0">Pause anytime with Ⅱ. Reopen this guide from “How to play.” New chapters explain their own goals.</p>
+    <button class="primary-btn" id="first-play-ready" type="button">Got it — let’s swim!</button>
+  </dialog>
   <dialog id="campaign-dialog" aria-labelledby="campaign-title">
     <h2 id="campaign-title">Chapter map</h2>
     <ol id="campaign-list"></ol>
@@ -511,7 +524,7 @@
     <h2 id="pause-title">Paused</h2><a href="../../#home" style="display:block;padding:16px;color:#b7e6d7;touch-action:manipulation">Pocket Playroom</a>
     <button class="primary-btn" id="resume-btn" autofocus>Resume</button>
     <button class="primary-btn campaign-action" id="retry-level" type="button">Retry chapter</button>
-    <button class="primary-btn campaign-action" id="pause-map" type="button">Chapter map</button>
+    <button class="primary-btn campaign-action" id="pause-help" type="button">How to play</button><button class="primary-btn campaign-action" id="pause-map" type="button">Chapter map</button>
   </dialog>
 
   <!-- Alerts & Hook Struggle -->
@@ -556,7 +569,7 @@
         <li><strong>Victory:</strong> Reach <strong>50.0 lbs</strong> to become the Lake Monarch.</li>
       </ul>
       <details class="desktop-help"><summary>Playing on desktop?</summary><p>Steer with your mouse or WASD / arrows. Hold left-click or Space to boost. Hold Shift or right-click for stealth. When hooked, click or tap Space repeatedly. Press P or Escape to pause.</p></details><button class="primary-btn" id="next-chapter" hidden>Continue</button>
-      <button class="primary-btn campaign-action" id="start-map" type="button">Chapter map</button>
+      <button class="primary-btn campaign-action" id="start-help" type="button">How to play</button><button class="primary-btn campaign-action" id="start-map" type="button">Chapter map</button>
       <button class="primary-btn" id="start-btn">DIVE INTO THE LAKE</button>
     </div>
   </div>
@@ -846,7 +859,7 @@
       setPaused(false);
     });
     window.addEventListener('keydown', (event) => {
-      if (!gameRunning || campaignDialog.open || event.repeat || !['KeyP', 'Escape'].includes(event.code)) return;
+      if (!gameRunning || document.getElementById('first-play-guide').open || campaignDialog.open || event.repeat || !['KeyP', 'Escape'].includes(event.code)) return;
       event.preventDefault();
       setPaused(!paused);
     });
@@ -2116,6 +2129,7 @@
       x > 1100 && x < 1520 && y < 430 ? 245 : 75;
 
     function startChapter(level) {
+      if (!guideSeen) { pendingFirstLevel = level; if (!firstPlay.open) firstPlay.showModal(); return; }
       if (paused) setPaused(false);
       initGame(level);
       btnDash.querySelector('span').textContent =
@@ -2879,6 +2893,24 @@
       }
       ctx.restore();
     }
+
+    // First-time instruction gate: the world starts only after explicit acknowledgement.
+    const firstPlay = document.getElementById('first-play-guide');
+    const guideKey = 'lake-monarch:first-play-v1';
+    let guideSeen = false, pendingFirstLevel = null;
+    try { guideSeen = localStorage.getItem(guideKey) === 'seen'; } catch {}
+    function showFirstPlay() { pendingFirstLevel = null; if (!firstPlay.open) firstPlay.showModal(); }
+    document.getElementById('start-help').addEventListener('click', showFirstPlay);
+    document.getElementById('pause-help').addEventListener('click', showFirstPlay);
+    firstPlay.addEventListener('cancel', () => { pendingFirstLevel = null; });
+    document.getElementById('first-play-ready').addEventListener('click', () => {
+      guideSeen = true;
+      try { localStorage.setItem(guideKey, 'seen'); } catch {}
+      const level = pendingFirstLevel;
+      pendingFirstLevel = null;
+      firstPlay.close();
+      if (level !== null) startChapter(level);
+    });
 
     if (campaignProgress.clearedThrough > 0) {
       elStartBtn.textContent = campaignProgress.clearedThrough === chapters.length
