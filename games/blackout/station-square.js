@@ -678,15 +678,14 @@
   }
 
   const station = new Image();
-  station.src = 'assets/art-refresh/station-square-approved-reference.png';
   const interiors = new Image();
-  interiors.src = 'assets/art-refresh/meridian-interiors.png';
   const railway = new Image();
-  railway.src = 'assets/art-refresh/meridian-railway.png';
+  for(const image of [station,interiors,railway])image.decoding='async';
   const fallback = CityScene.background;
   CityScene.background = (context, width, height, camera, time) => {
     const band=stationLevel().art;
     const image=stationLevel().atlas==='railway'?railway:band?interiors:station;
+    if(!image.getAttribute('src'))image.src='assets/art-refresh/'+(image===railway?'meridian-railway.png':image===interiors?'meridian-interiors.png':'station-square-approved-reference.png');
     if (!image.complete || !image.naturalWidth) {
       fallback(context, width, height, camera, time);
       return;

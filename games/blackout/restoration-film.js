@@ -4,7 +4,7 @@
  dialog.id='restoration-film';
  dialog.setAttribute('aria-label','Dawn Exchange restored');
  dialog.style.cssText='position:fixed;inset:0;width:100vw;max-width:none;height:100dvh;max-height:none;margin:0;padding:0;border:0;background:#080f18;color:white';
- dialog.innerHTML='<video controls playsinline preload="none" style="width:100%;height:calc(100% - 64px);object-fit:contain" aria-label="The courier restores power to Mercy Hospital and the city"><source src="assets/video/dawn-exchange-restored.mp4" type="video/mp4"></video><div style="height:64px;display:flex;align-items:center;justify-content:center;gap:16px"><span role="status"></span><button type="button">Skip · Continue to Station Square →</button></div>';
+ dialog.innerHTML='<video controls playsinline preload="none" style="width:100%;height:calc(100% - 64px);object-fit:contain" aria-label="The courier restores power to Mercy Hospital and the city"><source src="assets/video/dawn-exchange-restored.mp4?v=optimized-20261118" type="video/mp4"></video><div style="height:64px;display:flex;align-items:center;justify-content:center;gap:16px"><span role="status"></span><button type="button">Skip · Continue to Station Square →</button></div>';
  document.body.append(dialog);
  const video=dialog.querySelector('video'),status=dialog.querySelector('[role=status]');
  const advance=Campaign.advance.bind(Campaign);
