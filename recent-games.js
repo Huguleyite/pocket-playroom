@@ -3,6 +3,7 @@
  'use strict';
  const base=new URL('./',document.currentScript.src),key='room-for-play:last';
  const games={
+  'hows-it-go':["How's It Go?",'games/hows-it-go/'],
   overclock:['OVERCLOCK: Daily Run','games/overclock/'],
   'tilt-and-tumble':['Tilt & Tumble','#games/tilt-and-tumble'],
   'spot-the-dot':['Spot the Dot','#games/spot-the-dot'],
