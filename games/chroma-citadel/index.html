@@ -117,6 +117,7 @@ button:focus-visible { outline: 2px solid #c1f7ff; outline-offset: 3px; }
   #mobile-tools{display:flex;align-items:center;justify-content:center;gap:8px;margin:6px 0 38px}
   #mobile-selection{background:#0a1425ec;border-radius:9px;padding:8px;max-width:55%}
 }
+#instructions{max-width:min(92vw,480px);max-height:85dvh;overflow:auto;background:#0b182a;color:#e7faff;border:1px solid #79bccc;border-radius:18px;padding:22px;font:15px system-ui}#instructions::backdrop{background:#020611cc}#instructions h2{margin-top:0}#instructions p{line-height:1.5}#instructions button{width:100%}#controls-help{pointer-events:auto}#controls-help summary{cursor:pointer;padding:8px 0}#controls-help p{margin:5px 0;line-height:1.4}
 </style>
 </head>
 <body>
@@ -125,7 +126,7 @@ button:focus-visible { outline: 2px solid #c1f7ff; outline-offset: 3px; }
 <div id="hud">
 <header class="glass">
 <div id="mobile-top" class="mobile-only"><span id="mobile-stats"></span></div>
-<div id="details-content"><div class="row"><strong>CHROMA CITADEL</strong><span id="phase"></span><button id="audio" aria-pressed="false">Mute</button><input id="volume" aria-label="Master volume" type="range" min="0" max="1" step=".01" value=".45"></div>
+<div id="details-content"><details id="controls-help"><summary>Controls &amp; instructions</summary><p>Select a block, then tap or click the grid or a cube face to place it. On mobile, use Change block to open the tray.</p><p><strong>Stack 3 matching blocks vertically</strong> to activate Pyre, Bastion, Siphon, or Pulse Mine abilities. Obsidian provides armor.</p><p>Drag to rotate the build view. On desktop, scroll to zoom and use keys 1–6 to select a tool. Demolish refunds half the block cost.</p><p>Start Wave when ready. During battle, drag to look. Press and hold the front window to see enemies through your blocks. Use Exterior view to watch your defenses.</p><p>Protect both entrances. A window or door breach ends the game.</p><button id="show-instructions">Open instructions</button></details><div class="row"><strong>CHROMA CITADEL</strong><span id="phase"></span><button id="audio" aria-pressed="false">Mute</button><input id="volume" aria-label="Master volume" type="range" min="0" max="1" step=".01" value=".45"></div>
 <div class="row"><span id="lumens"></span><span id="wave"></span><span id="count"></span><span id="integrity"></span></div>
 <div class="barriers">
 <label>Window <meter id="glass" min="0" max="1" low=".25" high=".65" optimum="1" value="1"></meter></label>
@@ -166,7 +167,18 @@ setTimeout(() => {
 
 
 
-</body>
+<dialog id="instructions" aria-labelledby="instructions-title"><h2 id="instructions-title">Protect your sanctuary</h2><p>Choose a block, then tap or click the grid to place it. On mobile, open <strong>Change block</strong> to select another.</p><p><strong>Stack 3 matching blocks vertically to activate their abilities.</strong> Obsidian provides armor. Demolish returns half the cost.</p><p>Drag to rotate your build view. On desktop, scroll to zoom and press 1–6 to choose tools.</p><p>Press <strong>Start Wave</strong> when ready. During battle, drag to look and hold the front window to see through blocks. Exterior view shows your defenses working.</p><p><strong>Defend the window and the door.</strong> A breach at either entrance ends the game.</p><p>Reopen these instructions in Controls &amp; instructions at the top.</p><form method="dialog"><button class="action">Got it — let’s build</button></form></dialog>
+<script>
+(() => {
+  const dialog = document.getElementById("instructions");
+  const key = "chroma-citadel-instructions-seen-v1";
+  document.getElementById("show-instructions").onclick = () => dialog.showModal();
+  dialog.addEventListener("close", () => { try { localStorage.setItem(key,"1"); } catch {} });
+  let seen = false;
+  try { seen = localStorage.getItem(key) === "1"; } catch {}
+  if (!seen) dialog.showModal();
+})();
+</script></body>
 </html>
 <!--
 Manual test checklist
