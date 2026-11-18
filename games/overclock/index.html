@@ -762,6 +762,19 @@ body{
   .controls .btn{min-height:44px}
 }
 
+</style><style id='reachable-controls'>
+html{height:auto;min-height:100%}
+body{height:auto;min-height:100dvh;overflow-x:hidden;overflow-y:auto;padding-bottom:calc(88px + env(safe-area-inset-bottom))}
+.app{height:auto;min-height:0;flex:0 0 auto}
+.stage,.stage.danger{flex:0 0 auto;overflow:visible}
+.board-viewport{flex:0 0 auto;height:var(--board-height,220px);min-height:120px}
+.controls{
+ position:fixed;z-index:20;left:50%;bottom:0;transform:translateX(-50%);
+ width:min(540px,100%);box-sizing:border-box;
+ padding:8px 12px calc(10px + env(safe-area-inset-bottom));
+ background:linear-gradient(#07121af2,#07121a);border-top:1px solid #24505e;
+}
+.controls .btn{min-height:54px;touch-action:manipulation}
 </style></head>
 <body>
   <div class="app">
@@ -1912,5 +1925,34 @@ ${strip}
     window.addEventListener("hashchange", loadSeed);
     loadSeed();
   </script>
+<script>
+(() => {
+  const board = document.getElementById("boardViewport");
+  const controls = document.querySelector(".controls");
+  const app = document.querySelector(".app");
+  let pending = false;
+  function fit() {
+    pending = false;
+    const viewport = window.visualViewport;
+    const visibleBottom = viewport ? viewport.offsetTop + viewport.height : innerHeight;
+    const controlHeight = controls.getBoundingClientRect().height;
+    const messageHeight = document.getElementById("stageMsg").getBoundingClientRect().height;
+    const boardTop = board.getBoundingClientRect().top + scrollY;
+    const available = visibleBottom - boardTop - controlHeight - messageHeight - 22;
+    const height = Math.max(120, Math.floor(available));
+    app.style.setProperty("--board-height", height + "px");
+    const inset = viewport ? Math.max(0, innerHeight - visibleBottom) : 0;
+    controls.style.bottom = inset + "px";
+  }
+  function schedule() {
+    if (!pending) { pending = true; requestAnimationFrame(fit); }
+  }
+  addEventListener("resize", schedule);
+  window.visualViewport?.addEventListener("resize", schedule);
+  window.visualViewport?.addEventListener("scroll", schedule);
+  new ResizeObserver(schedule).observe(app);
+  schedule();
+})();
+</script>
 </body>
 </html>
