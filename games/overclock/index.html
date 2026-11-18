@@ -731,7 +731,38 @@ body{background:#070b10;padding:8px;min-height:100dvh}
 </style>
 
 <script src="../../recent-games.js?v=overclock1" defer></script>
-<style>.collection-return{display:block;color:#9feaf0;font:600 12px system-ui;text-align:center;padding:4px;text-decoration:none}</style></head>
+<style>.collection-return{display:block;color:#9feaf0;font:600 12px system-ui;text-align:center;padding:4px;text-decoration:none}</style><style id='viewport-fit'>
+html{height:100%}
+body{
+  height:100dvh;min-height:0;overflow:hidden;
+  padding:max(5px,env(safe-area-inset-top)) max(6px,env(safe-area-inset-right)) max(6px,env(safe-area-inset-bottom)) max(6px,env(safe-area-inset-left));
+}
+.app{height:100%;min-height:0;flex:1 1 auto}
+.app>header,.app>.collection-return,.seed-bar,.hud,.telemetry-panel,.board-status,.mod-banner,.controls{flex-shrink:0}
+.stage,.stage.danger{flex:1 1 0;min-height:0;overflow:hidden}
+.board-viewport{flex:1 1 0;min-height:0}
+.stage-msg{flex:0 0 auto;min-height:28px;line-height:1.25}
+.controls .btn{min-height:50px}
+@media(max-height:680px){
+  .app{gap:4px;padding:5px}
+  .app>header{min-height:39px;padding-block:1px}
+  .collection-return{padding:1px!important}
+  .stat-card{padding-block:4px}
+  .telemetry-panel{gap:4px;padding-block:1px}
+  .board-status,.bust-pct{padding-block:4px}
+  .stage-msg{font-size:10px;min-height:25px}
+}
+@media(max-height:520px){
+  .brand .badge,.controls .btn-sub{display:none}
+  .app>header{min-height:29px}
+  .stat-val,.stat-val.green,.stat-val.amber{font-size:19px}
+  .stat-card{padding-block:2px}
+  .deck-chips .chip{min-height:24px;padding-block:2px}
+  .board-status,.bust-pct{font-size:13px;padding-block:3px}
+  .controls .btn{min-height:44px}
+}
+
+</style></head>
 <body>
   <div class="app">
     <a class="collection-return" href="../../#games">← Pocket Playroom</a>
