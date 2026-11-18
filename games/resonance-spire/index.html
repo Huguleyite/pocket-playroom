@@ -140,6 +140,63 @@ main.sanctuary.focused #focusScene{pointer-events:auto}
 #freeplayTools[hidden]{display:none}
 #freeplayStatus{font-size:12px}
 @media(max-width:820px){#freeplayTools{max-height:22dvh;overflow:auto}#freeplayTools button{font-size:12px}}
+
+/* Jewel-glass palette */
+#dock,main.freeplay #dock{
+  display:flex;flex-wrap:wrap;justify-content:center;gap:10px;width:100%;max-width:1120px;
+  padding:7px;background:transparent;border:0;border-radius:0;overflow:visible
+}
+#dock button,main.freeplay #dock button{
+  position:relative;isolation:isolate;display:grid;grid-template-columns:76px minmax(0,1fr);
+  grid-template-rows:1fr 1fr;align-items:center;column-gap:10px;row-gap:3px;
+  flex:1 1 175px;max-width:260px;min-width:0;min-height:96px;padding:10px 14px 10px 6px;
+  text-align:left;border:1px solid #65557970;border-radius:17px;
+  background:linear-gradient(165deg,#30273ed9 0%,#171328f5 45%,#0d1022fa 100%);
+  box-shadow:inset 0 2px 0 #c3a7e92b,inset 0 -2px 1px #050714,0 4px 10px #05081750;
+  color:#f4f0ff;font-family:Georgia,serif;font-size:21px;line-height:1.15;
+  transition:transform .16s,border-color .16s,box-shadow .16s
+}
+#dock button::before{
+  content:'';position:absolute;inset:2px 8px auto;height:32%;border-radius:13px 13px 50% 50%;
+  background:linear-gradient(#d7c4ff12,transparent);pointer-events:none;z-index:-1
+}
+#dock button[aria-pressed=true]{
+  border-color:color-mix(in srgb,var(--color) 30%,#c6eeff);
+  background:linear-gradient(155deg,color-mix(in srgb,var(--color) 25%,#263344),#172034ed 55%,#0d1429fa);
+  box-shadow:inset 0 0 0 1px #bcecffb0,inset 0 0 15px #63c8ff26,
+    0 0 14px color-mix(in srgb,var(--color) 36%,transparent),0 5px 12px #05081770;
+  transform:translateY(-2px)
+}
+#dock .palette-cube,main.freeplay #dock .palette-cube{
+  grid-row:1 / 3;display:block;width:76px;height:76px;
+  background-image:url('./palette-cubes.png');background-size:520% 130%;
+  background-position:var(--sprite-position) center;background-repeat:no-repeat;
+  filter:var(--icon-filter,none);pointer-events:none
+}
+#dock .palette-name{align-self:end;white-space:nowrap}
+#dock small{
+  justify-self:start;align-self:start;display:inline-block;min-width:44px;
+  padding:3px 10px;border:1px solid #81709f88;border-radius:999px;
+  background:#9a83be12;color:#d7c9f8;font:16px system-ui;line-height:1.15
+}
+#dock button[aria-pressed=true] small{border-color:#72b5df88;color:#a8e0ff;background:#78b9df12}
+#dock button:disabled{opacity:.42;transform:none;box-shadow:inset 0 1px #b79ce31a}
+@media(hover:hover){#dock button:enabled:hover{border-color:#bea2e3;transform:translateY(-2px)}}
+@media(max-width:680px){
+  #dock,main.freeplay #dock{
+    flex-wrap:nowrap;justify-content:flex-start;max-height:none;overflow-x:auto;overflow-y:hidden;
+    gap:8px;scroll-snap-type:x proximity;scrollbar-width:thin;scrollbar-color:#6d638d transparent;
+    padding:7px 5px 9px
+  }
+  #dock button,main.freeplay #dock button{
+    display:grid;flex:0 0 145px;grid-template-columns:51px minmax(0,1fr);
+    min-height:77px;padding:7px 9px 7px 4px;gap:3px 6px;border-radius:14px;font-size:16px;
+    scroll-snap-align:start;text-align:left
+  }
+  #dock .palette-cube,main.freeplay #dock .palette-cube{width:51px;height:60px}
+  #dock small{font-size:13px;padding:3px 8px;min-width:38px}
+}
+@media(prefers-reduced-motion:reduce){#dock button{transition:none}}
 </style>
 <script type="importmap">
 {"imports":{"three":"https://unpkg.com/three@0.160.1/build/three.module.js","three/addons/":"https://unpkg.com/three@0.160.1/examples/jsm/"}}
@@ -1074,7 +1131,14 @@ async function start() {
   const paletteButtons = palette.map(({name,color}, index) => {
     const button = document.createElement('button');
     button.style.setProperty('--color',color);
-    button.innerHTML = '<span class="block-icon" aria-hidden="true"><i></i><i></i><i></i></span>' + name + '<small></small>';
+    const labels=['Cobalt','Amber','Jade','Violet','Rose','Ice','Scarlet','Lime','Pearl','Smoke'];
+    const sprites=[0,1,0,2,3,0,3,1,0,0];
+    const filters=['none','none','hue-rotate(-85deg)','none','none','hue-rotate(-30deg)','hue-rotate(25deg)','hue-rotate(40deg)','saturate(0) brightness(1.65)','saturate(0) brightness(.65)'];
+    button.style.setProperty('--sprite-position',(((5.2*(sprites[index]+.5)/4-.5)/4.2)*100)+'%');
+    button.style.setProperty('--icon-filter',filters[index]);
+    button.title=name;
+    button.setAttribute('aria-label',name);
+    button.innerHTML='<span class="palette-cube" aria-hidden="true"></span><span class="palette-name">'+labels[index]+'</span><small></small>';
     button.addEventListener('click', () => chooseColor(index));
     ui.dock.append(button);
     return button;
@@ -1299,7 +1363,8 @@ async function start() {
       if (matched) matched.instanceMatrix.needsUpdate = true;
     }
     paletteButtons.forEach((button,i) => {
-      button.querySelector('small').textContent = freeplay ? '∞' : '× ' + remaining[i];
+      button.querySelector('small').textContent = freeplay ? '∞' : remaining[i] ? '× ' + remaining[i] : 'Used up';
+      button.setAttribute('aria-label',palette[i].name + (freeplay ? ', unlimited' : ', ' + remaining[i] + ' remaining'));
       button.disabled = !freeplay && !remaining[i];
     });
     const count = inventory.reduce((sum,n) => sum+n,0);
