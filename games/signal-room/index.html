@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#080e1a">
+<meta name="description" content="Route a pulse through a wall of glowing relays.">
+<title>Signal Room · Pocket Playroom</title>
+<link rel="canonical" href="https://pocketplayroom.com/games/signal-room/">
+<meta property="og:title" content="Signal Room · Pocket Playroom">
+<meta property="og:description" content="Slide glowing relays to connect the source to the receiver. 30 levels, untimed.">
+<meta property="og:image" content="https://pocketplayroom.com/assets/signal-room-card.png">
+<link rel="stylesheet" href="room.css">
+<script defer src="../../recent-games.js"></script>
+<script defer src="campaign.js"></script>
+<script defer src="room.js"></script>
+</head>
+<body>
+<main class="shell">
+  <header class="mast">
+    <a class="wordmark" href="../../">pocket playroom</a>
+    <button id="help-button" class="quiet" type="button" hidden>How to play</button>
+  </header>
+  <section id="intro" class="intro" aria-labelledby="intro-title">
+    <div class="intro-copy">
+      <h1 id="intro-title">Send a signal.</h1>
+      <p>Connect the blue source to the red receiver across 30 puzzles.</p>
+      <ol class="instructions">
+        <li><strong>Trace a route.</strong> The pulse moves between lit blocks in neighboring columns. Tall blocks span two rows and let the pulse switch rows.</li>
+        <li><strong>Change the board.</strong> Tap a relay to switch it on or off. Use the row arrows or swipe to slide all blocks marked ↔ in that row together, one column at a time.</li>
+        <li><strong>Spend moves on the route.</strong> Each toggle or slide costs one move. Spare relays and dead ends can stay on or off. Plan backward from the receiver if you see several branches.</li>
+        <li><strong>Test your route.</strong> Press Send for free. Watch which blocks the pulse reaches. Use Undo to take back a move or Reset to start the puzzle over.</li>
+      </ol>
+      <label class="confirmation"><input id="confirm-rules" type="checkbox" autocomplete="off"> I’ve read the gameplay instructions.</label>
+      <button id="start" class="primary" type="button" disabled>Start game <span aria-hidden="true">→</span></button>
+    </div>
+    <div class="diagram" aria-hidden="true">
+      <div class="diagram-block tile receiver">◎</div>
+      <div class="diagram-block tile relay top-bar"></div>
+      <div class="diagram-block tile relay upright"></div>
+      <div class="diagram-block tile source">▶</div>
+      <div class="diagram-block tile relay bottom-bar"></div>
+      <div class="diagram-block tile relay off spare"></div>
+    </div>
+  </section>
+  <section id="game" aria-labelledby="level-name" hidden>
+    <div class="level-head">
+      <div>
+        <p id="stage" class="stage"></p>
+        <h1 id="level-name" tabindex="-1"></h1>
+        <p id="objective"></p>
+      </div>
+      <div class="move-count"><strong id="moves"></strong><span>Moves left</span></div>
+    </div>
+    <div id="console" class="console">
+      <div id="grid" class="grid" aria-label="Relay board"></div>
+      <div id="rows" class="row-controls"></div>
+    </div>
+    <div class="action-area">
+      <div class="actions">
+        <button id="undo" class="quiet" type="button">Undo</button>
+        <button id="reset" class="quiet" type="button">Reset</button>
+        <button id="send" class="primary" type="button">Send <span aria-hidden="true">▶</span></button>
+        <button id="next" class="primary" type="button" hidden></button>
+      </div>
+      <p id="status" class="status" role="status"></p>
+      <label class="level-picker">Puzzles <select id="puzzle-select"></select></label>
+    </div>
+  </section>
+</main>
+<dialog id="help" aria-labelledby="help-title">
+  <h2 id="help-title">How to play</h2>
+  <div id="help-copy"></div>
+  <form method="dialog"><button class="primary">Back to puzzle</button></form>
+</dialog>
+</body>
+</html>
