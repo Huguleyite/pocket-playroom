@@ -197,6 +197,9 @@ main.sanctuary.focused #focusScene{pointer-events:auto}
   #dock small{font-size:13px;padding:3px 8px;min-width:38px}
 }
 @media(prefers-reduced-motion:reduce){#dock button{transition:none}}
+#advanceLevel,#next{background:#bceaff;color:#10213a;border:2px solid #e4f7ff;font-weight:700;min-height:46px;padding:10px 22px;box-shadow:0 0 18px #81c9ff45}
+#advanceLevel[hidden]{display:none}
+#advanceLevel{justify-self:center}
 </style>
 <script type="importmap">
 {"imports":{"three":"https://unpkg.com/three@0.160.1/build/three.module.js","three/addons/":"https://unpkg.com/three@0.160.1/examples/jsm/"}}
@@ -231,6 +234,7 @@ main.sanctuary.focused #focusScene{pointer-events:auto}
   </aside>
 </div>
 <footer>
+  <button id="advanceLevel" hidden>Next Level</button>
   <div id="dock" aria-label="Available cubes"></div>
   <div id="freeplayTools" hidden>
     <label>Setting <select id="freeplaySetting"><option value="sanctuary">Crystal Sanctuary</option><option value="classic">Classic</option></select></label>
@@ -252,7 +256,7 @@ main.sanctuary.focused #focusScene{pointer-events:auto}
   <ol>
     <li>Choose a cube. Click the grid to place it or click the top or upper half of a cube to stack it.</li>
     <li>Use Build level to place at a specific height or reach an interior position. Stacking on the selected level automatically advances it.</li>
-    <li>Complete all 20 designs to unlock Crystal Sanctuary Freeplay. Start empty or use the castle starter, then save and reopen your creation on this device.</li>
+    <li>Complete each design to unlock the next puzzle. Your progress is saved on this device. Complete all 20 designs to unlock Crystal Sanctuary Freeplay. Start empty or use the castle starter, then save and reopen your creation on this device.</li>
     <li>Right-click a cube to return it to the tray. On a touchscreen, hold a cube to remove it.</li>
     <li>Drag to orbit and scroll or pinch to zoom. With the build area focused, use arrow keys to select a cell, Enter to place, and Delete to remove.</li>
   </ol>
@@ -261,7 +265,7 @@ main.sanctuary.focused #focusScene{pointer-events:auto}
 <dialog id="victory">
   <form method="dialog">
     <h2>Spire in harmony</h2><p id="victoryText"></p>
-    <button value="stay">Keep looking</button><button id="next" value="next">Next level</button>
+    <button value="stay">Keep looking</button><button id="next" value="next">Next Level</button>
   </form>
 </dialog>
 <script type="module">
@@ -629,6 +633,30 @@ async function start() {
   try {
     if (localStorage.getItem(unlockKey) === '1') unlockFreeplay();
   } catch {}
+
+  const progressKey = 'resonance-spire-progress-v1';
+  let unlockedLevel = 0;
+  try {
+    const saved = Number(localStorage.getItem(progressKey));
+    if (Number.isInteger(saved) && saved >= 0 && saved <= freeplayIndex) unlockedLevel = saved;
+  } catch {}
+  // Keep progression earned before sequential puzzle locks were introduced.
+  if (!freeplayOption.disabled) unlockedLevel = freeplayIndex;
+  function refreshLevelLocks() {
+    for (let index = 0; index <= finalPuzzle; index++) {
+      const option = ui.level.options[index];
+      option.disabled = index > unlockedLevel;
+      option.text = 'Level ' + (index + 1) + ' · ' + levels[index].name +
+        (option.disabled ? ' · Locked' : '');
+    }
+    if (unlockedLevel === freeplayIndex) unlockFreeplay();
+  }
+  function recordCompletion(index) {
+    unlockedLevel = Math.max(unlockedLevel, index + 1);
+    try { localStorage.setItem(progressKey, String(unlockedLevel)); } catch {}
+    refreshLevelLocks();
+  }
+  refreshLevelLocks();
 
   const scene = new THREE.Scene();
   const renderer = new THREE.WebGLRenderer({ alpha:true, antialias:true, powerPreference:'high-performance' });
@@ -1210,7 +1238,11 @@ async function start() {
 
   let floorGrid;
   function loadLevel(index) {
-    if (index === freeplayIndex && freeplayOption.disabled) return;
+    if (!Number.isInteger(index) || index < 0 || index > unlockedLevel || index >= levels.length) {
+      ui.level.value = String(currentLevel ?? 0);
+      return;
+    }
+    ui.advanceLevel.hidden = true;
     for (const pair of batches || []) {
       for (const mesh of Object.values(pair)) mesh?.dispose();
     }
@@ -1414,6 +1446,9 @@ async function start() {
     locked = redraw();
     play(selected, true, locked);
     if (locked) {
+      recordCompletion(currentLevel);
+      ui.advanceLevel.textContent = currentLevel === finalPuzzle ? 'Open Freeplay' : 'Next Level';
+      ui.advanceLevel.hidden = false;
       ui.layer.value = 'all';
       changeLayer();
       ui.victoryText.textContent = levels[currentLevel].name + ' is complete.';
@@ -1421,7 +1456,7 @@ async function start() {
         unlockFreeplay();
         ui.victoryText.textContent += ' Freeplay is unlocked.';
       }
-      ui.next.textContent = currentLevel === finalPuzzle ? 'Open Freeplay' : 'Next level';
+      ui.next.textContent = currentLevel === finalPuzzle ? 'Open Freeplay' : 'Next Level';
       ui.victory.returnValue = 'stay';
       ui.victory.showModal();
     }
@@ -1584,6 +1619,10 @@ async function start() {
   ui.layer.onchange = changeLayer;
   ui.level.onchange = () => loadLevel(ui.level.selectedIndex);
   ui.reset.onclick = () => loadLevel(currentLevel);
+  ui.advanceLevel.onclick = () => {
+    if (locked && currentLevel < freeplayIndex) loadLevel(currentLevel + 1);
+    canvas.focus();
+  };
   ui.victory.onclose = () => {
     if (ui.victory.returnValue === 'next' && currentLevel + 1 < levels.length) loadLevel(currentLevel + 1);
     canvas.focus();
