@@ -99,3 +99,16 @@
   }
   window.PocketShare = Object.freeze({install});
 })();
+
+// Keep Tilt controls within the visible phone viewport.
+if (/\/games\/tilt-and-tumble\/play\.html$/.test(location.pathname)) {
+ document.addEventListener("DOMContentLoaded", () => {
+  const style = document.createElement("style");
+  style.textContent = "/* Reserve control space first; the canvas cannot impose its intrinsic height. */\n.quick-settings{grid-template-columns:minmax(0,1fr) auto auto;align-items:center}\n.quick-pause,#menu summary{min-height:44px;min-width:64px;font-size:14px}\n.delivery-mode .quick-settings{grid-template-columns:minmax(0,1fr) auto}\n@media(max-width:900px),(pointer:coarse),(max-height:750px){\n body:has(main:not(.delivery-mode)){height:100dvh;min-height:0;overflow:hidden;display:block}\n main:not(.delivery-mode){height:100%;width:100%;margin:0;padding:max(6px,env(safe-area-inset-top)) max(8px,env(safe-area-inset-right)) max(8px,env(safe-area-inset-bottom)) max(8px,env(safe-area-inset-left))}\n main:not(.delivery-mode) section{height:100%;min-height:0;grid-template-columns:minmax(0,1fr) minmax(0,1fr);grid-template-areas:\"brand brand\" \"board board\" \"score next\" \"reserve reserve\" \"utilities utilities\";grid-template-rows:auto minmax(0,1fr) auto auto auto;gap:6px}\n main.club-mode:not(.delivery-mode) section{grid-template-areas:\"brand brand\" \"board board\" \"score next\" \"utilities utilities\";grid-template-rows:auto minmax(0,1fr) auto auto}\n main:not(.delivery-mode) .well{position:relative;width:100%;height:100%;min-height:0;min-width:0;container-type:size;justify-self:stretch;padding:4px}\n main:not(.delivery-mode) #board{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:min(calc(100cqw - 8px),calc(50cqh - 4px));height:auto;max-height:calc(100% - 8px);aspect-ratio:1/2}\n main.landscape:not(.delivery-mode) #board{width:min(calc(100cqw - 8px),calc(200cqh - 16px));aspect-ratio:2/1}\n main:not(.delivery-mode) h1{font-size:clamp(19px,4vw,30px);padding:8px}\n main:not(.delivery-mode) .panel{padding:5px 8px}\n main:not(.delivery-mode) #next{height:34px;width:auto;max-width:100%;margin:0 auto}\n main:not(.delivery-mode) .reserve{margin-top:3px;grid-template-columns:1.35fr 1fr 1fr;gap:6px}\n main:not(.delivery-mode) .reserve button{min-height:44px;grid-column:auto;grid-row:auto}\n main:not(.delivery-mode) .reserve canvas{height:28px}\n main:not(.delivery-mode) .quick-settings{grid-template-columns:minmax(0,1fr) auto auto}\n main:not(.delivery-mode) .volume-label{display:none}\n main:not(.delivery-mode) .music-controls{grid-template-columns:auto minmax(30px,1fr);min-width:0}\n main:not(.delivery-mode) #menu{width:auto}\n main:not(.delivery-mode) #menu summary{padding:4px 9px}\n main:not(.delivery-mode) .menu-items{width:min(340px,calc(100vw - 24px));max-height:calc(100dvh - 76px);z-index:10}\n main:not(.delivery-mode) footer{display:none}\n}\n";
+  document.head.append(style);
+  document.querySelector("meta[name=viewport]").content = "width=device-width, initial-scale=1, viewport-fit=cover";
+  const pause = document.querySelector("#menu [data-action=pause]");
+  const menu = document.querySelector("#menu");
+  if (pause && menu && !document.querySelector("main.delivery-mode")) { pause.classList.add("quick-pause"); menu.before(pause); }
+ });
+}
