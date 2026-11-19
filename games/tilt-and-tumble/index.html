@@ -15,7 +15,7 @@
     refreshControls.then(() => location.assign(link.href));
   });
   if (['play','delivery','tutorial','sideways','heist','lightline','club','campaign','club-campaign'].some(key => mode.has(key))) {
-    mode.set('v', 'controls-20261119');
+    mode.set('v', 'cascade-result-20261119');
     refreshControls.then(() => location.replace('play.html?' + mode.toString() + location.hash));
   }
 </script>
@@ -86,8 +86,8 @@ nav{grid-template-columns:repeat(3,minmax(0,1fr))}
       </div></div>
       <div><h2>Cascade Club <span id="daily-played" hidden>✓ Played today</span></h2><p class="description" id="daily-description">Today’s challenge. Same board, same five pieces. How high can you score?</p></div>
       <div class="split-actions">
-        <a class="play" href="play.html?v=controls-20261119&club"><span id="daily-action">Play daily</span> <span aria-hidden="true">→</span></a>
-        <a class="play" href="play.html?v=controls-20261119&club-campaign">Campaign <span aria-hidden="true">→</span><small>12 replayable stages</small></a>
+        <a class="play" href="play.html?v=cascade-result-20261119&club"><span id="daily-action">Play daily</span> <span aria-hidden="true">→</span></a>
+        <a class="play" href="play.html?v=cascade-result-20261119&club-campaign">Campaign <span aria-hidden="true">→</span><small>12 replayable stages</small></a>
       </div>
     </article>
     <article class="split-card">
@@ -96,25 +96,25 @@ nav{grid-template-columns:repeat(3,minmax(0,1fr))}
       </div></div>
       <div><h2>Classic</h2><p class="description">Drop pieces, fit triangle halves, and turn the board to set off scoring cascades.</p></div>
       <div class="split-actions">
-        <a class="play" href="play.html?v=controls-20261119&play">Play Classic <span aria-hidden="true">→</span></a>
-        <a class="play" href="play.html?v=controls-20261119&campaign">Campaign <span aria-hidden="true">→</span></a>
+        <a class="play" href="play.html?v=cascade-result-20261119&play">Play Classic <span aria-hidden="true">→</span></a>
+        <a class="play" href="play.html?v=cascade-result-20261119&campaign">Campaign <span aria-hidden="true">→</span></a>
       </div>
     </article>
-    <a href="play.html?v=controls-20261119&delivery">
+    <a href="play.html?v=cascade-result-20261119&delivery">
       <div class="preview" aria-hidden="true"><div class="grid" style="--cols:6;--rows:6">
         <i class="piece dock" style="--x:4;--y:1"></i><i class="piece triangle mint" style="--x:2;--y:3"></i><i class="piece triangle" style="--x:1;--y:4"></i><i class="piece triangle" style="--x:2;--y:4"></i><i class="piece triangle" style="--x:4;--y:5"></i><i class="piece triangle" style="--x:5;--y:5"></i>
       </div></div>
       <div><h2>Prism Delivery</h2><p class="description">Guide a mint prism to its dock in a limited number of turns. 27 puzzles to solve.</p></div>
       <span class="play">Play Prism Delivery <span aria-hidden="true">→</span></span>
     </a>
-    <a href="play.html?v=controls-20261119&heist">
+    <a href="play.html?v=cascade-result-20261119&heist">
       <div class="preview" aria-hidden="true"><div class="grid" style="--cols:6;--rows:6">
         <i class="piece dock" style="--x:4;--y:1"></i><i class="piece dock rose" style="--x:5;--y:1"></i><i class="piece triangle mint" style="--x:2;--y:3"></i><i class="piece triangle pink" style="--x:1;--y:4"></i><i class="piece triangle gold" style="--x:4;--y:4"></i><i class="piece" style="--x:2;--y:5"></i>
       </div></div>
       <div><h2>Tumble Heist</h2><p class="description">Tilt 21 vaults to collect their gems. Use your remaining turns to chase bonus loot.</p></div>
       <span class="play">Play Tumble Heist <span aria-hidden="true">→</span></span>
     </a>
-    <a href="play.html?v=controls-20261119&lightline">
+    <a href="play.html?v=cascade-result-20261119&lightline">
       <div class="preview" aria-hidden="true"><div class="grid" style="--cols:6;--rows:6">
         <i class="piece dock" style="--x:4;--y:1"></i><i class="piece triangle mint" style="--x:4;--y:4"></i><i class="piece triangle" style="--x:1;--y:4"></i><i class="light-preview-beam"></i>
       </div></div>
