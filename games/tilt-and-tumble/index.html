@@ -7,9 +7,16 @@
 <script>
   const mode = new URLSearchParams(location.search);
   document.documentElement.classList.add(mode.has('games') ? 'show-games' : 'show-splash');
+  const refreshControls = fetch('../../pocket-share.js', {cache:'reload'}).catch(() => {});
+  document.addEventListener('click', event => {
+    const link = event.target.closest('a[href^="play.html?"]');
+    if (!link || event.ctrlKey || event.metaKey || event.shiftKey) return;
+    event.preventDefault();
+    refreshControls.then(() => location.assign(link.href));
+  });
   if (['play','delivery','tutorial','sideways','heist','lightline','club','campaign','club-campaign'].some(key => mode.has(key))) {
     mode.set('v', 'controls-20261119');
-    location.replace('play.html?' + mode.toString() + location.hash);
+    refreshControls.then(() => location.replace('play.html?' + mode.toString() + location.hash));
   }
 </script>
 <style>
