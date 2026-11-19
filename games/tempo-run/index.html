@@ -734,6 +734,37 @@ function drawShot() {
 
 let audio, output, pickupBus, noise, timer, nextBeat, beat;
 let muted = false;
+let gameOverBufferPromise=null, gameOverSource=null, gameOverTicket=0;
+function loadGameOver() {
+  if(!audio) return null;
+  if(!gameOverBufferPromise) {
+    gameOverBufferPromise=fetch("song-audio/gameover_1_band.mp3")
+      .then(response=>{if(!response.ok) throw Error("Game over audio unavailable");return response.arrayBuffer();})
+      .then(data=>audio.decodeAudioData(data))
+      .catch(()=>{gameOverBufferPromise=null;return null;});
+  }
+  return gameOverBufferPromise;
+}
+function stopGameOver() {
+  gameOverTicket++;
+  if(gameOverSource) {
+    try {gameOverSource.stop();} catch {}
+    gameOverSource.disconnect();
+    gameOverSource=null;
+  }
+}
+async function playGameOver() {
+  stopGameOver();
+  const ticket=gameOverTicket;
+  const buffer=await loadGameOver();
+  if(!buffer || ticket!==gameOverTicket || state!=="over") return;
+  const source=audio.createBufferSource();
+  source.buffer=buffer;
+  source.connect(output);
+  source.onended=()=>{source.disconnect();if(gameOverSource===source) gameOverSource=null;};
+  gameOverSource=source;
+  source.start();
+}
 function initAudio() {
   const Audio = window.AudioContext || window.webkitAudioContext;
   if (!Audio) return;
@@ -755,6 +786,7 @@ function initAudio() {
       for(let i=0;i<samples.length;i++) samples[i]=Math.random()*2-1;
     }
     if(audio.state === "suspended") audio.resume().catch(()=>{});
+    loadGameOver();
   } catch {}
 }
 function voice(time,length,from,to,volume,type="square",destination=output) {
@@ -1121,6 +1153,7 @@ function fillCourse() {
   objects.sort((a,b)=>a.yard-b.yard);
 }
 function reset() {
+  stopGameOver();
   distance=0;
   notes=0;
   offered=0;
@@ -1583,7 +1616,7 @@ function finish(completed=false) {
   scoreDisplay.hidden=true;
   if(!completed) {
     stopSong();
-    effect("collision");
+    playGameOver();
   }
   updateHint("");
   const yards=Math.floor(distance);
