@@ -242,7 +242,7 @@ frame=document.getElementById('game-frame');frame.onload=()=>applyNight();return
 async function route(){ensureHouseAds();const version=++routeVersion;if(window.PocketChallengeHost?.render())return;
     if(location.hash==='#games/tilt-and-tumble'){
       window.PocketRecent.remember('tilt-and-tumble',location.hash);
-      location.assign(new URL('games/tilt-and-tumble/index.html',location.href));
+      location.assign(new URL('games/tilt-and-tumble/index.html?v=controls-20261119',location.href));
       return;
     }
 if(['#big-screen/little-wilds','#big-screen/little-wilds/play','#games/wilds'].includes(location.hash)){
