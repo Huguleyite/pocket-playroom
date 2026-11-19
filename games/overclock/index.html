@@ -796,7 +796,7 @@ body{height:auto;min-height:100dvh;overflow-x:hidden;overflow-y:auto;padding-bot
       <div class="seed-nav">
         <button class="seed-pill" data-offset="-1">Yesterday</button>
         <button class="seed-pill active" data-offset="0">Today</button>
-        <button class="seed-pill" data-offset="1">Tomorrow</button>
+
       </div>
       <span class="seed-label" id="seedDisplay">SEED: 2026-11-16</span>
     </div>
@@ -910,7 +910,7 @@ body{height:auto;min-height:100dvh;overflow-x:hidden;overflow-y:auto;padding-bot
       </div>
       <p id="shareStatus" role="status"></p>
       <textarea id="shareFallback" class="scorecard-box" rows="4" readonly hidden aria-label="Share text to copy"></textarea>
-      <button class="btn btn-bank" id="replayBtn">↻ Replay Seed</button>
+
     </div>
   </div>
 
@@ -1494,6 +1494,11 @@ body{height:auto;min-height:100dvh;overflow-x:hidden;overflow-y:auto;padding-bot
     }
 
     function initGame(seedStr) {
+      if (/^\d{4}-\d{2}-\d{2}$/.test(seedStr) && seedStr > getDateSeed()) {
+        seedStr = getDateSeed();
+        incomingChallenge = null;
+        history.replaceState(null, "", "#" + seedStr);
+      }
       clearTimeout(advanceTimeout);
       boardEvent = "reset";
       phase = "play";
@@ -1900,9 +1905,7 @@ ${strip}
       await copyShareText(makeChallengeLink(), "Challenge link");
     });
 
-    document.getElementById("replayBtn").addEventListener("click", () => {
-      initGame(currentSeed);
-    });
+
 
     function loadSeed() {
       let seed = location.hash.slice(1);
