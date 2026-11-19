@@ -148,3 +148,9 @@ dialog::backdrop { background: #030711cc; }
   .row-controls button::before { content: attr(data-row); font-size: .8rem; margin-right: 5px; }
   .grid { min-height: 248px; }
 }
+
+.mast-controls { display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
+@media (max-width: 540px) {
+  .mast { flex-wrap: wrap; padding-block: 10px; gap: 8px; }
+  .mast-controls .quiet { padding-inline: 10px; }
+}

@@ -232,6 +232,7 @@ function changeBoard(next, message) {
 function toggle(index) {
   if (busy || solved || !moves) return;
   const on = !board[index].on;
+  signalAudio.play("tap", on);
   changeBoard(board.map((tile, i) => i === index ? { ...tile, on } : tile),
     on ? "Relay switched on." : "Relay switched off.");
 }
@@ -239,13 +240,17 @@ function toggle(index) {
 function shiftRow(row, step) {
   if (busy || solved || !moves) return;
   const shifted = slide(board, row, step);
-  if (shifted) changeBoard(shifted, `Row ${row + 1} shifted ${step < 0 ? "left" : "right"}.`);
+  if (shifted) {
+    signalAudio.play("slide");
+    changeBoard(shifted, `Row ${row + 1} shifted ${step < 0 ? "left" : "right"}.`);
+  }
   else say("That row has no room to slide in this direction.");
 }
 
 const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
 async function sendPulse() {
   if (busy || solved) return;
+  signalAudio.play("send");
   busy = true;
   trace = [];
   say("Pulse in flight…");
@@ -254,6 +259,8 @@ async function sendPulse() {
   const max = distances.get(1) ?? Math.max(...distances.values());
   for (let hop = 0; hop <= max; hop++) {
     const reached = [...distances].filter(([, distance]) => distance === hop).map(([index]) => index);
+    // Reduced motion completes immediately; avoid stacking all hop sounds.
+    if (hop > 0 && !reduceMotion.matches) signalAudio.play("hop");
     trace.push(...reached);
     for (const index of reached) tileElements[index].classList.add("fired");
     if (!reduceMotion.matches) await delay(135);
@@ -262,7 +269,9 @@ async function sendPulse() {
       tileElements[index].classList.add("traced");
     }
   }
+  if (reduceMotion.matches) await delay(320);
   solved = distances.has(1);
+  signalAudio.play(solved ? "success" : "stop");
   busy = false;
   if (solved) {
     if (levelIndex === completed) {
@@ -283,18 +292,29 @@ const startButton = byId("start");
 confirmation.checked = false;
 if (completed > 0 && completed < levels.length) startButton.textContent = "Continue game →";
 confirmation.addEventListener("change", () => { startButton.disabled = !confirmation.checked; });
-startButton.addEventListener("click", () => {
-  if (!confirmation.checked) return;
+function startGame() {
   byId("intro").hidden = true;
   byId("game").hidden = false;
   byId("help-button").hidden = false;
   unlockLevels();
   loadLevel(completed === levels.length ? 0 : completed);
+}
+const instructionsKey = "signal-room.instructions-read";
+startButton.addEventListener("click", () => {
+  if (!confirmation.checked) return;
+  try { localStorage.setItem(instructionsKey, "true"); } catch { /* Storage is optional. */ }
+  signalAudio.ready();
+  startGame();
 });
+// Existing saved progress also identifies a player who has already played.
+let instructionsRead = completed > 0;
+try { instructionsRead ||= localStorage.getItem(instructionsKey) === "true"; } catch { /* Storage is optional. */ }
+if (instructionsRead) startGame();
 byId("help-copy").append(document.querySelector(".instructions").cloneNode(true));
 byId("help-button").addEventListener("click", () => byId("help").showModal());
 byId("undo").addEventListener("click", () => {
   if (!history.length || busy || solved) return;
+  signalAudio.play("tap", false);
   board = history.pop();
   moves++;
   trace = [];
