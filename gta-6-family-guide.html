@@ -1,0 +1,327 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Families &amp; Games: GTA 6 Guide for Parents, Buyers and Everyone Else | Pocket Playroom</title>
+<meta name="description" content="A plain-language GTA 6 guide: scam checker, parent's guide to the rating and parental controls, a true-cost and storage calculator, and a spoiler-free explainer for non-players.">
+<meta name="theme-color" content="#fff7e8">
+<meta property="og:title" content="Families &amp; Games: GTA 6 Guide | Pocket Playroom">
+<meta property="og:description" content="Scam checker, parent's guide, true-cost calculator, and a spoiler-free explainer for the rest of us.">
+<meta property="og:type" content="article">
+<link rel="stylesheet" href="styles.css?v=chroma-zen-20261107">
+<link rel="stylesheet" href="brand.css?v=pp-logo1">
+<link rel="stylesheet" href="families-shell.css?v=20261122">
+<link rel="icon" href="favicon.ico?v=pp-logo1">
+<style>
+#main.families-guide{--bg:#fff7e8;--card:#ffffff;--ink:#2b2118;--mute:#6b5a4a;--line:#ead9bd;--acc:#d9531e;--acc-d:#b3410f;--ok:#1f7a4d;--warn:#b42318;--soft:#fff0d6;font:17px/1.6 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;color:var(--ink)}
+#main.families-guide{max-width:860px;margin:0 auto;padding:22px 16px 60px}
+.families-guide h1{font-size:clamp(1.7rem,5vw,2.4rem);line-height:1.15;margin:.2em 0 .3em}
+.families-guide h2{font-size:1.45rem;margin:0 0 .4em}
+.families-guide h3{font-size:1.1rem;margin:1.2em 0 .3em}
+.families-guide .lede{color:var(--mute);font-size:1.05rem;margin:0 0 14px}
+.families-guide .stamp{font-size:.85rem;color:var(--mute)}
+.families-guide .tabs{display:flex;flex-wrap:wrap;gap:8px;margin:18px 0 14px;padding:0;list-style:none}
+.families-guide .tabs button{font:inherit;font-size:.95rem;padding:9px 14px;border-radius:999px;border:1.5px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer}
+.families-guide .tabs button[aria-selected=true]{background:var(--acc);border-color:var(--acc);color:#fff;font-weight:700}
+.families-guide .tabs button:focus-visible,.families-guide input:focus-visible,.families-guide select:focus-visible,.families-guide summary:focus-visible,.families-guide a:focus-visible,.families-guide .btn:focus-visible{outline:3px solid #1d4ed8;outline-offset:2px}
+.families-guide section.panel{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:20px 18px}
+.families-guide section.panel[hidden]{display:none}
+.families-guide .note{background:var(--soft);border-left:4px solid var(--acc);padding:10px 14px;border-radius:8px;margin:14px 0;font-size:.95rem}
+.families-guide .q{display:flex;gap:12px;align-items:flex-start;padding:12px 4px;border-top:1px solid var(--line)}
+.families-guide .q:first-of-type{border-top:0}
+.families-guide .q input{width:24px;height:24px;margin-top:3px;accent-color:var(--acc);flex:none}
+.families-guide .q label{cursor:pointer}
+.families-guide .q small{display:block;color:var(--mute)}
+.families-guide .btn{font:inherit;padding:11px 18px;border-radius:10px;border:0;background:var(--acc);color:#fff;font-weight:700;cursor:pointer}
+.families-guide .btn:hover{background:var(--acc-d)}
+.families-guide .btn.ghost{background:transparent;color:var(--ink);border:1.5px solid var(--line);font-weight:500}
+.families-guide .result{margin-top:16px;padding:14px;border-radius:12px;border:2px solid var(--line);background:#fff}
+.families-guide .result.bad{border-color:var(--warn);background:#fff1ef}
+.families-guide .result.good{border-color:var(--ok);background:#effaf3}
+.families-guide .result strong.v{display:block;font-size:1.15rem;margin-bottom:4px}
+.families-guide .grid{display:grid;gap:12px;grid-template-columns:1fr}
+@media(min-width:640px){.families-guide .grid.two{grid-template-columns:1fr 1fr}
+}
+.families-guide .f label{display:block;font-weight:600;font-size:.95rem;margin-bottom:4px}
+.families-guide .f input,.families-guide .f select{width:100%;font:inherit;padding:10px;border:1.5px solid var(--line);border-radius:10px;background:#fff;color:var(--ink)}
+.families-guide .f small{display:block;color:var(--mute);margin-top:3px;font-size:.85rem}
+.families-guide table{width:100%;border-collapse:collapse;margin:8px 0;font-size:.97rem}
+.families-guide td,.families-guide th{padding:9px 8px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+.families-guide td:last-child,.families-guide th:last-child{text-align:right}
+.families-guide tr.total td{font-weight:800;font-size:1.1rem;border-top:2px solid var(--ink);border-bottom:0}
+.families-guide ul.tight{padding-left:1.2em;margin:.4em 0}
+.families-guide ul.tight li{margin:.3em 0}
+.families-guide details{border:1px solid var(--line);border-radius:10px;padding:10px 14px;margin:10px 0;background:#fffdf8}
+.families-guide summary{cursor:pointer;font-weight:700}
+.families-guide dl{margin:8px 0}
+.families-guide dt{font-weight:700;margin-top:10px}
+.families-guide dd{margin:2px 0 0}
+.families-guide .chips{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0}
+.families-guide .chip{background:var(--soft);border:1px solid var(--line);border-radius:999px;padding:4px 12px;font-size:.9rem}
+@media(prefers-reduced-motion:reduce){}
+.families-guide h1{letter-spacing:normal;font-weight:700}.families-guide .note{transform:none;box-shadow:none}.families-guide a{text-decoration:underline}.families-guide summary{min-height:44px}.families-guide .tabs{padding:0}.families-guide .tabs li{list-style:none}.families-guide p{margin-top:0}.families-guide h1,.families-guide h2,.families-guide h3{font-family:inherit}
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="site-header"><a class="wordmark" href="/#home" aria-label="Pocket Playroom home"><img class="brand-logo" src="assets/branding/pocket-playroom-logo.webp" alt="Pocket Playroom Logo" width="48" height="53"><span class="brand-name">pocket <span>playroom</span></span></a><nav aria-label="Main navigation"><a href="/#home" id="all-link">Pocket Games</a><a href="/#big-screen" id="big-screen-link">Big Screen Games</a><a href="/#discover" id="discover-link">Discover</a><a href="/families-and-games.html" id="families-link" aria-current="page">Families &amp; Games</a><button id="about-button" aria-haspopup="dialog">About</button></nav></header>
+
+<main id="main" class="families-guide" tabindex="-1">
+  <p><a href="families-and-games.html">Families &amp; Games</a></p><h1>GTA 6: A guide for families</h1>
+  <p class="lede">A plain-language guide to GTA 6 for parents, buyers, and the people who live with them. No game required.</p>
+  <p class="stamp">Last updated: November 22, 2026. Ratings, prices, and sizes can change, so confirm on your console's store page before you buy.</p>
+
+  <ul class="tabs" role="tablist" aria-label="Guide sections">
+    <li><button role="tab" id="t-scam" aria-controls="p-scam" aria-selected="true">Scam checker</button></li>
+    <li><button role="tab" id="t-parents" aria-controls="p-parents" aria-selected="false">Parent's guide</button></li>
+    <li><button role="tab" id="t-cost" aria-controls="p-cost" aria-selected="false">True cost</button></li>
+    <li><button role="tab" id="t-rest" aria-controls="p-rest" aria-selected="false">For the rest of us</button></li>
+  </ul>
+
+  <!-- 1. SCAM CHECKER -->
+  <section class="panel" id="p-scam" role="tabpanel" aria-labelledby="t-scam">
+    <h2>Launch scam checker</h2>
+    <p>Big launches attract scammers. Tick anything that matches the offer, link, or message you're looking at. This checker runs entirely in your browser and sends nothing anywhere.</p>
+    <div class="note"><strong>The simplest rule:</strong> the game is sold through your console's own store (PlayStation Store or Microsoft Store/Xbox) and major retailers. Anything that sends you somewhere else for a "key," "beta," or "free copy" deserves suspicion.</div>
+    <form id="scamForm" aria-label="Scam red-flag checklist">
+      <div class="q"><input type="checkbox" id="s1"><label for="s1">It offers early access, a beta, or "VIP access" before the official launch.<small>Security researchers report fake beta invitations being used to spread malware and steal logins.</small></label></div>
+      <div class="q"><input type="checkbox" id="s2"><label for="s2">It's a free game code, a "code generator," or a giveaway.<small>Free codes from third-party sites and code generators for console games are not real.</small></label></div>
+      <div class="q"><input type="checkbox" id="s3"><label for="s3">The price is far below the store price, or the key comes from a seller you can't verify.<small>Cheap keys from unknown stores may never arrive, or may be invalid.</small></label></div>
+      <div class="q"><input type="checkbox" id="s4"><label for="s4">It asks you to download a file, installer, or app (.exe, .apk, "launcher") to get the game.<small>Console games install through the console. Fake installers have carried trojans and adware.</small></label></div>
+      <div class="q"><input type="checkbox" id="s5"><label for="s5">It asks you to sign in with your PlayStation, Xbox, Rockstar, Google, or other account on a page you reached through a link.<small>Look-alike sign-in pages are a common way to steal accounts.</small></label></div>
+      <div class="q"><input type="checkbox" id="s6"><label for="s6">It wants payment by gift card, cryptocurrency, wire transfer, or a person-to-person payment app.<small>These are hard or impossible to reverse.</small></label></div>
+      <div class="q"><input type="checkbox" id="s7"><label for="s7">It pressures you: "limited spots," "expires in minutes," or "you've been selected."</label></div>
+      <div class="q"><input type="checkbox" id="s8"><label for="s8">It arrived through a direct message, a comment, a pop-up, or an email from someone you don't know.</label></div>
+      <div class="q"><input type="checkbox" id="s9"><label for="s9">It claims a PC or mobile version is available now.<small>At launch the game came out on PlayStation 5 and Xbox Series X|S only.</small></label></div>
+      <p style="margin-top:14px"><button type="button" class="btn" id="scamGo">Check it</button> <button type="reset" class="btn ghost" id="scamReset">Clear</button></p>
+    </form>
+    <div id="scamOut" class="result" role="status" aria-live="polite" hidden></div>
+    <h3>If you already clicked or paid</h3>
+    <ul class="tight">
+      <li>Change the password for any account you typed in, and turn on two-step verification. Change it anywhere you reused that password.</li>
+      <li>If you paid, contact your bank or card company right away and ask about a chargeback.</li>
+      <li>If you installed something, run a security scan, and consider a factory reset for a phone.</li>
+      <li>Report the scam at <a href="https://reportfraud.ftc.gov" rel="noopener">reportfraud.ftc.gov</a> (US) and to the platform where you found it.</li>
+    </ul>
+  </section>
+
+  <!-- 2. PARENT'S GUIDE -->
+  <section class="panel" id="p-parents" role="tabpanel" aria-labelledby="t-parents" hidden>
+    <h2>Parent's guide</h2>
+    <p><strong>The short version:</strong> GTA 6 is rated <strong>M (Mature 17+)</strong> by the ESRB in the US and <strong>PEGI 18</strong> in Europe. It is an adult game.</p>
+    <h3>What the rating says</h3>
+    <p>The ESRB lists these content descriptors:</p>
+    <div class="chips"><span class="chip">Blood and Gore</span><span class="chip">Intense Violence</span><span class="chip">Mature Humor</span><span class="chip">Nudity</span><span class="chip">Strong Language</span><span class="chip">Strong Sexual Content</span><span class="chip">Use of Drugs and Alcohol</span></div>
+    <p>It also carries an <strong>In-Game Purchases</strong> notice, which means money can be spent inside the game or its services. Ratings and wording vary by country, so read the descriptors on your own store listing. The descriptors tell you what kinds of content are in the game. They don't say how often it appears or whether a player can avoid it.</p>
+    <h3>If your child asks for it</h3>
+    <ul class="tight">
+      <li>Read the full ESRB entry for the game at <a href="https://www.esrb.org/ratings/41627/grand-theft-auto-vi/" rel="noopener">esrb.org</a> before deciding.</li>
+      <li>Ask what draws them to it. Often it's friends playing, a clip they saw, or the hype.</li>
+      <li>Decide as a household. "Not yet" is a complete answer, and you can revisit it.</li>
+      <li>Check where else they might play it: a friend's house, a cousin's console, a streamed video.</li>
+    </ul>
+    <h3>Set limits on the console</h3>
+    <p>Both consoles let a parent control which games a child's account can play and how much they can spend. Menu names change with system updates. If you don't see these exactly, search "parental controls" or "family" in your console's settings or support site.</p>
+    <details><summary>PlayStation 5</summary>
+      <ul class="tight">
+        <li>Create a child account under Family Management, so the child plays on their own login rather than yours.</li>
+        <li>Go to Settings &gt; Family and Parental Controls &gt; Family Management, select the child, then Parental Controls. Set the <strong>age level for games and apps</strong> so mature-rated games are blocked.</li>
+        <li>Under Parental Controls, set a <strong>Monthly Spending Limit</strong>, which can be zero, to cover in-game purchases.</li>
+        <li>Keep your own adult account's password private and don't leave it signed in.</li>
+      </ul></details>
+    <details><summary>Xbox Series X|S</summary>
+      <ul class="tight">
+        <li>Add your child to your Microsoft family group, so they have their own child account.</li>
+        <li>In Microsoft's family settings (the Xbox Family Settings app or your Microsoft account's family page), set the <strong>age limit</strong> for apps and games.</li>
+        <li>Turn on <strong>Ask to Buy</strong> in the Xbox Family Settings app for requests to buy things beyond the child's available balance. Control how much money you add; purchases covered by that balance may not need another approval.</li>
+        <li>Keep your adult account's sign-in private.</li>
+      </ul></details>
+    <div class="note"><strong>One caution:</strong> an adult account that is signed in on a shared console can bypass child settings. Sign out when you're done.</div>
+    <h3>Talking points</h3>
+    <ul class="tight">
+      <li>Explain that the rating is about content, in the same way a movie's R rating is.</li>
+      <li>Agree on screen-time and spending rules before a new game arrives, not after.</li>
+      <li>Remind them never to share their login, and never to download "free" versions of the game.</li>
+    </ul>
+  </section>
+
+  <!-- 3. TRUE COST -->
+  <section class="panel" id="p-cost" role="tabpanel" aria-labelledby="t-cost" hidden>
+    <h2>True-cost and storage calculator</h2>
+    <p>The sticker price isn't the whole price. Enter your own numbers to see what GTA 6 will really cost you, and whether it will fit on your console.</p>
+    <form id="costForm" class="grid two" aria-label="Cost calculator" onsubmit="return false">
+      <div class="f"><label for="ed">Edition</label>
+        <select id="ed"><option value="79.99">Standard ($79.99)</option><option value="99.99">Ultimate Edition ($99.99)</option><option value="custom">Other price (enter below)</option></select>
+        <small>Listed US prices. Confirm on the store page.</small></div>
+      <div class="f"><label for="cp">Other price ($)</label><input id="cp" type="number" min="0" step="0.01" inputmode="decimal" placeholder="0.00"></div>
+      <div class="f"><label for="tax">Sales tax (%)</label><input id="tax" type="number" min="0" max="30" step="0.01" inputmode="decimal" value="0"><small>Use your local rate. Many stores add tax at checkout.</small></div>
+      <div class="f"><label for="free">Free space on your console (GB)</label><input id="free" type="number" min="0" step="1" inputmode="numeric" placeholder="e.g. 300"><small>Find it in your console's storage settings.</small></div>
+      <div class="f"><label for="stor">Extra storage you'd buy ($)</label><input id="stor" type="number" min="0" step="0.01" inputmode="decimal" value="0"><small>Enter the price you've found, or leave 0.</small></div>
+      <div class="f"><label for="sub">Online subscription ($ per month)</label><input id="sub" type="number" min="0" step="0.01" inputmode="decimal" value="0"><small>Only if you want a service you don't already pay for.</small></div>
+      <div class="f"><label for="mo">Months of that subscription</label><input id="mo" type="number" min="0" max="60" step="1" inputmode="numeric" value="0"></div>
+      <div class="f" style="align-self:end"><button class="btn" type="button" id="costGo">Calculate</button> <button type="reset" class="btn ghost" id="costReset">Clear</button></div>
+    </form>
+    <div id="costOut" class="result" role="status" aria-live="polite" hidden></div>
+    <div class="note"><strong>About the storage number:</strong> Rockstar lists an official requirement of up to 212 GB, depending on your device. We use 212 GB plus a 30 GB cushion for updates, which is our own allowance. Treat the result as a planning estimate, and check the size shown on the store page.</div>
+    <p class="stamp">Subscription needs: the listings we reviewed don't establish a separate online-subscription requirement for the story campaign. Check the store page for the mode you plan to play.</p>
+  </section>
+
+  <!-- 4. FOR THE REST OF US -->
+  <section class="panel" id="p-rest" role="tabpanel" aria-labelledby="t-rest" hidden>
+    <h2>GTA 6 for the rest of us</h2>
+    <p>Someone in your life is playing it, and you'd like to follow the conversation. Here's the spoiler-free version.</p>
+    <h3>What it is</h3>
+    <p>It's the newest game in Rockstar Games' <em>Grand Theft Auto</em> series, a crime story set in a big open world you can roam freely. It's rated Mature 17+, so it's built for adults.</p>
+    <h3>Why everyone is excited</h3>
+    <ul class="tight">
+      <li>It came out on <strong>November 19, 2026</strong> for PlayStation 5 and Xbox Series X|S.</li>
+      <li>It's the first numbered entry in the series in a very long time, so the wait was long.</li>
+      <li>The release date moved more than once. It was first slated for May 2025, then May 2026, and finally November 2026.</li>
+    </ul>
+    <h3>Words you'll hear</h3>
+    <dl>
+      <dt>Open world</dt><dd>A huge map you can explore in any order, with no fixed path.</dd>
+      <dt>Story mode / campaign</dt><dd>The main storyline, played alone. Many players start here.</dd>
+      <dt>Preload</dt><dd>Downloading the game before launch day so it's ready at midnight.</dd>
+      <dt>Patch</dt><dd>A software update that fixes problems after release.</dd>
+      <dt>Heist</dt><dd>A planned robbery. A staple of the series.</dd>
+      <dt>Sandbox</dt><dd>A game with room to mess around and make your own fun.</dd>
+    </dl>
+    <h3>How to be a good sport</h3>
+    <ul class="tight">
+      <li>Ask them what they're up to. Players love to be asked, and a single question can buy you ten minutes of delighted explanation.</li>
+      <li>Don't ask for spoilers or give any. Let them find the story themselves.</li>
+      <li>Expect long sessions at first. A game this big has a way of eating the weekend.</li>
+      <li>If it's a kid asking to play, jump to the Parent's guide.</li>
+    </ul>
+  </section>
+</main>
+
+<footer class="site-footer"><a href="/#home" class="footer-brand"><img class="footer-logo" src="assets/branding/pocket-playroom-logo.webp" alt="" width="32" height="35">Pocket Playroom</a><span>Small games. Room for big ideas.</span><button id="privacy-button">Your progress & privacy</button></footer>
+<div class="families-disclaimer">
+  <p>Pocket Playroom is an independent site. This guide is unofficial and is not affiliated with, endorsed by, or sponsored by Rockstar Games or Take-Two Interactive. Grand Theft Auto and GTA are trademarks of their respective owners. Information here is general, was gathered from public reports and store listings, and may change. It isn't security, legal, or parenting advice.</p>
+</div>
+<dialog id="info" aria-labelledby="info-title"><div class="dialog-top"><h2 id="info-title"></h2><button id="close-info" aria-label="Close dialog">×</button></div><div id="info-body"></div></dialog>
+<template id="about-content">
+<p>Pocket Playroom is an independent collection of browser games. A good word, a clever turn, a small victory, and the occasional sandwich. There’s always room for a little play.</p>
+<p>Explore word games, logic puzzles, and quick challenges on your phone, tablet, or computer. No account is needed. Switch on Night Play for an after-dark look and a little extra discovery.</p>
+<p>We plan to support Pocket Playroom through affiliate links and advertising. When those links are available, qualifying purchases may earn us a commission at no additional cost to you. Paid placements and affiliate links will be identified where they appear.</p>
+<p>Small games. Room for big ideas.</p>
+<h3>Entertainment and creative intent</h3>
+<p>Pocket Playroom’s games, quizzes, fictional worlds, and other experiences are provided for entertainment and recreational purposes. Quiz results and fictional scenarios are not professional advice, diagnoses, or factual assessments of a person.</p>
+<p>Our creative intent is to offer distinctive experiences, not to reproduce another party’s protected characters, artwork, stories, or branding, or to imply a connection with another creator or property.</p>
+<h3>Independence and third-party rights</h3>
+<p>Pocket Playroom is independently operated. Unless expressly disclosed, Pocket Playroom and its experiences are not affiliated with, sponsored by, endorsed by, or authorized by any third-party game publisher, franchise, brand, or rights holder. Shared genres, themes, or gameplay conventions do not imply such a relationship.</p>
+<p>Any third-party names, trademarks, logos, and copyrighted material remain the property of their respective owners. No ownership of third-party intellectual property is claimed. This notice does not grant permission to use another party’s protected material or limit any rights provided by applicable law.</p>
+<h3>Development and testing</h3>
+<p>Experiences labeled “In development” or “Playtest version” are unfinished and offered for testing. They may contain bugs, incomplete features, or balance issues. Features, rules, availability, and browser-stored progress may change or reset as development continues.</p>
+</template>
+<template id="privacy-content">
+<p><em>Last updated: October 23, 2026</em></p>
+<h3>Your progress and preferences</h3>
+<p>Pocket Playroom does not require an account. Games use browser storage, when available, to remember progress, scores, settings, and related play history. The collection also remembers your last opened game and Night Play preferences.</p>
+<p>These saves stay in that browser and are not sent to CJ by the current site code. Clearing this site’s browser data removes them. A different browser, device, or website address has separate saves.</p>
+<h3>GitHub</h3>
+<p>We use GitHub to maintain the site and GitHub Pages to host it. When this site is served through GitHub Pages, GitHub logs visitors’ IP addresses for security, including visitors who are not signed into GitHub. See <a href="https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement">GitHub’s Privacy Statement</a>.</p>
+<h3>Affiliate links and CJ</h3>
+<p>Binario and Signal Flow completion panels include a NordVPN affiliate banner supplied through CJ. We may earn a commission on qualifying purchases through it. Opening either panel requests the banner from CJ; following the ad uses a CJ tracking link.</p>
+<p>When a CJ banner loads or you follow an affiliate link, CJ and participating advertisers may process IP addresses, browser and device details, cookie or similar identifiers, referring pages, link clicks, and qualifying transaction details. Cookies, pixels, tags, or similar methods may connect a referral with a later transaction.</p>
+<p>CJ may share information with advertisers, publishers, service providers, and related companies for these purposes. Purchases take place on the advertiser’s site and are subject to its privacy policy.</p>
+<p>For CJ’s practices, retention, privacy rights, and available choices, see its <a href="https://www.cj.com/legal/privacy-policy-services">Services Privacy Notice</a> and <a href="https://www.cj.com/legal/privacy">regional privacy information</a>. CJ privacy questions can be directed to <a href="mailto:privacy@cj.com">privacy@cj.com</a>.</p>
+<h3>Other services and your choices</h3>
+<p>The site requests fonts from Google Fonts, which sends Google your IP address and browser request information. See <a href="https://policies.google.com/privacy">Google’s Privacy Policy</a>.</p>
+<p>The site has no connected analytics service. Binario and Signal Flow completion banners are connected to CJ; other advertisement spaces may promote Pocket Playroom games, Atlas Valley Books, Helios Valley, Read the Room, The Frequency, and VibeFrag. House promotions do not contact an advertising service; following a link opens the promoted site, which has its own privacy practices.</p>
+<p>Before opening a game, a local check looks for blocked ad elements and a small file hosted on this site. If ad blocking is detected, please allow ads for Pocket Playroom and try again. This check does not contact advertisers, track you, or send your results anywhere.</p>
+<p>You can clear saved data or manage cookies through your browser. Blocking cookies may affect future affiliate attribution; blocking site storage may prevent games from saving. Browser controls may not stop every form of tracking. Use the privacy choices offered by CJ and any advertiser you visit as well.</p>
+<h3>Updates</h3>
+<p>We will revise this notice when hosting, affiliate partners, or tracking tools change, including any required consent controls before tracking is activated.</p>
+</template>
+
+
+<script>
+(function(){
+  var tabs=[].slice.call(document.querySelectorAll('[role=tab]'));
+  var panels=tabs.map(function(t){return document.getElementById(t.getAttribute('aria-controls'));});
+  function show(i,focus){
+    tabs.forEach(function(t,j){t.setAttribute('aria-selected',j===i?'true':'false');t.tabIndex=j===i?0:-1;panels[j].hidden=j!==i;});
+    if(focus)tabs[i].focus();
+    try{history.replaceState(null,'','#'+panels[i].id.slice(2));}catch(e){}
+  }
+  tabs.forEach(function(t,i){
+    t.addEventListener('click',function(){show(i,false);});
+    t.addEventListener('keydown',function(e){
+      var n=null;
+      if(e.key==='ArrowRight')n=(i+1)%tabs.length;
+      if(e.key==='ArrowLeft')n=(i-1+tabs.length)%tabs.length;
+      if(n!==null){e.preventDefault();show(n,true);}
+    });
+  });
+  var map={scam:0,parents:1,cost:2,rest:3},h=(location.hash||'').slice(1);
+  show(map.hasOwnProperty(h)?map[h]:0,false);
+
+  // Scam checker
+  var out=document.getElementById('scamOut');
+  document.getElementById('scamGo').addEventListener('click',function(){
+    var n=document.querySelectorAll('#scamForm input[type=checkbox]:checked').length;
+    out.hidden=false;out.className='result';
+    var v=document.createElement('strong');v.className='v';
+    var p=document.createElement('span');
+    if(n===0){
+      out.classList.add('good');
+      v.textContent='No red flags ticked.';
+      p.textContent="That\u2019s a good sign, but not a guarantee. Still buy only from your console\u2019s official store or a major retailer, and never enter a login from a link.";
+    }else if(n===1){
+      out.classList.add('bad');
+      v.textContent='1 red flag: be careful.';
+      p.textContent="Don\u2019t click, pay, or sign in yet. Go directly to the official store in your console or a retailer you know, and look for the same offer there.";
+    }else{
+      out.classList.add('bad');
+      v.textContent=n+' red flags: very likely a scam.';
+      p.textContent="Walk away. Don\u2019t download anything, don\u2019t enter any logins, and don\u2019t pay. Report and delete the message or link.";
+    }
+    out.textContent='';out.appendChild(v);out.appendChild(p);
+  });
+  document.getElementById('scamReset').addEventListener('click',function(){out.hidden=true;});
+
+  // Cost calculator
+  var c=document.getElementById('costOut');
+  document.getElementById('costReset').addEventListener('click',function(){c.hidden=true;c.textContent='';});
+  function num(id){var x=parseFloat(document.getElementById(id).value);return isFinite(x)&&x>0?x:0;}
+  function money(x){return '$'+x.toFixed(2);}
+  document.getElementById('costGo').addEventListener('click',function(){
+    var ed=document.getElementById('ed').value;
+    var price=ed==='custom'?num('cp'):parseFloat(ed);
+    var taxAmt=price*num('tax')/100, stor=num('stor'), sub=num('sub')*Math.floor(num('mo'));
+    var total=price+taxAmt+stor+sub;
+    var need=212+30, free=num('free'), hasFree=document.getElementById('free').value!=='';
+    c.hidden=false;c.className='result';c.textContent='';
+    var t=document.createElement('table');
+    [['Game',price],['Sales tax',taxAmt],['Extra storage',stor],['Subscription',sub]].forEach(function(r){
+      var tr=t.insertRow();tr.insertCell().textContent=r[0];tr.insertCell().textContent=money(r[1]);
+    });
+    var tr=t.insertRow();tr.className='total';tr.insertCell().textContent='Estimated total';tr.insertCell().textContent=money(total);
+    c.appendChild(t);
+    var s=document.createElement('p');
+    if(!hasFree){s.textContent='Enter your free space to check whether it will fit. Estimated need: about '+need+' GB (up to 212 GB official size plus a 30 GB cushion).';}
+    else if(free>=need){c.classList.add('good');s.textContent='Storage: you likely have room. You have '+free+' GB free against an estimated '+need+' GB.';}
+    else{c.classList.add('bad');s.textContent='Storage: you may be about '+(need-free)+' GB short of the estimated '+need+' GB. You would need to delete other games or add storage.';}
+    c.appendChild(s);
+  });
+})();
+</script>
+<script>
+(function(){
+  var info=document.getElementById('info');
+  function openInfo(title,template){
+    document.getElementById('info-title').textContent=title;
+    document.getElementById('info-body').replaceChildren(document.getElementById(template).content.cloneNode(true));
+    info.showModal();
+  }
+  document.getElementById('about-button').addEventListener('click',function(){openInfo('About Pocket Playroom','about-content');});
+  document.getElementById('privacy-button').addEventListener('click',function(){openInfo('Privacy','privacy-content');});
+  document.getElementById('close-info').addEventListener('click',function(){info.close();});
+})();
+</script>
+</body>
+</html>
