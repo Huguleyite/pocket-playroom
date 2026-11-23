@@ -376,6 +376,7 @@ svg.mini .gnext,svg.mini .cnext{display:none}
 .game-nav{height:48px;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:0 18px;background:#0b101b;border-bottom:1px solid #2c3b57;font:600 14px system-ui;position:relative;z-index:100}.game-nav a{color:#c9d6ee;text-decoration:none;min-height:44px;display:inline-flex;align-items:center}.game-nav a:hover{color:#00f0ff}.game-nav a:focus-visible,.setup input:focus-visible,.setup select:focus-visible{outline:3px solid #00f0ff;outline-offset:3px}
 #tvViewport{top:48px!important;height:calc(100% - 48px)!important}#phoneApp{top:48px!important;height:calc(100% - 48px)!important;min-height:0}.setup{height:calc(100% - 48px);overflow:auto;padding:clamp(24px,5vw,64px) 20px;background:radial-gradient(ellipse at top,#102533,#05070b 70%)}.setup-inner{max-width:1040px;margin:auto}.setup h1{font-size:clamp(36px,6vw,64px);margin:0 0 12px;color:#effaff}.setup h1 em{font-style:normal;color:#00f0ff}.setup-intro{max-width:720px;font-size:18px;line-height:1.6;color:#b6c8dd}.setup-grid{display:grid;grid-template-columns:1.2fr 1fr;gap:22px;margin-top:28px}.setup-card{background:#0b1320;border:1px solid #2c3b57;border-radius:18px;padding:26px}.setup-card.primary{border-color:#00d9e8}.setup h2{font-size:26px;margin:0 0 12px}.setup p{line-height:1.6}.setup label{display:block;margin:18px 0 8px;font-weight:700}.setup input,.setup select{width:100%;min-height:48px;padding:12px;border:1px solid #526987;border-radius:8px;background:#050b14;color:#f4f8ff;font:18px system-ui}.setup .btn{width:100%;margin-top:20px;min-height:52px;font-size:17px}.setup small{display:block;margin-top:14px;font-size:14px;line-height:1.6;color:#a8bcd3}.setup .room-entry{text-transform:uppercase;font:700 26px ui-monospace,monospace;letter-spacing:.15em}.setup .err{color:#ff9caf}.setup-host{border-top:1px solid #2c3b57;margin-top:24px;padding-top:18px}.setup-host summary{cursor:pointer;font-size:18px;font-weight:700;min-height:44px}.local-tip{font-size:20px;line-height:1.6;color:#b9d5e7;margin-bottom:14px}.local-tip b{color:#00f0ff}.join .note{font-size:15px}.join input{font-size:20px!important;min-height:48px}.join #jRoom{letter-spacing:.1em}.mode-link{display:block;margin-top:16px;color:#00f0ff;text-align:center;font-size:16px}@media(max-width:700px){.setup-grid{grid-template-columns:1fr}.setup-card{padding:20px}.game-nav{padding:0 12px;font-size:13px}}
 
+.c-coach{border:1px solid var(--cyan);border-radius:12px;background:#09212b;padding:12px;color:#e9f1ff;font-size:16px;line-height:1.45}.c-coach p{margin:6px 0}.c-coach button{color:var(--cyan);text-decoration:underline;min-height:32px;margin-right:14px}.c-coach strong{color:var(--amber)}.tutorial-focus{outline:3px solid var(--amber);outline-offset:3px}.c-coach .coach-meta{color:#9db0d3;font-size:14px}.ctrl.deck .c-coach{font-size:19px}.ctrl.deck .c-coach button{font-size:17px}
 </style>
 </head>
 <body>
@@ -1305,11 +1306,11 @@ class Controller {
   constructor(root, o) {
     this.root = root; this.o = o || {};
     this.s = null; this.agents = []; this.active = 0; this.drafts = {}; this.denied = null; this.status = 'connected';
-    this.toastTimer = null; this.sound = !!this.o.sound;
+    this.coachOpen = true; this.coachMoves = {}; this.coachTurn = null; this.toastTimer = null; this.sound = !!this.o.sound;
     root.classList.add('ctrl'); if (this.o.deck) root.classList.add('deck');
     root.innerHTML =
       (this.o.header ? '<div class="c-head"><div class="c-brand"><b>VAULT BREAKERS</b><span class="mono c-room"></span></div><div class="c-alert"><div class="bar"><i></i></div><span class="mono c-pct">0%</span></div><button class="c-mute" data-act="mute" aria-label="Mute"></button></div>' : '') +
-      '<div class="c-body"><div class="c-tabs"></div><div class="c-agent"></div>' + (this.o.board ? '' : '<div class="c-map"></div>') +
+      '<div class="c-body"><div class="c-coach"></div><div class="c-tabs"></div><div class="c-agent"></div>' + (this.o.board ? '' : '<div class="c-map"></div>') +
       '<div class="c-row"><div class="c-pad"></div><div class="c-cards"></div></div><div class="c-hint"></div></div>' +
       '<div class="c-foot"><button class="c-lock" data-act="lock"></button></div><div class="c-over"></div><div class="c-toast"></div>';
     this.q = sel => root.querySelector(sel);
@@ -1336,7 +1337,7 @@ class Controller {
   setState(s, events) {
     const fresh = !this.s || this.s.id !== s.id || this.s.turn !== s.turn;
     this.s = s;
-    if (fresh) { this.drafts = {}; this.clearPicker(); }
+    if (fresh) { this.coachMoves = {}; this.drafts = {}; this.clearPicker(); }
     if (this.ownBoard) this.board.update(s, { preview: s.phase === 'planning' });
     if (this.sound && events) {
       const k = events.map(e => e.kind);
@@ -1373,6 +1374,7 @@ class Controller {
   onClick(e) {
     const b = e.target.closest('[data-act]'); if (!b || !this.root.contains(b)) return;
     const act = b.dataset.act, s = this.s;
+    if (act === 'coach') { this.coachOpen = !this.coachOpen; this.render(); return; }
     if (act === 'mute') { Sfx.toggle(); this.updateMuteBtn(); return; }
     if (act === 'retry') { if (this.o.onRetry) this.o.onRetry(); return; }
     if (!s || s.phase !== 'planning') return;
@@ -1381,7 +1383,7 @@ class Controller {
     if (!this.agents.includes(i)) return;
     if (act === 'lock') { this.lockToggle(); return; }
     if (s.crew[i].locked) { this.toast('Plan locked. Tap UNLOCK to edit.'); return; }
-    if (act === 'dir') { d.dir = b.dataset.d; Sfx.click(); this.render(); return; }
+    if (act === 'dir') { this.coachMoves[i] = true; d.dir = b.dataset.d; Sfx.click(); this.render(); return; }
     if (act === 'card') {
       const k = +b.dataset.k, id = s.crew[i].hand[k];
       Sfx.click();
@@ -1405,6 +1407,48 @@ class Controller {
     } else this.toast('Connection lost. Reconnecting...');
   }
   send(i, plan) { return this.o.send({ type: 'LOCK_PLAN', agentId: AGENTS[i].id, plan }); }
+
+  renderCoach() {
+    const box = this.q('.c-coach'), s = this.s;
+    if (!s || !this.agents.length) { box.innerHTML = ''; box.hidden = true; return; }
+    box.hidden = false;
+    this.root.querySelectorAll('.tutorial-focus').forEach(el => el.classList.remove('tutorial-focus'));
+    if (!this.coachOpen) { box.innerHTML = '<button data-act="coach">Show live tutorial</button>'; return; }
+    const a = s.crew[this.active], d = this.draft(this.active);
+    let title, text, focus = '';
+    if (s.phase !== 'planning') {
+      title = s.phase === 'resolving' ? 'Watch the turn play out' : 'Mission finished';
+      text = s.phase === 'resolving' ? 'Gadgets fire first, then operatives move, then security patrols and checks for sightings.' : 'Use New Mission on the host to try again. The tutorial stays available.';
+    } else if (a.out) {
+      title = 'This operative escaped'; text = 'Choose another operative tab if you control more than one. Everyone must reach the green H airlock.'; focus = '.c-tabs';
+    } else if (a.locked) {
+      const waiting = s.crew.filter(c => !c.out && !c.locked).map(c => c.id);
+      title = 'Plan locked — waiting for the crew';
+      text = waiting.length ? 'Still planning: ' + waiting.join(', ') + '. Each needs a locked plan, even to HOLD. The turn plays automatically when everyone is ready. Tap the lock button again to edit before that.' : 'Everyone is ready. Watch the board as the turn resolves.';
+      focus = '.c-tabs';
+    } else if (!this.coachMoves[this.active] && !d.card) {
+      title = '1 · Choose a move for ' + a.id;
+      text = 'Tap UP, DOWN, LEFT or RIGHT on the direction pad below to plan one square. HOLD stays put. Tapping the map does not move you. Nothing moves until all four plans are locked.';
+      focus = '.c-pad';
+    } else if (d.card && GADGETS[d.card].tgt === true && !d.target) {
+      title = '2 · Aim your gadget'; text = GADGETS[d.card].desc + ' Tap a glowing tile on the map to choose its target. Tap the same card again to skip it. Gadgets fire before movement, from your current position.';
+      focus = '.c-cards';
+    } else {
+      title = '3 · Review, then LOCK PLAN';
+      const [dx,dy] = DIRS[d.dir], x = a.x + dx, y = a.y + dy;
+      const blocked = d.dir !== 'HOLD' && !passMap(s)(x,y) && d.card !== 'grapple';
+      text = 'Selected: ' + d.dir + (d.card ? ' + ' + GADGETS[d.card].name : ', no gadget (that is fine)') + '. ';
+      text += blocked ? 'A wall or board edge blocks this move. Choose another direction or HOLD. ' : '';
+      text += 'Check the guards’ cones, dashed next-step arrows and lasers before committing. Patrols move before detection, so an empty square is not a safety guarantee. Locking confirms this operative only; then plan the next tab.';
+      focus = '.c-lock';
+    }
+    let objective;
+    if (s.ex.open) objective = 'All relics secured: guide every operative to the green H airlock.';
+    else if (s.relics.some(r => r.st === 'sealed' && r.hk === a.i)) objective = 'You are hacking a sealed case. HOLD here for the next turn to finish and collect it.';
+    else objective = 'Reach a relic: FORGE cracks cases from an adjacent square; a CUTTER can crack one before you move onto it. Otherwise stand on a sealed case for two turns. Step onto a cracked case to collect it.';
+    box.innerHTML = '<b>LIVE TUTORIAL · ' + esc(title) + '</b><p>' + esc(text) + '</p><p class="coach-meta">' + esc(objective) + '</p><button data-act="coach">Hide tutorial</button>';
+    if (focus) { const el = this.q(focus); if(el) el.classList.add('tutorial-focus'); }
+  }
 
   /* ------------ rendering ------------ */
   render() {
@@ -1467,6 +1511,7 @@ class Controller {
     lk.className = 'c-lock' + (a.locked ? ' locked' : '');
     lk.disabled = !!a.out;
     lk.textContent = a.out ? 'EXTRACTED' : a.locked ? 'PLAN LOCKED · TAP TO EDIT' : 'LOCK PLAN';
+    this.renderCoach();
     this.board.svg.querySelectorAll('.crew').forEach(g => g.classList.toggle('focus', +g.dataset.i === i));
   }
 }
