@@ -1,0 +1,4315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>GRIDSHIFT · Pocket Playroom</title>
+<script src="https://cdn.jsdelivr.net/npm/peerjs@1.5.5/dist/peerjs.min.js"></script>
+<style>
+  :root {
+    --bg-canvas: #07090e;
+    --bg-panel: #0f1420;
+    --bg-card: #161d2e;
+    --bg-elevated: #1e283d;
+    --border-subtle: #283550;
+    --border-bright: #415680;
+    --text-main: #f1f5f9;
+    --text-muted: #94a3b8;
+    --text-dim: #64748b;
+
+    --crimson: #ef4444;
+    --cobalt: #3b82f6;
+    --amber: #f59e0b;
+    --emerald: #10b981;
+
+    --gold: #fbbf24;
+    --p1-color: #38bdf8;
+    --p2-color: #fb7185;
+  }
+
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    user-select: none;
+  }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Inter, sans-serif;
+    background: var(--bg-canvas);
+    color: var(--text-main);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow-x: hidden;
+  }
+
+  /* Header */
+  header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 12px 20px;
+    background: var(--bg-panel);
+    border-bottom: 1px solid var(--border-subtle);
+  }
+
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .brand-logo {
+    width: 34px;
+    height: 34px;
+    border-radius: 8px;
+    background: linear-gradient(135deg, var(--cobalt), var(--emerald));
+    display: grid;
+    place-items: center;
+    font-weight: 900;
+    font-size: 16px;
+    color: #fff;
+    box-shadow: 0 0 16px rgba(59, 130, 246, 0.35);
+  }
+
+  .brand h1 {
+    font-size: 18px;
+    letter-spacing: 1.5px;
+    font-weight: 800;
+  }
+
+  .brand span {
+    font-size: 11px;
+    color: var(--text-muted);
+    display: block;
+    letter-spacing: 0.4px;
+  }
+
+  .header-controls {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+  }
+
+  button, select, input {
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    border-radius: 8px;
+    border: 1px solid var(--border-subtle);
+    background: var(--bg-elevated);
+    color: var(--text-main);
+    padding: 7px 12px;
+    transition: all 0.15s ease;
+  }
+
+  input {
+    user-select: text;
+  }
+
+  button, select {
+    cursor: pointer;
+  }
+
+  button:hover:not(:disabled), select:hover {
+    border-color: var(--border-bright);
+    background: #26334d;
+  }
+
+  button:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+  }
+
+  .btn-primary {
+    background: linear-gradient(135deg, #2563eb, #0284c7);
+    border-color: #38bdf8;
+    color: #fff;
+  }
+  .btn-primary:hover:not(:disabled) {
+    filter: brightness(1.1);
+  }
+
+  .btn-emerald {
+    background: linear-gradient(135deg, #059669, #047857);
+    border-color: #34d399;
+    color: #fff;
+  }
+  .btn-emerald:hover:not(:disabled) {
+    filter: brightness(1.1);
+  }
+
+  .btn-purple {
+    background: linear-gradient(135deg, #7c3aed, #6d28d9);
+    border-color: #a78bfa;
+    color: #fff;
+  }
+  .btn-purple:hover:not(:disabled) {
+    filter: brightness(1.12);
+  }
+
+  .btn-tutorial {
+    background: linear-gradient(135deg, #d97706, #b45309);
+    border-color: var(--gold);
+    color: #fff;
+  }
+
+  .btn-gold {
+    background: linear-gradient(135deg, #eab308, #ca8a04);
+    border-color: #fef08a;
+    color: #090d16;
+    font-weight: 800;
+  }
+
+  /* Online Connection Bar */
+  .net-bar {
+    display: none;
+    background: linear-gradient(90deg, rgba(16, 185, 129, 0.15), rgba(59, 130, 246, 0.15));
+    border-bottom: 1px solid #34d399;
+    padding: 8px 20px;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+    font-size: 13px;
+  }
+
+  .net-bar.active {
+    display: flex;
+  }
+
+  .room-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: #090d16;
+    border: 1px solid var(--gold);
+    padding: 4px 10px;
+    border-radius: 99px;
+    font-weight: 800;
+    letter-spacing: 1.5px;
+    color: var(--gold);
+  }
+
+  /* Tutorial Coach Banner */
+  .tutorial-banner {
+    display: none;
+    background: linear-gradient(90deg, rgba(245, 158, 11, 0.16), rgba(37, 99, 235, 0.16));
+    border-bottom: 1px solid var(--gold);
+    padding: 12px 20px;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+
+  .tutorial-banner.active {
+    display: flex;
+  }
+
+  .tut-content {
+    flex: 1;
+    min-width: 280px;
+  }
+
+  .tut-badge {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    background: var(--gold);
+    color: #090d16;
+    padding: 2px 8px;
+    border-radius: 99px;
+    margin-bottom: 4px;
+  }
+
+  .tut-title {
+    font-size: 15px;
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 3px;
+  }
+
+  .tut-desc {
+    font-size: 13px;
+    color: #e2e8f0;
+    line-height: 1.45;
+  }
+
+  .tut-tip {
+    font-size: 12px;
+    color: var(--gold);
+    margin-top: 4px;
+  }
+
+  .tut-actions {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+
+  /* Main Arena Layout */
+  .arena {
+    display: grid;
+    grid-template-columns: 275px minmax(360px, 540px) 300px;
+    gap: 16px;
+    padding: 16px 20px;
+    max-width: 1270px;
+    width: 100%;
+    margin: 0 auto;
+    flex: 1;
+    align-items: start;
+  }
+
+  @media (max-width: 1080px) {
+    .arena {
+      grid-template-columns: 1fr;
+      max-width: 640px;
+    }
+  }
+
+  .panel {
+    background: var(--bg-panel);
+    border: 1px solid var(--border-subtle);
+    border-radius: 14px;
+    padding: 14px;
+  }
+
+  .panel-title {
+    font-size: 12px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--text-muted);
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  /* Scoreboard & Turn Indicator */
+  .score-box {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+
+  .score-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-subtle);
+    border-radius: 10px;
+    padding: 10px;
+    text-align: center;
+    position: relative;
+  }
+
+  .score-card.active-turn {
+    border-color: var(--gold);
+    box-shadow: 0 0 14px rgba(251, 191, 36, 0.25);
+  }
+
+  .score-label {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .score-val {
+    font-size: 26px;
+    font-weight: 900;
+    margin: 2px 0;
+  }
+
+  .score-sub {
+    font-size: 11px;
+    color: var(--text-muted);
+  }
+
+  .status-banner {
+    background: var(--bg-elevated);
+    border: 1px solid var(--border-bright);
+    border-radius: 10px;
+    padding: 10px 12px;
+    font-size: 13px;
+    line-height: 1.4;
+    margin-bottom: 12px;
+    min-height: 54px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+  }
+
+  .status-banner.targeting {
+    border-color: var(--gold);
+    background: rgba(245, 158, 11, 0.14);
+    color: #fef3c7;
+  }
+
+  /* 6x6 Grid Board */
+  .board-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+  }
+
+  .grid-board {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 7px;
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    background: #0b0f19;
+    padding: 10px;
+    border-radius: 14px;
+    border: 1px solid var(--border-subtle);
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.65);
+  }
+
+  .tile {
+    position: relative;
+    border-radius: 9px;
+    background: var(--bg-card);
+    border: 2px solid var(--border-subtle);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 5px;
+    cursor: default;
+    transition: transform 0.12s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+    overflow: hidden;
+  }
+
+  .tile[data-color="crimson"] { border-color: rgba(239, 68, 68, 0.45); background: linear-gradient(160deg, rgba(239,68,68,0.12), var(--bg-card)); }
+  .tile[data-color="cobalt"]  { border-color: rgba(59, 130, 246, 0.45); background: linear-gradient(160deg, rgba(59,130,246,0.12), var(--bg-card)); }
+  .tile[data-color="amber"]   { border-color: rgba(245, 158, 11, 0.45); background: linear-gradient(160deg, rgba(245,158,11,0.12), var(--bg-card)); }
+  .tile[data-color="emerald"] { border-color: rgba(16, 185, 129, 0.45); background: linear-gradient(160deg, rgba(16,185,129,0.12), var(--bg-card)); }
+
+  .tile-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    z-index: 2;
+  }
+
+  .color-tag {
+    font-size: 9px;
+    font-weight: 800;
+    padding: 1px 4px;
+    border-radius: 4px;
+    letter-spacing: 0.4px;
+    color: #fff;
+  }
+  .tag-crimson { background: var(--crimson); }
+  .tag-cobalt  { background: var(--cobalt); }
+  .tag-amber   { background: var(--amber); color: #090d16; }
+  .tag-emerald { background: var(--emerald); color: #090d16; }
+
+  .tile-icon {
+    width: 16px;
+    height: 16px;
+    opacity: 0.9;
+  }
+
+  .tile-center-icon {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    opacity: 0.25;
+    pointer-events: none;
+  }
+
+  .tile-center-icon svg {
+    width: 30px;
+    height: 30px;
+  }
+
+  /* Valid Move & Overdrive Highlights */
+  .tile.valid-standard {
+    cursor: pointer;
+    border-color: #38bdf8 !important;
+    box-shadow: inset 0 0 12px rgba(56, 189, 248, 0.35), 0 0 10px rgba(56, 189, 248, 0.35);
+    transform: translateY(-1px);
+  }
+
+  .tile.valid-overdrive {
+    cursor: pointer;
+    border-color: var(--gold) !important;
+    box-shadow: inset 0 0 14px rgba(251, 191, 36, 0.45), 0 0 14px rgba(251, 191, 36, 0.55);
+    transform: translateY(-2px);
+  }
+
+  .tile.valid-overdrive::after {
+    content: "OVERDRIVE";
+    position: absolute;
+    bottom: 2px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--gold);
+    color: #090d16;
+    font-size: 8px;
+    font-weight: 900;
+    padding: 1px 4px;
+    border-radius: 3px;
+    z-index: 5;
+    letter-spacing: 0.3px;
+  }
+
+  .tile.valid-ability {
+    cursor: pointer;
+    border-color: #a855f7 !important;
+    box-shadow: inset 0 0 14px rgba(168, 85, 247, 0.45), 0 0 14px rgba(168, 85, 247, 0.55);
+    animation: pulsePurple 1.1s infinite;
+  }
+
+  .tile.pattern-preview {
+    outline: 3px solid #22c55e;
+    outline-offset: -3px;
+    box-shadow: 0 0 16px rgba(34, 197, 94, 0.65);
+  }
+
+  @keyframes pulsePurple {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.03); }
+  }
+
+  /* Tokens on Board */
+  .token {
+    position: absolute;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    top: 56%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 3;
+    display: grid;
+    place-items: center;
+    font-size: 11px;
+    font-weight: 900;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.65);
+    transition: all 0.2s ease;
+  }
+
+  .token.p1 {
+    background: radial-gradient(circle at 30% 30%, #7dd3fc, #0284c7);
+    border: 2px solid #e0f2fe;
+    color: #082f49;
+  }
+
+  .token.p2 {
+    background: radial-gradient(circle at 30% 30%, #fda4af, #e11d48);
+    border: 2px solid #ffe4e6;
+    color: #4c0519;
+  }
+
+  .token.shielded {
+    box-shadow: 0 0 0 3px #38bdf8, 0 0 14px #38bdf8;
+  }
+
+  .token.locked {
+    border-radius: 7px;
+    box-shadow: 0 0 0 3px var(--gold), 0 4px 12px rgba(0, 0, 0, 0.8);
+  }
+
+  /* Player Hand */
+  .hand-section {
+    width: 100%;
+    margin-top: 14px;
+    position: relative;
+  }
+
+  .hand-cards {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+  }
+
+  .hand-card {
+    background: var(--bg-card);
+    border: 2px solid var(--border-subtle);
+    border-radius: 12px;
+    padding: 10px 8px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    min-height: 118px;
+    position: relative;
+  }
+
+  .hand-card:hover:not(.disabled-card) {
+    transform: translateY(-4px);
+    border-color: var(--border-bright);
+  }
+
+  .hand-card.disabled-card {
+    opacity: 0.65;
+    cursor: not-allowed;
+  }
+
+  .hand-card.selected {
+    transform: translateY(-6px);
+    border-color: var(--gold) !important;
+    box-shadow: 0 8px 20px rgba(251, 191, 36, 0.3);
+  }
+
+  .hand-card.tut-focus {
+    border-color: var(--gold) !important;
+    box-shadow: 0 0 18px rgba(251, 191, 36, 0.65);
+    animation: pulseCard 1.2s infinite;
+  }
+
+  @keyframes pulseCard {
+    0%, 100% { transform: translateY(-2px); }
+    50% { transform: translateY(-6px); }
+  }
+
+  .hc-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .hc-icon {
+    margin: 6px auto;
+    width: 28px;
+    height: 28px;
+  }
+
+  .hc-name {
+    font-size: 11px;
+    font-weight: 800;
+    text-align: center;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+  }
+
+  .hc-ability {
+    font-size: 10px;
+    color: var(--text-muted);
+    text-align: center;
+    margin-top: 2px;
+    line-height: 1.25;
+  }
+
+  /* Pass-and-Play Privacy Curtain */
+  .pass-curtain {
+    position: fixed;
+    inset: 0;
+    background: rgba(7, 9, 14, 0.96);
+    backdrop-filter: blur(8px);
+    z-index: 90;
+    display: none;
+    place-items: center;
+    padding: 20px;
+    text-align: center;
+  }
+
+  .pass-curtain.active {
+    display: grid;
+  }
+
+  .curtain-box {
+    background: var(--bg-panel);
+    border: 2px solid var(--gold);
+    border-radius: 18px;
+    padding: 28px 32px;
+    max-width: 440px;
+    width: 100%;
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.9);
+  }
+
+  .curtain-box h2 {
+    font-size: 22px;
+    margin-bottom: 8px;
+  }
+
+  .curtain-box p {
+    font-size: 14px;
+    color: var(--text-muted);
+    margin-bottom: 20px;
+    line-height: 1.5;
+  }
+
+  /* Pattern Market (Right Column) */
+  .pattern-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .pattern-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-subtle);
+    border-radius: 11px;
+    padding: 10px;
+    transition: all 0.15s ease;
+  }
+
+  .pattern-card.scoreable {
+    border-color: #22c55e;
+    background: linear-gradient(135deg, rgba(34, 197, 94, 0.14), var(--bg-card));
+    box-shadow: 0 0 16px rgba(34, 197, 94, 0.25);
+  }
+
+  .pat-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 6px;
+  }
+
+  .pat-name {
+    font-size: 13px;
+    font-weight: 800;
+  }
+
+  .pat-vp {
+    background: rgba(251, 191, 36, 0.2);
+    color: var(--gold);
+    border: 1px solid rgba(251, 191, 36, 0.45);
+    font-size: 11px;
+    font-weight: 800;
+    padding: 2px 7px;
+    border-radius: 6px;
+  }
+
+  .pat-body {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .mini-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 14px);
+    grid-template-rows: repeat(4, 14px);
+    gap: 2px;
+    background: #090d16;
+    padding: 4px;
+    border-radius: 6px;
+    border: 1px solid var(--border-subtle);
+  }
+
+  .mini-cell {
+    border-radius: 2px;
+    background: #182032;
+  }
+
+  .mini-cell.filled {
+    background: #38bdf8;
+    box-shadow: 0 0 4px rgba(56, 189, 248, 0.6);
+  }
+
+  .pat-info {
+    flex: 1;
+    font-size: 11px;
+    color: var(--text-muted);
+    line-height: 1.35;
+  }
+
+  .pat-actions {
+    display: flex;
+    gap: 6px;
+    margin-top: 8px;
+  }
+
+  .pat-actions button {
+    font-size: 11px;
+    padding: 5px 8px;
+  }
+
+  /* Match Log & Reference Legend */
+  .legend-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid var(--border-subtle);
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+
+  .dot-sample {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    display: inline-block;
+  }
+
+  .log-box {
+    max-height: 170px;
+    overflow-y: auto;
+    font-size: 12px;
+    color: var(--text-muted);
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    padding-right: 4px;
+  }
+
+  .log-entry {
+    padding: 5px 8px;
+    background: var(--bg-card);
+    border-radius: 6px;
+    border-left: 3px solid var(--border-bright);
+    line-height: 1.35;
+  }
+  .log-entry.p1-log { border-left-color: var(--p1-color); }
+  .log-entry.p2-log { border-left-color: var(--p2-color); }
+  .log-entry.sys-log { border-left-color: var(--gold); color: #fde68a; }
+
+  /* Modals */
+  .modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(3, 6, 12, 0.86);
+    backdrop-filter: blur(4px);
+    display: none;
+    place-items: center;
+    z-index: 100;
+    padding: 16px;
+  }
+
+  .modal-backdrop.open {
+    display: grid;
+  }
+
+  .modal {
+    background: var(--bg-panel);
+    border: 1px solid var(--border-bright);
+    border-radius: 16px;
+    max-width: 820px;
+    width: 100%;
+    max-height: 92vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.85);
+  }
+
+  .modal-header {
+    padding: 14px 20px;
+    border-bottom: 1px solid var(--border-subtle);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+  }
+
+  .modal-header h2 {
+    font-size: 17px;
+    font-weight: 800;
+  }
+
+  .modal-tabs {
+    display: flex;
+    gap: 6px;
+    padding: 10px 20px;
+    background: #0b0f19;
+    border-bottom: 1px solid var(--border-subtle);
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .tab-btn {
+    font-size: 12px;
+    padding: 6px 10px;
+  }
+
+  .tab-btn.active {
+    background: var(--cobalt);
+    border-color: #60a5fa;
+    color: #fff;
+  }
+
+  .modal-body {
+    padding: 16px 20px;
+    overflow-y: auto;
+    font-size: 13.5px;
+    line-height: 1.5;
+    color: #e2e8f0;
+  }
+
+  .modal-footer {
+    padding: 12px 20px;
+    background: #0b0f19;
+    border-top: 1px solid var(--border-subtle);
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+  }
+
+  .rule-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+    gap: 12px;
+    margin: 12px 0;
+  }
+
+  .rule-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-subtle);
+    border-radius: 10px;
+    padding: 12px;
+  }
+
+  .rule-card h4 {
+    font-size: 13px;
+    color: var(--gold);
+    margin-bottom: 4px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .scout-choices {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    margin-top: 14px;
+  }
+
+  .lobby-split {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-top: 10px;
+  }
+
+  @media (max-width: 640px) {
+    .lobby-split {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .code-display {
+    font-size: 28px;
+    font-weight: 900;
+    letter-spacing: 5px;
+    color: var(--gold);
+    background: #090d16;
+    border: 1px dashed var(--gold);
+    border-radius: 10px;
+    padding: 12px;
+    text-align: center;
+    margin: 10px 0;
+  }
+
+  .code-input {
+    width: 100%;
+    font-size: 22px;
+    font-weight: 900;
+    letter-spacing: 4px;
+    text-align: center;
+    text-transform: uppercase;
+    padding: 10px;
+    background: #090d16;
+    border: 1px solid var(--border-bright);
+    color: #fff;
+    margin: 10px 0;
+  }
+
+  /* Custom Deck Builder Styles */
+  .db-toolbar-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 10px;
+  }
+
+  .db-name-box {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex: 1;
+    min-width: 240px;
+  }
+
+  .db-name-input {
+    background: #090d16;
+    border: 1px solid var(--border-bright);
+    color: #fff;
+    font-weight: 700;
+    padding: 6px 10px;
+    border-radius: 8px;
+    flex: 1;
+    min-width: 150px;
+  }
+
+  .db-share-panel {
+    background: #0b0f19;
+    border: 1px solid var(--border-subtle);
+    border-radius: 11px;
+    padding: 10px 12px;
+    margin-bottom: 12px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+
+  @media (max-width: 720px) {
+    .db-share-panel {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .db-share-group {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+
+  .db-share-label {
+    font-size: 11px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    color: var(--text-muted);
+    display: flex;
+    justify-content: space-between;
+  }
+
+  .db-share-row {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+  }
+
+  .db-code-field {
+    flex: 1;
+    background: var(--bg-card);
+    border: 1px solid var(--border-subtle);
+    color: var(--gold);
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    font-size: 12px;
+    font-weight: 700;
+    padding: 6px 9px;
+    border-radius: 7px;
+    min-width: 0;
+  }
+
+  .db-import-field {
+    flex: 1;
+    background: var(--bg-card);
+    border: 1px solid var(--border-bright);
+    color: #fff;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    font-size: 12px;
+    padding: 6px 9px;
+    border-radius: 7px;
+    min-width: 0;
+  }
+
+  .db-telemetry {
+    background: #0b0f19;
+    border: 1px solid var(--border-subtle);
+    border-radius: 12px;
+    padding: 10px 12px;
+    margin-bottom: 12px;
+  }
+
+  .db-progress-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 8px;
+  }
+
+  .db-bar-track {
+    flex: 1;
+    height: 10px;
+    background: var(--bg-card);
+    border-radius: 99px;
+    overflow: hidden;
+    border: 1px solid var(--border-subtle);
+  }
+
+  .db-bar-fill {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, var(--cobalt), var(--emerald));
+    transition: width 0.2s ease;
+  }
+
+  .db-bar-fill.complete {
+    background: linear-gradient(90deg, #22c55e, var(--gold));
+  }
+
+  .db-stat-pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    font-size: 11px;
+  }
+
+  .stat-pill {
+    background: var(--bg-card);
+    border: 1px solid var(--border-subtle);
+    padding: 3px 8px;
+    border-radius: 6px;
+    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .db-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 9px;
+  }
+
+  @media (max-width: 720px) {
+    .db-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  .db-card {
+    background: var(--bg-card);
+    border: 2px solid var(--border-subtle);
+    border-radius: 11px;
+    padding: 8px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 6px;
+    transition: transform 0.12s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+  }
+
+  .db-card.has-copies {
+    box-shadow: 0 0 14px rgba(56, 189, 248, 0.22);
+  }
+
+  .db-card.maxed-copies {
+    border-color: var(--gold) !important;
+    box-shadow: 0 0 14px rgba(251, 191, 36, 0.28);
+  }
+
+  .db-card-main {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+  }
+
+  .db-card-icon {
+    width: 24px;
+    height: 24px;
+    flex-shrink: 0;
+  }
+
+  .db-card-info {
+    min-width: 0;
+  }
+
+  .db-card-title {
+    font-size: 11.5px;
+    font-weight: 800;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .db-card-sub {
+    font-size: 10px;
+    color: var(--text-muted);
+  }
+
+  .db-stepper {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: #0b0f19;
+    border-radius: 7px;
+    padding: 3px 6px;
+    border: 1px solid var(--border-subtle);
+  }
+
+  .db-stepper button {
+    padding: 2px 9px;
+    font-size: 13px;
+    font-weight: 900;
+    border-radius: 5px;
+  }
+
+  .db-copy-count {
+    font-size: 12px;
+    font-weight: 800;
+    color: var(--text-main);
+  }
+</style>
+<style>
+/* ===== v3 visual layer ===== */
+/* ===== GRIDSHIFT v3 look ===== */
+body {
+  background: radial-gradient(1200px 620px at 50% -8%, #13213d 0%, #0a0f1b 46%, #07090e 100%) fixed;
+}
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background-image:
+    linear-gradient(rgba(148, 163, 184, 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(148, 163, 184, 0.035) 1px, transparent 1px);
+  background-size: 36px 36px;
+}
+
+
+header {
+  position: sticky;
+  top: 0;
+  z-index: 60;
+  background: rgba(13, 18, 30, 0.88);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.45);
+}
+.net-bar, .arena { position: relative; z-index: 1; }
+@media (max-width: 720px) { header { position: static; } }
+
+.brand-logo {
+  background: linear-gradient(135deg, #2563eb, #10b981);
+  box-shadow: 0 0 18px rgba(59, 130, 246, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+}
+.brand h1 { letter-spacing: 3px; }
+
+.arena { grid-template-columns: 280px minmax(380px, 560px) 300px; max-width: 1300px; }
+.col-left { display: flex; flex-direction: column; gap: 16px; }
+@media (max-width: 1080px) {
+  .arena { grid-template-columns: minmax(0, 1fr); max-width: 640px; }
+  .arena > *, .col-left > * { min-width: 0; }
+  .col-left { display: contents; }
+  #statusPanel { order: 1; }
+  .board-wrap { order: 2; }
+  #marketPanel { order: 3; }
+  #logPanel { order: 4; }
+}
+@media (max-width: 560px) { .arena { padding: 10px 8px; gap: 12px; } }
+
+.panel {
+  background: linear-gradient(180deg, #131b2e, #0e1421);
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.38), inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+/* Scoreboard */
+.score-card { text-align: left; padding: 10px 10px 11px; transition: border-color .25s, box-shadow .25s; }
+.score-head { display: flex; justify-content: space-between; align-items: center; gap: 6px; }
+.score-val { font-size: 30px; line-height: 1; margin: 5px 0 8px; }
+.turn-chip {
+  display: none;
+  font-size: 10px; font-weight: 800; letter-spacing: .6px; text-transform: uppercase;
+  padding: 2px 7px; border-radius: 99px; background: var(--gold); color: #090d16; white-space: nowrap;
+}
+.score-card.active-turn .turn-chip { display: inline-block; }
+.vp-track { display: grid; grid-template-columns: repeat(10, 1fr); gap: 2px; margin-bottom: 5px; }
+.vp-seg { height: 8px; border-radius: 2px; background: #1e283d; transition: background .3s, box-shadow .3s; }
+.vp-seg:nth-child(10) { outline: 1px solid rgba(251, 191, 36, 0.55); }
+.vp-seg.on-p1 { background: var(--p1-color); box-shadow: 0 0 7px rgba(56, 189, 248, 0.65); }
+.vp-seg.on-p2 { background: var(--p2-color); box-shadow: 0 0 7px rgba(251, 113, 133, 0.65); }
+
+/* Board */
+.board-wrap { width: 100%; }
+.board-frame { position: relative; width: 100%; }
+.grid-board {
+  gap: 6px; padding: 10px;
+  background: linear-gradient(145deg, #0e1526, #090d16);
+  transition: border-color .3s, box-shadow .3s;
+}
+.board-wrap.turn-p1 .grid-board {
+  border-color: rgba(56, 189, 248, 0.55);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.65), 0 0 30px rgba(56, 189, 248, 0.13);
+}
+.board-wrap.turn-p2 .grid-board {
+  border-color: rgba(251, 113, 133, 0.55);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.65), 0 0 30px rgba(251, 113, 133, 0.13);
+}
+.board-wrap.fx-overdrive .grid-board { animation: fxGold .65s ease-out; }
+.board-wrap.fx-score .grid-board { animation: fxGreen .9s ease-out; }
+@keyframes fxGold { 0% { box-shadow: 0 0 0 0 rgba(251, 191, 36, .75); } 100% { box-shadow: 0 0 0 26px rgba(251, 191, 36, 0); } }
+@keyframes fxGreen { 0% { box-shadow: 0 0 0 0 rgba(34, 197, 94, .75); } 100% { box-shadow: 0 0 0 30px rgba(34, 197, 94, 0); } }
+
+.tile[data-color] {
+  --tc: #64748b;
+  border-radius: 10px;
+  border: 1.5px solid color-mix(in srgb, var(--tc) 42%, #1a2335);
+  background: radial-gradient(circle at 28% 18%, color-mix(in srgb, var(--tc) 24%, #151d2f), color-mix(in srgb, var(--tc) 7%, #0f1523));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.07), 0 2px 6px rgba(0, 0, 0, 0.4);
+}
+.tile-icon svg { width: 100%; height: 100%; }
+.tile-center-icon { opacity: 0.3; }
+.tile-center-icon svg { width: 56%; height: auto; aspect-ratio: 1; filter: drop-shadow(0 0 8px color-mix(in srgb, currentColor 55%, transparent)); }
+
+.tile.valid-standard {
+  border-color: #38bdf8 !important;
+  box-shadow: inset 0 0 0 1px rgba(56, 189, 248, .85), 0 0 14px rgba(56, 189, 248, .5) !important;
+  animation: pulseBlue 1.4s ease-in-out infinite;
+}
+.tile.valid-overdrive {
+  border-color: var(--gold) !important;
+  box-shadow: inset 0 0 0 1px rgba(251, 191, 36, .9), 0 0 18px rgba(251, 191, 36, .65) !important;
+  animation: pulseGold 1.1s ease-in-out infinite;
+}
+@keyframes pulseBlue { 0%, 100% { transform: translateY(-1px); } 50% { transform: translateY(-3px); } }
+@keyframes pulseGold { 0%, 100% { transform: translateY(-2px) scale(1); } 50% { transform: translateY(-4px) scale(1.025); } }
+.tile.valid-overdrive::after { border-radius: 4px; box-shadow: 0 0 8px rgba(251, 191, 36, .8); }
+.tile.tut-target { outline: 2.5px dashed var(--gold); outline-offset: 2px; animation: tutPulse 1s ease-in-out infinite; }
+@keyframes tutPulse { 0%, 100% { outline-color: rgba(251, 191, 36, .35); } 50% { outline-color: rgba(251, 191, 36, 1); } }
+.tile.pattern-preview { outline: 3px solid #22c55e; outline-offset: -3px; box-shadow: 0 0 18px rgba(34, 197, 94, .7); }
+.tile.pattern-near { outline: 2.5px dashed #22c55e; outline-offset: -3px; box-shadow: 0 0 12px rgba(34, 197, 94, .4); }
+
+/* Tokens */
+.token {
+  width: 64%; height: auto; aspect-ratio: 1; top: 56%;
+  border: 2px solid rgba(255, 255, 255, 0.55);
+  box-shadow: 0 6px 10px rgba(0, 0, 0, 0.6), inset 0 -4px 6px rgba(0, 0, 0, 0.25), inset 0 3px 4px rgba(255, 255, 255, 0.45);
+}
+.token svg { width: 56%; height: 56%; }
+.token.p1 { background: radial-gradient(circle at 32% 28%, #bae6fd, #38bdf8 46%, #0369a1); color: #082f49; }
+.token.p2 { background: radial-gradient(circle at 32% 28%, #fecdd3, #fb7185 46%, #be123c); color: #4c0519; }
+.token.shielded { box-shadow: 0 0 0 3px #0b0f19, 0 0 0 5px #38bdf8, 0 0 16px rgba(56, 189, 248, 0.75); }
+.token.p2.shielded { box-shadow: 0 0 0 3px #0b0f19, 0 0 0 5px #fb7185, 0 0 16px rgba(251, 113, 133, 0.75); }
+.token.locked { border-radius: 9px; border: 2.5px solid var(--gold); box-shadow: 0 0 0 2px rgba(251, 191, 36, 0.22), 0 6px 12px rgba(0, 0, 0, 0.8); }
+.token.pop { animation: tokenDrop .38s cubic-bezier(.2, 1.4, .4, 1); }
+@keyframes tokenDrop {
+  0% { transform: translate(-50%, -190%) scale(1.3); opacity: 0; }
+  60% { opacity: 1; }
+  100% { transform: translate(-50%, -50%) scale(1); }
+}
+
+/* End of match overlay */
+.end-banner {
+  position: absolute; inset: 0; display: none; place-items: center;
+  background: rgba(7, 9, 14, 0.74); backdrop-filter: blur(3px);
+  border-radius: 14px; z-index: 20; padding: 16px; text-align: center;
+}
+.end-banner.show { display: grid; }
+.end-card {
+  background: #121a2b; border: 1.5px solid var(--gold); border-radius: 16px; padding: 22px 26px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.85), 0 0 40px rgba(251, 191, 36, 0.2);
+}
+.end-kicker { font-size: 11px; font-weight: 800; letter-spacing: 1.2px; text-transform: uppercase; color: var(--gold); }
+.end-card h2 { font-size: 24px; margin: 6px 0 4px; }
+.end-card p { color: var(--text-muted); margin-bottom: 14px; font-size: 14px; }
+.end-card .btns { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; }
+
+/* Hand */
+.hand-card {
+  --cc: #64748b; padding: 0; overflow: hidden; min-height: 134px;
+  background: linear-gradient(180deg, color-mix(in srgb, var(--cc) 17%, #182034), #121929);
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.45);
+}
+.hc-top { padding: 5px 7px; background: color-mix(in srgb, var(--cc) 26%, #121929); }
+.hc-icon { width: 38px; height: 38px; margin: 8px auto 4px; filter: drop-shadow(0 0 8px color-mix(in srgb, var(--cc) 65%, transparent)); }
+.hc-icon svg { width: 100%; height: 100%; }
+.hand-card > div:last-child { padding: 0 6px 8px; }
+.hand-card.selected { box-shadow: 0 0 0 2px var(--gold), 0 10px 22px rgba(251, 191, 36, 0.35); }
+.hand-card.deal { animation: dealIn .4s cubic-bezier(.2, .9, .3, 1) backwards; animation-delay: calc(var(--i, 0) * 70ms); }
+@keyframes dealIn { from { transform: translateY(28px) rotate(-4deg); opacity: 0; } to { transform: none; opacity: 1; } }
+@media (max-width: 560px) {
+  .hand-cards { display: flex; overflow-x: auto; scroll-snap-type: x proximity; padding: 8px 2px 10px; }
+  .hand-card { min-width: 116px; scroll-snap-align: center; }
+  .tile.valid-overdrive::after { content: "OD"; }
+  .color-tag { font-size: 8px; }
+}
+
+/* Pattern market */
+.pattern-card { padding: 11px; border-radius: 12px; background: linear-gradient(180deg, #19233b, #131b2e); }
+.mini-grid { grid-template-columns: repeat(4, 15px); grid-template-rows: repeat(4, 15px); gap: 3px; padding: 5px; }
+.mini-cell.filled { background: linear-gradient(135deg, #7dd3fc, #38bdf8); box-shadow: 0 0 6px rgba(56, 189, 248, 0.55); }
+.pat-progress { display: flex; align-items: center; gap: 8px; margin-top: 8px; }
+.pat-chip { padding: 2px 8px; border-radius: 99px; font-weight: 800; font-size: 10.5px; text-transform: uppercase; letter-spacing: .4px; white-space: nowrap; }
+.chip-ready { background: rgba(34, 197, 94, .2); color: #86efac; border: 1px solid #22c55e; }
+.chip-near { background: rgba(251, 191, 36, .14); color: #fde68a; border: 1px solid rgba(251, 191, 36, .5); }
+.chip-far { background: #182032; color: var(--text-dim); border: 1px solid var(--border-subtle); }
+.pat-steps { display: flex; gap: 3px; flex: 1; }
+.pat-steps i { flex: 1; max-width: 16px; height: 5px; border-radius: 2px; background: #1e283d; }
+.pat-steps i.on { background: #22c55e; box-shadow: 0 0 5px rgba(34, 197, 94, .6); }
+.btn-claim.tut-pulse { animation: pulseGold 1s ease-in-out infinite; box-shadow: 0 0 16px rgba(251, 191, 36, .8); }
+
+/* Tutorial coach banner (in-flow, never covers the board or hand) */
+.tutorial-banner {
+  position: relative; margin: 12px 20px 0; border: 1px solid var(--gold); border-radius: 14px;
+  background: linear-gradient(90deg, rgba(245,158,11,.14), rgba(37,99,235,.14)), rgba(14,20,33,.97);
+  box-shadow: 0 10px 30px rgba(0,0,0,.5), 0 0 24px rgba(251,191,36,.12);
+  padding: 10px 16px;
+}
+.tutorial-banner .tut-desc { font-size: 13px; }
+.tutorial-banner .tut-tip { margin-top: 3px; }
+.tut-dots { display: flex; gap: 5px; margin-top: 8px; }
+.tut-dots i { width: 22px; height: 4px; border-radius: 2px; background: #283550; }
+.tut-dots i.done { background: var(--gold); }
+.tut-dots i.now { background: var(--gold); box-shadow: 0 0 8px rgba(251, 191, 36, .8); }
+.tut-actions { flex-wrap: wrap; }
+
+/* Toast and confetti */
+.toast {
+  position: fixed; top: 78px; left: 50%; transform: translate(-50%, -20px); opacity: 0; pointer-events: none;
+  background: #1e283d; border: 1px solid var(--gold); color: #fde68a; padding: 9px 18px; border-radius: 99px;
+  font-weight: 700; font-size: 13px; z-index: 120; transition: all .3s; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+  max-width: calc(100% - 24px); text-align: center;
+}
+.toast.show { opacity: 1; transform: translate(-50%, 0); }
+#fxCanvas { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 110; }
+
+/* Modals and rules reference */
+.modal { background: linear-gradient(180deg, #141c2f, #0e1421); }
+.flow-steps { display: grid; gap: 8px; margin: 12px 0; }
+.flow-step { display: flex; gap: 12px; align-items: flex-start; background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: 10px; padding: 10px 12px; }
+.flow-step b { flex: 0 0 28px; height: 28px; border-radius: 8px; background: var(--gold); color: #090d16; display: grid; place-items: center; font-weight: 900; }
+.flow-step h4 { font-size: 13px; color: var(--gold); margin-bottom: 2px; }
+.face {
+  --cc: #3b82f6; border: 2px solid var(--cc); border-radius: 12px; padding: 8px 10px 10px; text-align: center;
+  background: linear-gradient(180deg, color-mix(in srgb, var(--cc) 18%, #182034), #121929);
+}
+.face-top { display: flex; justify-content: space-between; align-items: center; }
+.face-icon { width: 44px; height: 44px; margin: 8px auto 4px; filter: drop-shadow(0 0 8px color-mix(in srgb, var(--cc) 65%, transparent)); }
+.face-icon svg { width: 100%; height: 100%; }
+.face-name { font-weight: 800; text-transform: uppercase; letter-spacing: .5px; font-size: 12px; }
+.demo-tile { position: relative; width: 64px; height: 64px; border-radius: 10px; background: #0b0f19; border: 1.5px solid var(--border-subtle); margin-bottom: 8px; }
+.rule-card .pat-actions { margin-top: 8px; }
+
+@media (prefers-reduced-motion: reduce) {
+  * { animation: none !important; transition: none !important; }
+}
+
+.panel-title span:last-child { white-space: nowrap; }
+#deckCounter { font-size: 10px; letter-spacing: .3px; }
+
+</style>
+<link rel="canonical" href="https://pocketplayroom.com/games/gridshift/">
+<meta name="description" content="Match colors and icons, claim patterns, and race to 10 victory points. Play solo, pass and play, or online.">
+<style>
+.playroom-return{display:block;position:relative;z-index:5;min-height:44px;padding:12px 16px;text-align:center;background:#0b1422;color:#f4dfb9;font:600 14px system-ui;text-decoration:none;border-bottom:1px solid #283550}
+.playroom-return:focus-visible{outline:3px solid #f4dfb9;outline-offset:-4px}
+</style></head>
+<body><a class="playroom-return" href="../../families-and-games.html">Back to Families &amp; Games</a>
+
+<header>
+  <div class="brand">
+    <div class="brand-logo"><svg viewBox="0 0 24 24" width="26" height="26" aria-hidden="true"><rect x="2" y="2" width="9" height="9" rx="2" fill="#38bdf8"/><rect x="13" y="2" width="9" height="9" rx="2" fill="#fbbf24"/><rect x="2" y="13" width="9" height="9" rx="2" fill="#fb7185"/><rect x="13" y="13" width="9" height="9" rx="2" fill="#10b981"/></svg></div>
+    <div>
+      <h1>GRIDSHIFT</h1>
+      <span>Tactical grid card game</span>
+    </div>
+  </div>
+  <div class="header-controls">
+    <button class="btn-tutorial" id="btnStartTutorial">Tutorial</button>
+    <button id="btnOpenRules">? Rules</button>
+    <button class="btn-purple" id="btnOpenDeckBuilder">Deck Builder</button>
+    <select id="modeSelect" title="Select Game Mode">
+      <option value="ai">Mode: Solo vs AI</option>
+      <option value="local">Mode: 2P Pass & Play</option>
+      <option value="online">Mode: Online (Room Code)</option>
+    </select>
+    <select id="deckSelect" title="Choose Player 1 Deck"></select>
+    <select id="p2DeckSelect" title="Choose Player 2 Deck" style="display:none;"></select>
+    <button class="btn-primary" id="btnNewGame">Start / Lobby</button>
+    <button id="btnToggleAudio" title="Toggle Web Audio sound effects">Sound: ON</button>
+  </div>
+</header>
+
+<!-- Online P2P Connection Status Bar -->
+<div class="net-bar" id="netBar">
+  <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+    <span class="room-pill">ROOM: <span id="netRoomCodeDisplay">----</span></span>
+    <button id="btnCopyRoomCode" style="padding:4px 9px; font-size:11px;">Copy Code</button>
+    <span id="netStatusLabel" style="color:#a7f3d0; font-weight:600;">Connected</span>
+  </div>
+  <div style="display:flex; gap:8px;">
+    <button class="btn-emerald" id="btnOnlineRematch" style="display:none; padding:5px 10px; font-size:12px;">Rematch</button>
+    <button id="btnDisconnectNet" style="padding:5px 10px; font-size:12px;">Leave Room</button>
+  </div>
+</div>
+
+<!-- Guided Interactive Tutorial Banner -->
+<div class="tutorial-banner" id="tutorialBanner">
+  <div class="tut-content">
+    <span class="tut-badge" id="tutStepBadge">TUTORIAL • STEP 1 OF 6</span>
+    <div class="tut-title" id="tutTitle">Welcome to GRIDSHIFT</div>
+    <div class="tut-desc" id="tutDesc">Learn Standard Plays, Overdrive Exact Matches, and Pattern Locking in 60 seconds.</div>
+    <div class="tut-tip" id="tutTip"></div>
+    <div class="tut-dots" id="tutDots"></div>
+  </div>
+  <div class="tut-actions">
+    <button class="btn-gold" id="tutNextBtn" style="display:none;">Continue →</button>
+    <button class="btn-gold" id="tutFreshBtn" style="display:none;">Start a fresh game</button>
+    <button id="tutBuilderBtn" style="display:none;">Build a custom deck</button>
+    <button id="tutRestartBtn">Restart</button>
+    <button id="tutExitBtn">Skip tutorial</button>
+  </div>
+</div>
+
+<main class="arena">
+  <!-- Left Column: Scores, Turn Status & Log -->
+  <div class="col-left">
+  <section class="panel" id="statusPanel">
+    <div class="panel-title">
+      <span>Match Status</span>
+      <span id="deckCounter">Deck: 14 | Discard: 0</span>
+    </div>
+
+    <div class="score-box">
+      <div class="score-card active-turn" id="p1ScoreCard">
+        <div class="score-head"><div class="score-label" id="p1Label" style="color: var(--p1-color);">You (Blue)</div><span class="turn-chip" id="p1Chip">Your turn</span></div>
+        <div class="score-val" id="p1VP">0</div>
+        <div class="vp-track" id="p1Track"></div>
+        <div class="score-sub">Goal: 10 VP</div>
+      </div>
+      <div class="score-card" id="p2ScoreCard">
+        <div class="score-head"><div class="score-label" id="p2Label" style="color: var(--p2-color);">AI Rival (Red)</div><span class="turn-chip" id="p2Chip">Thinking</span></div>
+        <div class="score-val" id="p2VP">0</div>
+        <div class="vp-track" id="p2Track"></div>
+        <div class="score-sub">Goal: 10 VP</div>
+      </div>
+    </div>
+
+    <div class="status-banner" id="statusBanner">
+      <span id="statusText">Select a card from your hand to see matching grid spaces.</span>
+      <button id="btnCancelAbility" style="display:none; padding:4px 8px; font-size:11px;">Skip Ability</button>
+    </div>
+
+    <div style="display:flex; gap:8px; margin-bottom:4px;">
+      <button class="btn-primary" id="btnEndTurn" style="flex:1; display:none;">Finish Turn & Draw →</button>
+    </div>
+  </section>
+
+  <section class="panel" id="logPanel">
+    <div class="panel-title"><span>Match Log</span></div>
+    <div class="log-box" id="matchLog"></div>
+
+    <div class="legend-row">
+      <div class="legend-item"><span class="dot-sample" style="background:#38bdf8;"></span> Standard</div>
+      <div class="legend-item"><span class="dot-sample" style="background:#38bdf8; box-shadow:0 0 0 2px #38bdf8;"></span> Shielded (Immune)</div>
+      <div class="legend-item"><span class="dot-sample" style="background:#38bdf8; border-radius:3px; box-shadow:0 0 0 2px #fbbf24;"></span> Locked (Scored)</div>
+    </div>
+  </section>
+  </div>
+
+  <!-- Center Column: 6x6 Grid & Active Hand -->
+  <section class="board-wrap">
+    <div class="board-frame"><div class="grid-board" id="gridBoard"></div><div class="end-banner" id="endBanner"></div></div>
+
+    <div class="panel hand-section">
+      <div class="panel-title">
+        <span id="handHeaderTitle">Your Hand (Click a card to highlight valid spaces)</span>
+        <span id="phaseLabel" style="color: var(--gold);">Step 1: Play 1 Card</span>
+      </div>
+      <div class="hand-cards" id="playerHand"></div>
+    </div>
+  </section>
+
+  <!-- Right Column: Active Pattern Market -->
+  <section class="panel" id="marketPanel">
+    <div class="panel-title">
+      <span>Pattern Market (Max 1 / Turn)</span>
+      <span id="patternDeckCount">13 Left</span>
+    </div>
+    <p style="font-size:11.5px; color:var(--text-muted); margin-bottom:10px; line-height:1.35;">
+      Form any shape below with your un-locked tokens (90° rotations allowed; no mirror flips). Scored tokens lock permanently!
+    </p>
+    <div class="pattern-list" id="patternMarket"></div>
+  </section>
+</main>
+
+<!-- Custom 18-Card Deck Builder Modal -->
+<div class="modal-backdrop" id="deckBuilderModal">
+  <div class="modal" style="max-width:900px;">
+    <div class="modal-header">
+      <h2>18-Card Custom Deck Builder & Share Codes</h2>
+      <button id="btnCloseDeckBuilder">Close ✕</button>
+    </div>
+
+    <!-- 4 Named Slot Tabs -->
+    <div class="modal-tabs" id="dbSlotTabsRow"></div>
+
+    <div class="modal-body">
+      <!-- Deck Name + Quick Fill Tools -->
+      <div class="db-toolbar-row">
+        <div class="db-name-box">
+          <label for="dbDeckNameInput" style="font-size:12px; font-weight:800; color:var(--text-muted);">Deck Name:</label>
+          <input type="text" id="dbDeckNameInput" class="db-name-input" maxlength="22" placeholder="Enter custom deck name..." />
+        </div>
+        <div style="display:flex; gap:6px; flex-wrap:wrap; align-items:center;">
+          <select id="dbPresetSelect" style="padding:5px 9px; font-size:12px;">
+            <option value="balanced">Preset: Balanced</option>
+            <option value="aggro">Preset: Aggro (Bolt/Gear)</option>
+            <option value="control">Preset: Control (Shield/Rings)</option>
+            <option value="prestige">Preset: Prestige (Crown/Eye)</option>
+          </select>
+          <button id="btnDbLoadPreset" style="padding:5px 9px; font-size:12px;">Load Preset</button>
+          <button id="btnDbAutoFill" style="padding:5px 9px; font-size:12px;">Auto-Fill 18</button>
+          <button id="btnDbClear" style="padding:5px 9px; font-size:12px;">Clear</button>
+        </div>
+      </div>
+
+      <!-- One-Click Copy & Paste Deck Code Panel -->
+      <div class="db-share-panel">
+        <div class="db-share-group">
+          <div class="db-share-label">
+            <span>Shareable Deck Code (Live)</span>
+            <span id="dbCopyStatus" style="color:var(--emerald);"></span>
+          </div>
+          <div class="db-share-row">
+            <input type="text" id="dbExportCodeField" class="db-code-field" readonly title="Click Copy Code to share with friends" />
+            <button class="btn-emerald" id="btnDbCopyCode" style="padding:6px 11px; font-size:12px;">Copy Code</button>
+          </div>
+        </div>
+        <div class="db-share-group">
+          <div class="db-share-label">
+            <span>Import Friend's Deck Code</span>
+            <span id="dbImportStatus" style="color:var(--gold);"></span>
+          </div>
+          <div class="db-share-row">
+            <input type="text" id="dbImportCodeField" class="db-import-field" placeholder="Paste GS1-XXXXXXXX:Name..." />
+            <button class="btn-primary" id="btnDbImportCode" style="padding:6px 11px; font-size:12px;">Import</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Progress & Color/Icon Spread -->
+      <div class="db-telemetry">
+        <div class="db-progress-row">
+          <span id="dbCountText" style="font-weight:800; font-size:14px; color:var(--gold);">18 / 18 Cards Selected</span>
+          <div class="db-bar-track">
+            <div class="db-bar-fill complete" id="dbProgressFill" style="width:100%;"></div>
+          </div>
+        </div>
+        <div class="db-stat-pills" id="dbStatPills"></div>
+      </div>
+
+      <!-- 24 Color-Icon Combination Matrix -->
+      <div class="db-grid" id="dbCardGrid"></div>
+    </div>
+
+    <div class="modal-footer">
+      <span style="font-size:12px; color:var(--text-muted);">
+        Click any card tile to cycle copies (0 → 1 → 2 → 0), or use + / − buttons.
+      </span>
+      <div style="display:flex; gap:8px;">
+        <button class="btn-primary" id="btnDbSaveOnly">Save Slot</button>
+        <button class="btn-gold" id="btnDbSaveAndPlay">Save & Start Match →</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Pass & Play Privacy Curtain -->
+<div class="pass-curtain" id="passCurtain">
+  <div class="curtain-box">
+    <span class="tut-badge" style="margin-bottom:10px;">2P PASS & PLAY</span>
+    <h2 id="curtainTitle">Pass Device to Player 2 (Red)</h2>
+    <p id="curtainDesc">Hands are hidden while passing the screen so neither player can peek at the other's cards.</p>
+    <button class="btn-gold" id="btnRevealPassHand" style="width:100%; padding:12px; font-size:15px;">I'm Ready — Reveal My Hand</button>
+  </div>
+</div>
+
+<!-- PeerJS Online Lobby Modal -->
+<div class="modal-backdrop" id="onlineModal">
+  <div class="modal" style="max-width:640px;">
+    <div class="modal-header">
+      <h2>Online P2P Multiplayer (PeerJS Room Code)</h2>
+      <button id="btnCloseOnline">Close ✕</button>
+    </div>
+    <div class="modal-body">
+      <p style="margin-bottom:12px; color:var(--text-muted);">
+        Connect directly browser-to-browser with zero backend servers. Your currently selected deck (including any of your <strong>Named Custom Decks</strong>) is used automatically when the match starts.
+      </p>
+      <div class="lobby-split">
+        <div class="rule-card">
+          <h4>Host a New Room (Player 1 • Blue)</h4>
+          <p style="font-size:12px; color:var(--text-muted); margin-bottom:8px;">Generate a 4-character code and share it with your opponent.</p>
+          <button class="btn-primary" id="btnCreateRoom" style="width:100%;">Create Room Code</button>
+          <div class="code-display" id="hostCodeBox">----</div>
+          <div id="hostStatusMsg" style="font-size:12px; color:var(--gold); text-align:center;">Click above to generate room</div>
+        </div>
+        <div class="rule-card">
+          <h4>Join Existing Room (Player 2 • Red)</h4>
+          <p style="font-size:12px; color:var(--text-muted); margin-bottom:8px;">Enter the 4-character Room Code from your host.</p>
+          <input type="text" id="joinCodeInput" class="code-input" maxlength="4" placeholder="ABCD" />
+          <button class="btn-emerald" id="btnJoinRoom" style="width:100%;">Join Room</button>
+          <div id="joinStatusMsg" style="font-size:12px; color:var(--text-muted); text-align:center; margin-top:8px;">Ready to connect</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- How to Play / Rules & Reference Modal -->
+<div class="modal-backdrop" id="rulesModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h2>GRIDSHIFT — Complete Rules & Reference</h2>
+      <button id="btnCloseRules">Close ✕</button>
+    </div>
+    <div class="modal-tabs">
+      <button class="tab-btn active" data-tab="tabOverview">1. Turn Flow & Deck Rules</button>
+      <button class="tab-btn" data-tab="tabAbilities">2. Overdrive Abilities (6 Icons)</button>
+      <button class="tab-btn" data-tab="tabPatterns">3. Token States & All 16 Patterns</button>
+    </div>
+    <div class="modal-body" id="modalBody"></div>
+  </div>
+</div>
+
+<!-- Eye (Scout) Ability Selection Modal -->
+<div class="modal-backdrop" id="scoutModal">
+  <div class="modal" style="max-width:460px;">
+    <div class="modal-header">
+      <h2>Overdrive: Eye (Scout)</h2>
+    </div>
+    <div class="modal-body">
+      <p>Choose <strong>1 card</strong> to add to your hand. The other card will be placed on the bottom of your draw deck.</p>
+      <div class="scout-choices" id="scoutChoices"></div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div><canvas id="fxCanvas"></canvas>
+<script>
+(() => {
+  /* =========================================================================
+     1. WEB AUDIO API SYNTHESIZER
+     ========================================================================= */
+  let audioEnabled = true;
+  let audioCtx = null;
+
+  function playTone(freq, type = 'sine', duration = 0.14, gainVal = 0.12, delay = 0) {
+    if (!audioEnabled) return;
+    try {
+      if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = type;
+      osc.frequency.setValueAtTime(freq, audioCtx.currentTime + delay);
+      gain.gain.setValueAtTime(gainVal, audioCtx.currentTime + delay);
+      gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + delay + duration);
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.start(audioCtx.currentTime + delay);
+      osc.stop(audioCtx.currentTime + delay + duration);
+    } catch (e) {}
+  }
+
+  const SFX = {
+    select: () => playTone(520, 'triangle', 0.08, 0.08),
+    place: () => { playTone(330, 'sine', 0.12, 0.14); playTone(440, 'sine', 0.14, 0.12, 0.06); },
+    overdrive: () => {
+      flashBoard('overdrive');
+      playTone(440, 'triangle', 0.14, 0.15, 0);
+      playTone(554.37, 'triangle', 0.14, 0.15, 0.07);
+      playTone(659.25, 'triangle', 0.22, 0.16, 0.14);
+    },
+    score: () => {
+      flashBoard('score');
+      playTone(523.25, 'sine', 0.15, 0.16, 0);
+      playTone(659.25, 'sine', 0.15, 0.16, 0.08);
+      playTone(783.99, 'sine', 0.15, 0.16, 0.16);
+      playTone(1046.5, 'triangle', 0.3, 0.18, 0.24);
+    },
+    error: () => playTone(160, 'sawtooth', 0.18, 0.1)
+  };
+
+  /* =========================================================================
+     2. GAME DATA DEFINITIONS
+     ========================================================================= */
+  const COLORS = [
+    { id: 'crimson', code: 'CRM', name: 'Crimson', hex: '#ef4444' },
+    { id: 'cobalt',  code: 'COB', name: 'Cobalt',  hex: '#3b82f6' },
+    { id: 'amber',   code: 'AMB', name: 'Amber',   hex: '#f59e0b' },
+    { id: 'emerald', code: 'EMR', name: 'Emerald', hex: '#10b981' }
+  ];
+
+  const ICONS = [
+    {
+      id: 'bolt',
+      name: 'Bolt',
+      power: 'Surge',
+      shortDesc: 'Place +1 bonus token orthogonally adjacent',
+      fullDesc: 'Place 1 bonus Standard token on an empty space orthogonally adjacent (up, down, left, right) to the space you just claimed.',
+      svg: `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M13 2L4 14h7l-1 8 9-12h-7l1-8z"/></svg>`
+    },
+    {
+      id: 'shield',
+      name: 'Shield',
+      power: 'Fortify',
+      shortDesc: 'Shield 1 friendly un-locked token',
+      fullDesc: 'Flip 1 of your un-locked tokens to its Shielded state. Shielded tokens cannot be overwritten, pushed, or swapped.',
+      svg: `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L4 5v6.09c0 5.05 3.41 9.76 8 10.91 4.59-1.15 8-5.86 8-10.91V5l-8-3z"/></svg>`
+    },
+    {
+      id: 'gear',
+      name: 'Gear',
+      power: 'Shift',
+      shortDesc: 'Slide any 1 unshielded token 1 space',
+      fullDesc: 'Slide any 1 un-locked, unshielded token (yours or your opponent’s) 1 space orthogonally into an empty adjacent space.',
+      svg: `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58a.49.49 0 00.12-.61l-1.92-3.32a.49.49 0 00-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54a.484.484 0 00-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58a.49.49 0 00-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg>`
+    },
+    {
+      id: 'rings',
+      name: 'Rings',
+      power: 'Transpose',
+      shortDesc: 'Swap any 2 unshielded tokens on board',
+      fullDesc: 'Swap the positions of any 2 un-locked, unshielded tokens anywhere on the board.',
+      svg: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><circle cx="9" cy="12" r="5"/><circle cx="15" cy="12" r="5"/></svg>`
+    },
+    {
+      id: 'eye',
+      name: 'Eye',
+      power: 'Scout',
+      shortDesc: 'Draw 2 cards, keep 1, bottom 1',
+      fullDesc: 'Look at the top 2 cards of your personal draw deck. Add 1 to your hand and place the other on the bottom of your deck.',
+      svg: `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg>`
+    },
+    {
+      id: 'crown',
+      name: 'Crown',
+      power: 'Prestige',
+      shortDesc: 'Immediately gain +1 Victory Point',
+      fullDesc: 'Immediately score +1 Victory Point directly toward your 10 VP win goal.',
+      svg: `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M5 16L3 5l5.5 5L12 4l3.5 6L21 5l-2 11H5zm14 3c0 .6-.4 1-1 1H6c-.6 0-1-.4-1-1v-1h14v1z"/></svg>`
+    }
+  ];
+
+  const PATTERNS = [
+    { id: 'p01', name: 'The Trio',       vp: 2, coords: [[0,0],[0,1],[0,2]], desc: 'Straight orthogonal line of 3 tokens.' },
+    { id: 'p02', name: 'Cornerstone',    vp: 2, coords: [[0,0],[0,1],[1,0]], desc: 'Tight 3-token right-angle corner.' },
+    { id: 'p03', name: 'Slant',          vp: 2, coords: [[0,0],[1,1],[2,2]], desc: 'Diagonal line of 3 tokens.' },
+    { id: 'p04', name: 'Twin Split',     vp: 2, coords: [[0,0],[0,2]], edgeOnly: true, gapEmpty: true, desc: '2 tokens on outer board edges with 1 EMPTY gap tile between.' },
+    { id: 'p05', name: 'Bunker',         vp: 3, coords: [[0,0],[0,1],[1,0],[1,1]], desc: 'Solid 2×2 square block.' },
+    { id: 'p06', name: 'Hook',           vp: 3, coords: [[0,0],[1,0],[2,0],[2,1]], desc: 'Asymmetric L-tetromino (rotations only).' },
+    { id: 'p07', name: 'Zigzag',         vp: 3, coords: [[0,0],[0,1],[1,1],[1,2]], desc: 'Offset step shape (rotations only).' },
+    { id: 'p08', name: 'Vanguard',       vp: 3, coords: [[0,1],[1,0],[1,1],[1,2]], desc: 'T-tetromino formation.' },
+    { id: 'p09', name: 'Bridge',         vp: 3, coords: [[0,0],[0,1],[1,2],[1,3]], desc: 'Staggered 4-token span.' },
+    { id: 'p10', name: 'Pincer',         vp: 3, coords: [[0,0],[0,2],[1,0],[1,2]], desc: 'Two parallel pairs separated by 1 column.' },
+    { id: 'p11', name: 'Spearhead',      vp: 4, coords: [[0,0],[0,1],[0,2],[0,3]], desc: 'Unbroken orthogonal line of 4 tokens.' },
+    { id: 'p12', name: 'Crossfire',      vp: 4, coords: [[0,0],[0,2],[1,1],[2,0],[2,2]], desc: '5-token X-shape formation.' },
+    { id: 'p13', name: 'Diamond',        vp: 4, coords: [[0,1],[1,0],[1,2],[2,1]], desc: 'Hollow 4-token diamond ring.' },
+    { id: 'p14', name: 'Staircase',      vp: 4, coords: [[0,0],[1,0],[1,1],[2,1],[2,2]], desc: '5-token ascending step ridge.' },
+    { id: 'p15', name: 'Fortress',       vp: 5, coords: [[0,1],[1,0],[1,1],[1,2],[2,1]], bonusShield: true, desc: '5-token Plus (+) shape. Bonus: Shield 1 other token!' },
+    { id: 'p16', name: 'Grand Diagonal', vp: 5, coords: [[0,0],[1,1],[2,2],[3,3]], desc: 'Unbroken diagonal line of 4 tokens.' }
+  ];
+
+  /* =========================================================================
+     3. UNIFIED GAME, NETWORK & NAMED DECK SLOTS PERSISTENCE
+     ========================================================================= */
+  const STORAGE_KEY_V2 = 'gridshift_named_decks_v2';
+  const STORAGE_KEY_V1 = 'gridshift_custom_decks_v1';
+
+  const state = {
+    mode: 'ai',          // 'ai' | 'local' | 'online'
+    board: [],           // 36 cells: { index, r, c, color, icon, owner: null|'p1'|'p2', shielded, locked }
+    p1: { name: 'You (Blue)', deck: [], discard: [], hand: [], vp: 0, isAI: false },
+    p2: { name: 'AI Rival (Red)', deck: [], discard: [], hand: [], vp: 0, isAI: true },
+    patternDeck: [],
+    patternMarket: [],
+    turn: 'p1',          // 'p1' | 'p2'
+    phase: 'play_card',  // 'play_card' | 'ability' | 'score_pattern' | 'ai_thinking' | 'game_over'
+    selectedHandIdx: null,
+    abilityMode: null,
+    abilityAnchor: null,
+    abilityValidCells: [],
+    previewCells: [],
+    nearCells: [],
+    hoverHandIdx: null,
+    notice: null,
+    lastNoticeId: null,
+    rulesRot: {},
+    passCurtainActive: false,
+    logs: [],
+    tutorial: { active: false, step: 0 },
+    customSlots: [
+      { id: 'slot_0', name: 'My Vanguard',    cards: [] },
+      { id: 'slot_1', name: 'Surge Rush',     cards: [] },
+      { id: 'slot_2', name: 'Iron Fortress',  cards: [] },
+      { id: 'slot_3', name: 'P2 / Rival Mix', cards: [] }
+    ],
+    deckBuilder: {
+      activeSlotIdx: 0,
+      draftName: 'My Vanguard',
+      counts: {}         // map of "color_icon" -> 0 | 1 | 2
+    },
+    net: {
+      peer: null,
+      conn: null,
+      roomCode: '',
+      myRole: null,      // 'p1' (Host) | 'p2' (Guest)
+      connected: false
+    }
+  };
+
+  function getColorObj(id) { return COLORS.find(c => c.id === id); }
+  function getIconObj(id)  { return ICONS.find(i => i.id === id); }
+  function comboKey(c, i)  { return `${c}_${i}`; }
+
+  function getViewerId() {
+    if (state.mode === 'ai') return 'p1';
+    if (state.mode === 'local') return state.turn;
+    if (state.mode === 'online') return state.net.myRole || 'p1';
+    return 'p1';
+  }
+
+  function canLocalUserAct() {
+    if (state.phase === 'game_over') return false;
+    if (state.mode === 'ai') return state.turn === 'p1';
+    if (state.mode === 'local') return !state.passCurtainActive;
+    if (state.mode === 'online') return state.net.connected && state.turn === state.net.myRole;
+    return false;
+  }
+
+  function shuffle(arr) {
+    const a = [...arr];
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+  }
+
+  function buildAll24Combos() {
+    const list = [];
+    for (const c of COLORS) {
+      for (const i of ICONS) {
+        list.push({ color: c.id, icon: i.id });
+      }
+    }
+    return list;
+  }
+
+  function buildArchetypeDeck(archetype = 'balanced') {
+    const combos = buildAll24Combos();
+    const weights = {
+      balanced: { bolt: 1, shield: 1, gear: 1, rings: 1, eye: 1, crown: 1 },
+      aggro:    { bolt: 2, shield: 0.5, gear: 2, rings: 0.5, eye: 1, crown: 0.5 },
+      control:  { bolt: 0.5, shield: 2, gear: 1, rings: 2, eye: 1, crown: 0.5 },
+      prestige: { bolt: 0.5, shield: 1, gear: 0.5, rings: 0.5, eye: 2, crown: 2 }
+    }[archetype] || { bolt: 1, shield: 1, gear: 1, rings: 1, eye: 1, crown: 1 };
+
+    let pool = [];
+    for (const card of combos) {
+      const copies = weights[card.icon] >= 2 ? 2 : 1;
+      for (let k = 0; k < copies; k++) pool.push({ ...card });
+    }
+    return shuffle(pool).slice(0, 18);
+  }
+
+  function isValid18CardDeck(arr) {
+    if (!Array.isArray(arr) || arr.length !== 18) return false;
+    const counts = {};
+    for (const item of arr) {
+      if (!item || !getColorObj(item.color) || !getIconObj(item.icon)) return false;
+      const k = comboKey(item.color, item.icon);
+      counts[k] = (counts[k] || 0) + 1;
+      if (counts[k] > 2) return false;
+    }
+    return true;
+  }
+
+  function loadCustomDecksFromStorage() {
+    let loadedV2 = null;
+    try {
+      const rawV2 = localStorage.getItem(STORAGE_KEY_V2);
+      if (rawV2) loadedV2 = JSON.parse(rawV2);
+    } catch (e) {}
+
+    if (loadedV2 && Array.isArray(loadedV2.slots) && loadedV2.slots.length === 4) {
+      loadedV2.slots.forEach((s, idx) => {
+        if (s && typeof s.name === 'string' && isValid18CardDeck(s.cards)) {
+          state.customSlots[idx] = {
+            id: `slot_${idx}`,
+            name: s.name.trim().slice(0, 22) || `Custom Slot ${idx + 1}`,
+            cards: s.cards
+          };
+        }
+      });
+    } else {
+      // Migrate from v1 if present
+      let loadedV1 = null;
+      try {
+        const rawV1 = localStorage.getItem(STORAGE_KEY_V1);
+        if (rawV1) loadedV1 = JSON.parse(rawV1);
+      } catch (e) {}
+
+      state.customSlots[0].cards = (loadedV1 && isValid18CardDeck(loadedV1.p1))
+        ? loadedV1.p1
+        : buildArchetypeDeck('balanced');
+      state.customSlots[1].cards = buildArchetypeDeck('aggro');
+      state.customSlots[2].cards = buildArchetypeDeck('control');
+      state.customSlots[3].cards = (loadedV1 && isValid18CardDeck(loadedV1.p2))
+        ? loadedV1.p2
+        : buildArchetypeDeck('prestige');
+      saveCustomDecksToStorage();
+    }
+
+    // Ensure every slot has a valid 18-card list
+    const fallbacks = ['balanced', 'aggro', 'control', 'prestige'];
+    state.customSlots.forEach((slot, idx) => {
+      if (!isValid18CardDeck(slot.cards)) {
+        slot.cards = buildArchetypeDeck(fallbacks[idx % fallbacks.length]);
+      }
+    });
+  }
+
+  function saveCustomDecksToStorage() {
+    try {
+      localStorage.setItem(STORAGE_KEY_V2, JSON.stringify({ slots: state.customSlots }));
+    } catch (e) {}
+  }
+
+  function populateDeckDropdowns() {
+    const p1Sel = document.getElementById('deckSelect');
+    const p2Sel = document.getElementById('p2DeckSelect');
+    const prevP1 = p1Sel.value || 'balanced';
+    const prevP2 = p2Sel.value || 'balanced';
+
+    const buildOptionsHtml = (prefix = '') => {
+      const presets = [
+        { val: 'balanced', label: `${prefix}Balanced (Preset)` },
+        { val: 'aggro',    label: `${prefix}Aggro: Bolt/Gear` },
+        { val: 'control',  label: `${prefix}Control: Shield/Rings` },
+        { val: 'prestige', label: `${prefix}Prestige: Crown/Eye` }
+      ];
+      const customOpts = state.customSlots.map((slot, idx) => ({
+        val: `slot_${idx}`,
+        label: `${prefix}★ ${slot.name}`
+      }));
+      return [...presets, ...customOpts]
+        .map(o => `<option value="${o.val}">${o.label}</option>`)
+        .join('');
+    };
+
+    p1Sel.innerHTML = buildOptionsHtml('P1: ');
+    p2Sel.innerHTML = buildOptionsHtml('P2: ');
+
+    if ([...p1Sel.options].some(o => o.value === prevP1)) p1Sel.value = prevP1;
+    if ([...p2Sel.options].some(o => o.value === prevP2)) p2Sel.value = prevP2;
+  }
+
+  function getDeckDescriptor(choiceVal) {
+    if (choiceVal && choiceVal.startsWith('slot_')) {
+      const idx = parseInt(choiceVal.split('_')[1], 10);
+      const slot = state.customSlots[idx];
+      if (slot && isValid18CardDeck(slot.cards)) {
+        return { label: slot.name, cards: slot.cards.map(c => ({ ...c })) };
+      }
+    }
+    const presetNames = {
+      balanced: 'Balanced',
+      aggro: 'Aggro',
+      control: 'Control',
+      prestige: 'Prestige'
+    };
+    return {
+      label: presetNames[choiceVal] || 'Balanced',
+      cards: buildArchetypeDeck(choiceVal || 'balanced')
+    };
+  }
+
+  function resolvePlayerDeck(choiceVal, explicitCustomDeck = null) {
+    if (explicitCustomDeck && isValid18CardDeck(explicitCustomDeck)) {
+      return shuffle(explicitCustomDeck.map(c => ({ ...c })));
+    }
+    const desc = getDeckDescriptor(choiceVal);
+    return shuffle(desc.cards);
+  }
+
+  function addLog(text, cls = '') {
+    state.logs.unshift({ text, cls });
+    if (state.logs.length > 40) state.logs.pop();
+    renderLogs();
+  }
+
+  function renderLogs() {
+    const logEl = document.getElementById('matchLog');
+    logEl.innerHTML = '';
+    state.logs.forEach(entry => {
+      const div = document.createElement('div');
+      div.className = `log-entry ${entry.cls}`;
+      div.textContent = entry.text;
+      logEl.appendChild(div);
+    });
+  }
+
+  function drawCards(pid, count) {
+    const p = state[pid];
+    for (let i = 0; i < count; i++) {
+      if (p.deck.length === 0) {
+        if (p.discard.length === 0) break;
+        p.deck.push(...shuffle(p.discard.splice(0, p.discard.length)));
+      }
+      p.hand.push(p.deck.pop());
+    }
+  }
+
+  function getOrthogonalNeighbors(idx) {
+    const r = Math.floor(idx / 6);
+    const c = idx % 6;
+    const res = [];
+    if (r > 0) res.push((r - 1) * 6 + c);
+    if (r < 5) res.push((r + 1) * 6 + c);
+    if (c > 0) res.push(r * 6 + (c - 1));
+    if (c < 5) res.push(r * 6 + (c + 1));
+    return res;
+  }
+
+  /* =========================================================================
+     4. SHAREABLE DECK CODE ENCODER / DECODER (GS1-XXXXXXXX:Name)
+     ========================================================================= */
+  function sanitizeDeckName(raw) {
+    if (!raw || typeof raw !== 'string') return '';
+    return raw.replace(/[:\r\n]/g, '').trim().slice(0, 22);
+  }
+
+  function encodeDeckCode(countsMap, deckName = '') {
+    // 24 canonical combos -> 8 groups of 3 trits -> 8 base-27 chars (0-9, A-Q)
+    const trits = [];
+    for (const c of COLORS) {
+      for (const i of ICONS) {
+        const n = countsMap[comboKey(c.id, i.id)] || 0;
+        trits.push(Math.max(0, Math.min(2, n)));
+      }
+    }
+    let code = '';
+    for (let g = 0; g < 8; g++) {
+      const val = trits[g * 3] * 9 + trits[g * 3 + 1] * 3 + trits[g * 3 + 2];
+      code += val.toString(36).toUpperCase();
+    }
+    const cleanName = sanitizeDeckName(deckName);
+    return `GS1-${code}${cleanName ? ':' + cleanName : ''}`;
+  }
+
+  function decodeDeckCode(rawInput) {
+    if (!rawInput || typeof rawInput !== 'string') {
+      return { error: 'Paste a GS1-XXXXXXXX deck code first.' };
+    }
+    const trimmed = rawInput.trim();
+    const colonIdx = trimmed.indexOf(':');
+    const codePart = (colonIdx === -1 ? trimmed : trimmed.slice(0, colonIdx)).trim().toUpperCase();
+    const namePart = colonIdx === -1 ? '' : sanitizeDeckName(trimmed.slice(colonIdx + 1));
+
+    const match = codePart.match(/^GS1-([0-9A-Q]{8})$/);
+    if (!match) {
+      return { error: 'Invalid format. Expected GS1-XXXXXXXX (8 chars).' };
+    }
+
+    const payload = match[1];
+    const trits = [];
+    for (let g = 0; g < 8; g++) {
+      const val = parseInt(payload[g], 36);
+      if (isNaN(val) || val < 0 || val > 26) {
+        return { error: 'Corrupted character in deck code.' };
+      }
+      trits.push(Math.floor(val / 9));
+      trits.push(Math.floor((val % 9) / 3));
+      trits.push(val % 3);
+    }
+
+    const total = trits.reduce((acc, n) => acc + n, 0);
+    if (total !== 18) {
+      return { error: `Code has ${total} cards (must equal 18).` };
+    }
+
+    const counts = {};
+    const cards = [];
+    let idx = 0;
+    for (const c of COLORS) {
+      for (const i of ICONS) {
+        const count = trits[idx++];
+        counts[comboKey(c.id, i.id)] = count;
+        for (let k = 0; k < count; k++) cards.push({ color: c.id, icon: i.id });
+      }
+    }
+
+    return { counts, cards, name: namePart };
+  }
+
+  /* =========================================================================
+     5. INTERACTIVE 18-CARD NAMED DECK BUILDER
+     ========================================================================= */
+  function openDeckBuilder(slotIdx = null) {
+    SFX.select();
+    let targetIdx = slotIdx;
+    if (targetIdx === null) {
+      const curSel = document.getElementById('deckSelect').value;
+      targetIdx = curSel.startsWith('slot_') ? parseInt(curSel.split('_')[1], 10) : state.deckBuilder.activeSlotIdx;
+    }
+    switchDeckBuilderSlot(targetIdx, false);
+    document.getElementById('dbCopyStatus').textContent = '';
+    document.getElementById('dbImportStatus').textContent = '';
+    document.getElementById('dbImportCodeField').value = '';
+    document.getElementById('deckBuilderModal').classList.add('open');
+  }
+
+  function switchDeckBuilderSlot(slotIdx, playSound = true) {
+    if (playSound) SFX.select();
+    state.deckBuilder.activeSlotIdx = slotIdx;
+    const slot = state.customSlots[slotIdx];
+    state.deckBuilder.draftName = slot.name;
+
+    const counts = {};
+    for (const c of COLORS) {
+      for (const i of ICONS) {
+        counts[comboKey(c.id, i.id)] = 0;
+      }
+    }
+    slot.cards.forEach(card => {
+      const k = comboKey(card.color, card.icon);
+      if (counts[k] !== undefined && counts[k] < 2) counts[k]++;
+    });
+    state.deckBuilder.counts = counts;
+    document.getElementById('dbDeckNameInput').value = slot.name;
+    document.getElementById('dbCopyStatus').textContent = '';
+    document.getElementById('dbImportStatus').textContent = '';
+    renderDeckBuilder();
+  }
+
+  function getBuilderTotalCount() {
+    return Object.values(state.deckBuilder.counts).reduce((sum, n) => sum + n, 0);
+  }
+
+  function adjustBuilderCard(colorId, iconId, delta) {
+    const k = comboKey(colorId, iconId);
+    const cur = state.deckBuilder.counts[k] || 0;
+    const total = getBuilderTotalCount();
+
+    if (delta > 0) {
+      if (cur >= 2 || total >= 18) {
+        SFX.error();
+        return;
+      }
+      state.deckBuilder.counts[k] = cur + 1;
+      SFX.select();
+    } else if (delta < 0) {
+      if (cur <= 0) {
+        SFX.error();
+        return;
+      }
+      state.deckBuilder.counts[k] = cur - 1;
+      SFX.select();
+    }
+    renderDeckBuilder();
+  }
+
+  function cycleBuilderCard(colorId, iconId) {
+    const k = comboKey(colorId, iconId);
+    const cur = state.deckBuilder.counts[k] || 0;
+    const total = getBuilderTotalCount();
+
+    if (cur === 0 && total < 18) {
+      state.deckBuilder.counts[k] = 1;
+      SFX.select();
+    } else if (cur === 1 && total < 18) {
+      state.deckBuilder.counts[k] = 2;
+      SFX.select();
+    } else if (cur > 0) {
+      state.deckBuilder.counts[k] = 0;
+      SFX.select();
+    } else {
+      SFX.error();
+    }
+    renderDeckBuilder();
+  }
+
+  function loadPresetIntoBuilder(presetName) {
+    const sample = buildArchetypeDeck(presetName);
+    const counts = {};
+    for (const c of COLORS) {
+      for (const i of ICONS) counts[comboKey(c.id, i.id)] = 0;
+    }
+    sample.forEach(card => {
+      counts[comboKey(card.color, card.icon)]++;
+    });
+    state.deckBuilder.counts = counts;
+    SFX.select();
+    renderDeckBuilder();
+  }
+
+  function autoFillBuilderTo18() {
+    let total = getBuilderTotalCount();
+    if (total >= 18) return;
+    const keys = shuffle(Object.keys(state.deckBuilder.counts));
+    for (const k of keys) {
+      if (total >= 18) break;
+      if (state.deckBuilder.counts[k] === 0) {
+        state.deckBuilder.counts[k] = 1;
+        total++;
+      }
+    }
+    for (const k of keys) {
+      if (total >= 18) break;
+      if (state.deckBuilder.counts[k] < 2) {
+        state.deckBuilder.counts[k]++;
+        total++;
+      }
+    }
+    SFX.place();
+    renderDeckBuilder();
+  }
+
+  function clearBuilder() {
+    for (const k of Object.keys(state.deckBuilder.counts)) {
+      state.deckBuilder.counts[k] = 0;
+    }
+    SFX.select();
+    renderDeckBuilder();
+  }
+
+  function exportBuilderDeckList() {
+    const list = [];
+    for (const c of COLORS) {
+      for (const i of ICONS) {
+        const count = state.deckBuilder.counts[comboKey(c.id, i.id)] || 0;
+        for (let n = 0; n < count; n++) {
+          list.push({ color: c.id, icon: i.id });
+        }
+      }
+    }
+    return list;
+  }
+
+  function renderDeckBuilder() {
+    const total = getBuilderTotalCount();
+    const isComplete = total === 18;
+    const activeIdx = state.deckBuilder.activeSlotIdx;
+
+    // Render 4 Named Slot Tabs
+    const tabsRow = document.getElementById('dbSlotTabsRow');
+    tabsRow.innerHTML = '';
+    const tabGroup = document.createElement('div');
+    tabGroup.style.display = 'flex';
+    tabGroup.style.gap = '6px';
+    tabGroup.style.flexWrap = 'wrap';
+
+    state.customSlots.forEach((slot, idx) => {
+      const btn = document.createElement('button');
+      btn.className = `tab-btn ${idx === activeIdx ? 'active' : ''}`;
+      const displayName = idx === activeIdx
+        ? (sanitizeDeckName(state.deckBuilder.draftName) || `Slot ${idx + 1}`)
+        : slot.name;
+      btn.textContent = `Slot ${idx + 1}: ${displayName}`;
+      btn.onclick = () => switchDeckBuilderSlot(idx, true);
+      tabGroup.appendChild(btn);
+    });
+    tabsRow.appendChild(tabGroup);
+
+    // Update live shareable Deck Code field
+    const exportField = document.getElementById('dbExportCodeField');
+    if (isComplete) {
+      exportField.value = encodeDeckCode(state.deckBuilder.counts, state.deckBuilder.draftName);
+      exportField.style.color = 'var(--gold)';
+    } else {
+      exportField.value = `Select ${18 - total} more card${18 - total === 1 ? '' : 's'} to generate code`;
+      exportField.style.color = 'var(--text-dim)';
+    }
+
+    const countText = document.getElementById('dbCountText');
+    countText.textContent = `${total} / 18 Cards Selected${isComplete ? ' ✓ Ready!' : ` (Need ${18 - total} more)`}`;
+    countText.style.color = isComplete ? 'var(--gold)' : '#f87171';
+
+    const fill = document.getElementById('dbProgressFill');
+    fill.style.width = `${Math.min(100, (total / 18) * 100)}%`;
+    fill.classList.toggle('complete', isComplete);
+
+    document.getElementById('btnDbSaveOnly').disabled = !isComplete;
+    document.getElementById('btnDbSaveAndPlay').disabled = !isComplete;
+    document.getElementById('btnDbCopyCode').disabled = !isComplete;
+
+    // Color & Icon telemetry pills
+    const colorCounts = { crimson: 0, cobalt: 0, amber: 0, emerald: 0 };
+    const iconCounts = { bolt: 0, shield: 0, gear: 0, rings: 0, eye: 0, crown: 0 };
+
+    for (const c of COLORS) {
+      for (const i of ICONS) {
+        const n = state.deckBuilder.counts[comboKey(c.id, i.id)] || 0;
+        colorCounts[c.id] += n;
+        iconCounts[i.id] += n;
+      }
+    }
+
+    const pillsEl = document.getElementById('dbStatPills');
+    const colorPills = COLORS.map(c =>
+      `<span class="stat-pill"><span class="color-tag tag-${c.id}">${c.code}</span> ${colorCounts[c.id]}</span>`
+    ).join('');
+    const iconPills = ICONS.map(i =>
+      `<span class="stat-pill" style="color:var(--text-muted);">${i.name}: <strong style="color:#fff;">${iconCounts[i.id]}</strong></span>`
+    ).join('');
+    pillsEl.innerHTML = colorPills + iconPills;
+
+    // Render all 24 Color-Icon combinations
+    const grid = document.getElementById('dbCardGrid');
+    grid.innerHTML = '';
+    for (const iObj of ICONS) {
+      for (const cObj of COLORS) {
+        const n = state.deckBuilder.counts[comboKey(cObj.id, iObj.id)] || 0;
+        const cardEl = document.createElement('div');
+        cardEl.className = 'db-card';
+        if (n === 1) cardEl.classList.add('has-copies');
+        if (n === 2) cardEl.classList.add('maxed-copies');
+        cardEl.style.borderColor = n === 2 ? 'var(--gold)' : (n === 1 ? cObj.hex : 'var(--border-subtle)');
+
+        cardEl.innerHTML = `
+          <div class="db-card-main">
+            <div class="db-card-icon" style="color:${cObj.hex};">${iObj.svg}</div>
+            <div class="db-card-info">
+              <div class="db-card-title">
+                <span class="color-tag tag-${cObj.id}">${cObj.code}</span> ${iObj.name}
+              </div>
+              <div class="db-card-sub">${iObj.power}</div>
+            </div>
+          </div>
+          <div class="db-stepper">
+            <button class="btn-dec" ${n === 0 ? 'disabled' : ''}>−</button>
+            <span class="db-copy-count">${n} / 2</span>
+            <button class="btn-inc" ${n >= 2 || total >= 18 ? 'disabled' : ''}>+</button>
+          </div>
+        `;
+
+        cardEl.querySelector('.db-card-main').onclick = () => cycleBuilderCard(cObj.id, iObj.id);
+        cardEl.querySelector('.btn-dec').onclick = (e) => { e.stopPropagation(); adjustBuilderCard(cObj.id, iObj.id, -1); };
+        cardEl.querySelector('.btn-inc').onclick = (e) => { e.stopPropagation(); adjustBuilderCard(cObj.id, iObj.id, 1); };
+
+        grid.appendChild(cardEl);
+      }
+    }
+  }
+
+  function saveCurrentBuilderSlot() {
+    if (getBuilderTotalCount() !== 18) return null;
+    const idx = state.deckBuilder.activeSlotIdx;
+    const cleanName = sanitizeDeckName(state.deckBuilder.draftName) || `Custom Slot ${idx + 1}`;
+    state.customSlots[idx] = {
+      id: `slot_${idx}`,
+      name: cleanName,
+      cards: exportBuilderDeckList()
+    };
+    saveCustomDecksToStorage();
+    populateDeckDropdowns();
+    document.getElementById('deckSelect').value = `slot_${idx}`;
+    return idx;
+  }
+
+  /* =========================================================================
+     6. LEGAL MOVES & ROTATABLE PATTERN ENGINE
+     ========================================================================= */
+  function getLegalMovesForCard(card, pid) {
+    const moves = [];
+    for (const cell of state.board) {
+      const cMatch = cell.color === card.color;
+      const iMatch = cell.icon === card.icon;
+      const exact = cMatch && iMatch;
+      const single = (cMatch || iMatch) && !exact;
+
+      if (cell.owner === null) {
+        if (exact) moves.push({ index: cell.index, type: 'overdrive', overwrite: false });
+        else if (single) moves.push({ index: cell.index, type: 'standard', overwrite: false });
+      } else if (cell.owner !== pid && exact && !cell.locked && !cell.shielded) {
+        moves.push({ index: cell.index, type: 'overdrive', overwrite: true });
+      }
+    }
+    return moves;
+  }
+
+  function hasAnyLegalMove(pid) {
+    return state[pid].hand.some(card => getLegalMovesForCard(card, pid).length > 0);
+  }
+
+  function showToast(text) {
+    const t = document.getElementById('toast');
+    if (!t) return;
+    t.textContent = text;
+    t.classList.add('show');
+    clearTimeout(showToast._t);
+    showToast._t = setTimeout(() => t.classList.remove('show'), 2800);
+  }
+
+  function announce(text) {
+    state.notice = { id: Date.now() + '-' + Math.random().toString(36).slice(2, 6), text };
+    state.lastNoticeId = state.notice.id;
+    showToast(text);
+  }
+
+  function ensurePlayableHand(pid) {
+    if (state.tutorial.active) return;
+    let safety = 0;
+    const p = state[pid];
+    while (!hasAnyLegalMove(pid) && safety < 3) {
+      safety++;
+      const msg = `${p.name} had a Dead Hand: discarded and drew 4 fresh cards.`;
+      addLog(msg, 'sys-log');
+      announce(msg);
+      p.discard.push(...p.hand.splice(0));
+      drawCards(pid, 4);
+    }
+  }
+
+  function getRotatedCoords(coords, rotIndex) {
+    let pts = coords.map(([r, c]) => [r, c]);
+    for (let k = 0; k < rotIndex; k++) {
+      pts = pts.map(([r, c]) => [c, -r]);
+    }
+    const minR = Math.min(...pts.map(p => p[0]));
+    const minC = Math.min(...pts.map(p => p[1]));
+    return pts.map(([r, c]) => [r - minR, c - minC]);
+  }
+
+  function findPatternMatches(pattern, pid) {
+    const matches = [];
+    const seenKeys = new Set();
+
+    for (let rot = 0; rot < 4; rot++) {
+      const shape = getRotatedCoords(pattern.coords, rot);
+      for (let baseR = 0; baseR < 6; baseR++) {
+        for (let baseC = 0; baseC < 6; baseC++) {
+          const indices = [];
+          let valid = true;
+
+          for (const [dr, dc] of shape) {
+            const nr = baseR + dr;
+            const nc = baseC + dc;
+            if (nr < 0 || nr > 5 || nc < 0 || nc > 5) { valid = false; break; }
+            const cell = state.board[nr * 6 + nc];
+            if (cell.owner !== pid || cell.locked) { valid = false; break; }
+            if (pattern.edgeOnly) {
+              const isEdge = nr === 0 || nr === 5 || nc === 0 || nc === 5;
+              if (!isEdge) { valid = false; break; }
+            }
+            indices.push(cell.index);
+          }
+
+          if (valid && pattern.gapEmpty) {
+            const mr = (shape[0][0] + shape[1][0]) / 2;
+            const mc = (shape[0][1] + shape[1][1]) / 2;
+            if (state.board[(baseR + mr) * 6 + (baseC + mc)].owner !== null) valid = false;
+          }
+
+          if (valid) {
+            const key = [...indices].sort((a, b) => a - b).join(',');
+            if (!seenKeys.has(key)) {
+              seenKeys.add(key);
+              matches.push(indices);
+            }
+          }
+        }
+      }
+    }
+    return matches;
+  }
+
+  /* =========================================================================
+     7. PEERJS ONLINE MULTIPLAYER ENGINE
+     ========================================================================= */
+  function patternProgress(pattern, pid) {
+    let best = null;
+    for (let rot = 0; rot < 4; rot++) {
+      const shape = getRotatedCoords(pattern.coords, rot);
+      for (let baseR = 0; baseR < 6; baseR++) {
+        for (let baseC = 0; baseC < 6; baseC++) {
+          let ok = true, missing = 0;
+          const cells = [];
+          for (const [dr, dc] of shape) {
+            const nr = baseR + dr, nc = baseC + dc;
+            if (nr < 0 || nr > 5 || nc < 0 || nc > 5) { ok = false; break; }
+            const cell = state.board[nr * 6 + nc];
+            if (pattern.edgeOnly && !(nr === 0 || nr === 5 || nc === 0 || nc === 5)) { ok = false; break; }
+            if (cell.locked || (cell.owner && cell.owner !== pid)) { ok = false; break; }
+            if (cell.owner === null) missing++;
+            cells.push(cell.index);
+          }
+          if (ok && pattern.gapEmpty) {
+            const mr = (shape[0][0] + shape[1][0]) / 2;
+            const mc = (shape[0][1] + shape[1][1]) / 2;
+            if (state.board[(baseR + mr) * 6 + (baseC + mc)].owner !== null) ok = false;
+          }
+          if (ok && (!best || missing < best.missing)) best = { missing, cells };
+        }
+      }
+    }
+    return best;
+  }
+
+  const PEER_PREFIX = 'gridshift-gs-';
+
+  function generateRoomCode() {
+    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+    let code = '';
+    for (let i = 0; i < 4; i++) code += chars[Math.floor(Math.random() * chars.length)];
+    return code;
+  }
+
+  function cleanupPeer() {
+    if (state.net.conn) {
+      try { state.net.conn.close(); } catch (e) {}
+    }
+    if (state.net.peer) {
+      try { state.net.peer.destroy(); } catch (e) {}
+    }
+    state.net.peer = null;
+    state.net.conn = null;
+    state.net.connected = false;
+    state.net.roomCode = '';
+    state.net.myRole = null;
+    document.getElementById('netBar').classList.remove('active');
+  }
+
+  function hostOnlineRoom() {
+    if (typeof Peer === 'undefined') {
+      document.getElementById('hostStatusMsg').textContent = 'PeerJS library unavailable offline.';
+      return;
+    }
+    cleanupPeer();
+    const code = generateRoomCode();
+    document.getElementById('hostCodeBox').textContent = code;
+    document.getElementById('hostStatusMsg').textContent = 'Initializing signaling room...';
+
+    const peer = new Peer(PEER_PREFIX + code, {
+      config: {
+        iceServers: [
+          { urls: 'stun:stun.l.google.com:19302' },
+          { urls: 'stun:stun1.l.google.com:19302' }
+        ]
+      }
+    });
+
+    state.net.peer = peer;
+    state.net.roomCode = code;
+    state.net.myRole = 'p1';
+
+    peer.on('open', () => {
+      document.getElementById('hostStatusMsg').textContent = 'Room open! Waiting for Player 2 to join...';
+    });
+
+    peer.on('connection', (conn) => {
+      state.net.conn = conn;
+      setupConnectionHandlers(conn, true);
+    });
+
+    peer.on('error', (err) => {
+      document.getElementById('hostStatusMsg').textContent = `Connection error: ${err.type}. Try again.`;
+    });
+  }
+
+  function joinOnlineRoom() {
+    if (typeof Peer === 'undefined') {
+      document.getElementById('joinStatusMsg').textContent = 'PeerJS library unavailable offline.';
+      return;
+    }
+    const raw = document.getElementById('joinCodeInput').value.trim().toUpperCase();
+    if (raw.length !== 4) {
+      document.getElementById('joinStatusMsg').textContent = 'Enter a valid 4-character Room Code.';
+      return;
+    }
+
+    cleanupPeer();
+    document.getElementById('joinStatusMsg').textContent = `Connecting to room ${raw}...`;
+
+    const peer = new Peer({
+      config: {
+        iceServers: [
+          { urls: 'stun:stun.l.google.com:19302' },
+          { urls: 'stun:stun1.l.google.com:19302' }
+        ]
+      }
+    });
+
+    state.net.peer = peer;
+    state.net.roomCode = raw;
+    state.net.myRole = 'p2';
+
+    peer.on('open', () => {
+      const conn = peer.connect(PEER_PREFIX + raw, { reliable: true });
+      state.net.conn = conn;
+      setupConnectionHandlers(conn, false);
+    });
+
+    peer.on('error', (err) => {
+      document.getElementById('joinStatusMsg').textContent = `Could not reach room (${err.type}).`;
+    });
+  }
+
+  function getSelectedOnlineDeckPayload() {
+    const choice = document.getElementById('deckSelect').value;
+    const desc = getDeckDescriptor(choice);
+    return {
+      choice,
+      label: desc.label,
+      customDeck: choice.startsWith('slot_') ? desc.cards : null
+    };
+  }
+
+  function setupConnectionHandlers(conn, isHost) {
+    conn.on('open', () => {
+      state.net.connected = true;
+      state.mode = 'online';
+      document.getElementById('modeSelect').value = 'online';
+      document.getElementById('p2DeckSelect').style.display = 'none';
+      document.getElementById('onlineModal').classList.remove('open');
+      document.getElementById('netBar').classList.add('active');
+      document.getElementById('netRoomCodeDisplay').textContent = state.net.roomCode;
+      document.getElementById('netStatusLabel').textContent = isHost
+        ? 'Connected • You are Player 1 (Blue)'
+        : 'Connected • You are Player 2 (Red)';
+
+      const myPayload = getSelectedOnlineDeckPayload();
+
+      if (isHost) {
+        initNewMatch('online', myPayload.choice, 'balanced');
+        broadcastNetState('place');
+      } else {
+        conn.send({
+          type: 'guest_ready',
+          choice: myPayload.choice,
+          label: myPayload.label,
+          customDeck: myPayload.customDeck
+        });
+      }
+    });
+
+    conn.on('data', (msg) => {
+      if (!msg || typeof msg !== 'object') return;
+      if ((msg.type === 'guest_ready' || msg.type === 'request_rematch') && state.net.myRole === 'p1') {
+        const hostChoice = document.getElementById('deckSelect').value;
+        initNewMatch('online', hostChoice, msg.choice || 'balanced', msg.customDeck || null, msg.label || null);
+        broadcastNetState('place');
+      } else if (msg.type === 'sync_state') {
+        applyRemoteState(msg.payload, msg.sfx);
+      }
+    });
+
+    conn.on('close', () => {
+      state.net.connected = false;
+      document.getElementById('netStatusLabel').textContent = 'Opponent disconnected.';
+      addLog('Opponent disconnected from the room.', 'sys-log');
+      renderAll();
+    });
+  }
+
+  function broadcastNetState(sfxName = null) {
+    if (state.mode !== 'online' || !state.net.connected || !state.net.conn) return;
+    const payload = {
+      board: state.board,
+      p1: state.p1,
+      p2: state.p2,
+      patternDeck: state.patternDeck,
+      patternMarket: state.patternMarket,
+      turn: state.turn,
+      phase: state.phase,
+      logs: state.logs,
+      notice: state.notice
+    };
+    state.net.conn.send({ type: 'sync_state', payload, sfx: sfxName });
+  }
+
+  function applyRemoteState(payload, sfxName) {
+    state.board = payload.board;
+    state.p1 = payload.p1;
+    state.p2 = payload.p2;
+    state.patternDeck = payload.patternDeck;
+    state.patternMarket = payload.patternMarket;
+    state.turn = payload.turn;
+    state.phase = payload.phase;
+    state.logs = payload.logs;
+    state.selectedHandIdx = null;
+    state.abilityMode = null;
+    state.abilityAnchor = null;
+    state.abilityValidCells = [];
+    state.previewCells = [];
+    state.nearCells = [];
+    if (payload.notice && payload.notice.id !== state.lastNoticeId) {
+      state.lastNoticeId = payload.notice.id;
+      showToast(payload.notice.text);
+    }
+    if (sfxName && SFX[sfxName]) SFX[sfxName]();
+    renderAll();
+  }
+
+  /* =========================================================================
+     8. INTERACTIVE 6-STEP TUTORIAL ROUND
+     ========================================================================= */
+  const TUT_CARDS = {
+    gear:   { color: 'cobalt',  icon: 'gear'   },
+    bolt:   { color: 'amber',   icon: 'bolt'   },
+    shield: { color: 'emerald', icon: 'shield' }
+  };
+
+  const TUTORIAL_STEPS = [
+    {
+      badge: 'TUTORIAL • STEP 1 OF 6',
+      title: 'Welcome to GRIDSHIFT! Goal: first to 10 VP',
+      desc: 'Every tile on the 6×6 grid has TWO tags: a Color (CRM, COB, AMB, EMR) and an Icon. You play cards from your hand onto tiles, then claim shapes from the Pattern Market on the right.',
+      tip: 'Tip: the 3 face-up Pattern Cards are "The Trio", "Cornerstone" and "Bunker". Click Continue to make your first move.',
+      showContinue: true,
+      reqCard: null,
+      requiredTileIdx: null
+    },
+    {
+      badge: 'TUTORIAL • STEP 2 OF 6',
+      title: 'Standard Play: match Color OR Icon',
+      desc: 'Click the glowing Cobalt Gear card in your hand, then click the pulsing Cobalt Rings tile at Row 2, Column 2 to place your Blue token.',
+      tip: 'Matching EITHER the Color OR the Icon lets you claim any empty tile. A blue glow means a Standard match.',
+      showContinue: false,
+      reqCard: TUT_CARDS.gear,
+      requiredTileIdx: 7
+    },
+    {
+      badge: 'TUTORIAL • STEP 3 OF 6',
+      title: 'Overdrive Play: match BOTH Color and Icon!',
+      desc: 'Now select the glowing Amber Bolt card. The tile at Row 2, Column 3 is ALSO an Amber Bolt, so this is an exact match: OVERDRIVE! It triggers the Bolt (Surge) ability for a bonus token.',
+      tip: '1) Amber Bolt card → 2) the golden OVERDRIVE tile → 3) the purple tile beside it, to complete a row of 3.',
+      showContinue: false,
+      reqCard: TUT_CARDS.bolt,
+      requiredTileIdx: 8
+    },
+    {
+      badge: 'TUTORIAL • STEP 4 OF 6',
+      title: 'Score a Pattern and lock your tokens',
+      desc: 'You just formed a straight line of 3 Blue tokens! "The Trio (+2 VP)" is glowing green in the Pattern Market. Click its Claim button.',
+      tip: 'Scored tokens flip into gold-bordered LOCKED tokens. They stay as permanent blockers and cannot be overwritten or reused.',
+      showContinue: false,
+      reqCard: null,
+      requiredTileIdx: null,
+      claimPattern: 'p01'
+    },
+    {
+      badge: 'TUTORIAL • STEP 5 OF 6',
+      title: 'Overdrive overwrite and Shielding',
+      desc: 'Your rival holds the Emerald Shield tile (Row 4, Column 3). You hold the EXACT matching Emerald Shield card, so you can overwrite their token and Shield one of your own.',
+      tip: '1) Emerald Shield card → 2) the red token at Row 4, Column 3 → 3) your un-locked Blue token at Row 3, Column 3 to Shield it.',
+      showContinue: false,
+      reqCard: TUT_CARDS.shield,
+      requiredTileIdx: 20
+    },
+    {
+      badge: 'TUTORIAL • STEP 6 OF 6',
+      title: 'Tutorial complete! Build and share custom decks',
+      desc: 'You’ve mastered Standard Plays, Overdrive Exact Matches, Pattern Locking and Enemy Overwrites. Keep playing this board, start a fresh game, or build your own 18-card deck and share its GS1- code.',
+      tip: 'Use "? Rules" in the top bar anytime to review all 6 Icon Abilities and all 16 Pattern Cards.',
+      showContinue: true,
+      nextLabel: 'Keep playing this board →',
+      reqCard: null,
+      requiredTileIdx: null
+    }
+  ];
+
+  function tutReq() {
+    return state.tutorial.active ? TUTORIAL_STEPS[state.tutorial.step] : null;
+  }
+
+  function cardIsTutReq(card) {
+    const r = tutReq();
+    return !!(r && r.reqCard && card && card.color === r.reqCard.color && card.icon === r.reqCard.icon);
+  }
+
+  function startTutorialMatch() {
+    SFX.select();
+    cleanupPeer();
+    state.mode = 'ai';
+    document.getElementById('modeSelect').value = 'ai';
+    document.getElementById('p2DeckSelect').style.display = 'none';
+    document.getElementById('passCurtain').classList.remove('active');
+    state.tutorial.active = true;
+    state.tutorial.step = 0;
+    state.turn = 'p1';
+    state.phase = 'play_card';
+    state.selectedHandIdx = null;
+    state.abilityMode = null;
+    state.abilityAnchor = null;
+    state.abilityValidCells = [];
+    state.previewCells = [];
+    state.nearCells = [];
+    state.passCurtainActive = false;
+    prevOwnerSnap = null;
+    prevHandKeys = [];
+    endHidden = false;
+
+    const allCombos = buildAll24Combos();
+    const gridCards = [];
+    for (let i = 0; i < 36; i++) gridCards.push({ ...allCombos[i % 24] });
+
+    gridCards[7]  = { color: 'cobalt',  icon: 'rings'  };
+    gridCards[8]  = { color: 'amber',   icon: 'bolt'   };
+    gridCards[9]  = { color: 'emerald', icon: 'crown'  };
+    gridCards[14] = { color: 'crimson', icon: 'eye'    };
+    gridCards[20] = { color: 'emerald', icon: 'shield' };
+
+    state.board = gridCards.map((c, idx) => ({
+      index: idx,
+      r: Math.floor(idx / 6),
+      c: idx % 6,
+      color: c.color,
+      icon: c.icon,
+      owner: null,
+      shielded: false,
+      locked: false
+    }));
+
+    state.board[14].owner = 'p1';
+    state.board[20].owner = 'p2';
+
+    // Scripted hand + a filler-only draw pile so no scripted card is ever duplicated or reshuffled away
+    const scripted = new Set(['cobalt_gear', 'amber_bolt', 'emerald_shield', 'crimson_crown']);
+    state.p1 = {
+      name: 'You (Blue)',
+      deck: shuffle(buildAll24Combos().filter(c => !scripted.has(comboKey(c.color, c.icon)))),
+      discard: [],
+      hand: [
+        { color: 'cobalt',  icon: 'gear'   },
+        { color: 'amber',   icon: 'bolt'   },
+        { color: 'emerald', icon: 'shield' },
+        { color: 'crimson', icon: 'crown'  }
+      ],
+      vp: 0,
+      isAI: false
+    };
+
+    state.p2 = {
+      name: 'AI Rival (Red)',
+      deck: buildArchetypeDeck('balanced'),
+      discard: [],
+      hand: [],
+      vp: 0,
+      isAI: true
+    };
+    drawCards('p2', 4);
+
+    state.patternMarket = [
+      { ...PATTERNS[0], previewRot: 0 },
+      { ...PATTERNS[1], previewRot: 0 },
+      { ...PATTERNS[4], previewRot: 0 }
+    ];
+    state.patternDeck = shuffle(PATTERNS.filter((p, i) => i !== 0 && i !== 1 && i !== 4)).map(p => ({ ...p, previewRot: 0 }));
+
+    state.logs = [];
+    addLog('Started Guided Tutorial Round!', 'sys-log');
+    updateTutorialBanner();
+    renderAll();
+  }
+
+  function updateTutorialBanner() {
+    const banner = document.getElementById('tutorialBanner');
+    document.body.classList.toggle('tut-on', state.tutorial.active);
+    if (!state.tutorial.active) {
+      banner.classList.remove('active');
+      return;
+    }
+    banner.classList.add('active');
+    const stepObj = TUTORIAL_STEPS[state.tutorial.step];
+    const last = state.tutorial.step === TUTORIAL_STEPS.length - 1;
+    document.getElementById('tutStepBadge').textContent = stepObj.badge;
+    document.getElementById('tutTitle').textContent = stepObj.title;
+    document.getElementById('tutDesc').textContent = stepObj.desc;
+    document.getElementById('tutTip').textContent = stepObj.tip;
+    const nextBtn = document.getElementById('tutNextBtn');
+    nextBtn.style.display = stepObj.showContinue ? 'inline-block' : 'none';
+    nextBtn.textContent = stepObj.nextLabel || 'Continue →';
+    document.getElementById('tutFreshBtn').style.display = last ? 'inline-block' : 'none';
+    document.getElementById('tutBuilderBtn').style.display = last ? 'inline-block' : 'none';
+    document.getElementById('tutExitBtn').style.display = last ? 'none' : 'inline-block';
+    document.getElementById('tutDots').innerHTML = TUTORIAL_STEPS
+      .map((s, i) => `<i class="${i < state.tutorial.step ? 'done' : (i === state.tutorial.step ? 'now' : '')}"></i>`)
+      .join('');
+  }
+
+  function advanceTutorialStep() {
+    if (!state.tutorial.active) return;
+    if (state.tutorial.step < TUTORIAL_STEPS.length - 1) {
+      state.tutorial.step++;
+      SFX.select();
+      updateTutorialBanner();
+      renderAll();
+    } else {
+      state.tutorial.active = false;
+      updateTutorialBanner();
+      addLog('Tutorial graduated! Free play continues.', 'sys-log');
+      ensurePlayableHand('p1');
+      renderAll();
+    }
+  }
+
+  /* =========================================================================
+     9. MATCH INITIALIZATION (SOLO AI, LOCAL PASS & PLAY, ONLINE)
+     ========================================================================= */
+  function initNewMatch(mode, p1Choice = 'balanced', p2Choice = 'balanced', remoteGuestCustomDeck = null, remoteGuestLabel = null) {
+    state.tutorial.active = false;
+    updateTutorialBanner();
+    prevOwnerSnap = null;
+    prevHandKeys = [];
+    endHidden = false;
+    state.nearCells = [];
+    state.mode = mode;
+
+    const combos = buildAll24Combos();
+    const gridPool = shuffle([...combos, ...combos]).slice(0, 36);
+
+    state.board = gridPool.map((c, idx) => ({
+      index: idx,
+      r: Math.floor(idx / 6),
+      c: idx % 6,
+      color: c.color,
+      icon: c.icon,
+      owner: null,
+      shielded: false,
+      locked: false
+    }));
+
+    // 2nd player handicap: starts with 1 token in a random corner
+    const corners = [0, 5, 30, 35];
+    state.board[corners[Math.floor(Math.random() * corners.length)]].owner = 'p2';
+
+    const p1Desc = getDeckDescriptor(p1Choice);
+    const p2Desc = getDeckDescriptor(p2Choice);
+
+    state.p1 = {
+      name: mode === 'ai' ? 'You (Blue)' : 'Player 1 (Blue)',
+      deck: resolvePlayerDeck(p1Choice),
+      discard: [],
+      hand: [],
+      vp: 0,
+      isAI: false
+    };
+    drawCards('p1', 4);
+
+    state.p2 = {
+      name: mode === 'ai' ? 'AI Rival (Red)' : 'Player 2 (Red)',
+      deck: resolvePlayerDeck(p2Choice, remoteGuestCustomDeck),
+      discard: [],
+      hand: [],
+      vp: 0,
+      isAI: mode === 'ai'
+    };
+    drawCards('p2', 4);
+
+    const shuffledPatterns = shuffle(PATTERNS).map(p => ({ ...p, previewRot: 0 }));
+    state.patternMarket = shuffledPatterns.slice(0, 3);
+    state.patternDeck = shuffledPatterns.slice(3);
+
+    state.turn = 'p1';
+    state.phase = 'play_card';
+    state.selectedHandIdx = null;
+    state.abilityMode = null;
+    state.abilityAnchor = null;
+    state.abilityValidCells = [];
+    state.previewCells = [];
+    state.passCurtainActive = (mode === 'local');
+    state.logs = [];
+
+    const p2DisplayLabel = remoteGuestLabel || p2Desc.label;
+    addLog(`Match started (${mode.toUpperCase()}) • P1 [${p1Desc.label}] vs P2 [${p2DisplayLabel}]. ${state.p2.name} starts with 1 corner token.`, 'sys-log');
+    ensurePlayableHand('p1');
+
+    if (mode === 'local') {
+      showPassCurtain('p1');
+    }
+    renderAll();
+  }
+
+  function showPassCurtain(pid) {
+    state.passCurtainActive = true;
+    const p = state[pid];
+    document.getElementById('curtainTitle').textContent = `Pass Device to ${p.name}`;
+    document.getElementById('curtainTitle').style.color = pid === 'p1' ? 'var(--p1-color)' : 'var(--p2-color)';
+    document.getElementById('btnRevealPassHand').textContent = `I am ${p.name} — Reveal My Hand`;
+    document.getElementById('passCurtain').classList.add('active');
+  }
+
+  /* =========================================================================
+     10. ACTIVE PLAYER TURN ACTIONS & OVERDRIVE ABILITIES
+     ========================================================================= */
+  function onSelectHandCard(idx) {
+    if (!canLocalUserAct() || state.phase !== 'play_card') return;
+
+    if (state.tutorial.active) {
+      if (!cardIsTutReq(state.p1.hand[idx])) {
+        SFX.error();
+        return;
+      }
+    }
+
+    SFX.select();
+    state.selectedHandIdx = state.selectedHandIdx === idx ? null : idx;
+    renderAll();
+  }
+
+  function onClickBoardTile(idx) {
+    if (!canLocalUserAct()) return;
+    const activePid = state.turn;
+    const activePlayer = state[activePid];
+    const logCls = activePid === 'p1' ? 'p1-log' : 'p2-log';
+
+    if (state.phase === 'ability') {
+      if (!state.abilityValidCells.includes(idx)) {
+        SFX.error();
+        return;
+      }
+
+      if (state.abilityMode === 'fortress') {
+        state.board[idx].shielded = true;
+        SFX.overdrive();
+        addLog(`Fortress Bonus: ${activePlayer.name} Shielded the token at (${Math.floor(idx/6)+1}, ${(idx%6)+1}).`, logCls);
+        state.abilityMode = null;
+        state.abilityValidCells = [];
+        endActiveTurn('overdrive');
+        return;
+      }
+
+      if (state.abilityMode === 'bolt') {
+        state.board[idx].owner = activePid;
+        SFX.place();
+        addLog(`${activePlayer.name} Surge (Bolt): Placed bonus token at (${Math.floor(idx/6)+1}, ${(idx%6)+1}).`, logCls);
+        finishAbilityPhase('place');
+        if (state.tutorial.active && state.tutorial.step === 2) advanceTutorialStep();
+        return;
+      }
+
+      if (state.abilityMode === 'shield') {
+        state.board[idx].shielded = true;
+        SFX.overdrive();
+        addLog(`${activePlayer.name} Fortify (Shield): Protected token at (${Math.floor(idx/6)+1}, ${(idx%6)+1}).`, logCls);
+        finishAbilityPhase('overdrive');
+        if (state.tutorial.active && state.tutorial.step === 4) advanceTutorialStep();
+        return;
+      }
+
+      if (state.abilityMode === 'gear_pick') {
+        state.abilityAnchor = idx;
+        state.abilityMode = 'gear_dest';
+        state.abilityValidCells = getOrthogonalNeighbors(idx).filter(n => state.board[n].owner === null);
+        SFX.select();
+        renderAll();
+        return;
+      }
+
+      if (state.abilityMode === 'gear_dest') {
+        const from = state.board[state.abilityAnchor];
+        const to = state.board[idx];
+        to.owner = from.owner;
+        to.shielded = from.shielded;
+        from.owner = null;
+        from.shielded = false;
+        SFX.place();
+        addLog(`${activePlayer.name} Shift (Gear): Slid token to (${to.r+1}, ${to.c+1}).`, logCls);
+        finishAbilityPhase('place');
+        return;
+      }
+
+      if (state.abilityMode === 'rings_first') {
+        state.abilityAnchor = idx;
+        state.abilityMode = 'rings_second';
+        state.abilityValidCells = state.board
+          .filter(c => c.owner !== null && !c.locked && !c.shielded && c.index !== idx)
+          .map(c => c.index);
+        SFX.select();
+        renderAll();
+        return;
+      }
+
+      if (state.abilityMode === 'rings_second') {
+        const a = state.board[state.abilityAnchor];
+        const b = state.board[idx];
+        const tmpOwner = a.owner;
+        a.owner = b.owner;
+        b.owner = tmpOwner;
+        SFX.overdrive();
+        addLog(`${activePlayer.name} Transpose (Rings): Swapped (${a.r+1},${a.c+1}) and (${b.r+1},${b.c+1}).`, logCls);
+        finishAbilityPhase('overdrive');
+        return;
+      }
+    }
+
+    if (state.phase === 'play_card' && state.selectedHandIdx !== null) {
+      if (state.tutorial.active) {
+        const reqTile = TUTORIAL_STEPS[state.tutorial.step].requiredTileIdx;
+        if (reqTile === null || idx !== reqTile) {
+          SFX.error();
+          return;
+        }
+      }
+
+      const card = activePlayer.hand[state.selectedHandIdx];
+      const legalMoves = getLegalMovesForCard(card, activePid);
+      const move = legalMoves.find(m => m.index === idx);
+      if (!move) {
+        SFX.error();
+        return;
+      }
+
+      const cell = state.board[idx];
+      cell.owner = activePid;
+      cell.shielded = false;
+      activePlayer.discard.push(activePlayer.hand.splice(state.selectedHandIdx, 1)[0]);
+      state.selectedHandIdx = null;
+
+      const cObj = getColorObj(card.color);
+      const iObj = getIconObj(card.icon);
+
+      if (move.type === 'standard') {
+        SFX.place();
+        addLog(`${activePlayer.name} played ${cObj.name} ${iObj.name} at (${cell.r+1}, ${cell.c+1}).`, logCls);
+        if (state.tutorial.active && state.tutorial.step === 1) {
+          enterScoreOrEndPhase('place');
+          advanceTutorialStep();
+          return;
+        }
+        enterScoreOrEndPhase('place');
+      } else {
+        SFX.overdrive();
+        addLog(`OVERDRIVE! ${activePlayer.name} played ${cObj.name} ${iObj.name}${move.overwrite ? ' (Overwrote token!)' : ''}.`, logCls);
+        triggerOverdriveAbility(card.icon, idx, activePid);
+      }
+    }
+  }
+
+  function triggerOverdriveAbility(iconId, playedIdx, activePid) {
+    const activePlayer = state[activePid];
+    const logCls = activePid === 'p1' ? 'p1-log' : 'p2-log';
+
+    if (iconId === 'crown') {
+      activePlayer.vp += 1;
+      SFX.score();
+      addLog(`${activePlayer.name} Prestige (Crown): +1 immediate VP!`, logCls);
+      if (checkVictory('score')) return;
+      enterScoreOrEndPhase('score');
+      return;
+    }
+
+    if (iconId === 'eye') {
+      openScoutModal(activePid);
+      return;
+    }
+
+    if (iconId === 'bolt') {
+      const adj = getOrthogonalNeighbors(playedIdx).filter(n => state.board[n].owner === null);
+      if (state.tutorial.active && state.tutorial.step === 2) {
+        state.phase = 'ability';
+        state.abilityMode = 'bolt';
+        state.abilityValidCells = [9];
+        renderAll();
+        return;
+      }
+      if (adj.length === 0) {
+        addLog('Overdrive Bolt: No empty adjacent spaces available.', 'sys-log');
+        enterScoreOrEndPhase('overdrive');
+        return;
+      }
+      state.phase = 'ability';
+      state.abilityMode = 'bolt';
+      state.abilityValidCells = adj;
+      broadcastNetState('overdrive');
+      renderAll();
+      return;
+    }
+
+    if (iconId === 'shield') {
+      const candidates = state.board
+        .filter(c => c.owner === activePid && !c.locked && !c.shielded)
+        .map(c => c.index);
+      if (state.tutorial.active && state.tutorial.step === 4) {
+        state.phase = 'ability';
+        state.abilityMode = 'shield';
+        state.abilityValidCells = [14];
+        renderAll();
+        return;
+      }
+      if (candidates.length === 0) {
+        addLog('Overdrive Shield: No unshielded friendly tokens available.', 'sys-log');
+        enterScoreOrEndPhase('overdrive');
+        return;
+      }
+      state.phase = 'ability';
+      state.abilityMode = 'shield';
+      state.abilityValidCells = candidates;
+      broadcastNetState('overdrive');
+      renderAll();
+      return;
+    }
+
+    if (iconId === 'gear') {
+      const movable = state.board
+        .filter(c => c.owner !== null && !c.locked && !c.shielded &&
+          getOrthogonalNeighbors(c.index).some(n => state.board[n].owner === null))
+        .map(c => c.index);
+      if (movable.length === 0) {
+        addLog('Overdrive Gear: No movable tokens with an adjacent empty space.', 'sys-log');
+        enterScoreOrEndPhase('overdrive');
+        return;
+      }
+      state.phase = 'ability';
+      state.abilityMode = 'gear_pick';
+      state.abilityValidCells = movable;
+      broadcastNetState('overdrive');
+      renderAll();
+      return;
+    }
+
+    if (iconId === 'rings') {
+      const swappable = state.board
+        .filter(c => c.owner !== null && !c.locked && !c.shielded)
+        .map(c => c.index);
+      if (swappable.length < 2) {
+        addLog('Overdrive Rings: Fewer than 2 unshielded tokens on board.', 'sys-log');
+        enterScoreOrEndPhase('overdrive');
+        return;
+      }
+      state.phase = 'ability';
+      state.abilityMode = 'rings_first';
+      state.abilityValidCells = swappable;
+      broadcastNetState('overdrive');
+      renderAll();
+      return;
+    }
+  }
+
+  function finishAbilityPhase(sfxName = 'place') {
+    state.abilityMode = null;
+    state.abilityAnchor = null;
+    state.abilityValidCells = [];
+    enterScoreOrEndPhase(sfxName);
+  }
+
+  function openScoutModal(activePid) {
+    const p = state[activePid];
+    if (p.deck.length < 2 && p.discard.length > 0) {
+      p.deck.push(...shuffle(p.discard.splice(0)));
+    }
+    const drawn = [];
+    if (p.deck.length > 0) drawn.push(p.deck.pop());
+    if (p.deck.length > 0) drawn.push(p.deck.pop());
+
+    if (drawn.length === 0) {
+      addLog('Overdrive Eye: Deck is empty.', 'sys-log');
+      enterScoreOrEndPhase('overdrive');
+      return;
+    }
+    if (drawn.length === 1) {
+      p.hand.push(drawn[0]);
+      addLog(`${p.name} Scout (Eye): Drew last remaining card in deck.`, activePid === 'p1' ? 'p1-log' : 'p2-log');
+      enterScoreOrEndPhase('overdrive');
+      return;
+    }
+
+    const container = document.getElementById('scoutChoices');
+    container.innerHTML = '';
+    drawn.forEach((card, i) => {
+      const el = createCardElement(card, false);
+      el.style.cursor = 'pointer';
+      el.onclick = () => {
+        p.hand.push(drawn[i]);
+        p.deck.unshift(drawn[1 - i]);
+        document.getElementById('scoutModal').classList.remove('open');
+        SFX.select();
+        addLog(`${p.name} Scout (Eye): Kept ${getColorObj(card.color).name} ${getIconObj(card.icon).name}.`, activePid === 'p1' ? 'p1-log' : 'p2-log');
+        enterScoreOrEndPhase('select');
+      };
+      container.appendChild(el);
+    });
+    document.getElementById('scoutModal').classList.add('open');
+  }
+
+  function enterScoreOrEndPhase(sfxName = 'place') {
+    const scoreableAny = state.patternMarket.some(pat => findPatternMatches(pat, state.turn).length > 0);
+    if (scoreableAny) {
+      state.phase = 'score_pattern';
+      broadcastNetState(sfxName);
+      renderAll();
+    } else {
+      endActiveTurn(sfxName);
+    }
+  }
+
+  function onClaimPattern(marketIdx) {
+    if (!canLocalUserAct() || state.phase !== 'score_pattern') return;
+    const pat = state.patternMarket[marketIdx];
+    const activePid = state.turn;
+    const activePlayer = state[activePid];
+    const logCls = activePid === 'p1' ? 'p1-log' : 'p2-log';
+
+    if (state.tutorial.active && state.tutorial.step === 3 && pat.id !== 'p01') {
+      SFX.error();
+      return;
+    }
+
+    const matches = findPatternMatches(pat, activePid);
+    if (matches.length === 0) return;
+
+    matches[0].forEach(idx => {
+      state.board[idx].locked = true;
+      state.board[idx].shielded = false;
+    });
+
+    activePlayer.vp += pat.vp;
+    SFX.score();
+    addLog(`${activePlayer.name} scored "${pat.name}" (+${pat.vp} VP)! Tokens locked permanently.`, logCls);
+
+    if (state.patternDeck.length > 0) {
+      state.patternMarket[marketIdx] = state.patternDeck.pop();
+    } else {
+      state.patternMarket.splice(marketIdx, 1);
+    }
+
+    state.previewCells = [];
+    if (checkVictory('score')) return;
+
+    if (pat.bonusShield) {
+      const eligible = state.board.filter(c => c.owner === activePid && !c.locked && !c.shielded).map(c => c.index);
+      if (eligible.length > 0) {
+        state.phase = 'ability';
+        state.abilityMode = 'fortress';
+        state.abilityValidCells = eligible;
+        addLog('Fortress Bonus: choose one of your tokens to Shield.', logCls);
+        broadcastNetState('score');
+        renderAll();
+        return;
+      }
+    }
+
+    if (state.tutorial.active && state.tutorial.step === 3) {
+      state.board[20].owner = 'p2';
+      state.board[20].shielded = false;
+      state.board[20].locked = false;
+      drawCards('p1', Math.max(0, 4 - state.p1.hand.length));
+      state.phase = 'play_card';
+      advanceTutorialStep();
+      return;
+    }
+
+    endActiveTurn('score');
+  }
+
+  function endActiveTurn(sfxName = 'place') {
+    if (state.phase === 'game_over') return;
+    const currentPid = state.turn;
+    const nextPid = currentPid === 'p1' ? 'p2' : 'p1';
+
+    drawCards(currentPid, Math.max(0, 4 - state[currentPid].hand.length));
+    state.selectedHandIdx = null;
+    state.abilityMode = null;
+    state.abilityValidCells = [];
+    state.previewCells = [];
+
+    if (state.tutorial.active) {
+      state.turn = 'p1';
+      state.phase = 'play_card';
+      renderAll();
+      return;
+    }
+
+    state.turn = nextPid;
+
+    if (state.mode === 'ai') {
+      state.phase = 'ai_thinking';
+      renderAll();
+      setTimeout(runAITurn, 650);
+    } else if (state.mode === 'local') {
+      state.phase = 'play_card';
+      ensurePlayableHand(nextPid);
+      showPassCurtain(nextPid);
+      renderAll();
+    } else if (state.mode === 'online') {
+      state.phase = 'play_card';
+      ensurePlayableHand(nextPid);
+      broadcastNetState(sfxName);
+      renderAll();
+    }
+  }
+
+  /* =========================================================================
+     11. TACTICAL AI OPPONENT (SOLO MODE)
+     ========================================================================= */
+  function runAITurn() {
+    if (state.phase === 'game_over') return;
+    ensurePlayableHand('p2');
+
+    let bestMove = null;
+    let bestScore = -999;
+
+    state.p2.hand.forEach((card, cardIdx) => {
+      const legal = getLegalMovesForCard(card, 'p2');
+      legal.forEach(move => {
+        let score = 0;
+        const cell = state.board[move.index];
+        if (move.type === 'overdrive') score += 5;
+        if (move.overwrite) score += 7;
+        if (card.icon === 'crown' && move.type === 'overdrive') score += 6;
+
+        const adjAI = getOrthogonalNeighbors(move.index).filter(n => state.board[n].owner === 'p2').length;
+        score += adjAI * 2.5;
+
+        const distCenter = Math.abs(cell.r - 2.5) + Math.abs(cell.c - 2.5);
+        score += (5 - distCenter) * 0.6;
+
+        if (score > bestScore) {
+          bestScore = score;
+          bestMove = { cardIdx, card, move };
+        }
+      });
+    });
+
+    if (bestMove) {
+      const { cardIdx, card, move } = bestMove;
+      const cell = state.board[move.index];
+      cell.owner = 'p2';
+      cell.shielded = false;
+      state.p2.discard.push(state.p2.hand.splice(cardIdx, 1)[0]);
+
+      const cObj = getColorObj(card.color);
+      const iObj = getIconObj(card.icon);
+
+      if (move.type === 'overdrive') {
+        SFX.overdrive();
+        addLog(`AI triggered OVERDRIVE (${cObj.name} ${iObj.name})${move.overwrite ? ' & overwrote your token!' : '.'}`, 'p2-log');
+        resolveAIOverdrive(card.icon, move.index);
+      } else {
+        SFX.place();
+        addLog(`AI played ${cObj.name} ${iObj.name} at (${cell.r+1}, ${cell.c+1}).`, 'p2-log');
+      }
+    }
+
+    let bestPatIdx = -1;
+    let bestPatVP = -1;
+    state.patternMarket.forEach((pat, idx) => {
+      const m = findPatternMatches(pat, 'p2');
+      if (m.length > 0 && pat.vp > bestPatVP) {
+        bestPatVP = pat.vp;
+        bestPatIdx = idx;
+      }
+    });
+
+    if (bestPatIdx !== -1) {
+      const pat = state.patternMarket[bestPatIdx];
+      findPatternMatches(pat, 'p2')[0].forEach(i => {
+        state.board[i].locked = true;
+        state.board[i].shielded = false;
+      });
+      state.p2.vp += pat.vp;
+      SFX.score();
+      addLog(`AI scored "${pat.name}" for +${pat.vp} VP!`, 'p2-log');
+      if (pat.bonusShield) {
+        const fc = state.board.find(c => c.owner === 'p2' && !c.locked && !c.shielded);
+        if (fc) { fc.shielded = true; addLog(`AI Fortress Bonus: shielded its token at (${fc.r+1}, ${fc.c+1}).`, 'p2-log'); }
+      }
+      if (state.patternDeck.length > 0) {
+        state.patternMarket[bestPatIdx] = state.patternDeck.pop();
+      } else {
+        state.patternMarket.splice(bestPatIdx, 1);
+      }
+    }
+
+    if (checkVictory('score')) return;
+
+    drawCards('p2', Math.max(0, 4 - state.p2.hand.length));
+    state.turn = 'p1';
+    state.phase = 'play_card';
+    ensurePlayableHand('p1');
+    renderAll();
+  }
+
+  function resolveAIOverdrive(iconId, playedIdx) {
+    if (iconId === 'crown') {
+      state.p2.vp += 1;
+      addLog('AI gained +1 VP from Crown (Prestige).', 'p2-log');
+    } else if (iconId === 'bolt') {
+      const adj = getOrthogonalNeighbors(playedIdx).filter(n => state.board[n].owner === null);
+      if (adj.length > 0) {
+        const pick = adj[0];
+        state.board[pick].owner = 'p2';
+        addLog(`AI placed bonus Bolt token at (${Math.floor(pick/6)+1}, ${(pick%6)+1}).`, 'p2-log');
+      }
+    } else if (iconId === 'shield') {
+      const cand = state.board.filter(c => c.owner === 'p2' && !c.locked && !c.shielded);
+      if (cand.length > 0) {
+        cand[0].shielded = true;
+        addLog(`AI Shielded its token at (${cand[0].r+1}, ${cand[0].c+1}).`, 'p2-log');
+      }
+    } else if (iconId === 'gear') {
+      const humanTokens = state.board.filter(c => c.owner === 'p1' && !c.locked && !c.shielded);
+      for (const ht of humanTokens) {
+        const emptyAdj = getOrthogonalNeighbors(ht.index).filter(n => state.board[n].owner === null);
+        if (emptyAdj.length > 0) {
+          const dest = state.board[emptyAdj[0]];
+          dest.owner = 'p1';
+          ht.owner = null;
+          addLog(`AI used Gear to push your token to (${dest.r+1}, ${dest.c+1}).`, 'p2-log');
+          break;
+        }
+      }
+    } else if (iconId === 'rings') {
+      const pTok = state.board.find(c => c.owner === 'p1' && !c.locked && !c.shielded);
+      const aTok = state.board.find(c => c.owner === 'p2' && !c.locked && !c.shielded);
+      if (pTok && aTok) {
+        pTok.owner = 'p2';
+        aTok.owner = 'p1';
+        addLog('AI used Rings to swap token positions!', 'p2-log');
+      }
+    } else if (iconId === 'eye') {
+      drawCards('p2', 1);
+    }
+  }
+
+  function checkVictory(sfxName = 'score') {
+    if (state.p1.vp >= 10 || state.p2.vp >= 10) {
+      state.phase = 'game_over';
+      const winner = state.p1.vp >= 10 ? state.p1.name : state.p2.name;
+      SFX.score();
+      addLog(`VICTORY! ${winner} reached 10 Victory Points!`, 'sys-log');
+      broadcastNetState(sfxName);
+      renderAll();
+      return true;
+    }
+    return false;
+  }
+
+  /* =========================================================================
+     12. RENDERING ENGINE
+     ========================================================================= */
+  const LOCK_SVG = `<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M7 10V8a5 5 0 0110 0v2h1.5v11h-13V10H7zm2 0h6V8a3 3 0 00-6 0v2z"/></svg>`;
+  const SHIELD_SVG = `<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2L4 5v6c0 5 3.4 9.8 8 11 4.6-1.2 8-6 8-11V5l-8-3z"/></svg>`;
+
+  let prevOwnerSnap = null;
+  let prevHandKeys = [];
+  let endHidden = false;
+  let endShown = false;
+  const popAt = {};
+
+  function flashBoard(kind) {
+    const w = document.querySelector('.board-wrap');
+    if (!w) return;
+    w.classList.remove('fx-overdrive', 'fx-score');
+    void w.offsetWidth;
+    w.classList.add('fx-' + kind);
+    setTimeout(() => w.classList.remove('fx-' + kind), 950);
+  }
+
+  function launchConfetti() {
+    if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    const cv = document.getElementById('fxCanvas');
+    if (!cv) return;
+    const ctx = cv.getContext('2d');
+    cv.width = window.innerWidth;
+    cv.height = window.innerHeight;
+    const cols = ['#fbbf24', '#38bdf8', '#fb7185', '#10b981', '#f59e0b', '#3b82f6'];
+    const parts = Array.from({ length: 150 }, () => ({
+      x: Math.random() * cv.width,
+      y: -20 - Math.random() * cv.height * 0.5,
+      vx: (Math.random() - 0.5) * 3,
+      vy: 2 + Math.random() * 4,
+      s: 5 + Math.random() * 6,
+      r: Math.random() * 6.28,
+      vr: (Math.random() - 0.5) * 0.3,
+      c: cols[Math.floor(Math.random() * cols.length)]
+    }));
+    let frames = 0;
+    (function tick() {
+      ctx.clearRect(0, 0, cv.width, cv.height);
+      parts.forEach(p => {
+        p.x += p.vx; p.y += p.vy; p.r += p.vr;
+        ctx.save();
+        ctx.translate(p.x, p.y);
+        ctx.rotate(p.r);
+        ctx.fillStyle = p.c;
+        ctx.fillRect(-p.s / 2, -p.s / 2, p.s, p.s * 0.6);
+        ctx.restore();
+      });
+      if (++frames < 240) requestAnimationFrame(tick);
+      else ctx.clearRect(0, 0, cv.width, cv.height);
+    })();
+  }
+
+  function renderVpTrack(id, vp, who) {
+    let html = '';
+    for (let i = 0; i < 10; i++) html += `<span class="vp-seg ${i < vp ? 'on-' + who : ''}"></span>`;
+    document.getElementById(id).innerHTML = html;
+  }
+
+  function createCardElement(card, interactive = true, idx = 0, disabled = false) {
+    const cObj = getColorObj(card.color);
+    const iObj = getIconObj(card.icon);
+    const div = document.createElement('div');
+    div.className = 'hand-card';
+    if (disabled) div.classList.add('disabled-card');
+    div.style.borderColor = cObj.hex;
+    div.style.setProperty('--cc', cObj.hex);
+    div.style.setProperty('--i', idx);
+
+    if (interactive) {
+      if (state.selectedHandIdx === idx) div.classList.add('selected');
+      if (!disabled && cardIsTutReq(card)) div.classList.add('tut-focus');
+      div.onclick = () => onSelectHandCard(idx);
+      div.onmouseenter = () => {
+        if (disabled) return;
+        state.hoverHandIdx = idx;
+        paintMoveHints();
+      };
+      div.onmouseleave = () => {
+        if (state.hoverHandIdx === idx) {
+          state.hoverHandIdx = null;
+          paintMoveHints();
+        }
+      };
+    }
+
+    div.innerHTML = `
+      <div class="hc-top">
+        <span class="color-tag tag-${cObj.id}">${cObj.code}</span>
+        <span style="font-size:10px; font-weight:700; color:${cObj.hex};">${cObj.name}</span>
+      </div>
+      <div class="hc-icon" style="color:${cObj.hex};">${iObj.svg}</div>
+      <div>
+        <div class="hc-name">${iObj.name}</div>
+        <div class="hc-ability">${iObj.power}: ${iObj.shortDesc}</div>
+      </div>
+    `;
+    return div;
+  }
+
+  // Which tiles light up for the card being inspected (selected card wins over hover)
+  function computeMoveMap() {
+    const map = new Map();
+    const viewerPid = getViewerId();
+    if (!canLocalUserAct() || state.phase !== 'play_card') return map;
+    const idx = state.selectedHandIdx !== null ? state.selectedHandIdx : state.hoverHandIdx;
+    if (idx === null || idx === undefined) return map;
+    const card = state[viewerPid].hand[idx];
+    if (!card) return map;
+    if (state.tutorial.active && !cardIsTutReq(card)) return map;
+    getLegalMovesForCard(card, viewerPid).forEach(m => {
+      if (state.tutorial.active) {
+        const reqTile = tutReq().requiredTileIdx;
+        if (reqTile !== null && m.index !== reqTile) return;
+      }
+      map.set(m.index, m);
+    });
+    return map;
+  }
+
+  function paintMoveHints() {
+    const map = computeMoveMap();
+    document.querySelectorAll('#gridBoard .tile').forEach((t, i) => {
+      const m = map.get(i);
+      t.classList.toggle('valid-standard', !!m && m.type === 'standard');
+      t.classList.toggle('valid-overdrive', !!m && m.type === 'overdrive');
+    });
+  }
+
+  function renderAll() {
+    const viewerPid = getViewerId();
+    const viewerPlayer = state[viewerPid];
+    const canAct = canLocalUserAct();
+    const tutR = tutReq();
+    const live = state.phase !== 'game_over';
+    state.hoverHandIdx = null;
+
+    document.getElementById('p1Label').textContent = state.p1.name;
+    document.getElementById('p2Label').textContent = state.p2.name;
+    document.getElementById('p1VP').textContent = state.p1.vp;
+    document.getElementById('p2VP').textContent = state.p2.vp;
+    renderVpTrack('p1Track', state.p1.vp, 'p1');
+    renderVpTrack('p2Track', state.p2.vp, 'p2');
+    document.getElementById('p1ScoreCard').classList.toggle('active-turn', live && state.turn === 'p1');
+    document.getElementById('p2ScoreCard').classList.toggle('active-turn', live && state.turn === 'p2');
+    document.getElementById('p1Chip').textContent = state.mode === 'ai' ? 'Your turn' : 'Active turn';
+    document.getElementById('p2Chip').textContent = state.mode === 'ai' ? 'Thinking' : 'Active turn';
+    const bw = document.querySelector('.board-wrap');
+    bw.classList.toggle('turn-p1', live && state.turn === 'p1');
+    bw.classList.toggle('turn-p2', live && state.turn === 'p2');
+    document.getElementById('deckCounter').textContent = `Deck: ${viewerPlayer.deck.length} | Discard: ${viewerPlayer.discard.length}`;
+    document.getElementById('patternDeckCount').textContent = `${state.patternDeck.length} Left`;
+
+    const btnRematch = document.getElementById('btnOnlineRematch');
+    if (state.mode === 'online' && state.net.connected && state.phase === 'game_over') {
+      btnRematch.style.display = 'inline-block';
+    } else {
+      btnRematch.style.display = 'none';
+    }
+
+    const statusText = document.getElementById('statusText');
+    const statusBanner = document.getElementById('statusBanner');
+    const btnCancelAbility = document.getElementById('btnCancelAbility');
+    const btnEndTurn = document.getElementById('btnEndTurn');
+    const phaseLabel = document.getElementById('phaseLabel');
+
+    statusBanner.classList.remove('targeting');
+    btnCancelAbility.style.display = 'none';
+    btnEndTurn.style.display = 'none';
+
+    if (state.phase === 'game_over') {
+      phaseLabel.textContent = 'Match Complete';
+      const winner = state.p1.vp >= 10 ? state.p1.name : state.p2.name;
+      statusText.textContent = `${winner} wins with 10+ VP! Start a new match or rematch anytime.`;
+    } else if (state.mode === 'ai' && state.turn === 'p2') {
+      phaseLabel.textContent = 'AI Rival Turn';
+      statusText.textContent = 'AI Rival is evaluating the 6×6 grid...';
+    } else if (state.mode === 'online' && !canAct) {
+      phaseLabel.textContent = 'Opponent Turn';
+      statusText.textContent = `Waiting for ${state[state.turn].name} to make their move...`;
+    } else if (state.phase === 'ability') {
+      phaseLabel.textContent = 'Overdrive Ability!';
+      statusBanner.classList.add('targeting');
+      if (!state.tutorial.active && canAct) btnCancelAbility.style.display = 'inline-block';
+
+      const prompts = {
+        bolt: 'SURGE: Click a highlighted empty adjacent space to place +1 bonus token.',
+        shield: 'FORTIFY: Click one of your un-locked tokens to Shield it.',
+        fortress: 'FORTRESS BONUS: Click another un-locked token of yours to Shield it.',
+        gear_pick: 'SHIFT (1/2): Click any unshielded token to slide.',
+        gear_dest: 'SHIFT (2/2): Click an empty adjacent space to slide into.',
+        rings_first: 'TRANSPOSE (1/2): Click the first unshielded token to swap.',
+        rings_second: 'TRANSPOSE (2/2): Click the second unshielded token to swap with.'
+      };
+      statusText.textContent = prompts[state.abilityMode] || 'Resolve Overdrive ability.';
+    } else if (state.phase === 'score_pattern') {
+      phaseLabel.textContent = 'Step 2: Score Pattern';
+      statusBanner.classList.add('targeting');
+      statusText.textContent = 'Pattern Ready! Click "Claim" on a glowing Pattern Card on the right, or finish your turn.';
+      if (!state.tutorial.active && canAct) btnEndTurn.style.display = 'inline-block';
+    } else {
+      phaseLabel.textContent = 'Step 1: Play 1 Card';
+      if (state.selectedHandIdx !== null) {
+        const c = viewerPlayer.hand[state.selectedHandIdx];
+        statusText.textContent = c
+          ? `Selected ${getColorObj(c.color).name} ${getIconObj(c.icon).name}: Blue = Standard match, Gold = OVERDRIVE Exact Match.`
+          : 'Select a card in your hand to highlight matching grid tiles.';
+      } else {
+        statusText.textContent = `${viewerPlayer.name}: Select a card in your hand (or hover one) to highlight matching grid tiles.`;
+      }
+    }
+
+    // End of match overlay + confetti
+    const endEl = document.getElementById('endBanner');
+    if (state.phase === 'game_over') {
+      const winnerPid = state.p1.vp >= 10 ? 'p1' : 'p2';
+      const iWon = state.mode === 'local' || winnerPid === viewerPid;
+      endEl.innerHTML = `
+        <div class="end-card">
+          <div class="end-kicker">Match complete</div>
+          <h2 style="color:${winnerPid === 'p1' ? 'var(--p1-color)' : 'var(--p2-color)'};">${state[winnerPid].name} wins</h2>
+          <p>${state.p1.vp} – ${state.p2.vp} Victory Points</p>
+          <div class="btns">
+            <button class="btn-gold" id="endAgain">Play again</button>
+            <button id="endView">View board</button>
+          </div>
+        </div>`;
+      endEl.classList.toggle('show', !endHidden);
+      endEl.querySelector('#endAgain').onclick = () => {
+        if (state.mode === 'online' && state.net.connected) document.getElementById('btnOnlineRematch').click();
+        else document.getElementById('btnNewGame').click();
+      };
+      endEl.querySelector('#endView').onclick = () => {
+        endHidden = true;
+        endEl.classList.remove('show');
+      };
+      if (!endShown) {
+        endShown = true;
+        if (iWon) launchConfetti();
+      }
+    } else {
+      endEl.classList.remove('show');
+      endEl.innerHTML = '';
+      endShown = false;
+      endHidden = false;
+    }
+
+    const moveMap = computeMoveMap();
+    const boardEl = document.getElementById('gridBoard');
+    boardEl.innerHTML = '';
+    const now = Date.now();
+    state.board.forEach(cell => {
+      const cObj = getColorObj(cell.color);
+      const iObj = getIconObj(cell.icon);
+      const tile = document.createElement('div');
+      tile.className = 'tile';
+      tile.dataset.color = cell.color;
+      tile.style.setProperty('--tc', cObj.hex);
+
+      if (moveMap.has(cell.index)) {
+        const m = moveMap.get(cell.index);
+        tile.classList.add(m.type === 'overdrive' ? 'valid-overdrive' : 'valid-standard');
+      }
+      if (canAct && state.phase === 'ability' && state.abilityValidCells.includes(cell.index)) {
+        tile.classList.add('valid-ability');
+      }
+      if (tutR && tutR.requiredTileIdx === cell.index && state.phase === 'play_card') {
+        tile.classList.add('tut-target');
+      }
+      if (state.previewCells.includes(cell.index)) tile.classList.add('pattern-preview');
+      if (state.nearCells.includes(cell.index)) tile.classList.add('pattern-near');
+
+      tile.innerHTML = `
+        <div class="tile-top">
+          <span class="color-tag tag-${cObj.id}">${cObj.code}</span>
+          <span class="tile-icon" style="color:${cObj.hex};">${iObj.svg}</span>
+        </div>
+        <div class="tile-center-icon" style="color:${cObj.hex};">${iObj.svg}</div>
+      `;
+
+      if (cell.owner) {
+        const tok = document.createElement('div');
+        tok.className = `token ${cell.owner}`;
+        if (cell.shielded) tok.classList.add('shielded');
+        if (cell.locked) tok.classList.add('locked');
+        tok.innerHTML = cell.locked ? LOCK_SVG : (cell.shielded ? SHIELD_SVG : '');
+        if (prevOwnerSnap && prevOwnerSnap[cell.index] !== cell.owner) popAt[cell.index] = now;
+        if (popAt[cell.index] && now - popAt[cell.index] < 380) tok.classList.add('pop');
+        tile.appendChild(tok);
+      }
+
+      tile.onclick = () => onClickBoardTile(cell.index);
+      boardEl.appendChild(tile);
+    });
+    prevOwnerSnap = state.board.map(c => c.owner);
+
+    document.getElementById('handHeaderTitle').textContent = `${viewerPlayer.name}'s Hand`;
+    const handEl = document.getElementById('playerHand');
+    handEl.innerHTML = '';
+    const seen = {};
+    prevHandKeys.forEach(k => { seen[k] = (seen[k] || 0) + 1; });
+    const keys = [];
+    viewerPlayer.hand.forEach((card, idx) => {
+      const el = createCardElement(card, true, idx, !canAct || state.phase !== 'play_card');
+      const k = viewerPid + card.color + card.icon;
+      keys.push(k);
+      if (seen[k] > 0) seen[k]--;
+      else el.classList.add('deal');
+      handEl.appendChild(el);
+    });
+    prevHandKeys = keys;
+
+    const patEl = document.getElementById('patternMarket');
+    patEl.innerHTML = '';
+    state.patternMarket.forEach((pat, idx) => {
+      const matches = findPatternMatches(pat, viewerPid);
+      let canClaim = canAct && state.phase === 'score_pattern' && matches.length > 0;
+      if (tutR && tutR.claimPattern && pat.id !== tutR.claimPattern) canClaim = false;
+      const progress = matches.length > 0 ? { missing: 0, cells: matches[0] } : patternProgress(pat, viewerPid);
+      const rotShape = getRotatedCoords(pat.coords, pat.previewRot || 0);
+      const total = pat.coords.length;
+
+      let chipCls = 'chip-far';
+      let chipText = 'Blocked';
+      if (progress) {
+        if (progress.missing === 0) { chipCls = 'chip-ready'; chipText = 'Formed'; }
+        else if (progress.missing <= 2) { chipCls = 'chip-near'; chipText = `${progress.missing} token${progress.missing === 1 ? '' : 's'} away`; }
+        else { chipCls = 'chip-far'; chipText = `${progress.missing} tokens away`; }
+      }
+      const have = progress ? total - progress.missing : 0;
+      let stepsHtml = '';
+      for (let s = 0; s < total; s++) stepsHtml += `<i class="${s < have ? 'on' : ''}"></i>`;
+
+      const card = document.createElement('div');
+      card.className = `pattern-card ${canClaim ? 'scoreable' : ''}`;
+
+      let miniCellsHtml = '';
+      for (let r = 0; r < 4; r++) {
+        for (let c = 0; c < 4; c++) {
+          const isFilled = rotShape.some(([pr, pc]) => pr === r && pc === c);
+          miniCellsHtml += `<div class="mini-cell ${isFilled ? 'filled' : ''}"></div>`;
+        }
+      }
+
+      card.innerHTML = `
+        <div class="pat-header">
+          <span class="pat-name">${pat.name}</span>
+          <span class="pat-vp">+${pat.vp} VP</span>
+        </div>
+        <div class="pat-body">
+          <div class="mini-grid">${miniCellsHtml}</div>
+          <div class="pat-info">${pat.desc}</div>
+        </div>
+        <div class="pat-progress">
+          <span class="pat-chip ${chipCls}">${chipText}</span>
+          <span class="pat-steps">${stepsHtml}</span>
+        </div>
+        <div class="pat-actions">
+          <button class="btn-rot" title="Rotate preview">Rotate (${(pat.previewRot || 0) * 90}°)</button>
+          ${canClaim ? `<button class="btn-gold btn-claim${tutR && tutR.claimPattern ? ' tut-pulse' : ''}">Claim (+${pat.vp} VP)</button>` : ''}
+        </div>
+      `;
+
+      card.querySelector('.btn-rot').onclick = (e) => {
+        e.stopPropagation();
+        pat.previewRot = ((pat.previewRot || 0) + 1) % 4;
+        SFX.select();
+        renderAll();
+      };
+
+      card.onmouseenter = () => {
+        if (matches.length > 0) {
+          state.previewCells = matches[0];
+          state.nearCells = [];
+        } else if (progress && progress.missing <= 2) {
+          state.previewCells = [];
+          state.nearCells = progress.cells;
+        }
+        renderBoardHighlightsOnly();
+      };
+      card.onmouseleave = () => {
+        state.previewCells = [];
+        state.nearCells = [];
+        renderBoardHighlightsOnly();
+      };
+
+      if (canClaim) {
+        card.querySelector('.btn-claim').onclick = (e) => {
+          e.stopPropagation();
+          onClaimPattern(idx);
+        };
+      }
+
+      patEl.appendChild(card);
+    });
+  }
+
+  function renderBoardHighlightsOnly() {
+    const tiles = document.querySelectorAll('#gridBoard .tile');
+    tiles.forEach((t, i) => {
+      t.classList.toggle('pattern-preview', state.previewCells.includes(i));
+      t.classList.toggle('pattern-near', state.nearCells.includes(i));
+    });
+  }
+
+  /* =========================================================================
+     13. RULES & REFERENCE MODAL
+     ========================================================================= */
+  function renderRulesTab(tabId) {
+    document.querySelectorAll('#rulesModal .tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === tabId));
+    const body = document.getElementById('modalBody');
+
+    if (tabId === 'tabOverview') {
+      body.innerHTML = `
+        <p style="margin-bottom:10px;"><strong>GRIDSHIFT</strong> is a tactical spatial card game where the 6×6 board is shuffled every match. Be the first player to reach <strong>10 Victory Points (VP)</strong> by arranging your tokens into the shapes shown on the active <strong>Pattern Cards</strong>.</p>
+        <div class="flow-steps">
+          <div class="flow-step"><b>A</b><div><h4>Play 1 card (mandatory)</h4><p>Standard play on a Color-or-Icon match, or an Overdrive Exact Match that also fires the card's Icon Ability.</p></div></div>
+          <div class="flow-step"><b>B</b><div><h4>Score 1 pattern (optional, max 1 per turn)</h4><p>Match a face-up Pattern Card with your un-locked tokens. Scored tokens Lock. The market refills to 3 cards.</p></div></div>
+          <div class="flow-step"><b>C</b><div><h4>Draw to 4 cards</h4><p>Refill your hand to 4. If your draw pile runs out, your discard pile is reshuffled into it.</p></div></div>
+        </div>
+        <div class="rule-grid">
+          <div class="rule-card">
+            <h4>Standard play (single match)</h4>
+            <p>Play a card onto any <strong>empty</strong> tile matching its <strong>Color</strong> OR its <strong>Icon</strong> to place 1 Standard token.</p>
+          </div>
+          <div class="rule-card">
+            <h4>Overdrive (exact match)</h4>
+            <p>Play onto a tile matching <strong>BOTH Color AND Icon</strong>. Claim an empty tile <strong>OR overwrite an enemy's un-locked, unshielded token</strong>, then trigger the card's <strong>Icon Ability</strong>.</p>
+          </div>
+          <div class="rule-card">
+            <h4>Locking</h4>
+            <p>Claiming a Pattern flips every token in that formation to <strong>Locked</strong>: permanent blockers that cannot be overwritten, moved, swapped, or reused in future patterns.</p>
+          </div>
+          <div class="rule-card">
+            <h4>Dead hand</h4>
+            <p>If no card in your hand has a legal placement at the start of your turn, your hand is discarded and you draw 4 fresh cards automatically.</p>
+          </div>
+          <div class="rule-card">
+            <h4>Second-player handicap</h4>
+            <p>In 2-player matches, Player 2 (or the AI) starts with <strong>1 Standard token</strong> on a random corner tile to offset the first-turn initiative.</p>
+          </div>
+          <div class="rule-card">
+            <h4>Named decks and share codes</h4>
+            <p>Open the <strong>Deck Builder</strong> to create up to <strong>4 named 18-card decks</strong> (max 2 copies per card) and copy/paste <strong>GS1-</strong> share codes with friends across Solo, Pass & Play, or Online matches.</p>
+          </div>
+        </div>
+      `;
+    } else if (tabId === 'tabAbilities') {
+      body.innerHTML = `
+        <p style="margin-bottom:10px;">Every card carries 1 of 6 Icons. Whenever you make an <strong>Overdrive Exact Match</strong> (matching both Color and Icon), you trigger that Icon's special power:</p>
+        <div class="rule-grid">
+          ${ICONS.map((ic, n) => {
+            const col = COLORS[n % COLORS.length];
+            return `
+              <div class="rule-card">
+                <div class="face" style="--cc:${col.hex};">
+                  <div class="face-top">
+                    <span class="color-tag tag-${col.id}">${col.code}</span>
+                    <span style="font-size:10px; font-weight:700; color:${col.hex};">${col.name}</span>
+                  </div>
+                  <div class="face-icon" style="color:${col.hex};">${ic.svg}</div>
+                  <div class="face-name">${ic.name}</div>
+                </div>
+                <h4 style="margin-top:10px;">${ic.power}</h4>
+                <p>${ic.fullDesc}</p>
+              </div>`;
+          }).join('')}
+        </div>
+      `;
+    } else if (tabId === 'tabPatterns') {
+      const demo = (cls, svg) => `<div class="demo-tile"><div class="token p1 ${cls}">${svg}</div></div>`;
+      body.innerHTML = `
+        <div class="rule-grid" style="margin-bottom:14px;">
+          <div class="rule-card">
+            ${demo('', '')}
+            <h4>Standard token</h4>
+            <p>Normal active token. Counts toward Patterns, but can be overwritten by an enemy Exact Match, pushed by Gear, or swapped by Rings.</p>
+          </div>
+          <div class="rule-card">
+            ${demo('shielded', SHIELD_SVG)}
+            <h4>Shielded token</h4>
+            <p>Created by <strong>Shield (Fortify)</strong> or a Fortress bonus. Counts toward Patterns and is <strong>100% immune</strong> to overwrites, Gear shifts, and Rings swaps.</p>
+          </div>
+          <div class="rule-card">
+            ${demo('locked', LOCK_SVG)}
+            <h4>Locked token</h4>
+            <p>Created when scoring a Pattern. Stays on the grid permanently as a blocker, immune to everything, and cannot be reused to score future Patterns.</p>
+          </div>
+        </div>
+        <h4 style="margin-bottom:8px; color:var(--gold);">Complete 16-card pattern deck (rotations allowed, no mirroring)</h4>
+        <div class="rule-grid">
+          ${PATTERNS.map(p => {
+            const rot = state.rulesRot[p.id] || 0;
+            const shape = getRotatedCoords(p.coords, rot);
+            let cells = '';
+            for (let r = 0; r < 4; r++) {
+              for (let c = 0; c < 4; c++) {
+                const on = shape.some(([pr, pc]) => pr === r && pc === c);
+                cells += `<div class="mini-cell ${on ? 'filled' : ''}"></div>`;
+              }
+            }
+            return `
+              <div class="rule-card">
+                <div class="pat-header"><span class="pat-name">${p.name}</span><span class="pat-vp">+${p.vp} VP</span></div>
+                <div class="pat-body">
+                  <div class="mini-grid">${cells}</div>
+                  <div class="pat-info">${p.desc}</div>
+                </div>
+                <div class="pat-actions"><button class="gal-rot" data-pat="${p.id}">Rotate (${rot * 90}°)</button></div>
+              </div>`;
+          }).join('')}
+        </div>
+      `;
+      body.querySelectorAll('.gal-rot').forEach(btn => {
+        btn.onclick = () => {
+          const id = btn.dataset.pat;
+          state.rulesRot[id] = ((state.rulesRot[id] || 0) + 1) % 4;
+          SFX.select();
+          const keep = body.scrollTop;
+          renderRulesTab('tabPatterns');
+          body.scrollTop = keep;
+        };
+      });
+    }
+  }
+
+  /* =========================================================================
+     14. EVENT LISTENERS & BOOTSTRAP
+     ========================================================================= */
+  loadCustomDecksFromStorage();
+  populateDeckDropdowns();
+
+  document.getElementById('btnOpenDeckBuilder').onclick = () => openDeckBuilder();
+  document.getElementById('btnCloseDeckBuilder').onclick = () => {
+    document.getElementById('deckBuilderModal').classList.remove('open');
+  };
+
+  document.getElementById('dbDeckNameInput').oninput = (e) => {
+    state.deckBuilder.draftName = e.target.value;
+    renderDeckBuilder();
+  };
+
+  document.getElementById('btnDbLoadPreset').onclick = () => {
+    loadPresetIntoBuilder(document.getElementById('dbPresetSelect').value);
+  };
+  document.getElementById('btnDbAutoFill').onclick = autoFillBuilderTo18;
+  document.getElementById('btnDbClear').onclick = clearBuilder;
+
+  document.getElementById('btnDbCopyCode').onclick = () => {
+    if (getBuilderTotalCount() !== 18) return;
+    const codeStr = encodeDeckCode(state.deckBuilder.counts, state.deckBuilder.draftName);
+    const field = document.getElementById('dbExportCodeField');
+    field.value = codeStr;
+    field.select();
+    navigator.clipboard?.writeText(codeStr);
+    SFX.select();
+    const status = document.getElementById('dbCopyStatus');
+    status.textContent = 'Copied to clipboard ✓';
+    setTimeout(() => { status.textContent = ''; }, 2200);
+  };
+
+  document.getElementById('btnDbImportCode').onclick = () => {
+    const raw = document.getElementById('dbImportCodeField').value;
+    const res = decodeDeckCode(raw);
+    const status = document.getElementById('dbImportStatus');
+    if (res.error) {
+      SFX.error();
+      status.style.color = '#f87171';
+      status.textContent = res.error;
+      return;
+    }
+    state.deckBuilder.counts = res.counts;
+    if (res.name) {
+      state.deckBuilder.draftName = res.name;
+      document.getElementById('dbDeckNameInput').value = res.name;
+    }
+    SFX.score();
+    status.style.color = '#34d399';
+    status.textContent = `Loaded ${res.name ? `"${res.name}"` : '18-card build'} ✓`;
+    renderDeckBuilder();
+  };
+
+  document.getElementById('btnDbSaveOnly').onclick = () => {
+    const savedIdx = saveCurrentBuilderSlot();
+    if (savedIdx === null) return;
+    SFX.score();
+    document.getElementById('deckBuilderModal').classList.remove('open');
+    addLog(`Saved "${state.customSlots[savedIdx].name}" to Custom Slot ${savedIdx + 1}!`, 'sys-log');
+  };
+
+  document.getElementById('btnDbSaveAndPlay').onclick = () => {
+    const savedIdx = saveCurrentBuilderSlot();
+    if (savedIdx === null) return;
+    SFX.score();
+    document.getElementById('deckBuilderModal').classList.remove('open');
+
+    const selectedMode = document.getElementById('modeSelect').value;
+    const p1Choice = `slot_${savedIdx}`;
+    const p2Choice = selectedMode === 'local' ? document.getElementById('p2DeckSelect').value : 'balanced';
+
+    if (selectedMode === 'online') {
+      document.getElementById('onlineModal').classList.add('open');
+    } else {
+      cleanupPeer();
+      initNewMatch(selectedMode, p1Choice, p2Choice);
+    }
+  };
+
+  document.getElementById('btnNewGame').onclick = () => {
+    const selectedMode = document.getElementById('modeSelect').value;
+    const p1Choice = document.getElementById('deckSelect').value;
+    const p2Choice = selectedMode === 'local' ? document.getElementById('p2DeckSelect').value : 'balanced';
+    if (selectedMode === 'online') {
+      document.getElementById('onlineModal').classList.add('open');
+    } else {
+      cleanupPeer();
+      initNewMatch(selectedMode, p1Choice, p2Choice);
+    }
+  };
+
+  document.getElementById('modeSelect').onchange = (e) => {
+    const val = e.target.value;
+    const p2Sel = document.getElementById('p2DeckSelect');
+    p2Sel.style.display = val === 'local' ? 'inline-block' : 'none';
+
+    const p1Choice = document.getElementById('deckSelect').value;
+    const p2Choice = val === 'local' ? p2Sel.value : 'balanced';
+
+    if (val === 'online') {
+      document.getElementById('onlineModal').classList.add('open');
+    } else {
+      cleanupPeer();
+      initNewMatch(val, p1Choice, p2Choice);
+    }
+  };
+
+  document.getElementById('btnRevealPassHand').onclick = () => {
+    SFX.select();
+    state.passCurtainActive = false;
+    document.getElementById('passCurtain').classList.remove('active');
+    renderAll();
+  };
+
+  // Online Modal & PeerJS Controls
+  document.getElementById('btnCloseOnline').onclick = () => {
+    document.getElementById('onlineModal').classList.remove('open');
+  };
+  document.getElementById('btnCreateRoom').onclick = hostOnlineRoom;
+  document.getElementById('btnJoinRoom').onclick = joinOnlineRoom;
+  document.getElementById('btnCopyRoomCode').onclick = () => {
+    if (!state.net.roomCode) return;
+    navigator.clipboard?.writeText(state.net.roomCode);
+    SFX.select();
+    document.getElementById('btnCopyRoomCode').textContent = 'Copied!';
+    setTimeout(() => { document.getElementById('btnCopyRoomCode').textContent = 'Copy Code'; }, 1500);
+  };
+  document.getElementById('btnDisconnectNet').onclick = () => {
+    cleanupPeer();
+    document.getElementById('modeSelect').value = 'ai';
+    document.getElementById('p2DeckSelect').style.display = 'none';
+    initNewMatch('ai', document.getElementById('deckSelect').value, 'balanced');
+  };
+  document.getElementById('btnOnlineRematch').onclick = () => {
+    const myPayload = getSelectedOnlineDeckPayload();
+    if (state.net.myRole === 'p1') {
+      initNewMatch('online', myPayload.choice, 'balanced');
+      broadcastNetState('place');
+    } else if (state.net.conn) {
+      state.net.conn.send({
+        type: 'request_rematch',
+        choice: myPayload.choice,
+        label: myPayload.label,
+        customDeck: myPayload.customDeck
+      });
+    }
+  };
+
+  // Tutorial Controls
+  document.getElementById('btnStartTutorial').onclick = startTutorialMatch;
+  document.getElementById('tutRestartBtn').onclick = startTutorialMatch;
+  document.getElementById('tutExitBtn').onclick = () => {
+    initNewMatch('ai', 'balanced', 'balanced');
+  };
+  document.getElementById('tutFreshBtn').onclick = () => {
+    initNewMatch('ai', 'balanced', 'balanced');
+  };
+  document.getElementById('tutBuilderBtn').onclick = () => {
+    document.getElementById('btnOpenDeckBuilder').click();
+  };
+  document.getElementById('tutNextBtn').onclick = advanceTutorialStep;
+
+  // Turn Controls
+  document.getElementById('btnCancelAbility').onclick = () => {
+    addLog('Skipped Overdrive ability.', 'sys-log');
+    if (state.abilityMode === 'fortress') {
+      state.abilityMode = null;
+      state.abilityValidCells = [];
+      endActiveTurn('select');
+      return;
+    }
+    finishAbilityPhase('select');
+  };
+  document.getElementById('btnEndTurn').onclick = () => endActiveTurn('select');
+
+  // Audio & Rules Modal
+  document.getElementById('btnToggleAudio').onclick = (e) => {
+    audioEnabled = !audioEnabled;
+    e.target.textContent = audioEnabled ? 'Sound: ON' : 'Sound: OFF';
+  };
+  document.getElementById('btnOpenRules').onclick = () => {
+    renderRulesTab('tabOverview');
+    document.getElementById('rulesModal').classList.add('open');
+  };
+  document.getElementById('btnCloseRules').onclick = () => {
+    document.getElementById('rulesModal').classList.remove('open');
+  };
+  document.querySelectorAll('#rulesModal .tab-btn').forEach(btn => {
+    btn.onclick = () => renderRulesTab(btn.dataset.tab);
+  });
+
+  // Start default Solo vs AI match on load
+  initNewMatch('ai', 'balanced', 'balanced');
+})();
+</script>
+</body>
+</html>
