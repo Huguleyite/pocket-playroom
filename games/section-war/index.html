@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Section War: Band Room Battles</title><meta name="description" content="A marching-band deckbuilder with AI Scrimmage and Pass &amp; Play.">
+<title>Section War: Band Room Battles</title><meta name="description" content="A marching-band deckbuilder with AI Scrimmage, Pass &amp; Play, and online room-code battles.">
 <style>
 :root{color-scheme:dark;--gold:#f9ca75;--paper:#ffedbc;--ink:#10272a;--teal:#78ffe8}
 *{box-sizing:border-box}
@@ -405,6 +405,21 @@ button:not(:disabled):active{transform:translateY(2px) scale(.97);filter:brightn
 #impact-side{color:#503216;font:800 .57rem system-ui,sans-serif}
 .comic-impact[data-side=enemy] #impact-speaker{left:auto;right:2%}
 </style><style>.battle-tool-actions{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}.battle-tool-actions button{min-height:44px}main>.menu{justify-content:center}</style><link rel="preload" as="image" href="assets/dc50f4f39daeb5a6ccd5.webp">
+<style id="approved-play-modes">
+/* The approved illustrated menu, with a separate accessible button for each choice. */
+#mode-screen{position:relative;width:min(100%,calc((100dvh - 42px)*.562799));aspect-ratio:941/1672;min-height:0;margin:0 auto;padding:0;border:0;background:center/100% 100% no-repeat url('assets/play-modes-approved.png');box-shadow:none}
+#mode-screen>.duel-crest,#mode-screen>.duel-arena{display:none}
+#mode-screen>.duel-plaque{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);padding:0;border:0;margin:0}
+#mode-screen .duel-actions{display:contents}
+#mode-screen .duel-actions button{position:absolute;left:2.8%;width:94.4%;height:22.2%;min-height:0;aspect-ratio:auto;padding:0;border:0;background:none;box-shadow:none;border-radius:3px}
+#mode-screen #mode-ai{top:24.7%;background:none}
+#mode-screen #mode-local{top:48.2%;background:none}
+#mode-screen #mode-room{top:71.7%;background:none}
+#mode-screen .duel-actions button:hover{background:#ffdf8c12}
+#mode-screen .duel-actions button:focus-visible{outline:3px solid #fff0b8;outline-offset:-5px;background:#ffdf8c18}
+#mode-screen button.audio-settings{position:absolute;top:1.8%;right:3.2%;width:15.5%;height:3.3%;min-height:0;margin:0;padding:0;border:0;background:none;box-shadow:none;color:transparent}
+@media(max-height:440px) and (orientation:landscape){#mode-screen{width:min(100%,340px);min-height:0}}
+</style>
 <link rel="canonical" href="https://pocketplayroom.com/games/section-war/"><script src="../../recent-games.js" defer></script><style>.section-war-return{display:block;position:relative;z-index:5;text-align:center;padding:10px 12px;background:#06171b;color:#ffe1a2;font:600 14px system-ui;text-decoration:none}.section-war-return:focus-visible{outline:2px solid #ffe1a2;outline-offset:-3px}</style></head>
 <body><a class="section-war-return" href="../../#home">Back to Pocket Playroom</a>
 <main id="battle-screen" hidden>
@@ -429,6 +444,7 @@ button:not(:disabled):active{transform:translateY(2px) scale(.97);filter:brightn
   <div class="duel-actions">
     <button id="mode-ai" type="button"><span>Scrimmage · Play against the AI</span></button>
     <button id="mode-local" type="button"><span>Pass &amp; Play · Two players on one device</span></button>
+    <button id="mode-room" type="button"><span>Room Code · Two players on two devices</span></button>
   </div>
 </section>
 <section id="handoff-screen" class="duel-screen" hidden aria-labelledby="handoff-title">
@@ -1444,5 +1460,9 @@ el("audio-volume").addEventListener("input", event => {
   saveAudio();
 });
 unlockMusic();</script>
+<script src="https://cdn.jsdelivr.net/npm/peerjs@1.5.5/dist/peerjs.min.js"></script>
+<script src="battle-rules.js"></script>
+<script src="peer-rooms.js"></script>
+<script src="rooms.js"></script>
 </body>
 </html>
