@@ -1,0 +1,1923 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<meta name="description" content="Vault Breakers: a cooperative heist for 1 to 4 players. Play together on Pocket Playroom.">
+<link rel="icon" href="../../favicon.ico">
+<meta name="theme-color" content="#05070B">
+<meta name="color-scheme" content="dark">
+<title>Vault Breakers | Pocket Playroom</title>
+<script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+:root{--obs:#05070B;--slate:#0B101B;--slate2:#111827;--line:#1B2740;--cyan:#00F0FF;--amber:#FFB800;--crim:#FF3B5C;--em:#00E676;--txt:#C9D6EE;--dim:#6F82A6;--mono:ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;--sans:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif}
+[hidden]{display:none!important}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;background:var(--obs);color:var(--txt);font-family:var(--sans);overflow:hidden}
+button{font:inherit;color:inherit;cursor:pointer;border:0;background:none;padding:0}
+button:disabled{cursor:not-allowed}
+.mono{font-family:var(--mono);letter-spacing:.04em}
+.dim{color:var(--dim)}
+em{font-style:normal}
+svg text{font-family:var(--sans)}
+
+/* ------------------------------------------------------------ buttons */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;height:56px;padding:0 30px;border-radius:12px;background:linear-gradient(180deg,#0f2a33,#0a1c24);border:2px solid var(--cyan);color:var(--cyan);font-weight:800;letter-spacing:.12em;font-size:18px;transition:transform .12s,box-shadow .2s,background .2s}
+.btn:hover:not(:disabled){box-shadow:0 0 22px rgba(0,240,255,.35);transform:translateY(-1px)}
+.btn:active:not(:disabled){transform:translateY(1px)}
+.btn:disabled{opacity:.35;border-color:#2c3b57;color:#6F82A6;background:#0b101b}
+.btn.big{height:72px;padding:0 44px;font-size:24px;background:linear-gradient(180deg,#00323a,#012128);box-shadow:0 0 28px rgba(0,240,255,.18)}
+.btn.ghost{background:transparent;border-color:#2c3b57;color:var(--txt)}
+.btn.ghost:hover:not(:disabled){border-color:var(--cyan);color:var(--cyan)}
+.btn.mini{height:38px;padding:0 16px;font-size:14px;border-radius:9px}
+.btn.sim{border-style:dashed;border-color:var(--amber);color:var(--amber)}
+
+/* ------------------------------------------------------------ TV stage */
+#tvViewport{position:fixed;inset:var(--bar,0px) 0 0 0;overflow:hidden;background:var(--obs);--s:1}
+.tv-scale{position:absolute;left:50%;top:50%;width:1920px;height:1080px;transform:translate(-50%,-50%) scale(var(--s));transform-origin:center center}
+.tv-stage{position:absolute;inset:0;background:radial-gradient(1200px 700px at 50% 38%,#0a1222 0%,var(--obs) 70%);animation:drift 120s ease-in-out infinite;will-change:transform;overflow:hidden}
+@keyframes drift{0%{transform:translate(0,0)}25%{transform:translate(3px,-3px)}50%{transform:translate(-3px,3px)}75%{transform:translate(3px,3px)}100%{transform:translate(0,0)}}
+.tv-stage::before{content:"";position:absolute;inset:-6px;background-image:linear-gradient(rgba(0,240,255,.035) 1px,transparent 1px),linear-gradient(90deg,rgba(0,240,255,.035) 1px,transparent 1px);background-size:60px 60px;pointer-events:none}
+.tv-head{position:relative;height:96px;padding:0 36px;display:flex;align-items:center;gap:28px;border-bottom:1px solid var(--line);background:rgba(5,7,11,.7)}
+.brand{display:flex;align-items:center;gap:16px;min-width:330px}
+.brand .logo{width:54px;height:54px}
+.brand b{display:block;white-space:nowrap;font-size:26px;letter-spacing:.18em;font-weight:900;color:#E9F1FF}
+.brand small{display:block;font-size:13px;letter-spacing:.34em;color:var(--dim);margin-top:2px}
+.head-mid{flex:1;display:flex;align-items:center;gap:26px;justify-content:center}
+.head-mid.lobbymid{gap:16px}
+.lobbymid .rl{font-size:15px;letter-spacing:.3em;color:var(--dim)}
+.lobbymid b{font-size:34px;color:var(--cyan);letter-spacing:.16em;text-shadow:0 0 18px rgba(0,240,255,.4)}
+.meter{display:flex;align-items:center;gap:16px}
+.ml,.stat span{white-space:nowrap;font-size:13px;letter-spacing:.24em;color:var(--dim)}
+.mbar{position:relative;width:230px;height:26px;border-radius:13px;background:#0b1220;border:2px solid #25365a;overflow:hidden}
+.mbar i{position:absolute;left:0;top:0;bottom:0;width:0;background:linear-gradient(90deg,#00b8c4,var(--cyan));transition:width .7s cubic-bezier(.3,.9,.3,1),background .4s}
+.meter.warm .mbar i{background:linear-gradient(90deg,#d99500,var(--amber))}
+.meter.hot .mbar i{background:linear-gradient(90deg,#c01f3c,var(--crim));animation:hotpulse 1s infinite}
+@keyframes hotpulse{50%{filter:brightness(1.4)}}
+.mbar u{position:absolute;top:0;bottom:0;width:2px;background:#05070B;text-decoration:none}
+.mbar u:nth-of-type(1){left:25%}.mbar u:nth-of-type(2){left:50%}.mbar u:nth-of-type(3){left:75%}
+#mPct{font-size:26px;width:76px;text-align:right;color:#E9F1FF}
+.meter.hot #mPct{color:var(--crim)}
+.stat{display:flex;flex-direction:column;align-items:center;gap:2px}
+.stat b{font-size:28px;color:#E9F1FF}
+.head-right{display:flex;gap:10px;align-items:center}
+.hbtn{white-space:nowrap;height:46px;padding:0 14px;display:inline-flex;align-items:center;gap:10px;border-radius:10px;border:1.5px solid #2c3b57;color:var(--txt);font-size:14px;font-weight:800;letter-spacing:.14em;transition:all .15s}
+.hbtn:hover{border-color:var(--cyan);color:var(--cyan)}
+.hbtn svg{width:24px;height:24px}
+.hbtn.tog.on{border-color:var(--amber);color:var(--amber);background:rgba(255,184,0,.08)}
+.tv-main{position:absolute;left:0;right:0;top:96px;bottom:0;padding:24px 36px 28px}
+
+/* ------------------------------------------------------------ lobby */
+.lobby{height:100%;display:grid;grid-template-columns:1fr 640px;gap:44px}
+.lb-left{display:flex;flex-direction:column;gap:20px;min-width:0}
+.lb-left h1{margin:6px 0 0;font-size:84px;line-height:1;letter-spacing:.06em;font-weight:900;color:#E9F1FF}
+.lb-left h1 em{color:var(--cyan);text-shadow:0 0 28px rgba(0,240,255,.45)}
+.tagline{margin:0;font-size:24px;line-height:1.4;color:#9db0d3;max-width:980px}
+.diffs{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.diff{padding:16px 20px;border-radius:14px;border:2px solid #25365a;background:rgba(11,16,27,.8);text-align:left;display:flex;flex-direction:column;gap:6px;transition:all .15s}
+.diff b{font-size:24px;letter-spacing:.16em}
+.diff span{font-size:16px;color:var(--dim);line-height:1.35}
+.diff:hover{border-color:#3a5688}
+.diff.on{border-color:var(--cyan);background:rgba(0,240,255,.07);box-shadow:0 0 24px rgba(0,240,255,.15) inset}
+.diff.on b{color:var(--cyan)}
+.slots{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+.slot{padding:14px 18px;border-radius:14px;border:2px dashed #25365a;min-height:132px;display:flex;flex-direction:column;gap:6px}
+.slot.on{border:2px solid var(--cyan);background:rgba(0,240,255,.05)}
+.slot.on.away{border-color:var(--amber);opacity:.7}
+.slot .sh{display:flex;justify-content:space-between;align-items:center}
+.slot .sh b{font-size:22px;color:var(--cyan)}
+.slot .kind{font-size:12px;letter-spacing:.2em;color:var(--dim);border:1px solid #2c3b57;padding:2px 8px;border-radius:99px}
+.slot .sn{font-size:22px;font-weight:800;letter-spacing:.06em;color:#E9F1FF;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.slot .sn.dim{color:#3d4f75}
+.slot .sa{display:flex;gap:6px;flex-wrap:wrap;font-size:14px;color:#3d4f75}
+.slot .sa i{font-style:normal;font-size:12px;font-weight:900;letter-spacing:.12em;padding:3px 9px;border-radius:99px;border:1.5px solid var(--c);color:var(--c)}
+.scale{margin:0;font-size:16px;color:var(--dim)}
+.lb-actions{display:flex;gap:16px;align-items:center;flex-wrap:wrap;margin-top:auto}
+.lb-right{display:flex;flex-direction:column;gap:20px;min-width:0}
+.qrcard{padding:24px;border-radius:20px;background:rgba(11,16,27,.85);border:2px solid #25365a;display:flex;flex-direction:column;align-items:center;gap:14px}
+.qrbox{width:282px;height:282px;padding:16px;border-radius:14px;background:#7FDCE4;display:flex;align-items:center;justify-content:center;box-shadow:0 0 36px rgba(0,240,255,.18)}
+.qrbox img,.qrbox canvas{display:block;width:250px!important;height:250px!important}
+.qrbox.off{background:#0b101b;border:2px dashed #2c3b57;box-shadow:none}.qrbox.off .qrwait{color:var(--dim)}
+.qrwait{color:#05202a;font-weight:700;text-align:center;font-size:16px;line-height:1.4}
+.rc{text-align:center}
+.rc span{display:block;font-size:13px;letter-spacing:.3em;color:var(--dim)}
+.rc b{display:block;font-size:46px;letter-spacing:.14em;color:var(--cyan);text-shadow:0 0 22px rgba(0,240,255,.35)}
+.joinurl{font-size:15px;color:var(--dim);text-align:center;word-break:break-all;max-width:560px}
+.netstat{width:100%;padding:10px 16px;border-radius:10px;font-size:15px;display:flex;flex-direction:column;gap:2px;text-align:center}
+.netstat b{letter-spacing:.2em;font-size:14px}
+.netstat span{color:var(--dim);font-size:14px}
+.netstat.ok{background:rgba(0,230,118,.08);border:1px solid rgba(0,230,118,.4)}.netstat.ok b{color:var(--em)}
+.netstat.wait{background:rgba(255,184,0,.08);border:1px solid rgba(255,184,0,.4)}.netstat.wait b{color:var(--amber)}
+.netstat.bad{background:rgba(255,59,92,.09);border:1px solid rgba(255,59,92,.5)}.netstat.bad b{color:var(--crim)}
+.legend{padding:20px 24px;border-radius:20px;background:rgba(11,16,27,.7);border:1px solid var(--line);display:flex;flex-direction:column;gap:6px}
+.legend h4{margin:0 0 4px;font-size:13px;letter-spacing:.3em;color:var(--dim)}
+.lg{display:flex;gap:16px;align-items:center}
+.lg svg{width:50px;height:50px;flex:none;background:#0B101B;border-radius:8px}
+.lg b{display:block;font-size:16px;letter-spacing:.14em;color:#E9F1FF}
+.lg span{display:block;font-size:14px;color:var(--dim)}
+
+.how{padding:18px 24px;border-radius:16px;background:rgba(11,16,27,.6);border:1px solid var(--line);display:grid;grid-template-columns:repeat(4,1fr);gap:18px}
+.how div{display:flex;flex-direction:column;gap:4px}
+.how b{font-size:14px;letter-spacing:.22em;color:var(--cyan)}
+.how span{font-size:16px;line-height:1.4;color:#9db0d3}
+.ex .exl{paint-order:stroke;stroke:#052013;stroke-width:5px}
+/* ------------------------------------------------------------ game screen */
+.game{height:100%;display:grid;grid-template-columns:1232px 1fr;gap:24px}
+.board-col{display:flex;align-items:flex-start}
+.board-host{width:1232px;height:880px;border-radius:18px;border:2px solid #1d2c4b;background:#070b14;box-shadow:0 0 60px rgba(0,0,0,.6),0 0 0 1px rgba(0,240,255,.05) inset;overflow:hidden}
+.board-host svg{display:block;width:100%;height:100%}
+.side{display:flex;flex-direction:column;gap:16px;min-width:0;min-height:0}
+.tphase{display:flex;align-items:baseline;justify-content:space-between;padding:12px 20px;border-radius:12px;background:rgba(11,16,27,.9);border:1.5px solid #25365a}
+.tphase span{font-size:16px;color:var(--dim);letter-spacing:.2em}
+.tphase b{font-size:26px;letter-spacing:.2em;color:var(--cyan)}
+.tphase.resolving b{color:var(--amber)}.tphase.won b{color:var(--em)}.tphase.lost b{color:var(--crim)}
+.locks{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.locks i{font-style:normal;padding:8px 6px;text-align:center;border-radius:10px;border:1.5px solid #2c3b57;color:#51658c;font-size:15px;font-weight:900;letter-spacing:.12em;display:flex;flex-direction:column;gap:2px}
+.locks i em{font-size:11px;letter-spacing:.2em;font-weight:700}
+.locks i.lk{border-color:var(--c);color:var(--c);background:rgba(255,255,255,.03)}
+.locks i.out{opacity:.4;border-style:dashed}
+.waiting{display:flex;align-items:center;justify-content:space-between;gap:12px;font-size:16px;color:var(--dim)}
+.side-body{flex:1;min-height:0;display:flex;flex-direction:column;gap:14px;overflow:hidden}
+.roster{display:flex;flex-direction:column;gap:10px}
+.rc-row{display:grid;grid-template-columns:150px 1fr auto;gap:12px;align-items:center;padding:12px 16px;border-radius:12px;background:rgba(11,16,27,.85);border:1.5px solid #25365a;border-left:6px solid var(--c)}
+.rc-row.out{opacity:.4}
+.rc-row .rn b{display:block;font-size:22px;letter-spacing:.12em;color:var(--c)}
+.rc-row .rn span{display:block;font-size:12px;letter-spacing:.14em;color:var(--dim)}
+.rc-row .ro{font-size:16px;color:#9db0d3;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pips{display:flex;gap:5px}
+.pips i{width:11px;height:20px;border-radius:3px;border:1.5px solid #3a4c72}
+.pips i.f{background:var(--c);border-color:var(--c)}
+.log{padding:14px 18px;border-radius:12px;background:rgba(11,16,27,.7);border:1px solid var(--line);flex:1;min-height:0;overflow:hidden}
+.log h4{margin:0 0 8px;font-size:13px;letter-spacing:.3em;color:var(--dim)}
+.log p{margin:0 0 8px;font-size:16px;line-height:1.35;color:#b4c3e0}
+.log p:first-of-type{color:#E9F1FF}
+.deckwrap{flex:1;min-height:0;display:flex}
+.simtabs{display:flex;gap:8px}
+.simtabs button{min-height:44px;padding:8px 16px;border-radius:9px;border:1.5px solid #2c3b57;font-size:14px;font-weight:800;letter-spacing:.1em;display:flex;gap:8px;align-items:baseline}
+.simtabs button small{font-size:11px;color:var(--dim)}
+.simtabs button.on{border-color:var(--amber);color:var(--amber)}
+.simstage{flex:1;min-height:0;display:flex;justify-content:center;align-items:flex-start}
+.simframe{display:none;width:390px;height:844px;zoom:.8;border-radius:34px;border:8px solid #1a2438;box-shadow:0 0 0 2px #2c3b57,0 24px 60px rgba(0,0,0,.6);overflow:hidden;background:var(--obs)}
+.simframe.show{display:flex}
+.simframe:not(.show){display:none!important}
+
+/* overlays */
+.banner{position:absolute;left:1292px;top:948px;width:592px;height:84px;display:flex;align-items:center;justify-content:center;border-radius:14px;background:rgba(5,7,11,.88);border:2px solid var(--cyan);font-size:24px;font-weight:900;letter-spacing:.16em;text-align:center;color:var(--cyan);opacity:0;pointer-events:none;transform:translateY(-8px);z-index:20}
+.banner.on{animation:bannerIn 1.4s ease forwards}
+.banner.s3{border-color:var(--crim);color:var(--crim)}.banner.s4{border-color:var(--amber);color:var(--amber)}.banner.s1{border-color:#9b7bff;color:#c7b4ff}
+@keyframes bannerIn{0%{opacity:0;transform:translateY(-12px)}12%{opacity:1;transform:none}85%{opacity:1}100%{opacity:0}}
+.spotbar{position:absolute;left:1292px;bottom:150px;width:592px;opacity:0;pointer-events:none;z-index:21;display:flex;flex-direction:column;gap:8px}
+.spotbar div{padding:14px 24px;border-radius:12px;background:rgba(40,6,14,.92);border:2px solid var(--crim);font-size:20px;font-weight:800;color:#ffd0d9;letter-spacing:.04em}
+.spotbar.on{animation:spotIn 2.2s ease forwards}
+@keyframes spotIn{0%{opacity:0;transform:translateY(14px)}10%{opacity:1;transform:none}85%{opacity:1}100%{opacity:0}}
+.flash{position:absolute;inset:0;pointer-events:none;z-index:19;opacity:0;background:radial-gradient(ellipse at center,rgba(255,59,92,0) 45%,rgba(255,59,92,.4) 100%)}
+.flash.on{animation:flash .9s ease 2}
+@keyframes flash{0%{opacity:0}30%{opacity:1}100%{opacity:0}}
+.endov{position:absolute;inset:0;display:none;align-items:center;justify-content:center;background:rgba(5,7,11,.82);z-index:30;backdrop-filter:blur(6px)}
+.endov.on{display:flex}
+.endcard{width:1000px;padding:56px 64px;border-radius:26px;background:linear-gradient(180deg,#0e1626,#080c15);border:3px solid var(--cyan);text-align:center;display:flex;flex-direction:column;gap:26px;align-items:center}
+.endov.good .endcard{border-color:var(--em);box-shadow:0 0 80px rgba(0,230,118,.22)}
+.endov.bad .endcard{border-color:var(--crim);box-shadow:0 0 80px rgba(255,59,92,.25)}
+.endcard h2{margin:0;white-space:nowrap;font-size:60px;letter-spacing:.14em;font-weight:900}
+.endov.good h2{color:var(--em)}.endov.bad h2{color:var(--crim)}
+.endcard p{margin:0;font-size:26px;color:#b4c3e0}
+.stats{display:flex;gap:44px}
+.stats div{display:flex;flex-direction:column;gap:4px}
+.stats span{font-size:13px;letter-spacing:.28em;color:var(--dim)}
+.stats b{font-size:42px;color:#E9F1FF}
+
+/* ------------------------------------------------------------ board svg */
+.fl{fill:#0B101B;stroke:#16213a;stroke-width:1.5}
+.fl.alt{fill:#0D1424}
+.ped{fill:#14100a;stroke:#5a4210;stroke-width:3}
+.cone{pointer-events:none}
+.cone.g{fill:#FF3B5C}.cone.c{fill:#FFB800}
+.cone.nx{fill:none;stroke-width:3;stroke-dasharray:9 7;opacity:.55}
+.cone.nx.g{stroke:#FF3B5C}.cone.nx.c{stroke:#FFB800}
+.beam-glow{stroke:#FF3B5C;stroke-width:14;opacity:.28;stroke-linecap:round}
+.beam{stroke:#ff8aa0;stroke-width:4;stroke-linecap:round;stroke-dasharray:14 6;animation:beam 1.2s linear infinite}
+@keyframes beam{to{stroke-dashoffset:-20}}
+.node{fill:#2a0b14;stroke:#FF3B5C;stroke-width:3}
+.lzTile{fill:#1b0710;stroke:#6b1325;stroke-width:3}
+.laser.off{opacity:.28}.laser.off .beam{animation:none}
+.laser.cut{opacity:.18}
+.laser .lzoff{opacity:0;font-size:15px;font-weight:900;fill:#FFB800;letter-spacing:.14em}
+.laser.off .lzoff{opacity:1}
+.lbl{font-size:15px;font-weight:900;letter-spacing:.12em;fill:#9db0d3}
+.relic .halo{fill:#FFB800;opacity:.08}
+.relic .case{stroke:#FFB800;opacity:.9}
+.relic .rpill rect{fill:#241a02;stroke:#FFB800;stroke-width:2}
+.relic .rpill text{fill:#FFD66B;font-size:13px}
+.relic .hk{fill:#00F0FF;font-size:15px;animation:blink 1s infinite}
+@keyframes blink{50%{opacity:.3}}
+.relic.st-cracked .case{stroke:#00F0FF;stroke-dasharray:none}
+.relic.st-cracked .halo{fill:#00F0FF;opacity:.14;animation:halo 1.6s infinite}
+.relic.st-cracked .rpill rect{stroke:#00F0FF;fill:#02242a}
+.relic.st-cracked .rpill text{fill:#7ff6ff}
+.relic.st-secured .halo{fill:#00E676;opacity:.18}
+.relic.st-secured .case{stroke:#00E676;stroke-dasharray:none}
+.relic.st-secured .gem{opacity:.55;filter:saturate(.6)}
+.relic.st-secured .rpill rect{stroke:#00E676;fill:#02200f}
+.relic.st-secured .rpill text{fill:#8dffc0}
+@keyframes halo{50%{opacity:.04}}
+.ex .exbg{fill:#052013;stroke:#0f5a34;stroke-width:3}
+.ex .brk{stroke:#00E676}
+.ex .pad{stroke:#00E676;opacity:.35}
+.ex .hpad{font-size:34px;font-weight:900;fill:#00E676;opacity:.5}
+.ex .exl{font-size:13px}
+.ex .exlock{fill:#FFB800}
+.ex .exopen{fill:#00E676;display:none}
+.ex .padlock{display:block}
+.ex.open .padlock{display:none}.ex.open .exlock{display:none}.ex.open .exopen{display:block}
+.ex.open .exbg{fill:#07351f;stroke:#00E676}
+.ex.open .pad{opacity:1;animation:padspin 8s linear infinite;transform-origin:center}
+.ex.open .hpad{opacity:1}
+@keyframes padspin{to{transform:rotate(360deg)}}
+.ent{transition:transform .75s cubic-bezier(.45,.05,.2,1)}
+.gface,.cturret{transition:transform .6s cubic-bezier(.4,0,.2,1)}
+.gtip{fill:#FF3B5C}
+.glab{font-size:15px;font-weight:900;fill:#ffd0d9;letter-spacing:.1em}
+.cam .clab{font-size:14px;font-weight:900;fill:#FFD66B;letter-spacing:.1em}
+.cam .crot{font-size:22px;fill:#FFB800;font-weight:900}
+.cam.dead{opacity:.35}
+.cam.dead .cturret{filter:grayscale(1)}
+.crew .plate rect{fill:#05070B;fill-opacity:.88;stroke-width:2.5}
+.crew .plt{font-size:15px;font-weight:900;letter-spacing:.12em}
+.crew .plt.mini{font-size:15px}
+.crew .lockb{opacity:0;transition:opacity .2s}
+.crew .lockb circle{fill:#00E676;stroke:#05070B;stroke-width:3}
+.crew .lockb path{fill:none;stroke:#05070B;stroke-width:3.5;stroke-linecap:round;stroke-linejoin:round}
+.crew.locked .lockb{opacity:1}
+.crew.gone{opacity:0;pointer-events:none}
+.crew.focus .pawn{filter:drop-shadow(0 0 7px rgba(255,255,255,.55))}
+.emp rect{fill:rgba(0,240,255,.1);stroke:#00F0FF;stroke-width:3;stroke-dasharray:10 6;animation:beam 1.4s linear infinite}
+.emp path{stroke:#00F0FF;stroke-width:4;stroke-linecap:round;stroke-linejoin:round}
+.emp .lbl{fill:#00F0FF}
+.smoke circle{fill:#8aa0c4;opacity:.45}
+.smk{fill:#E9F1FF}
+.decoy{opacity:.7}
+.decoy .dcl{fill:#00F0FF}
+.garrow{stroke:#FF3B5C;stroke-width:5;stroke-dasharray:10 7;opacity:.9}
+.ghead{fill:#FF3B5C}
+.ghost{opacity:.4}
+.gnext{font-size:19px;font-weight:900;fill:#ff9db0;letter-spacing:.08em}
+.cnext{font-size:18px;font-weight:900;fill:#FFD66B;letter-spacing:.08em}
+.pk{fill:rgba(0,240,255,.16);stroke:#00F0FF;stroke-width:4;animation:pkp 1s ease-in-out infinite;pointer-events:none}
+@keyframes pkp{50%{fill:rgba(0,240,255,.3)}}
+.hit{fill:transparent}
+svg.picking .hit{cursor:pointer}
+.pingc{fill:none;stroke-width:6;animation:ping 1.3s ease-out forwards;transform-box:fill-box;transform-origin:center}
+@keyframes ping{from{transform:scale(.6);opacity:1}to{transform:scale(5);opacity:0}}
+svg.mini .lbl,svg.mini .glab,svg.mini .clab,svg.mini .gnext,svg.mini .cnext,svg.mini .crot,svg.mini .rpill,svg.mini .hk,svg.mini .exl{display:none}
+svg.mini .gnext,svg.mini .cnext{display:none}
+
+/* ------------------------------------------------------------ controller (phone / sim / deck) */
+.ctrl{position:relative;display:flex;flex-direction:column;width:100%;height:100%;background:var(--obs);overflow:hidden;color:var(--txt);user-select:none;-webkit-user-select:none;touch-action:manipulation}
+.c-head{flex:none;display:grid;grid-template-columns:1fr auto auto;gap:12px;align-items:center;padding:calc(10px + env(safe-area-inset-top)) 14px 10px;border-bottom:1px solid var(--line);background:rgba(11,16,27,.9)}
+.c-brand b{display:block;font-size:14px;letter-spacing:.2em;color:#E9F1FF}
+.c-brand span{display:block;font-size:11px;color:var(--dim);margin-top:2px}
+.c-alert{display:flex;align-items:center;gap:8px}
+.c-alert .bar{width:84px;height:12px;border-radius:6px;background:#0b1220;border:1.5px solid #25365a;overflow:hidden}
+.c-alert .bar i{display:block;height:100%;width:0;background:var(--cyan);transition:width .5s}
+.c-alert.warm .bar i{background:var(--amber)}.c-alert.hot .bar i{background:var(--crim)}
+.c-pct{font-size:13px;font-weight:800;color:#E9F1FF;width:38px}
+.c-mute{width:44px;height:44px;padding:6px;color:var(--dim)}
+.c-mute svg{width:100%;height:100%}
+.c-body{flex:1;min-height:0;display:flex;flex-direction:column;gap:8px;padding:10px 12px;overflow-y:auto}
+.c-tabs{display:flex;gap:6px}
+.c-tabs .tab{flex:1;height:44px;border-radius:9px;border:1.5px solid #2c3b57;color:#6F82A6;font-weight:900;font-size:13px;letter-spacing:.12em;display:flex;align-items:center;justify-content:center;gap:6px}
+.c-tabs .tab.on{border-color:var(--c);color:var(--c);background:rgba(255,255,255,.04)}
+.c-tabs .tab em{font-size:11px;color:var(--em)}
+.c-agent{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.c-agent .who{display:flex;align-items:baseline;gap:8px}
+.c-agent .who b{font-size:22px;letter-spacing:.14em;color:var(--c)}
+.c-agent .who span{font-size:11px;letter-spacing:.18em;color:var(--dim)}
+.c-agent .spec{font-size:13px;color:#9db0d3;line-height:1.35;width:100%}
+.c-map{flex:none;border-radius:12px;border:1.5px solid #1d2c4b;background:#070b14;overflow:hidden}
+.c-map svg{display:block;width:100%;height:auto}
+.c-row{display:flex;gap:12px;align-items:stretch}
+.c-pad{flex:none;width:clamp(144px,46vw,176px);display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(3,1fr);gap:6px;aspect-ratio:1}
+.dp{border-radius:12px;border:1.5px solid #2c3b57;background:#0b101b;display:flex;flex-direction:column;align-items:center;justify-content:center;transition:all .12s}
+.dp b{font-size:24px;line-height:1}.dp small{font-size:8px;letter-spacing:.14em;color:var(--dim);margin-top:2px}
+.dp.u{grid-column:2;grid-row:1}.dp.l{grid-column:1;grid-row:2}.dp.h{grid-column:2;grid-row:2}.dp.r{grid-column:3;grid-row:2}.dp.dn{grid-column:2;grid-row:3}
+.dp.on{border-color:var(--cyan);background:rgba(0,240,255,.14);color:var(--cyan);box-shadow:0 0 14px rgba(0,240,255,.25)}
+.dp:active:not(:disabled){transform:scale(.94)}
+.dp:disabled{opacity:.4}
+.c-cards{flex:1;display:grid;grid-template-columns:1fr 1fr;gap:6px;min-width:0}
+.card{position:relative;border-radius:12px;border:1.5px solid #2c3b57;background:#0b101b;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;font-size:12px;font-weight:900;letter-spacing:.12em;color:#b4c3e0;min-height:54px;transition:all .12s}
+.card .gi{width:26px;height:26px;color:var(--amber)}
+.card.on{border-color:var(--amber);background:rgba(255,184,0,.1);color:var(--amber);box-shadow:0 0 14px rgba(255,184,0,.2)}
+.card em{position:absolute;top:3px;right:6px;font-size:9px;letter-spacing:.1em;color:var(--cyan)}
+.card:disabled{opacity:.4}
+.c-hint{font-size:13px;line-height:1.4;color:#9db0d3;min-height:54px;padding:8px 10px;border-radius:10px;background:rgba(11,16,27,.8);border:1px solid var(--line)}
+.c-hint b{color:var(--amber)}.c-hint a{color:var(--cyan);text-decoration:underline;cursor:pointer}.c-hint .tip{color:var(--cyan)}
+.c-foot{flex:none;padding:10px 12px calc(12px + env(safe-area-inset-bottom));border-top:1px solid var(--line);background:rgba(5,7,11,.95)}
+.c-lock{width:100%;height:58px;border-radius:14px;border:2px solid var(--cyan);background:linear-gradient(180deg,#00323a,#012128);color:var(--cyan);font-weight:900;letter-spacing:.16em;font-size:17px}
+.c-lock.locked{border-color:var(--em);background:linear-gradient(180deg,#053a20,#02200f);color:var(--em);font-size:14px}
+.c-lock:disabled{opacity:.4}
+.c-over{position:absolute;inset:0;display:none;align-items:center;justify-content:center;padding:22px;background:rgba(5,7,11,.9);z-index:5;backdrop-filter:blur(3px)}
+.c-over.on{display:flex}
+.ov-card{width:100%;max-width:360px;padding:26px 22px;border-radius:18px;border:2px solid var(--cyan);background:#0a111d;text-align:center;display:flex;flex-direction:column;align-items:center;gap:12px}
+.ov-card h3{margin:0;font-size:20px;letter-spacing:.16em;color:var(--cyan)}
+.ov-card p{margin:0;font-size:15px;line-height:1.5;color:#b4c3e0}
+.ov-card.bad{border-color:var(--crim)}.ov-card.bad h3{color:var(--crim)}
+.ov-card.good{border-color:var(--em)}.ov-card.good h3{color:var(--em)}
+.ov-card.scan h3{color:var(--amber)}.ov-card.scan{border-color:var(--amber)}
+.ov-card .btn{height:50px;font-size:15px;padding:0 20px}
+.spin{width:34px;height:34px;border-radius:50%;border:4px solid #1d2c4b;border-top-color:var(--cyan);animation:spin 1s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.c-toast{position:absolute;left:14px;right:14px;bottom:86px;padding:12px 16px;border-radius:12px;background:rgba(40,6,14,.95);border:1.5px solid var(--crim);color:#ffd0d9;font-size:14px;font-weight:700;text-align:center;opacity:0;transform:translateY(8px);transition:all .2s;pointer-events:none;z-index:6}
+.c-toast.on{opacity:1;transform:none}
+.ctrl.noagents .c-foot{visibility:hidden}
+
+/* deck (TV local command deck) */
+.ctrl.deck{flex-direction:column;border-radius:16px;border:1.5px solid #25365a;background:rgba(11,16,27,.6)}
+.ctrl.deck .c-body{padding:14px 18px;gap:12px}
+.ctrl.deck .c-agent .who b{font-size:30px}
+.ctrl.deck .c-agent .who span{font-size:14px}
+.ctrl.deck .c-agent .spec{font-size:17px}
+.ctrl.deck .c-pad{width:250px}
+.ctrl.deck .dp b{font-size:34px}.ctrl.deck .dp small{font-size:11px}
+.ctrl.deck .card{font-size:15px;min-height:70px}
+.ctrl.deck .card .gi{width:32px;height:32px}
+.ctrl.deck .c-hint{font-size:17px;min-height:64px}
+.ctrl.deck .c-tabs .tab{height:52px;font-size:17px}
+.ctrl.deck .c-foot{padding:14px 18px;background:transparent}
+.ctrl.deck .c-lock{height:68px;font-size:22px}
+.ctrl.deck .c-over{border-radius:16px}
+.ctrl.deck .ov-card{max-width:520px}
+.ctrl.deck .ov-card h3{font-size:26px}.ctrl.deck .ov-card p{font-size:19px}
+
+/* ------------------------------------------------------------ phone app */
+#phoneApp{position:fixed;inset:var(--bar,0px) 0 0 0;background:var(--obs)}
+.join{height:100%;overflow-y:auto;display:flex;flex-direction:column;justify-content:safe center;gap:16px;padding:28px 24px;max-width:460px;margin:0 auto}
+.join h1{margin:0;font-size:32px;letter-spacing:.14em;font-weight:900;color:#E9F1FF}
+.join h1 em{color:var(--cyan)}
+.join p{margin:0;font-size:15px;color:var(--dim);line-height:1.5}
+.join label{font-size:11px;letter-spacing:.28em;color:var(--dim);display:block;margin-bottom:6px}
+.join input{width:100%;height:56px;border-radius:12px;border:2px solid #25365a;background:#0b101b;color:#E9F1FF;font-size:20px;font-weight:800;letter-spacing:.1em;padding:0 16px;text-transform:uppercase;outline:none}
+.join input:focus{border-color:var(--cyan)}
+.join .btn{width:100%;height:60px;font-size:18px;flex-shrink:0}.join input,.join .btn{flex-shrink:0}
+.join .err{color:var(--crim);font-size:14px;min-height:20px}
+#phoneApp .ctrl{height:100%}
+@media (min-width:700px){#phoneApp{display:flex;justify-content:center}#phoneApp>.ctrl,#phoneApp>.join{max-width:480px}}
+@media (min-width:640px) and (min-aspect-ratio:1/1){
+ #phoneApp>.ctrl{max-width:none}
+ #phoneApp>.ctrl .c-body{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);grid-auto-rows:min-content;align-content:start;column-gap:16px;row-gap:8px;padding:10px 16px}
+ #phoneApp>.ctrl .c-body>*{grid-column:2}
+ #phoneApp>.ctrl .c-body>.c-map{grid-column:1;grid-row:1/span 6}
+ #phoneApp>.ctrl .c-pad{width:clamp(144px,16vw,200px)}
+}
+.join .note{font-size:13px;color:var(--dim);border-top:1px solid var(--line);padding-top:12px}
+@media (prefers-reduced-motion:reduce){.tv-stage{animation:none}.beam,.emp rect,.ex.open .pad{animation:none}}
+</style>
+</head>
+<body>
+<div id="tvViewport" hidden></div>
+<div id="phoneApp" hidden></div>
+<noscript>Vault Breakers needs JavaScript.</noscript>
+<script>
+/* =====================================================================
+   ENGINE: rules, procedural mission generator, solvability checker
+   ===================================================================== */
+const W = 7, H = 5, HAND = 4;
+const DIRS = { UP: [0, -1], RIGHT: [1, 0], DOWN: [0, 1], LEFT: [-1, 0], HOLD: [0, 0] };
+const DIRLIST = ['UP', 'RIGHT', 'DOWN', 'LEFT'];
+const ARROW = { UP: '↑', RIGHT: '→', DOWN: '↓', LEFT: '←', HOLD: '•' };
+const GUARD_R = 2, CAM_R = 3;
+const widthOf = d => d >> 1;
+
+const AGENTS = [
+  { id: 'CIPHER', color: '#00F0FF', skill: 'Remote Uplink', desc: 'Deploys gadgets up to 3 tiles away' },
+  { id: 'FORGE', color: '#00E676', skill: 'Master Breacher', desc: 'Auto-cracks adjacent relic cases after moving' },
+  { id: 'LYNX', color: '#FFB800', skill: 'Acrobat', desc: 'Crosses active lasers undetected' },
+  { id: 'GHOST', color: '#E040FB', skill: 'Shadow Cloak', desc: 'Invisible to cameras while holding' }
+];
+const GADGETS = {
+  emp: { name: 'EMP GRENADE', short: 'EMP', tgt: true, desc: 'Disables lasers and cameras in a 3×3 area for 1 turn.' },
+  smoke: { name: 'SMOKE BOMB', short: 'SMOKE', tgt: true, desc: 'Blocks guard and camera sightlines on the target tile and its neighbors for 1 turn.' },
+  decoy: { name: 'HOLOGRAM DECOY', short: 'DECOY', tgt: true, desc: 'Guards within 3 spaces divert toward the decoy instead of patrolling.' },
+  cutter: { name: 'THERMAL CUTTER', short: 'CUTTER', tgt: true, desc: 'Cracks an adjacent relic case, or permanently cuts an adjacent laser.' },
+  nitro: { name: 'NITRO SPRINT', short: 'NITRO', tgt: false, desc: 'Move 2 spaces in your chosen direction this turn.' },
+  grapple: { name: 'GRAPPLE HOOK', short: 'GRAPPLE', tgt: 'opt', desc: 'Pull yourself (or an adjacent teammate) 2 spaces in a straight line over hazards.' }
+};
+const GADGET_IDS = Object.keys(GADGETS);
+const DIFFS = {
+  ROOKIE: { relics: 1, guards: 2, cams: 0, lasers: 1, walls: 4, budget: 0, blurb: '1 Relic · 2 Guards' },
+  PRO: { relics: 2, guards: 2, cams: 2, lasers: 2, walls: 4, budget: 1, blurb: '2 Relics · 2 Guards · 2 Cameras' },
+  MASTERMIND: { relics: 3, guards: 3, cams: 2, lasers: 4, walls: 4, budget: 2, blurb: '3 Relics · 3 Guards · 2 Cameras · Extra Lasers' }
+};
+
+const key = (x, y) => x + ',' + y;
+const inB = (x, y) => x >= 0 && y >= 0 && x < W && y < H;
+const clone = o => JSON.parse(JSON.stringify(o));
+function mulberry32(a) { return function () { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+function shuffle(arr, rng) { for (let i = arr.length - 1; i > 0; i--) { const j = Math.floor(rng() * (i + 1)); [arr[i], arr[j]] = [arr[j], arr[i]]; } return arr; }
+const dirFromDelta = (dx, dy) => dx > 0 ? 'RIGHT' : dx < 0 ? 'LEFT' : dy > 0 ? 'DOWN' : 'UP';
+
+function isWall(s, x, y) { return s.walls.some(w => w[0] === x && w[1] === y); }
+function passMap(s) {
+  const m = new Uint8Array(W * H);
+  s.walls.forEach(w => m[w[1] * W + w[0]] = 1);
+  s.cameras.forEach(c => m[c.y * W + c.x] = 1);
+  return (x, y) => inB(x, y) && !m[y * W + x];
+}
+function smokeSet(s) {
+  const set = new Set();
+  (s.smokes || []).forEach(m => [[0, 0], [1, 0], [-1, 0], [0, 1], [0, -1]].forEach(([dx, dy]) => { if (inB(m.x + dx, m.y + dy)) set.add(key(m.x + dx, m.y + dy)); }));
+  return set;
+}
+function empSet(s) {
+  const set = new Set();
+  (s.emps || []).forEach(m => { for (let dx = -1; dx <= 1; dx++) for (let dy = -1; dy <= 1; dy++) if (inB(m.x + dx, m.y + dy)) set.add(key(m.x + dx, m.y + dy)); });
+  return set;
+}
+function laserLive(s, l, emp) { return !l.off && !emp.has(key(l.x, l.y)); }
+
+/* Cells visible from a viewer. Returns [x, y, distance, lateral]. Walls and smoke are opaque. */
+function coneCells(s, x, y, dir, range, smoke) {
+  const [dx, dy] = DIRS[dir], px = -dy, py = dx, out = [];
+  const opaque = (cx, cy) => isWall(s, cx, cy) || smoke.has(key(cx, cy));
+  for (let d = 1; d <= range; d++) {
+    const wm = widthOf(d);
+    for (let w = -wm; w <= wm; w++) {
+      const cx = x + dx * d + px * w, cy = y + dy * d + py * w;
+      if (!inB(cx, cy) || opaque(cx, cy)) continue;
+      let ok = true;
+      for (let k = 1; k < d; k++) {
+        const ww = Math.round(w * k / d), ix = x + dx * k + px * ww, iy = y + dy * k + py * ww;
+        if (!inB(ix, iy) || opaque(ix, iy)) { ok = false; break; }
+      }
+      if (ok) out.push([cx, cy, d, w]);
+    }
+  }
+  return out;
+}
+const guardCone = (s, g, smoke) => coneCells(s, g.x, g.y, g.f, GUARD_R, smoke || new Set());
+const camCone = (s, c, smoke) => coneCells(s, c.x, c.y, DIRLIST[c.d], CAM_R, smoke || new Set());
+
+function dangerKeys(s) {
+  const set = new Set(), none = new Set();
+  s.guards.forEach(g => { set.add(key(g.x, g.y)); guardCone(s, g, none).forEach(c => set.add(key(c[0], c[1]))); });
+  s.cameras.forEach(c => camCone(s, c, none).forEach(q => set.add(key(q[0], q[1]))));
+  s.lasers.forEach(l => { if (!l.off) set.add(key(l.x, l.y)); });
+  return set;
+}
+
+function bfsNext(pass, fx, fy, tx, ty) {
+  if (fx === tx && fy === ty) return null;
+  const start = fy * W + fx, prev = new Int16Array(W * H).fill(-1), q = [start];
+  prev[start] = start;
+  let found = false;
+  while (q.length) {
+    const c = q.shift(), x = c % W, y = (c / W) | 0;
+    if (x === tx && y === ty) { found = true; break; }
+    for (const [dx, dy] of [[0, -1], [1, 0], [0, 1], [-1, 0]]) {
+      const nx = x + dx, ny = y + dy;
+      if (!inB(nx, ny) || !pass(nx, ny)) continue;
+      const n = ny * W + nx;
+      if (prev[n] !== -1) continue;
+      prev[n] = c; q.push(n);
+    }
+  }
+  if (!found) return null;
+  let c = ty * W + tx;
+  while (prev[c] !== start) c = prev[c];
+  return [c % W, (c / W) | 0];
+}
+
+/* One guard step. Mutates g and decoys, returns an event or null. */
+function stepGuard(pass, g, decoys) {
+  let best = null, bd = 99;
+  (decoys || []).forEach(d => { if (d.ttl <= 0) return; const dist = Math.abs(d.x - g.x) + Math.abs(d.y - g.y); if (dist <= 3 && dist < bd) { bd = dist; best = d; } });
+  if (best) {
+    if (bd === 0) { best.ttl = 0; return { kind: 'inspect', g: g.id, text: g.id + ' inspects the hologram' }; }
+    const n = bfsNext(pass, g.x, g.y, best.x, best.y);
+    if (n) { g.f = dirFromDelta(n[0] - g.x, n[1] - g.y); g.x = n[0]; g.y = n[1]; return { kind: 'lured', g: g.id, text: g.id + ' diverts toward the decoy' }; }
+    return null;
+  }
+  if (g.x === g.path[g.pi][0] && g.y === g.path[g.pi][1]) g.pi = (g.pi + 1) % g.path.length;
+  const t = g.path[g.pi], n = bfsNext(pass, g.x, g.y, t[0], t[1]);
+  if (n) {
+    g.f = dirFromDelta(n[0] - g.x, n[1] - g.y); g.x = n[0]; g.y = n[1];
+    if (g.x === t[0] && g.y === t[1]) g.pi = (g.pi + 1) % g.path.length;
+  }
+  return null;
+}
+function advanceHazards(s, decoys) {
+  const pass = passMap(s), evs = [];
+  s.guards.forEach(g => { const e = stepGuard(pass, g, decoys); if (e) evs.push(e); });
+  s.cameras.forEach(c => { c.d = (c.d + 1) % 4; });
+  return evs;
+}
+function guardNext(s, g) {
+  const tmp = clone(g), d2 = clone(s.decoys || []);
+  stepGuard(passMap(s), tmp, d2);
+  return { x: tmp.x, y: tmp.y, f: tmp.f };
+}
+
+/* ---------------- plan validation ---------------- */
+function agentRange(a) { return a.id === 'CIPHER' ? 3 : 1; }
+function planError(s, i, plan) {
+  const a = s.crew[i];
+  if (!a) return 'Unknown operative';
+  if (a.out) return 'Already extracted';
+  if (!plan || !DIRS[plan.dir]) return 'Choose a direction';
+  const id = plan.card;
+  if (id == null || id === '') return null;
+  if (!a.hand.includes(id)) return 'That card is not in hand';
+  const g = GADGETS[id], r = agentRange(a), t = plan.target;
+  const dist = t ? Math.abs(t.x - a.x) + Math.abs(t.y - a.y) : 0;
+  if (g.tgt === true) {
+    if (!t || !inB(t.x, t.y)) return 'Pick a target tile';
+    if (dist > r) return 'Target is out of range';
+    if (id === 'decoy' && !passMap(s)(t.x, t.y)) return 'Decoy needs open floor';
+    if (id === 'cutter') {
+      const rel = s.relics.find(q => q.x === t.x && q.y === t.y && q.st === 'sealed');
+      const las = s.lasers.find(q => q.x === t.x && q.y === t.y && !q.off);
+      if (!rel && !las) return 'Cutter needs a sealed relic or a laser';
+    }
+  }
+  if (id === 'nitro' && plan.dir === 'HOLD') return 'Nitro needs a direction';
+  if (id === 'grapple') {
+    if (plan.dir === 'HOLD') return 'Grapple needs a direction';
+    if (t && !(t.x === a.x && t.y === a.y)) {
+      if (dist > r) return 'Target is out of range';
+      if (!s.crew.find(c => !c.out && c.i !== i && c.x === t.x && c.y === t.y)) return 'Grapple targets you or a teammate';
+    }
+  }
+  return null;
+}
+function validTargets(s, i, cardId) {
+  const out = [], a = s.crew[i];
+  for (let x = 0; x < W; x++) for (let y = 0; y < H; y++) {
+    const dir = (cardId === 'nitro' || cardId === 'grapple') ? 'UP' : 'HOLD';
+    if (cardId === 'grapple') { if (x === a.x && y === a.y) continue; }
+    if (!planError(s, i, { dir, card: cardId, target: { x, y } })) out.push([x, y]);
+  }
+  return out;
+}
+
+/* ---------------- turn resolution ---------------- */
+function drawUp(s) {
+  s.crew.forEach(a => {
+    while (a.hand.length < HAND) {
+      if (!s.deck.length) { s.deck = shuffle(s.discard.splice(0), Math.random); }
+      if (!s.deck.length) break;
+      a.hand.push(s.deck.pop());
+    }
+  });
+}
+function removeCard(s, a, id) {
+  const k = a.hand.indexOf(id);
+  if (k >= 0) { a.hand.splice(k, 1); s.discard.push(id); }
+}
+function detect(s) {
+  const emp = empSet(s), smoke = smokeSet(s), res = [];
+  const gs = s.guards.map(g => { const set = new Set(guardCone(s, g, smoke).map(c => key(c[0], c[1]))); set.add(key(g.x, g.y)); return { id: g.id, set }; });
+  const cs = s.cameras.filter(c => !emp.has(key(c.x, c.y))).map(c => ({ id: c.id, set: new Set(camCone(s, c, smoke).map(q => key(q[0], q[1]))) }));
+  s.crew.forEach(a => {
+    if (a.out) return;
+    const k = key(a.x, a.y);
+    let by = null;
+    if (a.id !== 'LYNX') {
+      if (s.lasers.some(l => l.x === a.x && l.y === a.y && laserLive(s, l, emp)) || (s.crossed && s.crossed[a.i])) by = 'LASER';
+    }
+    if (!by) for (const g of gs) if (g.set.has(k)) { by = g.id; break; }
+    if (!by && !(a.id === 'GHOST' && a.plan && a.plan.dir === 'HOLD')) for (const c of cs) if (c.set.has(k)) { by = c.id; break; }
+    if (by) res.push({ i: a.i, by });
+  });
+  return res;
+}
+
+function resolveTurn(s0) {
+  const s = clone(s0), frames = [];
+  s.crossed = {};
+  const snap = (step, label, events, extra) => frames.push(Object.assign({ step, label, events, state: clone(s) }, extra || {}));
+  s.crew.forEach(a => { if (!a.plan || planError(s, a.i, a.plan)) a.plan = { dir: 'HOLD', card: null, target: null }; });
+
+  /* STEP 1: gadgets */
+  const e1 = [];
+  s.crew.forEach(a => {
+    if (a.out) return;
+    const p = a.plan, id = p.card;
+    if (!id) return;
+    const t = p.target;
+    if (id === 'emp') { s.emps.push({ x: t.x, y: t.y }); e1.push({ kind: 'emp', sfx: 'emp', text: a.id + ' fires an EMP grenade' }); }
+    else if (id === 'smoke') { s.smokes.push({ x: t.x, y: t.y }); e1.push({ kind: 'smoke', sfx: 'smoke', text: a.id + ' pops a smoke bomb' }); }
+    else if (id === 'decoy') { s.decoys.push({ x: t.x, y: t.y, ttl: 2 }); e1.push({ kind: 'decoy', sfx: 'decoy', text: a.id + ' deploys a hologram decoy' }); }
+    else if (id === 'cutter') {
+      const rel = s.relics.find(q => q.x === t.x && q.y === t.y && q.st === 'sealed');
+      if (rel) { rel.st = 'cracked'; rel.hk = null; e1.push({ kind: 'crack', sfx: 'crack', text: a.id + ' cuts open a relic case' }); }
+      else { const las = s.lasers.find(q => q.x === t.x && q.y === t.y); if (las) { las.off = true; e1.push({ kind: 'cut', sfx: 'crack', text: a.id + ' cuts a laser grid for good' }); } }
+    }
+    else if (id === 'nitro') e1.push({ kind: 'nitro', sfx: 'nitro', text: a.id + ' ignites nitro sprint' });
+    else if (id === 'grapple') e1.push({ kind: 'grapple', sfx: 'nitro', text: a.id + ' fires a grapple hook' });
+    removeCard(s, a, id);
+  });
+  snap(1, 'GADGETS', e1);
+
+  /* STEP 2: movement, relics, extraction */
+  const e2 = [], pass = passMap(s), emp = empSet(s), dest = {}, cross = {};
+  s.crew.forEach(a => {
+    if (a.out || a.plan.card !== 'grapple') return;
+    const t = a.plan.target, [dx, dy] = DIRS[a.plan.dir];
+    const mate = (t && !(t.x === a.x && t.y === a.y)) ? s.crew.find(c => !c.out && c.i !== a.i && c.x === t.x && c.y === t.y) : null;
+    const v = mate || a, lx = v.x + dx * 2, ly = v.y + dy * 2;
+    if (pass(lx, ly)) { dest[v.i] = { x: lx, y: ly }; e2.push({ kind: 'hook', text: v.id + ' is hauled over the hazards' }); }
+    else { dest[v.i] = { x: v.x, y: v.y }; e2.push({ kind: 'fizzle', text: 'Grapple has no landing tile' }); }
+    if (mate) dest[a.i] = { x: a.x, y: a.y };
+  });
+  s.crew.forEach(a => {
+    if (a.out || dest[a.i]) return;
+    const [dx, dy] = DIRS[a.plan.dir];
+    let nx = a.x, ny = a.y;
+    if (a.plan.dir !== 'HOLD') {
+      const steps = a.plan.card === 'nitro' ? 2 : 1;
+      for (let k = 1; k <= steps; k++) {
+        const tx = nx + dx, ty = ny + dy;
+        if (!pass(tx, ty)) break;
+        nx = tx; ny = ty;
+        if (k < steps && s.lasers.some(l => l.x === nx && l.y === ny && laserLive(s, l, emp)) && a.id !== 'LYNX') cross[a.i] = true;
+      }
+    }
+    dest[a.i] = { x: nx, y: ny };
+  });
+  s.crew.forEach(a => { if (dest[a.i]) { a.x = dest[a.i].x; a.y = dest[a.i].y; } });
+  s.crossed = cross;
+  const forge = s.crew[1];
+  if (!forge.out) s.relics.forEach(r => {
+    if (r.st === 'sealed' && Math.abs(r.x - forge.x) + Math.abs(r.y - forge.y) <= 1) { r.st = 'cracked'; r.hk = null; e2.push({ kind: 'crack', sfx: 'crack', text: 'FORGE breaches a relic case' }); }
+  });
+  s.relics.forEach(r => {
+    if (r.st !== 'sealed') return;
+    const occ = s.crew.filter(a => !a.out && a.x === r.x && a.y === r.y);
+    if (r.hk != null && occ.some(a => a.i === r.hk)) { e2.push({ kind: 'crack', sfx: 'crack', text: s.crew[r.hk].id + ' finishes hacking the case' }); r.st = 'cracked'; r.hk = null; }
+    else r.hk = occ.length ? occ[0].i : null;
+  });
+  s.relics.forEach(r => {
+    if (r.st !== 'cracked') return;
+    const occ = s.crew.filter(a => !a.out && a.x === r.x && a.y === r.y);
+    if (occ.length) { r.st = 'secured'; e2.push({ kind: 'relic', sfx: 'relic', text: occ[0].id + ' secures a relic' }); }
+  });
+  if (!s.ex.open && s.relics.every(r => r.st === 'secured')) { s.ex.open = true; e2.push({ kind: 'airlock', sfx: 'unlock', text: 'ALL RELICS SECURED · airlock open' }); }
+  let extracted = 0;
+  s.crew.forEach(a => { if (!a.out && s.ex.open && a.x === s.ex.x && a.y === s.ex.y) { a.out = true; extracted++; e2.push({ kind: 'extract', text: a.id + ' extracted' }); } });
+  if (extracted) e2.push({ kind: 'sfx', sfx: 'extract', text: '' });
+  snap(2, 'MOVEMENT', e2);
+
+  /* STEP 3: guards and cameras */
+  const e3 = advanceHazards(s, s.decoys);
+  snap(3, 'PATROLS', e3);
+
+  /* STEP 4: detection */
+  const e4 = [], dets = detect(s);
+  dets.forEach(d => {
+    s.alert = Math.min(100, s.alert + 25);
+    e4.push({ kind: 'spot', i: d.i, by: d.by, sfx: 'alarm', text: s.crew[d.i].id + ' spotted by ' + d.by + '  +25% ALERT' });
+  });
+  snap(4, 'SECURITY SWEEP', e4, { flash: dets.length > 0 });
+
+  /* cleanup */
+  s.emps = []; s.smokes = [];
+  s.decoys.forEach(d => d.ttl -= 1);
+  s.decoys = s.decoys.filter(d => d.ttl > 0);
+  s.crew.forEach(a => { a.plan = null; a.locked = false; });
+  s.crossed = {};
+  drawUp(s);
+  s.turn += 1;
+  const all = [].concat(e1, e2, e3, e4).filter(e => e.text).map(e => 'T' + (s.turn - 1) + ' · ' + e.text);
+  s.log = (s.log || []).concat(all).slice(-40);
+  if (s.crew.every(a => a.out)) s.phase = 'won';
+  else if (s.alert >= 100) s.phase = 'lost';
+  else s.phase = 'planning';
+  snap(5, 'TURN COMPLETE', []);
+  return { frames, final: s };
+}
+
+/* ---------------- level generation ---------------- */
+function connectedOK(walls, peds, targets) {
+  const m = new Uint8Array(W * H);
+  walls.forEach(p => m[p[1] * W + p[0]] = 1); peds.forEach(p => m[p[1] * W + p[0]] = 1);
+  for (const t of targets) if (m[t[1] * W + t[0]]) return false;
+  const seen = new Uint8Array(W * H), q = [targets[0]];
+  seen[targets[0][1] * W + targets[0][0]] = 1;
+  while (q.length) {
+    const [x, y] = q.pop();
+    for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
+      const nx = x + dx, ny = y + dy;
+      if (!inB(nx, ny) || m[ny * W + nx] || seen[ny * W + nx]) continue;
+      seen[ny * W + nx] = 1; q.push([nx, ny]);
+    }
+  }
+  return targets.every(t => seen[t[1] * W + t[0]]);
+}
+
+function colsOpen(walls, peds) {
+  for (let x = 1; x <= 5; x++) {
+    let open = 0;
+    for (let y = 0; y < H; y++) if (![].concat(walls, peds).some(p => p[0] === x && p[1] === y)) open++;
+    if (open < 3) return false;
+  }
+  return true;
+}
+
+function buildCandidate(P, rng) {
+  const ri = n => Math.floor(rng() * n);
+  const ys = rng() < 0.5 ? [0, 1, 2, 3] : [1, 2, 3, 4];
+  const starts = ys.map(y => [0, y]);
+  const ex = [W - 1, ri(H)];
+  const taken = new Set(starts.map(p => key(p[0], p[1])));
+  taken.add(key(ex[0], ex[1]));
+  const freeCells = (x0, x1) => { const a = []; for (let x = x0; x <= x1; x++) for (let y = 0; y < H; y++) if (!taken.has(key(x, y))) a.push([x, y]); return a; };
+  const walls = [], peds = [], relics = [], lasers = [], guards = [];
+  const must = () => [starts[0]].concat(starts, [ex], relics);
+  for (let tries = 0; walls.length < P.walls && tries < 80; tries++) {
+    const c = freeCells(1, 5); if (!c.length) break;
+    const p = c[ri(c.length)];
+    if (colsOpen(walls.concat([p]), peds) && connectedOK(walls.concat([p]), peds, must())) { walls.push(p); taken.add(key(p[0], p[1])); }
+  }
+  for (let n = 0; n < P.relics; n++) {
+    const c = freeCells(2, 5); if (!c.length) return null;
+    const p = c[ri(c.length)];
+    if (!connectedOK(walls, peds, must().concat([p]))) { n--; if (c.length < 3) return null; continue; }
+    relics.push(p); taken.add(key(p[0], p[1]));
+  }
+  for (let n = 0, tries = 0; n < P.cams && tries < 60; tries++) {
+    const c = freeCells(1, 5).filter(q => q[1] === 0 || q[1] === H - 1); if (!c.length) return null;
+    const p = c[ri(c.length)];
+    if (colsOpen(walls, peds.concat([p])) && connectedOK(walls, peds.concat([p]), must())) { peds.push(p); taken.add(key(p[0], p[1])); n++; }
+  }
+  if (peds.length < P.cams) return null;
+  for (let n = 0; n < P.lasers; n++) {
+    const c = freeCells(2, 5); if (!c.length) return null;
+    const p = c[ri(c.length)];
+    lasers.push({ id: 'L' + (n + 1), x: p[0], y: p[1], o: rng() < 0.5 ? 'h' : 'v', off: false }); taken.add(key(p[0], p[1]));
+  }
+  const blocked = new Set(walls.concat(peds).map(p => key(p[0], p[1])));
+  for (let n = 0, tries = 0; n < P.guards && tries < 80; tries++) {
+    const horiz = rng() < 0.6, L = 3 + ri(horiz ? 3 : 3);
+    let seg = [];
+    if (horiz) { const x1 = 1 + ri(6 - L + 1), y = ri(H); for (let k = 0; k < L; k++) seg.push([x1 + k, y]); }
+    else { const x = 1 + ri(6), y1 = ri(H - L + 1); for (let k = 0; k < L; k++) seg.push([x, y1 + k]); }
+    if (seg.some(p => blocked.has(key(p[0], p[1])))) continue;
+    if (rng() < 0.5) seg.reverse();
+    const path = seg.concat(seg.slice(1, -1).reverse());
+    const f = dirFromDelta(path[1][0] - path[0][0], path[1][1] - path[0][1]);
+    guards.push({ id: 'G' + (n + 1), x: path[0][0], y: path[0][1], f, path, pi: 1 }); n++;
+  }
+  if (guards.length < P.guards) return null;
+  const cameras = peds.map((p, i) => ({ id: 'C' + (i + 1), x: p[0], y: p[1], d: ri(4) }));
+  const deck = [];
+  GADGET_IDS.forEach(g => { for (let k = 0; k < 4; k++) deck.push(g); });
+  shuffle(deck, rng);
+  const crew = AGENTS.map((a, i) => ({ i, id: a.id, x: starts[i][0], y: starts[i][1], out: false, hand: [], locked: false, plan: null }));
+  const s = {
+    id: Math.floor(rng() * 1e9).toString(36), phase: 'planning', turn: 1, alert: 0, diff: '',
+    walls, lasers, cameras, guards, relics: relics.map((p, i) => ({ id: 'R' + (i + 1), x: p[0], y: p[1], st: 'sealed', hk: null })),
+    ex: { x: ex[0], y: ex[1], open: false }, crew, decoys: [], emps: [], smokes: [], deck, discard: [], log: [], crossed: {}
+  };
+  drawUp(s);
+  return s;
+}
+
+/* Time-expanded search over the (deterministic) hazard schedule. Returns the minimum number of detections
+   (each +25% alert) a gadget-free team needs to secure every relic and extract, or 99 if impossible. */
+function minHits(s0) {
+  const T = 40, INF = 99, sim = clone(s0), danger = [dangerKeys(s0)];
+  for (let t = 1; t <= T; t++) { advanceHazards(sim, []); danger[t] = dangerKeys(sim); }
+  for (const a of s0.crew) if (danger[0].has(key(a.x, a.y))) return INF;
+  const pass = passMap(s0), moves = [[0, 0], [1, 0], [-1, 0], [0, 1], [0, -1]];
+  const relicIdx = {};
+  s0.relics.forEach((r, i) => relicIdx[key(r.x, r.y)] = i);
+  const full = (1 << s0.relics.length) - 1, exCell = s0.ex.y * W + s0.ex.x;
+  const enc = (x, y, m, h) => (((y * W + x) * 8 + m) * 2 + h);
+  /* generic layered DP: best[code] = fewest hits so far; relicMode toggles the relic/hack bookkeeping */
+  const run = (start, relicMode) => {
+    let cur = new Map([[enc(start[0], start[1], 0, 0), 0]]);
+    const atEx = new Array(T + 1).fill(INF);
+    for (let t = 1; t <= T; t++) {
+      const nx = new Map();
+      cur.forEach((k, code) => {
+        const h = code & 1, m = (code >> 1) & 7, cell = code >> 4, x = cell % W, y = (cell / W) | 0;
+        for (const [dx, dy] of moves) {
+          const X = x + dx, Y = y + dy;
+          if (!pass(X, Y)) continue;
+          const k2 = k + (danger[t].has(key(X, Y)) ? 1 : 0);
+          let m2 = m, h2 = 0;
+          if (relicMode) {
+            const ri = relicIdx[key(X, Y)];
+            if (ri !== undefined && !(m & (1 << ri))) { if (dx === 0 && dy === 0 && h === 1) { m2 = m | (1 << ri); h2 = 0; } else h2 = 1; }
+          }
+          if (Y * W + X === exCell && (!relicMode || m2 === full) && k < atEx[t]) atEx[t] = k;
+          const c2 = enc(X, Y, m2, h2);
+          if (!nx.has(c2) || nx.get(c2) > k2) nx.set(c2, k2);
+        }
+      });
+      cur = nx;
+    }
+    return atEx;
+  };
+  const starts = s0.crew.map(a => [a.x, a.y]);
+  const plain = starts.map(st => run(st, false)), fetched = starts.map(st => run(st, true));
+  let best = INF;
+  for (let f = 0; f < 4; f++) {
+    for (let t0 = 1; t0 <= T; t0++) {
+      if (fetched[f][t0] >= INF) continue;
+      let total = fetched[f][t0];
+      for (let c = 0; c < 4; c++) {
+        if (c === f) continue;
+        let m = INF;
+        for (let t = t0; t <= T; t++) if (plain[c][t] < m) m = plain[c][t];
+        total += m;
+      }
+      if (total < best) best = total;
+    }
+  }
+  return best;
+}
+const solvable = (s, budget) => minHits(s) <= (budget || 0);
+
+function makeLevel(diff, seed) {
+  const P = DIFFS[diff] || DIFFS.PRO;
+  const rng = mulberry32(seed != null ? seed : (Math.random() * 4294967296) >>> 0);
+  let level = null;
+  for (let attempt = 0; attempt < 600 && !level; attempt++) {
+    let Q = P;
+    if (attempt > 350) Q = Object.assign({}, P, { lasers: Math.max(0, P.lasers - 1), cams: Math.max(0, P.cams - 1) });
+    if (attempt > 500) Q = Object.assign({}, P, { lasers: 0, cams: 0, guards: Math.max(1, P.guards - 1) });
+    const s = buildCandidate(Q, rng);
+    if (s && solvable(s, P.budget)) level = s;
+  }
+  if (!level) {
+    const Q = { relics: P.relics, guards: 1, cams: 0, lasers: 0, walls: 4 };
+    for (let k = 0; k < 400 && !level; k++) { const s = buildCandidate(Q, rng); if (s && solvable(s, P.budget)) level = s; }
+  }
+  level.diff = diff;
+  return level;
+}
+/* =====================================================================
+   WEB AUDIO FOLEY ENGINE (everything synthesized, zero audio files)
+   ===================================================================== */
+const Sfx = (() => {
+  let ctx = null, master = null, muted = false, noiseBuf = null;
+  try { muted = localStorage.getItem('vb-muted') === '1'; } catch (e) { }
+  function ensure() {
+    if (!ctx) {
+      const AC = window.AudioContext || window.webkitAudioContext;
+      if (!AC) return null;
+      try { ctx = new AC(); } catch (e) { return null; }
+      master = ctx.createGain(); master.gain.value = muted ? 0 : 0.55; master.connect(ctx.destination);
+      const len = ctx.sampleRate * 2; noiseBuf = ctx.createBuffer(1, len, ctx.sampleRate);
+      const d = noiseBuf.getChannelData(0); for (let i = 0; i < len; i++) d[i] = Math.random() * 2 - 1;
+    }
+    if (ctx.state === 'suspended') ctx.resume();
+    return ctx;
+  }
+  function tone(f, t0, dur, type, vol, f2) {
+    const c = ensure(); if (!c || muted) return;
+    const o = c.createOscillator(), g = c.createGain(), t = c.currentTime + t0;
+    o.type = type || 'sine'; o.frequency.setValueAtTime(f, t);
+    if (f2) o.frequency.exponentialRampToValueAtTime(f2, t + dur);
+    g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(vol || 0.2, t + 0.012); g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    o.connect(g); g.connect(master); o.start(t); o.stop(t + dur + 0.05);
+  }
+  function noise(t0, dur, ftype, f1, f2, vol) {
+    const c = ensure(); if (!c || muted) return;
+    const s = c.createBufferSource(), fl = c.createBiquadFilter(), g = c.createGain(), t = c.currentTime + t0;
+    s.buffer = noiseBuf; s.loop = true; fl.type = ftype; fl.frequency.setValueAtTime(f1, t); fl.frequency.exponentialRampToValueAtTime(f2, t + dur);
+    g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(vol, t + 0.05); g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    s.connect(fl); fl.connect(g); g.connect(master); s.start(t); s.stop(t + dur + 0.05);
+  }
+  const api = {
+    unlock() { ensure(); },
+    isMuted() { return muted; },
+    setMuted(m) { muted = !!m; try { localStorage.setItem('vb-muted', muted ? '1' : '0'); } catch (e) { } if (master) master.gain.value = muted ? 0 : 0.55; },
+    toggle() { api.setMuted(!muted); if (!muted) api.click(); return muted; },
+    click() { tone(1400, 0, 0.05, 'square', 0.07, 700); },
+    tick() { tone(900, 0, 0.035, 'triangle', 0.06); },
+    lock() { tone(520, 0, 0.09, 'triangle', 0.16); tone(780, 0.08, 0.09, 'triangle', 0.16); tone(1170, 0.16, 0.18, 'sine', 0.18); },
+    unlockPlan() { tone(900, 0, 0.08, 'triangle', 0.12, 500); },
+    emp() { tone(1800, 0, 0.55, 'sawtooth', 0.14, 70); tone(90, 0, 0.45, 'square', 0.12, 40); noise(0, 0.5, 'bandpass', 4000, 300, 0.25); for (let i = 0; i < 6; i++) tone(2400 + Math.random() * 1800, 0.05 * i, 0.04, 'square', 0.07); },
+    smoke() { noise(0, 0.9, 'lowpass', 5200, 700, 0.3); noise(0.05, 0.7, 'highpass', 6000, 2500, 0.07); },
+    decoy() { tone(300, 0, 0.35, 'sine', 0.14, 900); tone(600, 0.1, 0.3, 'triangle', 0.1, 1200); },
+    crack() { noise(0, 0.25, 'highpass', 3000, 1200, 0.25); tone(220, 0, 0.18, 'sawtooth', 0.1, 90); },
+    nitro() { noise(0, 0.4, 'bandpass', 400, 3000, 0.22); tone(180, 0, 0.35, 'sawtooth', 0.09, 520); },
+    step() { tone(150, 0, 0.07, 'triangle', 0.1, 90); },
+    relic() { [523.25, 659.25, 783.99, 1046.5, 1318.5].forEach((f, i) => tone(f, i * 0.085, 0.5, 'triangle', 0.17)); },
+    unlock() { [392, 587.33, 783.99].forEach((f, i) => tone(f, i * 0.1, 0.4, 'sine', 0.15)); },
+    extract() { [261.63, 329.63, 392, 523.25].forEach(f => tone(f, 0, 1.2, 'sine', 0.13)); noise(0, 0.5, 'lowpass', 3000, 400, 0.15); tone(110, 0, 0.8, 'square', 0.06, 70); },
+    alarm() { for (let i = 0; i < 4; i++) { tone(880, i * 0.28, 0.14, 'sawtooth', 0.17, 660); tone(660, i * 0.28 + 0.14, 0.14, 'sawtooth', 0.17, 880); } },
+    win() { [523.25, 659.25, 783.99, 1046.5].forEach((f, i) => { tone(f, i * 0.12, 0.8, 'triangle', 0.17); tone(f / 2, i * 0.12, 0.8, 'sine', 0.09); }); tone(1568, 0.6, 1.2, 'sine', 0.12); },
+    fail() { for (let i = 0; i < 3; i++) tone(200 - i * 25, i * 0.35, 0.5, 'sawtooth', 0.16, 70); noise(0.1, 1, 'lowpass', 900, 80, 0.2); },
+    play(name) { if (api[name]) api[name](); }
+  };
+  const first = () => { ensure(); };
+  ['pointerdown', 'touchstart', 'keydown', 'click'].forEach(ev => window.addEventListener(ev, first, { capture: true, passive: true }));
+  return api;
+})();
+/* =====================================================================
+   BOARD RENDERER (SVG blueprint used on the TV and as the phone mini-map)
+   ===================================================================== */
+const CELL = 120;
+let boardUid = 0;
+const cx = x => x * CELL + CELL / 2;
+const cy = y => y * CELL + CELL / 2;
+const FACE_DEG = { UP: 0, RIGHT: 90, DOWN: 180, LEFT: 270 };
+
+const Icons = {
+  guard() {
+    return '<path d="M0 -33 L28 -22 L28 5 Q28 25 0 36 Q-28 25 -28 5 L-28 -22 Z" fill="#2a0b14" stroke="#FF3B5C" stroke-width="4.5" stroke-linejoin="round"/>' +
+      '<path d="M-28 -22 L0 -33 L28 -22" fill="none" stroke="#ff9db0" stroke-width="2" opacity=".7"/>' +
+      '<path d="M-18 -9 H18 L13 6 H-13 Z" fill="#FF3B5C"/><path d="M-13 14 H13" stroke="#FF3B5C" stroke-width="3" stroke-linecap="round"/>';
+  },
+  camera() {
+    return '<circle r="25" fill="#17110a" stroke="#FFB800" stroke-width="4.5"/><circle r="14" fill="none" stroke="#FFB800" stroke-opacity=".45" stroke-width="2" stroke-dasharray="4 4"/>' +
+      '<rect x="-10" y="-42" width="20" height="32" rx="6" fill="#FFB800"/><circle cy="-42" r="9" fill="#05070B" stroke="#FFD66B" stroke-width="3.5"/><circle cy="-42" r="3.5" fill="#FFB800"/>';
+  },
+  gem() {
+    return '<path d="M-27 -9 L-14 -27 L14 -27 L27 -9 L0 29 Z" fill="url(#GEMGRAD)" stroke="#FFE08A" stroke-width="2.5" stroke-linejoin="round"/>' +
+      '<path d="M-27 -9 H27 M-14 -27 L-8 -9 L0 -27 L8 -9 L14 -27 M-8 -9 L0 29 L8 -9" fill="none" stroke="#7a4a00" stroke-opacity=".75" stroke-width="2" stroke-linejoin="round"/>' +
+      '<path d="M-20 -22 L-13 -22" stroke="#fff6d1" stroke-width="3" stroke-linecap="round" opacity=".8"/>';
+  },
+  pawn(i) {
+    const c = AGENTS[i].color;
+    const acc = [
+      '<path d="M10 -20 L19 -33" stroke="' + c + '" stroke-width="3.5" stroke-linecap="round"/><circle cx="20" cy="-35" r="4" fill="' + c + '"/><path d="M12 -39 Q27 -35 28 -22" fill="none" stroke="' + c + '" stroke-width="2.5" stroke-linecap="round" opacity=".8"/>',
+      '<rect x="-27" y="-2" width="13" height="13" rx="4" fill="' + c + '"/><rect x="14" y="-2" width="13" height="13" rx="4" fill="' + c + '"/><rect x="-11" y="-17" width="22" height="3" fill="' + c + '"/>',
+      '<path d="M-10 -20 L-9 -36 L-1 -23 Z M10 -20 L9 -36 L1 -23 Z" fill="' + c + '"/>',
+      '<path d="M-15 -10 Q-15 -34 0 -34 Q15 -34 15 -10 Q0 -17 -15 -10 Z" fill="' + c + '" opacity=".55"/><path d="M-17 17 Q-24 31 -9 27 L0 34 L9 27 Q24 31 17 17 Z" fill="' + c + '" opacity=".7"/>'
+    ][i];
+    return '<circle r="37" fill="' + c + '" fill-opacity=".13" stroke="' + c + '" stroke-width="5"/>' +
+      '<path d="M-17 19 Q-17 1 0 1 Q17 1 17 19 Z" fill="' + c + '"/><circle cy="-11" r="10.5" fill="' + c + '"/><rect x="-7.5" y="-15" width="15" height="6" rx="3" fill="#05070B"/>' + acc;
+  },
+  laserBeam() {
+    return '<line x1="-46" x2="46" class="beam-glow"/><line x1="-46" x2="46" class="beam"/><circle cx="-52" r="8" class="node"/><circle cx="52" r="8" class="node"/>';
+  },
+  lock() {
+    return '<path d="M-9 -3 V-9 A9 9 0 0 1 9 -9 V-3" fill="none" stroke="#FFB800" stroke-width="4"/><rect x="-13" y="-3" width="26" height="19" rx="4" fill="#FFB800"/><circle cy="6" r="3" fill="#05070B"/>';
+  }
+};
+
+class Board {
+  constructor(host, opts) {
+    this.host = host; this.mini = !!(opts && opts.mini); this.levelId = null; this.ang = {}; this.picker = null;
+    this.uid = ++boardUid; this.ents = {};
+    host.innerHTML = '<svg class="board' + (this.mini ? ' mini' : '') + '" viewBox="0 0 ' + (W * CELL) + ' ' + (H * CELL) + '" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Vault blueprint">' +
+      '<defs><pattern id="hatch' + this.uid + '" patternUnits="userSpaceOnUse" width="18" height="18" patternTransform="rotate(45)"><rect width="18" height="18" fill="#131B2D"/><rect width="8" height="18" fill="#2A3B5F"/></pattern>' +
+      '<linearGradient id="gem' + this.uid + '" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FFE9A8"/><stop offset=".5" stop-color="#FFB800"/><stop offset="1" stop-color="#B36B00"/></linearGradient>' +
+      '<filter id="glow' + this.uid + '" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="4" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>' +
+      '<g class="L-floor"></g><g class="L-ex"></g><g class="L-walls"></g><g class="L-cones"></g><g class="L-lasers"></g><g class="L-relics"></g><g class="L-fx"></g><g class="L-arrows"></g><g class="L-haz"></g><g class="L-crew"></g><g class="L-ping"></g><g class="L-pick"></g><g class="L-hit"></g></svg>';
+    this.svg = host.firstChild;
+    this.L = n => this.svg.querySelector('.L-' + n);
+    this.svg.addEventListener('click', e => {
+      const t = e.target.closest && e.target.closest('[data-hx]');
+      if (!t || !this.picker) return;
+      const x = +t.dataset.hx, y = +t.dataset.hy;
+      if (this.picker.set.has(key(x, y))) { const cb = this.picker.cb; Sfx.tick(); cb(x, y); }
+    });
+  }
+  sub(s) { return s.replace(/GEMGRAD/g, 'gem' + this.uid).replace(/url\(#hatch\)/g, 'url(#hatch' + this.uid + ')'); }
+
+  build(s) {
+    this.levelId = s.id; this.ents = {}; this.ang = {};
+    let f = '', w = '', hit = '';
+    for (let x = 0; x < W; x++) for (let y = 0; y < H; y++) {
+      f += '<rect x="' + (x * CELL + 2) + '" y="' + (y * CELL + 2) + '" width="' + (CELL - 4) + '" height="' + (CELL - 4) + '" rx="7" class="fl' + ((x + y) % 2 ? ' alt' : '') + '"/>';
+      hit += '<rect x="' + x * CELL + '" y="' + y * CELL + '" width="' + CELL + '" height="' + CELL + '" data-hx="' + x + '" data-hy="' + y + '" class="hit"/>';
+    }
+    s.walls.forEach(p => {
+      w += '<g transform="translate(' + p[0] * CELL + ',' + p[1] * CELL + ')"><rect x="3" y="3" width="114" height="114" rx="8" fill="url(#hatch)" stroke="#6C80A6" stroke-width="4"/>' +
+        '<path d="M8 112 V8 H112" fill="none" stroke="#B6C8E8" stroke-opacity=".5" stroke-width="3"/><path d="M112 8 V112 H8" fill="none" stroke="#02040a" stroke-opacity=".85" stroke-width="5"/></g>';
+    });
+    this.L('floor').innerHTML = f;
+    this.L('walls').innerHTML = this.sub(w);
+    this.L('hit').innerHTML = hit;
+    /* airlock */
+    const ex = s.ex, X = cx(ex.x), Y = cy(ex.y), b = 50, k = 22;
+    this.L('ex').innerHTML = '<g class="ex" transform="translate(' + X + ',' + Y + ')"><rect x="-54" y="-54" width="108" height="108" rx="8" class="exbg"/>' +
+      '<path d="M' + (-b) + ' ' + (-b + k) + ' V' + (-b) + ' H' + (-b + k) + ' M' + (b - k) + ' ' + (-b) + ' H' + b + ' V' + (-b + k) + ' M' + b + ' ' + (b - k) + ' V' + b + ' H' + (b - k) + ' M' + (-b + k) + ' ' + b + ' H' + (-b) + ' V' + (b - k) + '" class="brk" fill="none" stroke-width="6" stroke-linecap="square"/>' +
+      '<circle r="29" class="pad" fill="none" stroke-width="3.5" stroke-dasharray="7 5"/><text class="hpad" y="12" text-anchor="middle">H</text>' +
+      '<g class="padlock" transform="translate(0,-2) scale(1.25)">' + Icons.lock() + '</g>' +
+      '<text class="lbl exl exlock" y="45" text-anchor="middle">LOCKED</text><text class="lbl exl exopen" y="45" text-anchor="middle">EXTRACT OPEN</text></g>';
+    /* lasers */
+    this.lz = {}; let lh = '';
+    s.lasers.forEach(l => {
+      lh += '<g class="laser" data-id="' + l.id + '" transform="translate(' + cx(l.x) + ',' + cy(l.y) + ')"><rect x="-54" y="-54" width="108" height="108" rx="8" class="lzTile"/>' +
+        '<g style="transform:rotate(' + (l.o === 'v' ? 90 : 0) + 'deg)">' + Icons.laserBeam() + '</g><text class="lbl lzoff" y="46" text-anchor="middle">OFF</text></g>';
+    });
+    this.L('lasers').innerHTML = lh;
+    this.svg.querySelectorAll('.laser').forEach(g => this.lz[g.dataset.id] = g);
+    /* relics */
+    this.rl = {}; let rh = '';
+    s.relics.forEach(r => {
+      rh += '<g class="relic st-sealed" data-id="' + r.id + '" transform="translate(' + cx(r.x) + ',' + cy(r.y) + ')"><circle r="42" class="halo"/><path class="case" d="M-30 -14 L-14 -34 L14 -34 L30 -14 L30 14 L14 34 L-14 34 L-30 14 Z" fill="none" stroke-width="3.5" stroke-dasharray="6 5"/>' +
+        '<g class="gem">' + Icons.gem() + '</g><g class="rpill"><rect x="-31" y="36" width="62" height="19" rx="9.5"/><text class="lbl" y="50" text-anchor="middle">RELIC</text></g><text class="lbl hk" y="-40" text-anchor="middle"></text></g>';
+    });
+    this.L('relics').innerHTML = this.sub(rh);
+    this.svg.querySelectorAll('.relic').forEach(g => this.rl[g.dataset.id] = g);
+    /* camera pedestals */
+    let ph = '';
+    s.cameras.forEach(c => { ph += '<rect x="' + (c.x * CELL + 6) + '" y="' + (c.y * CELL + 6) + '" width="108" height="108" rx="10" class="ped"/>'; });
+    this.L('floor').insertAdjacentHTML('beforeend', ph);
+    /* guards and cameras (movable entities) */
+    let hz = '';
+    s.cameras.forEach(c => {
+      hz += '<g class="cam" data-id="' + c.id + '" transform="translate(' + cx(c.x) + ',' + cy(c.y) + ')"><g class="cturret">' + Icons.camera() + '</g>' +
+        '<text class="clab" y="40" text-anchor="middle">' + c.id + '</text><text class="crot" x="30" y="-24" text-anchor="middle">↻</text></g>';
+    });
+    s.guards.forEach(g => {
+      hz += '<g class="ent guard" data-id="' + g.id + '" style="transform:translate(' + cx(g.x) + 'px,' + cy(g.y) + 'px)"><g class="gface"><path d="M-10 -46 L10 -46 L0 -60 Z" class="gtip"/></g>' + Icons.guard() +
+        '<text class="glab" y="26" text-anchor="middle">' + g.id + '</text></g>';
+    });
+    this.L('haz').innerHTML = hz;
+    this.svg.querySelectorAll('.cam').forEach(g => this.ents[g.dataset.id] = g);
+    this.svg.querySelectorAll('.guard').forEach(g => this.ents[g.dataset.id] = g);
+    /* crew */
+    let ch = '';
+    AGENTS.forEach((a, i) => {
+      ch += '<g class="ent crew" data-i="' + i + '" style="transform:translate(' + cx(s.crew[i].x) + 'px,' + cy(s.crew[i].y) + 'px)"><g class="pawn">' + Icons.pawn(i) + '</g>' +
+        '<g class="lockb"><circle cx="30" cy="-30" r="12"/><path d="M24 -30 L29 -25 L37 -35"/></g>' +
+        (this.mini ? '<g class="plate"><rect x="-14" y="38" width="28" height="22" rx="11" stroke="' + a.color + '"/><text y="54" text-anchor="middle" fill="' + a.color + '" class="plt mini">' + a.id[0] + '</text></g>'
+          : '<g class="plate"><rect x="-41" y="37" width="82" height="23" rx="11.5" stroke="' + a.color + '"/><text y="54" text-anchor="middle" fill="' + a.color + '" class="plt">' + a.id + '</text></g>') + '</g>';
+    });
+    this.L('crew').innerHTML = ch;
+    this.svg.querySelectorAll('.crew').forEach(g => this.ents['A' + g.dataset.i] = g);
+    this.L('fx').innerHTML = ''; this.L('cones').innerHTML = ''; this.L('arrows').innerHTML = ''; this.L('pick').innerHTML = '';
+  }
+
+  angFor(id, target) {
+    const prev = this.ang[id] == null ? target : this.ang[id];
+    const delta = (((target - prev) % 360) + 540) % 360 - 180;
+    this.ang[id] = prev + delta; return this.ang[id];
+  }
+
+  update(s, o) {
+    o = o || {};
+    if (s.id !== this.levelId) this.build(s);
+    const emp = empSet(s), smoke = smokeSet(s);
+    s.lasers.forEach(l => { const g = this.lz[l.id]; g.classList.toggle('off', l.off || emp.has(key(l.x, l.y))); g.classList.toggle('cut', !!l.off); });
+    s.relics.forEach(r => {
+      const g = this.rl[r.id]; g.setAttribute('class', 'relic st-' + r.st);
+      g.querySelector('.hk').textContent = (r.st === 'sealed' && r.hk != null) ? 'HACKING' : '';
+    });
+    const exg = this.svg.querySelector('.ex'); exg.classList.toggle('open', !!s.ex.open);
+    s.cameras.forEach(c => {
+      const g = this.ents[c.id], t = g.querySelector('.cturret');
+      t.style.transform = 'rotate(' + this.angFor(c.id, c.d * 90) + 'deg)';
+      g.classList.toggle('dead', emp.has(key(c.x, c.y)));
+    });
+    s.guards.forEach(gd => {
+      const g = this.ents[gd.id];
+      g.style.transform = 'translate(' + cx(gd.x) + 'px,' + cy(gd.y) + 'px)';
+      g.querySelector('.gface').style.transform = 'rotate(' + this.angFor(gd.id, FACE_DEG[gd.f]) + 'deg)';
+    });
+    /* crew placement (spread when sharing a tile) */
+    const byTile = {};
+    s.crew.forEach(a => { if (!a.out) (byTile[key(a.x, a.y)] = byTile[key(a.x, a.y)] || []).push(a.i); });
+    s.crew.forEach(a => {
+      const g = this.ents['A' + a.i]; let ox = 0, oy = 0, sc = 1;
+      const grp = byTile[key(a.x, a.y)] || [], n = grp.length, k = grp.indexOf(a.i);
+      if (n === 2) { ox = (k ? 1 : -1) * 26; sc = .74; }
+      else if (n > 2) { ox = (k % 2 ? 1 : -1) * 26; oy = (k < 2 ? -1 : 1) * 22; sc = .6; }
+      g.style.transform = 'translate(' + (cx(a.x) + ox) + 'px,' + (cy(a.y) + oy) + 'px) scale(' + sc + ')';
+      g.classList.toggle('gone', !!a.out); g.classList.toggle('locked', !!a.locked && s.phase === 'planning');
+    });
+    /* cones */
+    let ch = '';
+    const cone = (cells, cls, base, fall) => cells.forEach(c => { ch += '<rect x="' + (c[0] * CELL + 6) + '" y="' + (c[1] * CELL + 6) + '" width="108" height="108" rx="10" class="cone ' + cls + '" style="opacity:' + Math.max(.12, base - fall * (c[2] - 1)).toFixed(2) + '"/>'; });
+    s.guards.forEach(g => cone(guardCone(s, g, smoke), 'g', .42, .12));
+    s.cameras.forEach(c => { if (!emp.has(key(c.x, c.y))) cone(camCone(s, c, smoke), 'c', .36, .08); });
+    if (o.preview) {
+      s.guards.forEach(g => { const n = guardNext(s, g), tmp = { x: n.x, y: n.y, f: n.f }; coneCells(s, tmp.x, tmp.y, tmp.f, GUARD_R, new Set()).forEach(c => { ch += '<rect x="' + (c[0] * CELL + 9) + '" y="' + (c[1] * CELL + 9) + '" width="102" height="102" rx="9" class="cone nx g"/>'; }); });
+      s.cameras.forEach(c => { coneCells(s, c.x, c.y, DIRLIST[(c.d + 1) % 4], CAM_R, new Set()).forEach(q => { ch += '<rect x="' + (q[0] * CELL + 9) + '" y="' + (q[1] * CELL + 9) + '" width="102" height="102" rx="9" class="cone nx c"/>'; }); });
+    }
+    this.L('cones').innerHTML = ch;
+    /* fx: emp, smoke, decoys */
+    let fx = '';
+    s.emps.forEach(m => {
+      const x0 = Math.max(0, m.x - 1), y0 = Math.max(0, m.y - 1), x1 = Math.min(W - 1, m.x + 1), y1 = Math.min(H - 1, m.y + 1);
+      fx += '<g class="emp"><rect x="' + (x0 * CELL + 4) + '" y="' + (y0 * CELL + 4) + '" width="' + ((x1 - x0 + 1) * CELL - 8) + '" height="' + ((y1 - y0 + 1) * CELL - 8) + '" rx="12"/>' +
+        '<path d="M' + (cx(m.x) - 40) + ' ' + cy(m.y) + ' l14 -22 l12 34 l14 -34 l12 30 l14 -22" fill="none"/><text class="lbl" x="' + cx(m.x) + '" y="' + (cy(m.y) + 42) + '" text-anchor="middle">EMP</text></g>';
+    });
+    smoke.forEach(k => {
+      const [x, y] = k.split(',').map(Number);
+      fx += '<g class="smoke" transform="translate(' + cx(x) + ',' + cy(y) + ')"><circle cx="-14" cy="-8" r="34"/><circle cx="18" cy="6" r="30"/><circle cx="-4" cy="20" r="26"/></g>';
+    });
+    if (s.smokes.length) s.smokes.forEach(m => { fx += '<text class="lbl smk" x="' + cx(m.x) + '" y="' + (cy(m.y) + 6) + '" text-anchor="middle">SMOKE</text>'; });
+    s.decoys.forEach(d => {
+      fx += '<g class="decoy" transform="translate(' + cx(d.x) + ',' + cy(d.y) + ') scale(.92)"><g style="--c:#00F0FF">' + Icons.pawn(0) + '</g><text class="lbl dcl" y="52" text-anchor="middle">DECOY</text></g>';
+    });
+    this.L('fx').innerHTML = fx;
+    /* telegraphs */
+    let ar = '';
+    if (o.preview) {
+      s.guards.forEach(g => {
+        const n = guardNext(s, g);
+        if (n.x === g.x && n.y === g.y) return;
+        const x1 = cx(g.x), y1 = cy(g.y), x2 = cx(n.x), y2 = cy(n.y), dx = Math.sign(x2 - x1), dy = Math.sign(y2 - y1);
+        const tx = x2 - dx * 28, ty = y2 - dy * 28, px = -dy, py = dx;
+        ar += '<line class="garrow" x1="' + (x1 + dx * 36) + '" y1="' + (y1 + dy * 36) + '" x2="' + (tx - dx * 6) + '" y2="' + (ty - dy * 6) + '"/>' +
+          '<polygon class="ghead" points="' + tx + ',' + ty + ' ' + (tx - dx * 16 + px * 9) + ',' + (ty - dy * 16 + py * 9) + ' ' + (tx - dx * 16 - px * 9) + ',' + (ty - dy * 16 - py * 9) + '"/>' +
+          '<g class="ghost" transform="translate(' + x2 + ',' + y2 + ') scale(.62)">' + Icons.guard() + '</g>' +
+          '<text class="gnext" x="' + (n.x * CELL + 8) + '" y="' + (n.y * CELL + 22) + '">' + g.id + ' ' + ARROW[n.f] + '</text>';
+      });
+      s.cameras.forEach(c => { ar += '<text class="cnext" x="' + (c.x * CELL + CELL - 8) + '" y="' + (c.y * CELL + 22) + '" text-anchor="end">↻ ' + ARROW[DIRLIST[(c.d + 1) % 4]] + '</text>'; });
+    }
+    this.L('arrows').innerHTML = ar;
+    this.renderPick();
+  }
+
+  setPicker(tiles, cb) {
+    this.picker = tiles ? { set: new Set(tiles.map(t => key(t[0], t[1]))), tiles, cb } : null;
+    this.svg.classList.toggle('picking', !!this.picker);
+    this.renderPick();
+  }
+  renderPick() {
+    let h = '';
+    if (this.picker) this.picker.tiles.forEach(t => { h += '<rect x="' + (t[0] * CELL + 5) + '" y="' + (t[1] * CELL + 5) + '" width="110" height="110" rx="10" class="pk"/>'; });
+    this.L('pick').innerHTML = h;
+  }
+  ping(x, y, color) {
+    const g = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+    g.setAttribute('cx', cx(x)); g.setAttribute('cy', cy(y)); g.setAttribute('r', 20); g.setAttribute('class', 'pingc'); g.style.stroke = color || '#FF3B5C';
+    this.L('ping').appendChild(g); setTimeout(() => g.remove(), 1400);
+  }
+}
+/* =====================================================================
+   POCKET PLAYROOM: VAULT BREAKERS PEER BRIDGE (v2)
+   Host: reserves PPR-VB-XXXX, retries on collisions, tracks phones.
+   Controller: 10s connection timeout, session token for RECONNECT.
+   ===================================================================== */
+const PeerBridge = {
+  peer: null,
+  connections: {},   // peerId -> DataConnection (Host mode)
+  hostConn: null,    // DataConnection (Controller mode)
+  roomCode: null,
+  ICE: { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }, { urls: 'stun:stun1.l.google.com:19302' }, { urls: 'stun:stun.cloudflare.com:3478' }] },
+  MAX_ID_ATTEMPTS: 5,
+  CONNECT_TIMEOUT_MS: 10000,
+
+  suffix() {
+    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+    return Array.from({ length: 4 }, () => chars[Math.floor(Math.random() * chars.length)]).join('');
+  },
+  normalizeRoom(v) {
+    v = String(v || '').toUpperCase().replace(/[^A-Z0-9-]/g, '');
+    if (/^[A-Z0-9]{4}$/.test(v)) return 'PPR-VB-' + v;
+    const m = v.match(/^PPR-?VB-?([A-Z0-9]{4})$/);
+    return m ? 'PPR-VB-' + m[1] : v;
+  },
+
+  /* ---------------- HOST ---------------- */
+  initHost(h) {
+    this.handlers = h; this.attempts = 0; this._openHost();
+  },
+  _openHost() {
+    const h = this.handlers;
+    if (typeof Peer === 'undefined') { h.onStatus('offline', 'The PeerJS library did not load. Solo mode still works.'); return; }
+    this.attempts++;
+    this.roomCode = 'PPR-VB-' + this.suffix();
+    let peer;
+    try { peer = new Peer(this.roomCode, { debug: 1, config: this.ICE }); }
+    catch (e) { h.onStatus('error', 'Could not start networking.'); return; }
+    this.peer = peer;
+    let opened = false;
+    const watchdog = setTimeout(() => { if (!opened && this.peer === peer) h.onStatus('error', 'The matchmaking broker is unreachable. Solo mode still works.'); }, 12000);
+    peer.on('open', id => {
+      opened = true; clearTimeout(watchdog);
+      const joinUrl = window.location.origin + window.location.pathname + '?room=' + id;
+      h.onReady(id, joinUrl); h.onStatus('online');
+    });
+    peer.on('error', err => {
+      clearTimeout(watchdog);
+      if (err && err.type === 'unavailable-id') {
+        if (this.attempts < this.MAX_ID_ATTEMPTS) { try { peer.destroy(); } catch (e) { } this._openHost(); }
+        else h.onStatus('error', 'Could not reserve a room code. Reload to try again.');
+        return;
+      }
+      h.onStatus(opened ? 'degraded' : 'error', 'Network problem (' + (err && err.type || 'unknown') + '). Solo mode still works.');
+    });
+    peer.on('disconnected', () => { if (opened) { h.onStatus('reconnecting'); try { peer.reconnect(); } catch (e) { } } });
+    peer.on('connection', conn => {
+      conn.on('open', () => { this.connections[conn.peer] = conn; });
+      conn.on('data', msg => {
+        if (!msg || typeof msg !== 'object') return;
+        if (msg.type === 'JOIN_CREW') h.onPlayerJoin(conn, msg);
+        else if (msg.type === 'RECONNECT') h.onReconnect(conn, msg);
+        else if (msg.type === 'LOCK_PLAN') h.onPlanReceived(conn, msg);
+      });
+      const gone = () => { delete this.connections[conn.peer]; h.onPlayerDrop(conn); };
+      conn.on('close', gone); conn.on('error', gone);
+    });
+  },
+  sendTo(conn, msg) { try { if (conn && conn.open) conn.send(msg); } catch (e) { } },
+  broadcastState(statePayload) {
+    const packet = { type: 'STATE_SYNC', state: statePayload };
+    Object.values(this.connections).forEach(conn => this.sendTo(conn, packet));
+  },
+
+  /* ---------------- CONTROLLER ---------------- */
+  token(room) {
+    const k = 'vb-token-' + room;
+    try { return sessionStorage.getItem(k); } catch (e) { return null; }
+  },
+  makeToken(room) {
+    const t = 'T' + Math.random().toString(36).slice(2, 10) + Date.now().toString(36).slice(-4), k = 'vb-token-' + room;
+    try { sessionStorage.setItem(k, t); } catch (e) { }
+    return t;
+  },
+  initController(roomId, playerName, h) {
+    this.cHandlers = h; this.roomId = this.normalizeRoom(roomId); this.name = playerName || 'AGENT';
+    this.redials = 0; this._openController();
+  },
+  _openController() {
+    const h = this.cHandlers;
+    if (typeof Peer === 'undefined') { h.onStatus('broker', 'The PeerJS library did not load. Check your connection.'); return; }
+    try { if (this.peer) this.peer.destroy(); } catch (e) { }
+    let peer;
+    try { peer = new Peer({ debug: 1, config: this.ICE }); } catch (e) { h.onStatus('broker', 'Could not start networking.'); return; }
+    this.peer = peer;
+    h.onStatus('connecting');
+    const brokerTimer = setTimeout(() => { if (!peer.open && this.peer === peer) h.onStatus('timeout'); }, this.CONNECT_TIMEOUT_MS);
+    peer.on('open', () => { clearTimeout(brokerTimer); this._dial(); });
+    peer.on('error', err => {
+      clearTimeout(brokerTimer);
+      const t = err && err.type;
+      if (t === 'peer-unavailable') h.onStatus('noroom');
+      else if (t === 'network' || t === 'server-error' || t === 'socket-error' || t === 'socket-closed') h.onStatus('broker');
+      else h.onStatus('error', t);
+    });
+  },
+  _dial() {
+    const h = this.cHandlers, peer = this.peer;
+    if (!peer || peer.destroyed) return;
+    const conn = peer.connect(this.roomId, { reliable: true });
+    this.hostConn = conn;
+    const timer = setTimeout(() => { if (!conn.open && this.hostConn === conn) { h.onStatus('timeout'); try { conn.close(); } catch (e) { } } }, this.CONNECT_TIMEOUT_MS);
+    conn.on('open', () => {
+      clearTimeout(timer); this.redials = 0;
+      const saved = this.token(this.roomId);
+      if (saved) conn.send({ type: 'RECONNECT', token: saved, name: this.name });
+      else conn.send({ type: 'JOIN_CREW', name: this.name, token: this.makeToken(this.roomId) });
+      h.onStatus('connected');
+    });
+    conn.on('data', msg => { if (msg && msg.type) h.onMessage(msg); });
+    conn.on('close', () => {
+      clearTimeout(timer);
+      if (this.hostConn !== conn || this.dead) return;
+      h.onStatus('lost');
+      if (this.redials++ < 8) setTimeout(() => { if (!this.dead && (!this.hostConn || !this.hostConn.open)) this._dial(); }, 2500);
+    });
+    conn.on('error', () => { });
+  },
+  retry() { this.dead = false; this.redials = 0; this._openController(); },
+  resumeIfNeeded() {
+    if (this.cHandlers && !this.dead && (!this.hostConn || !this.hostConn.open) && this.peer && this.peer.open) this._dial();
+  },
+  sendPlan(agentId, plan) {
+    if (this.hostConn && this.hostConn.open) { this.hostConn.send({ type: 'LOCK_PLAN', agentId, plan }); return true; }
+    return false;
+  }
+};
+/* =====================================================================
+   CONTROLLER UI (phone, simulated phone, and the TV's local command deck)
+   ===================================================================== */
+const GLYPH = {
+  emp: '<path d="M3 -11 L-6 2 H0 L-3 11 L7 -3 H1 Z" fill="currentColor"/>',
+  smoke: '<circle cx="-5" cy="2" r="6" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="4" cy="-2" r="7" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="3" cy="6" r="4" fill="none" stroke="currentColor" stroke-width="2"/>',
+  decoy: '<circle cy="-5" r="4.5" fill="none" stroke="currentColor" stroke-width="2" stroke-dasharray="3 2"/><path d="M-8 10 Q-8 1 0 1 Q8 1 8 10 Z" fill="none" stroke="currentColor" stroke-width="2" stroke-dasharray="3 2"/>',
+  cutter: '<path d="M0 -11 C6 -4 8 0 8 4 A8 8 0 0 1 -8 4 C-8 0 -4 -3 0 -11 Z" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/><path d="M0 2 V9" stroke="currentColor" stroke-width="2.2"/>',
+  nitro: '<path d="M-9 -8 L-1 0 L-9 8 M0 -8 L8 0 L0 8" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>',
+  grapple: '<path d="M-6 -10 V2 A6 6 0 0 0 6 2 V-3 M1 -7 L6 -3 L11 -7" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>'
+};
+const gIcon = id => '<svg class="gi" viewBox="-13 -13 26 26" aria-hidden="true">' + (GLYPH[id] || '') + '</svg>';
+
+class Controller {
+  constructor(root, o) {
+    this.root = root; this.o = o || {};
+    this.s = null; this.agents = []; this.active = 0; this.drafts = {}; this.denied = null; this.status = 'connected';
+    this.toastTimer = null; this.sound = !!this.o.sound;
+    root.classList.add('ctrl'); if (this.o.deck) root.classList.add('deck');
+    root.innerHTML =
+      (this.o.header ? '<div class="c-head"><div class="c-brand"><b>VAULT BREAKERS</b><span class="mono c-room"></span></div><div class="c-alert"><div class="bar"><i></i></div><span class="mono c-pct">0%</span></div><button class="c-mute" data-act="mute" aria-label="Mute"></button></div>' : '') +
+      '<div class="c-body"><div class="c-tabs"></div><div class="c-agent"></div>' + (this.o.board ? '' : '<div class="c-map"></div>') +
+      '<div class="c-row"><div class="c-pad"></div><div class="c-cards"></div></div><div class="c-hint"></div></div>' +
+      '<div class="c-foot"><button class="c-lock" data-act="lock"></button></div><div class="c-over"></div><div class="c-toast"></div>';
+    this.q = sel => root.querySelector(sel);
+    this.board = this.o.board || new Board(this.q('.c-map'), { mini: true });
+    this.ownBoard = !this.o.board;
+    root.addEventListener('click', e => this.onClick(e));
+    this.updateMuteBtn();
+    this.render();
+  }
+
+  /* ------------ incoming ------------ */
+  receive(msg) {
+    switch (msg.type) {
+      case 'ASSIGN_AGENTS':
+        this.agents = msg.agents || []; this.slot = msg.slot; this.denied = null;
+        if (!this.agents.includes(this.active)) this.active = this.agents.length ? this.agents[0] : 0;
+        this.clearPicker(); this.render(); break;
+      case 'STATE_SYNC': case 'NEW_MISSION': this.setState(msg.state, msg.events); break;
+      case 'LOBBY': this.s = null; this.drafts = {}; this.clearPicker(); this.render(); break;
+      case 'PLAN_REJECTED': this.toast(msg.reason || 'Plan rejected'); break;
+      case 'JOIN_DENIED': this.denied = msg.reason || 'Unable to join'; this.render(); break;
+    }
+  }
+  setState(s, events) {
+    const fresh = !this.s || this.s.id !== s.id || this.s.turn !== s.turn;
+    this.s = s;
+    if (fresh) { this.drafts = {}; this.clearPicker(); }
+    if (this.ownBoard) this.board.update(s, { preview: s.phase === 'planning' });
+    if (this.sound && events) {
+      const k = events.map(e => e.kind);
+      if (k.includes('spot')) { Sfx.alarm(); if (navigator.vibrate) navigator.vibrate([120, 60, 120]); }
+      else if (k.includes('relic')) Sfx.relic();
+      else if (k.includes('extract')) Sfx.extract();
+    }
+    if (this.sound && (s.phase === 'won' || s.phase === 'lost') && (!this.endSeen || this.endSeen !== s.id)) { this.endSeen = s.id; s.phase === 'won' ? Sfx.win() : Sfx.fail(); }
+    this.render();
+  }
+  setStatus(st, detail) { this.status = st; this.statusDetail = detail; this.render(); }
+
+  /* ------------ helpers ------------ */
+  draft(i) { return this.drafts[i] || (this.drafts[i] = { dir: 'HOLD', card: null, k: -1, target: null }); }
+  clearPicker() { if (this.board) this.board.setPicker(null); }
+  toast(t) {
+    const el = this.q('.c-toast'); el.textContent = t; el.classList.add('on');
+    clearTimeout(this.toastTimer); this.toastTimer = setTimeout(() => el.classList.remove('on'), 2400);
+  }
+  updateMuteBtn() {
+    const b = this.q('.c-mute'); if (!b) return;
+    b.innerHTML = Sfx.isMuted() ? '<svg viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9H4z" fill="currentColor"/><path d="M16 9l5 6M21 9l-5 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>' : '<svg viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9H4z" fill="currentColor"/><path d="M16 8.5a5 5 0 0 1 0 7M18.5 6a8.5 8.5 0 0 1 0 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>';
+  }
+  pickTargets() {
+    const s = this.s, i = this.active, d = this.draft(i);
+    if (!s || !d.card) { this.clearPicker(); return; }
+    const g = GADGETS[d.card];
+    if (g.tgt === false) { this.clearPicker(); return; }
+    const tiles = validTargets(s, i, d.card);
+    this.board.setPicker(tiles, (x, y) => { d.target = { x, y }; this.clearPicker(); this.render(); });
+  }
+
+  /* ------------ interaction ------------ */
+  onClick(e) {
+    const b = e.target.closest('[data-act]'); if (!b || !this.root.contains(b)) return;
+    const act = b.dataset.act, s = this.s;
+    if (act === 'mute') { Sfx.toggle(); this.updateMuteBtn(); return; }
+    if (act === 'retry') { if (this.o.onRetry) this.o.onRetry(); return; }
+    if (!s || s.phase !== 'planning') return;
+    const i = this.active, d = this.draft(i);
+    if (act === 'agent') { this.active = +b.dataset.i; this.clearPicker(); Sfx.click(); this.render(); this.pickTargets(); return; }
+    if (!this.agents.includes(i)) return;
+    if (act === 'lock') { this.lockToggle(); return; }
+    if (s.crew[i].locked) { this.toast('Plan locked. Tap UNLOCK to edit.'); return; }
+    if (act === 'dir') { d.dir = b.dataset.d; Sfx.click(); this.render(); return; }
+    if (act === 'card') {
+      const k = +b.dataset.k, id = s.crew[i].hand[k];
+      Sfx.click();
+      if (d.k === k) { d.card = null; d.k = -1; d.target = null; this.clearPicker(); }
+      else { d.card = id; d.k = k; d.target = null; this.clearPicker(); this.render(); this.pickTargets(); }
+      this.render(); return;
+    }
+    if (act === 'cleartarget') { d.target = null; this.render(); this.pickTargets(); return; }
+  }
+  lockToggle() {
+    const s = this.s, i = this.active, d = this.draft(i), a = s.crew[i];
+    if (a.locked) { this.send(i, null); Sfx.unlockPlan(); return; }
+    const plan = { dir: d.dir, card: d.card, target: d.target };
+    const err = planError(s, i, plan);
+    if (err) { this.toast(err); if (d.card && GADGETS[d.card].tgt === true && !d.target) this.pickTargets(); return; }
+    this.clearPicker();
+    if (this.send(i, plan)) {
+      Sfx.lock();
+      const next = this.agents.find(k => k !== i && !s.crew[k].locked && !s.crew[k].out);
+      if (next != null) { this.active = next; this.render(); }
+    } else this.toast('Connection lost. Reconnecting...');
+  }
+  send(i, plan) { return this.o.send({ type: 'LOCK_PLAN', agentId: AGENTS[i].id, plan }); }
+
+  /* ------------ rendering ------------ */
+  render() {
+    const s = this.s, root = this.root;
+    const over = this.q('.c-over');
+    root.classList.toggle('noagents', !this.agents.length);
+    if (this.o.header) {
+      const room = this.q('.c-room'); if (room && this.o.room) room.textContent = this.o.room;
+      const pct = s ? s.alert : 0;
+      this.q('.c-alert .bar i').style.width = pct + '%'; this.q('.c-pct').textContent = pct + '%';
+      this.q('.c-alert').className = 'c-alert ' + (pct >= 75 ? 'hot' : pct >= 50 ? 'warm' : '');
+    }
+    /* overlays */
+    let ov = '';
+    if (this.denied) ov = '<div class="ov-card bad"><h3>CANNOT JOIN</h3><p>' + this.denied + '</p></div>';
+    else if (this.status !== 'connected') {
+      const T = { connecting: ['CONNECTING...', 'Linking to the TV. This takes a few seconds.'], lost: ['CONNECTION LOST', 'Trying to reconnect. Keep this page open.'],
+        timeout: ['CONNECTION FAILED', 'Could not reach the TV in 10 seconds. Check that both devices are online, then retry.'],
+        noroom: ['ROOM NOT FOUND', 'Check the room code on the TV and retry.'], broker: ['NETWORK UNREACHABLE', 'The matchmaking server did not respond. Check Wi-Fi and retry.'], error: ['CONNECTION ERROR', 'Something went wrong. Retry.'] }[this.status] || ['OFFLINE', ''];
+      ov = '<div class="ov-card ' + (this.status === 'connecting' || this.status === 'lost' ? '' : 'bad') + '"><h3>' + T[0] + '</h3><p>' + T[1] + '</p>' +
+        (this.status === 'connecting' || this.status === 'lost' ? '<div class="spin"></div>' : '<button class="btn" data-act="retry">RETRY / CHECK WI-FI</button>') + '</div>';
+    }
+    else if (!s) ov = '<div class="ov-card"><h3>CREW LINKED</h3><p>' + (this.agents.length ? 'You control <b>' + this.agents.map(i => AGENTS[i].id).join(' + ') + '</b>.' : 'Waiting for the host to assign operatives.') + '<br>Waiting for the mission to start...</p><div class="spin"></div></div>';
+    else if (s.phase === 'resolving') ov = '<div class="ov-card scan"><h3>RESOLUTION IN PROGRESS</h3><p>Eyes on the TV.</p><div class="spin"></div></div>';
+    else if (s.phase === 'won') ov = '<div class="ov-card good"><h3>MISSION COMPLETE</h3><p>The crew is out clean in ' + (s.turn - 1) + (s.turn - 1 === 1 ? ' turn' : ' turns') + ' at ' + s.alert + '% alert.<br>The host can start a new mission.</p></div>';
+    else if (s.phase === 'lost') ov = '<div class="ov-card bad"><h3>ALARM: LOCKDOWN</h3><p>Security alert hit 100%.<br>The host can start a new mission.</p></div>';
+    over.innerHTML = ov; over.classList.toggle('on', !!ov);
+    if (!s || s.phase !== 'planning' || this.status !== 'connected') { this.q('.c-lock').style.visibility = 'hidden'; if (!s) return; } else this.q('.c-lock').style.visibility = '';
+    if (!this.agents.length) { this.q('.c-tabs').innerHTML = ''; this.q('.c-agent').innerHTML = '<div class="spec">Spectating. No operative assigned this turn.</div>'; return; }
+    const i = this.active, a = s.crew[i], d = this.draft(i), meta = AGENTS[i];
+    /* tabs */
+    this.q('.c-tabs').innerHTML = this.agents.length > 1 ? this.agents.map(k => {
+      const c = s.crew[k];
+      return '<button class="tab' + (k === i ? ' on' : '') + '" data-act="agent" data-i="' + k + '" style="--c:' + AGENTS[k].color + '"><span>' + AGENTS[k].id + '</span>' + (c.out ? '<em>OUT</em>' : c.locked ? '<em>✓</em>' : '') + '</button>';
+    }).join('') : '';
+    /* agent line */
+    this.q('.c-agent').innerHTML = '<div class="who" style="--c:' + meta.color + '"><b>' + meta.id + '</b><span>' + meta.skill + '</span></div><div class="spec">' + meta.desc + '</div>';
+    /* d-pad */
+    const dis = a.out || a.locked ? ' disabled' : '';
+    const bt = (dir, glyph, cls) => '<button class="dp ' + cls + (d.dir === dir ? ' on' : '') + '" data-act="dir" data-d="' + dir + '"' + dis + ' aria-label="' + dir + '"><b>' + glyph + '</b><small>' + dir + '</small></button>';
+    this.q('.c-pad').innerHTML = bt('UP', '↑', 'u') + bt('LEFT', '←', 'l') + bt('HOLD', '■', 'h') + bt('RIGHT', '→', 'r') + bt('DOWN', '↓', 'dn');
+    /* cards */
+    this.q('.c-cards').innerHTML = a.hand.map((id, k) => {
+      const g = GADGETS[id], sel = d.k === k, need = sel && g.tgt === true && !d.target;
+      return '<button class="card' + (sel ? ' on' : '') + '" data-act="card" data-k="' + k + '"' + dis + '>' + gIcon(id) + '<span>' + g.short + '</span>' + (need ? '<em>TARGET</em>' : sel && d.target ? '<em>' + d.target.x + ',' + d.target.y + '</em>' : '') + '</button>';
+    }).join('');
+    /* hint */
+    let hint;
+    if (a.out) hint = 'Extracted. Nothing left to plan.';
+    else if (a.locked) hint = 'Plan locked. Waiting for the rest of the crew.';
+    else if (d.card) {
+      const g = GADGETS[d.card];
+      hint = '<b>' + g.name + '</b> — ' + g.desc;
+      if (g.tgt === true) hint += d.target ? ' <a data-act="cleartarget">Change target</a>' : ' <span class="tip">Tap a glowing tile on the map.</span>';
+      if (g.tgt === 'opt') hint += d.target ? ' Pulling teammate. <a data-act="cleartarget">Clear</a>' : ' Tap a teammate tile to pull them instead (optional).';
+      if ((d.card === 'nitro' || d.card === 'grapple') && d.dir === 'HOLD') hint += ' <span class="tip">Pick a direction.</span>';
+    } else hint = 'Pick a direction, optionally equip one gadget, then lock your plan.';
+    this.q('.c-hint').innerHTML = hint;
+    const lk = this.q('.c-lock');
+    lk.className = 'c-lock' + (a.locked ? ' locked' : '');
+    lk.disabled = !!a.out;
+    lk.textContent = a.out ? 'EXTRACTED' : a.locked ? 'PLAN LOCKED · TAP TO EDIT' : 'LOCK PLAN';
+    this.board.svg.querySelectorAll('.crew').forEach(g => g.classList.toggle('focus', +g.dataset.i === i));
+  }
+}
+/* =====================================================================
+   HOST: crew management, turn flow, TV presentation
+   ===================================================================== */
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+const $ = (sel, root) => (root || document).querySelector(sel);
+const esc = t => String(t).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+
+const Host = {
+  players: [], diff: 'PRO', state: null, busy: false, started: false, simOpen: false,
+  net: 'connecting', netDetail: '', roomCode: null, joinUrl: null, simSeq: 0, simShown: 0,
+
+  /* ---------- crew ---------- */
+  find(token) { return this.players.find(p => p.token === token); },
+  denyReason() {
+    if (this.started) return 'A mission is already in progress. Ask the host to return to the lobby.';
+    if (this.players.length >= 4) return 'The crew is full (4 phones).';
+    return null;
+  },
+  addPlayer(info) {
+    const why = this.denyReason();
+    if (why) return why;
+    const p = info; p.agents = []; p.connected = true;
+    this.players.push(p);
+    this.assign(); TV.lobbyChanged(); Sfx.tick();
+    return null;
+  },
+  removePlayer(p) {
+    this.players = this.players.filter(q => q !== p);
+    this.assign(); TV.lobbyChanged();
+  },
+  assign() {
+    const n = this.players.length, ps = this.players;
+    ps.forEach(p => p.agents = []);
+    if (n === 1) ps[0].agents = [0, 1, 2, 3];
+    else if (n === 2) { ps[0].agents = [0, 1]; ps[1].agents = [2, 3]; }
+    else if (n === 3) {
+      ps[0].agents = [0]; ps[1].agents = [1]; ps[2].agents = [2];
+      const turn = this.state ? this.state.turn : 1;
+      ps[(turn - 1) % 3].agents.push(3);
+    }
+    else if (n === 4) ps.forEach((p, i) => p.agents = [i]);
+    ps.forEach((p, i) => p.tx.send({ type: 'ASSIGN_AGENTS', agents: p.agents.slice(), slot: i, name: p.name, players: n }));
+  },
+  pub(events) {
+    const s = clone(this.state); delete s.deck; delete s.discard;
+    return { type: 'STATE_SYNC', state: s, events: events || [] };
+  },
+  sync(events) {
+    if (!this.state) return;
+    const m = this.pub(events);
+    this.players.forEach(p => p.tx.send(m));
+    if (!this.busy) TV.refresh(this.state);
+    TV.renderSide();
+  },
+
+  /* ---------- network callbacks ---------- */
+  netJoin(conn, msg) {
+    const token = msg.token || ('R' + Math.random().toString(36).slice(2, 9));
+    const existing = this.find(token);
+    if (existing) return this.netAttach(existing, conn, msg);
+    const name = String(msg.name || 'AGENT').slice(0, 14).toUpperCase();
+    const p = { token, name, kind: 'remote', conn, tx: null };
+    p.tx = { send: m => PeerBridge.sendTo(p.conn, m) };
+    conn.vbToken = token;
+    const why = this.addPlayer(p);
+    if (why) { PeerBridge.sendTo(conn, { type: 'JOIN_DENIED', reason: why }); return; }
+    if (this.state) p.tx.send(this.pub());
+  },
+  netReconnect(conn, msg) {
+    const p = this.find(msg.token);
+    if (p) this.netAttach(p, conn, msg);
+    else this.netJoin(conn, msg);
+  },
+  netAttach(p, conn, msg) {
+    clearTimeout(p.dropTimer);
+    p.conn = conn; conn.vbToken = p.token; p.connected = true;
+    if (msg && msg.name) p.name = String(msg.name).slice(0, 14).toUpperCase();
+    p.tx.send({ type: 'ASSIGN_AGENTS', agents: p.agents.slice(), slot: this.players.indexOf(p), name: p.name, players: this.players.length });
+    if (this.state) p.tx.send(this.pub());
+    TV.lobbyChanged(); TV.renderSide();
+  },
+  netPlan(conn, msg) {
+    const p = this.find(conn.vbToken); if (p) this.lockPlan(p, msg);
+  },
+  netDrop(conn) {
+    const p = this.players.find(q => q.conn === conn); if (!p) return;
+    p.connected = false;
+    TV.lobbyChanged(); TV.renderSide();
+    if (!this.started) p.dropTimer = setTimeout(() => { if (!p.connected && !this.started) this.removePlayer(p); }, 20000);
+  },
+
+  /* ---------- plans ---------- */
+  lockPlan(p, msg) {
+    const s = this.state;
+    if (!s || s.phase !== 'planning' || this.busy) return;
+    const i = AGENTS.findIndex(a => a.id === msg.agentId);
+    if (i < 0 || !p.agents.includes(i)) { p.tx.send({ type: 'PLAN_REJECTED', agentId: msg.agentId, reason: 'That operative is not assigned to you.' }); return; }
+    const a = s.crew[i];
+    if (msg.plan == null) { a.locked = false; a.plan = null; this.sync(); return; }
+    const err = planError(s, i, msg.plan);
+    if (err) { p.tx.send({ type: 'PLAN_REJECTED', agentId: msg.agentId, reason: err }); return; }
+    a.plan = { dir: msg.plan.dir, card: msg.plan.card || null, target: msg.plan.target || null }; a.locked = true;
+    this.sync();
+    if (s.crew.every(c => c.out || c.locked)) setTimeout(() => this.resolve(), 450);
+  },
+
+  /* ---------- mission flow ---------- */
+  startMission() {
+    if (!this.players.length) return;
+    this.started = true; this.busy = false;
+    this.state = makeLevel(this.diff);
+    this.assign();
+    TV.showGame();
+    this.players.forEach(p => p.tx.send({ type: 'NEW_MISSION', state: this.pub().state, events: [] }));
+    TV.refresh(this.state); TV.renderSide();
+  },
+  newMission() {
+    if (this.busy) return;
+    this.state = makeLevel(this.diff); this.started = true;
+    this.assign();
+    TV.hideEnd(); TV.showGame(true);
+    this.players.forEach(p => p.tx.send({ type: 'NEW_MISSION', state: this.pub().state, events: [] }));
+    TV.refresh(this.state); TV.renderSide();
+  },
+  toLobby() {
+    if (this.busy) return;
+    this.state = null; this.started = false;
+    this.players = this.players.filter(p => p.kind !== 'local');
+    this.players.forEach(p => { p.agents = []; p.tx.send({ type: 'LOBBY' }); });
+    this.assign();
+    TV.hideEnd(); TV.showLobby();
+  },
+  solo() {
+    this.players.filter(p => p.kind === 'remote').forEach(p => { p.tx.send({ type: 'JOIN_DENIED', reason: 'The host switched to solo / local pass-and-play.' }); try { p.conn.close(); } catch (e) { } });
+    this.players = [];
+    const p = { token: 'local', name: 'COMMAND DECK', kind: 'local', agents: [], connected: true, tx: { send: m => queueMicrotask(() => { if (TV.deck) TV.deck.receive(m); }) } };
+    this.players.push(p);
+    TV.pendingDeck = p;
+    this.startMission();
+  },
+  async resolve() {
+    const s = this.state;
+    if (!s || s.phase !== 'planning' || this.busy) return;
+    this.busy = true;
+    const res = resolveTurn(s);
+    s.phase = 'resolving';
+    this.players.forEach(p => p.tx.send(this.pub()));
+    TV.renderSide();
+    await TV.play(res);
+    this.state = res.final;
+    this.busy = false;
+    const evs = [].concat.apply([], res.frames.map(f => f.events));
+    this.assign();
+    this.sync(evs);
+    if (this.state.phase === 'won' || this.state.phase === 'lost') TV.showEnd(this.state);
+  }
+};
+
+/* =====================================================================
+   TV PRESENTATION
+   ===================================================================== */
+const TV = {
+  board: null, deck: null, sims: {}, activeSim: null, screen: 'lobby',
+
+  init() {
+    const root = $('#tvViewport');
+    root.innerHTML =
+      '<div class="tv-scale" id="tvScale"><div class="tv-stage" id="tvStage">' +
+      '<header class="tv-head"><div class="brand"><svg viewBox="-30 -30 60 60" class="logo"><path d="M0 -26 L23 -13 V13 L0 26 L-23 13 V-13 Z" fill="none" stroke="#00F0FF" stroke-width="4"/><path d="M-9 -8 H9 M-9 0 H9 M-9 8 H9" stroke="#FFB800" stroke-width="4" stroke-linecap="round"/></svg><div><b>VAULT BREAKERS</b><small>POCKET PLAYROOM</small></div></div>' +
+      '<div class="head-mid" id="headMid"></div>' +
+      '<div class="head-right"><button class="hbtn" id="bMute" aria-label="Mute"></button><button class="hbtn" id="bNew" style="display:none">NEW MISSION</button><button class="hbtn" id="bLobby" style="display:none">LOBBY</button><button class="hbtn tog" id="bSim" aria-pressed="false">HOST + PHONE SIM</button></div></header>' +
+      '<main class="tv-main" id="tvMain"></main><div class="banner" id="banner"></div><div class="spotbar" id="spotbar"></div><div class="flash" id="flash"></div><div class="endov" id="endov"></div>' +
+      '</div></div>';
+    const fit = () => { root.style.setProperty('--s', Math.min(innerWidth / 1920, (innerHeight - (parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--bar')) || 0)) / 1080)); };
+    fit(); addEventListener('resize', fit);
+    this.updateMute();
+    $('#bMute').onclick = () => { Sfx.toggle(); this.updateMute(); };
+    $('#bNew').onclick = () => Host.newMission();
+    $('#bLobby').onclick = () => Host.toLobby();
+    $('#bSim').onclick = () => this.toggleSim();
+    this.showLobby();
+    PeerBridge.initHost({
+      onReady: (id, url) => { Host.roomCode = id; Host.joinUrl = url; this.drawQR(); this.netBadge(); this.headMid(); },
+      onStatus: (st, detail) => { Host.net = st; Host.netDetail = detail || ''; this.netBadge(); if (this.screen === 'lobby') this.headMid(); },
+      onPlayerJoin: (c, m) => Host.netJoin(c, m), onReconnect: (c, m) => Host.netReconnect(c, m),
+      onPlanReceived: (c, m) => Host.netPlan(c, m), onPlayerDrop: c => Host.netDrop(c)
+    });
+  },
+  updateMute() {
+    $('#bMute').innerHTML = Sfx.isMuted() ? '<svg viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9H4z" fill="currentColor"/><path d="M16 9l5 6M21 9l-5 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><span>MUTED</span>' : '<svg viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9H4z" fill="currentColor"/><path d="M16 8.5a5 5 0 0 1 0 7M18.5 6a8.5 8.5 0 0 1 0 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><span>SOUND</span>';
+  },
+  toggleSim() {
+    Host.simOpen = !Host.simOpen;
+    $('#bSim').setAttribute('aria-pressed', Host.simOpen);
+    $('#bSim').classList.toggle('on', Host.simOpen);
+    if (Host.simOpen && !Host.started && !Host.players.length) this.addSim();
+    if (this.screen === 'lobby') this.renderLobby(); else this.renderSide();
+  },
+
+  /* ---------- simulated phones ---------- */
+  addSim() {
+    if (Host.started || Host.players.length >= 4) return;
+    const n = ++Host.simSeq, token = 'sim' + n;
+    const p = { token, name: 'SIM-' + n, kind: 'sim', connected: true, ctrl: null, tx: null };
+    p.tx = { send: m => queueMicrotask(() => { if (p.ctrl) p.ctrl.receive(m); else (p.queue = p.queue || []).push(m); }) };
+    const why = Host.addPlayer(p);
+    if (!why) this.activeSim = token;
+  },
+
+  /* ---------- screens ---------- */
+  setHeadButtons(game) {
+    $('#bNew').style.display = game ? '' : 'none'; $('#bLobby').style.display = game ? '' : 'none';
+  },
+  showLobby() {
+    this.screen = 'lobby'; this.board = null; this.deck = null;
+    this.setHeadButtons(false);
+    this.renderLobby(); this.headMid();
+  },
+  headMid() {
+    const el = $('#headMid');
+    if (this.screen === 'lobby') {
+      el.className = 'head-mid lobbymid';
+      const bad = Host.net === 'offline' || Host.net === 'error';
+      el.innerHTML = Host.roomCode && Host.joinUrl ? '<span class="rl">ROOM</span><b class="mono">' + esc(Host.roomCode) + '</b>' : '<span class="rl">' + (bad ? 'NO ONLINE ROOM \u00b7 SOLO MODE AVAILABLE' : 'OPENING ROOM...') + '</span>';
+    } else {
+      el.className = 'head-mid';
+      el.innerHTML = '<div class="meter"><span class="ml">SECURITY ALERT</span><div class="mbar"><i id="mFill"></i><u></u><u></u><u></u></div><b class="mono" id="mPct">0%</b></div>' +
+        '<div class="stat"><span>TURN</span><b class="mono" id="mTurn">1</b></div><div class="stat"><span>RELICS</span><b class="mono" id="mRel">0/0</b></div><div class="stat"><span>CREW OUT</span><b class="mono" id="mOut">0/4</b></div>';
+    }
+  },
+  updateHeader(s) {
+    if (this.screen !== 'game' || !$('#mFill')) return;
+    $('#mFill').style.width = s.alert + '%'; $('#mPct').textContent = s.alert + '%';
+    $('#mFill').parentNode.parentNode.className = 'meter ' + (s.alert >= 75 ? 'hot' : s.alert >= 50 ? 'warm' : '');
+    $('#mTurn').textContent = s.turn;
+    $('#mRel').textContent = s.relics.filter(r => r.st === 'secured').length + '/' + s.relics.length;
+    $('#mOut').textContent = s.crew.filter(a => a.out).length + '/4';
+  },
+
+  /* ---------- lobby ---------- */
+  renderLobby() {
+    const main = $('#tvMain');
+    const diffs = Object.keys(DIFFS).map(d => '<button class="diff' + (Host.diff === d ? ' on' : '') + '" data-d="' + d + '"><b>' + d + '</b><span>' + DIFFS[d].blurb + '</span></button>').join('');
+    let slots = '';
+    for (let i = 0; i < 4; i++) {
+      const p = Host.players[i];
+      if (p) {
+        slots += '<div class="slot on' + (p.connected ? '' : ' away') + '"><div class="sh"><b>P' + (i + 1) + '</b><span class="kind">' + (p.kind === 'remote' ? 'PHONE' : p.kind === 'sim' ? 'SIM' : 'LOCAL') + '</span></div><div class="sn">' + esc(p.name) + (p.connected ? '' : ' (reconnecting...)') + '</div>' +
+          '<div class="sa">' + p.agents.map(k => '<i style="--c:' + AGENTS[k].color + '">' + AGENTS[k].id + '</i>').join('') + '</div></div>';
+      } else slots += '<div class="slot"><div class="sh"><b>P' + (i + 1) + '</b></div><div class="sn dim">OPEN SLOT</div><div class="sa dim">Scan the code to join</div></div>';
+    }
+    const n = Host.players.length;
+    const scale = n <= 1 ? '1 player: one commander runs all four operatives' : n === 2 ? '2 players: two operatives each, with quick agent tabs' : n === 3 ? '3 players: one operative each, GHOST rotates between you every turn' : '4 players: one operative each';
+    main.innerHTML = '<div class="lobby"><section class="lb-left"><h1>VAULT <em>BREAKERS</em></h1><p class="tagline">Cooperative heist for 1 to 4 players. Plan together, crack the relics, and get everyone out before the alarm hits 100%.</p>' +
+      '<div class="diffs">' + diffs + '</div><div class="slots">' + slots + '</div><p class="scale mono">' + scale + '</p>' +
+      '<div class="how"><div><b>1 · PLAN</b><span>Each operative picks a move and one gadget, then locks in.</span></div><div><b>2 · RESOLVE</b><span>Gadgets fire, the crew moves, guards and cameras patrol.</span></div><div><b>3 · SWEEP</b><span>Anyone seen adds 25% alert. At 100% the vault locks down.</span></div><div><b>4 · ESCAPE</b><span>Secure every relic, then get all four operatives into the airlock.</span></div></div>' +
+      '<div class="lb-actions"><button class="btn big" id="bStart"' + (n ? '' : ' disabled') + '>' + (n ? 'START MISSION' : 'WAITING FOR CREW') + '</button><button class="btn ghost" id="bSolo">SOLO / LOCAL PASS-AND-PLAY</button>' +
+      (Host.simOpen ? '<button class="btn ghost sim" id="bAddSim"' + (n >= 4 ? ' disabled' : '') + '>+ SIM PHONE</button>' : '') + '</div></section>' +
+      '<section class="lb-right"><div class="qrcard"><div class="qrbox" id="qr-container"></div><div class="rc"><span>ROOM CODE</span><b class="mono">' + esc(Host.roomCode || '....') + '</b></div><div class="joinurl mono" id="joinUrl"></div><div class="netstat" id="netstat"></div></div>' +
+      '<div class="legend"><h4>BLUEPRINT KEY</h4>' + this.legend() + '</div></section></div>';
+    main.querySelectorAll('.diff').forEach(b => b.onclick = () => { Host.diff = b.dataset.d; Sfx.click(); this.renderLobby(); });
+    $('#bStart').onclick = () => { Sfx.lock(); Host.startMission(); };
+    $('#bSolo').onclick = () => { Sfx.lock(); Host.solo(); };
+    const as = $('#bAddSim'); if (as) as.onclick = () => this.addSim();
+    this.drawQR(); this.netBadge();
+  },
+  legend() {
+    const ic = (svg, label, sub, scale) => '<div class="lg"><svg viewBox="-62 -62 124 124"><g transform="scale(' + (scale || 1) + ')">' + svg + '</g></svg><div><b>' + label + '</b><span>' + sub + '</span></div></div>';
+    return ic(Icons.guard(), 'GUARD', 'Flashlight cone and a dashed next-step arrow') +
+      ic(Icons.camera(), 'CAMERA', 'Sweeps 90° clockwise every turn') +
+      '<div class="lg"><svg viewBox="-62 -62 124 124"><rect x="-54" y="-54" width="108" height="108" rx="8" class="lzTile"/><g class="laser">' + Icons.laserBeam() + '</g></svg><div><b>LASER GRID</b><span>+25% alert if you stand in the beam</span></div></div>' +
+      ic(Icons.gem().replace(/GEMGRAD/g, 'gemL'), 'RELIC', 'Crack the case, then step on it', 1) +
+      '<div class="lg"><svg viewBox="-62 -62 124 124"><rect x="-54" y="-54" width="108" height="108" rx="8" fill="#0a2a1a"/><path d="M-50 -28 V-50 H-28 M28 -50 H50 V-28 M50 28 V50 H28 M-28 50 H-50 V28" stroke="#00E676" stroke-width="6" fill="none"/><circle r="26" fill="none" stroke="#00E676" stroke-width="3.5" stroke-dasharray="7 5"/><text y="12" text-anchor="middle" font-size="32" font-weight="900" fill="#00E676">H</text></svg><div><b>EXTRACTION</b><span>Opens after every relic is secured</span></div></div>' +
+      '<svg width="0" height="0" style="position:absolute"><defs><linearGradient id="gemL" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FFE9A8"/><stop offset=".5" stop-color="#FFB800"/><stop offset="1" stop-color="#B36B00"/></linearGradient></defs></svg>';
+  },
+  drawQR() {
+    const t = $('#qr-container'); if (!t) return;
+    const u = $('#joinUrl'); if (u) u.textContent = Host.joinUrl ? Host.joinUrl.replace(/^https?:\/\//, '') : '';
+    t.innerHTML = '';
+    if (!Host.joinUrl) { const bad = Host.net === 'offline' || Host.net === 'error'; t.classList.toggle('off', bad); t.innerHTML = '<div class="qrwait">' + (bad ? 'No online room.<br>Use Solo mode.' : 'Opening room...') + '</div>'; return; }
+    t.classList.remove('off');
+    if (window.QRCode) new QRCode(t, { text: Host.joinUrl, width: 250, height: 250, colorDark: '#05070B', colorLight: '#7FDCE4', correctLevel: QRCode.CorrectLevel.M });
+    else t.innerHTML = '<div class="qrwait">QR library unavailable.<br>Type the address below on your phone.</div>';
+  },
+  netBadge() {
+    const el = $('#netstat'); if (!el) return;
+    const m = { online: ['ONLINE', 'ok', 'Phones can join with the QR code or the room code.'], connecting: ['CONNECTING...', 'wait', 'Opening a room on the matchmaking broker.'], reconnecting: ['RECONNECTING...', 'wait', 'The broker link dropped. Retrying.'], offline: ['OFFLINE', 'bad', Host.netDetail], error: ['NETWORK PROBLEM', 'bad', Host.netDetail], degraded: ['NETWORK PROBLEM', 'bad', Host.netDetail] }[Host.net] || ['', '', ''];
+    el.className = 'netstat ' + m[1]; el.innerHTML = '<b>' + m[0] + '</b><span>' + esc(m[2]) + '</span>';
+  },
+  lobbyChanged() { if (this.screen === 'lobby') this.renderLobby(); },
+
+  /* ---------- game screen ---------- */
+  showGame(keepDeck) {
+    this.screen = 'game'; this.setHeadButtons(true);
+    this.headMid();
+    $('#tvMain').innerHTML = '<div class="game"><section class="board-col"><div class="board-host" id="boardHost"></div></section><aside class="side"><div class="side-turn" id="sideTurn"></div><div class="side-body" id="sideBody"></div></aside></div>';
+    this.board = new Board($('#boardHost'), {});
+    this.deck = null; this.sideMode = null; this.sims = {};
+    Host.players.forEach(p => { if (p.kind === 'sim') p.ctrl = null; });
+    this.renderSide();
+  },
+  refresh(s) {
+    if (this.screen !== 'game' || !this.board) return;
+    this.board.update(s, { preview: s.phase === 'planning' });
+    this.updateHeader(s);
+  },
+  renderSide() {
+    if (this.screen !== 'game' || !$('#sideTurn')) return;
+    const s = Host.state; if (!s) return;
+    const local = Host.players.length === 1 && Host.players[0].kind === 'local';
+    const sims = Host.players.filter(p => p.kind === 'sim');
+    const mode = local ? 'deck' : (Host.simOpen && sims.length ? 'sim' : 'roster');
+    /* turn block */
+    const waiting = s.crew.filter(a => !a.out && !a.locked).map(a => a.id);
+    const phase = s.phase === 'planning' ? 'PLANNING' : s.phase === 'resolving' ? 'RESOLVING' : s.phase === 'won' ? 'MISSION COMPLETE' : 'ALARM';
+    $('#sideTurn').innerHTML = '<div class="tphase ' + s.phase + '"><span class="mono">TURN ' + s.turn + '</span><b>' + phase + '</b></div>' +
+      '<div class="locks">' + s.crew.map(a => '<i class="' + (a.out ? 'out' : a.locked ? 'lk' : '') + '" style="--c:' + AGENTS[a.i].color + '">' + a.id + '<em>' + (a.out ? 'OUT' : a.locked ? 'LOCKED' : '...') + '</em></i>').join('') + '</div>' +
+      (s.phase === 'planning' && !Host.busy && waiting.length ? '<div class="waiting"><span>Waiting on ' + waiting.join(', ') + '</span><button class="btn mini" id="bResolve">RESOLVE NOW</button></div>' : '');
+    const rb = $('#bResolve'); if (rb) rb.onclick = () => Host.resolve();
+    /* body */
+    const body = $('#sideBody');
+    if (this.sideMode !== mode) {
+      this.sideMode = mode; body.innerHTML = '';
+      if (mode === 'deck') {
+        const root = document.createElement('div'); root.className = 'deckwrap'; body.appendChild(root);
+        this.deck = new Controller(root, { board: this.board, deck: true, send: m => { Host.lockPlan(Host.players[0], m); return true; } });
+        const p = Host.players[0];
+        p.tx.send({ type: 'ASSIGN_AGENTS', agents: p.agents.slice(), slot: 0 });
+        this.deck.setState(Host.pub().state, []);
+      } else if (mode === 'sim') this.mountSims(body);
+      else body.innerHTML = '<div class="roster" id="roster"></div><div class="log" id="log"></div>';
+    }
+    if (mode === 'roster') {
+      $('#roster').innerHTML = s.crew.map(a => {
+        const owner = Host.players.find(p => p.agents.includes(a.i));
+        return '<div class="rc-row' + (a.out ? ' out' : '') + '" style="--c:' + AGENTS[a.i].color + '"><div class="rn"><b>' + a.id + '</b><span>' + AGENTS[a.i].skill + '</span></div>' +
+          '<div class="ro">' + (owner ? esc(owner.name) + (owner.connected ? '' : ' • away') : '') + '</div><div class="pips">' + [0, 1, 2, 3].map(k => '<i class="' + (k < a.hand.length ? 'f' : '') + '"></i>').join('') + '</div></div>';
+      }).join('');
+      $('#log').innerHTML = '<h4>MISSION LOG</h4>' + (s.log.length ? s.log.slice(-7).reverse().map(l => '<p>' + esc(l) + '</p>').join('') : '<p class="dim">No activity yet. Plan your first move.</p>');
+    }
+    if (mode === 'deck' && this.deck) { this.deck.render(); }
+    if (mode === 'sim') this.syncSims();
+  },
+  mountSims(body) {
+    const sims = Host.players.filter(p => p.kind === 'sim');
+    body.innerHTML = '<div class="simtabs"></div><div class="simstage"></div>';
+    const st = $('.simstage', body);
+    sims.forEach(p => {
+      const fr = document.createElement('div'); fr.className = 'simframe'; fr.dataset.t = p.token; st.appendChild(fr);
+      p.ctrl = new Controller(fr, { header: true, room: 'SIM · ' + p.name, send: m => { Host.lockPlan(p, m); return true; } });
+      (p.queue || []).forEach(m => p.ctrl.receive(m)); p.queue = [];
+      p.tx.send({ type: 'ASSIGN_AGENTS', agents: p.agents.slice(), slot: Host.players.indexOf(p), name: p.name });
+      if (Host.state) p.ctrl.setState(Host.pub().state, []);
+    });
+    if (!sims.find(p => p.token === this.activeSim)) this.activeSim = sims[0].token;
+  },
+  syncSims() {
+    const body = $('#sideBody'), sims = Host.players.filter(p => p.kind === 'sim');
+    $('.simtabs', body).innerHTML = sims.map(p => '<button class="' + (p.token === this.activeSim ? 'on' : '') + '" data-t="' + p.token + '">' + esc(p.name) + '<small>' + p.agents.map(k => AGENTS[k].id[0]).join('+') + '</small></button>').join('');
+    $('.simtabs', body).querySelectorAll('button').forEach(b => b.onclick = () => { this.activeSim = b.dataset.t; this.syncSims(); });
+    body.querySelectorAll('.simframe').forEach(f => f.classList.toggle('show', f.dataset.t === this.activeSim));
+  },
+
+  /* ---------- resolution playback ---------- */
+  setBanner(t, cls) {
+    const b = $('#banner'); b.textContent = t; b.className = 'banner on s' + cls;
+    b.style.animation = 'none'; void b.offsetWidth; b.style.animation = '';
+  },
+  async play(res) {
+    const b = this.board;
+    for (const f of res.frames) {
+      if (f.step === 5) break;
+      this.setBanner('STEP ' + f.step + ' · ' + f.label, f.step);
+      b.update(f.state, { preview: false });
+      this.updateHeader(f.state);
+      let delay = 0;
+      if (f.step === 2) Sfx.step();
+      f.events.forEach(e => { if (e.sfx) { setTimeout(() => Sfx.play(e.sfx), delay); delay += 160; } });
+      if (f.step === 4 && f.flash) {
+        const fl = $('#flash'); fl.classList.remove('on'); void fl.offsetWidth; fl.classList.add('on');
+        f.events.filter(e => e.kind === 'spot').forEach(e => { const a = f.state.crew[e.i]; b.ping(a.x, a.y, '#FF3B5C'); });
+        const sb = $('#spotbar'); sb.innerHTML = f.events.filter(e => e.kind === 'spot').map(e => '<div>⚠ ' + esc(e.text) + '</div>').join(''); sb.classList.remove('on'); void sb.offsetWidth; sb.classList.add('on');
+      }
+      const has = f.events.some(e => e.text);
+      const dur = { 1: has ? 1500 : 450, 2: 1050, 3: 1000, 4: f.flash ? 2100 : 600 }[f.step];
+      await sleep(dur);
+    }
+    $('#banner').className = 'banner';
+    if (res.final.phase === 'planning') { this.setBanner('PLANNING PHASE · TURN ' + res.final.turn, 0); setTimeout(() => { if (!Host.busy) $('#banner').className = 'banner'; }, 1700); }
+  },
+
+  /* ---------- end of mission ---------- */
+  showEnd(s) {
+    const won = s.phase === 'won', ov = $('#endov');
+    won ? Sfx.win() : Sfx.fail();
+    ov.className = 'endov on ' + (won ? 'good' : 'bad');
+    ov.innerHTML = '<div class="endcard"><h2>' + (won ? 'MISSION COMPLETE' : 'ALARM · LOCKDOWN') + '</h2><p>' + (won ? 'Every relic secured and the whole crew is out clean.' : 'Security alert hit 100%. The vault sealed itself.') + '</p>' +
+      '<div class="stats mono"><div><span>TURNS</span><b>' + (s.turn - 1) + '</b></div><div><span>ALERT</span><b>' + s.alert + '%</b></div><div><span>RELICS</span><b>' + s.relics.filter(r => r.st === 'secured').length + '/' + s.relics.length + '</b></div><div><span>CREW OUT</span><b>' + s.crew.filter(a => a.out).length + '/4</b></div></div>' +
+      '<div class="lb-actions"><button class="btn big" id="eNew">NEW MISSION · ' + s.diff + '</button><button class="btn ghost" id="eLobby">BACK TO LOBBY</button></div></div>';
+    $('#eNew').onclick = () => Host.newMission(); $('#eLobby').onclick = () => Host.toLobby();
+  },
+  hideEnd() { const ov = $('#endov'); ov.className = 'endov'; ov.innerHTML = ''; $('#spotbar').classList.remove('on'); }
+};
+/* =====================================================================
+   BOOT: route to TV host mode or phone controller mode
+   ===================================================================== */
+const Phone = {
+  ctrl: null,
+  start(rawRoom, opts) {
+    const app = $('#phoneApp'); app.hidden = false;
+    let saved = ''; try { saved = localStorage.getItem('vb-name') || ''; } catch (e) { }
+    const room = PeerBridge.normalizeRoom(rawRoom);
+    app.innerHTML = '<div class="join"><h1>VAULT <em>BREAKERS</em></h1><p>Join the crew on the big screen. Pick a call sign and confirm the room code shown on the TV.</p>' +
+      '<div><label for="jName">CALL SIGN</label><input id="jName" maxlength="14" autocomplete="off" autocapitalize="characters" placeholder="YOUR NAME" value="' + esc(saved) + '"></div>' +
+      '<div><label for="jRoom">ROOM CODE</label><input id="jRoom" maxlength="16" autocomplete="off" autocapitalize="characters" placeholder="PPR-VB-XXXX" value="' + esc(room) + '"></div>' +
+      '<div class="err" id="jErr"></div><button class="btn big" id="jGo">JOIN CREW</button>' + (opts && opts.note ? '<p class="note">Vault Breakers is hosted on a big screen (TV or laptop). Open this page there to start a room, then join from phones with the room code.</p>' : '<p class="note">Tip: join from the same Wi-Fi as the host laptop for the best connection.</p>') + '</div>';
+    const go = () => {
+      const name = $('#jName').value.trim().toUpperCase() || 'AGENT', rm = PeerBridge.normalizeRoom($('#jRoom').value);
+      if (!/^PPR-VB-[A-Z0-9]{4}$/.test(rm)) { $('#jErr').textContent = 'Enter the 4-character room code from the TV.'; return; }
+      try { localStorage.setItem('vb-name', name); } catch (e) { }
+      Sfx.unlock(); this.connect(name, rm);
+    };
+    $('#jGo').onclick = go;
+    $('#jRoom').addEventListener('keydown', e => { if (e.key === 'Enter') go(); });
+    $('#jName').addEventListener('keydown', e => { if (e.key === 'Enter') $('#jRoom').focus(); });
+    /* automatic rejoin when this tab already holds a session token for the room */
+    if (/^PPR-VB-[A-Z0-9]{4}$/.test(room) && PeerBridge.token(room) && saved) this.connect(saved, room);
+  },
+  connect(name, room) {
+    const app = $('#phoneApp'); app.innerHTML = '';
+    const c = this.ctrl = new Controller(app, {
+      header: true, room: room, sound: true,
+      send: m => PeerBridge.sendPlan(m.agentId, m.plan),
+      onRetry: () => { PeerBridge.retry(); }
+    });
+    try { history.replaceState(null, '', location.pathname + '?room=' + room); } catch (e) { }
+    PeerBridge.initController(room, name, {
+      onStatus: (st, detail) => c.setStatus(st === 'connected' ? 'connected' : st, detail),
+      onMessage: m => c.receive(m)
+    });
+    document.addEventListener('visibilitychange', () => { if (!document.hidden) PeerBridge.resumeIfNeeded(); });
+    addEventListener('online', () => PeerBridge.resumeIfNeeded());
+  }
+};
+
+(function boot() {
+  const q = new URLSearchParams(location.search), room = q.get('room');
+  const unlock = () => { Sfx.unlock(); };
+  addEventListener('pointerdown', unlock, { once: true, passive: true });
+  addEventListener('keydown', unlock, { once: true });
+  if (room !== null) { Phone.start(room); return; }
+  if (innerWidth < 700 && innerHeight > innerWidth) { Phone.start('', { note: true }); return; }
+  const tv = $('#tvViewport'); tv.hidden = false;
+  TV.init();
+})();
+</script>
+</body>
+</html>
