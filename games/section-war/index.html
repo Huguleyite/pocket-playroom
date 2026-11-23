@@ -1,0 +1,1448 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Section War: Band Room Battles</title><meta name="description" content="A marching-band deckbuilder with AI Scrimmage and Pass &amp; Play.">
+<style>
+:root{color-scheme:dark;--gold:#f9ca75;--paper:#ffedbc;--ink:#10272a;--teal:#78ffe8}
+*{box-sizing:border-box}
+body{margin:0;background:#06171b;color:var(--paper);font-family:system-ui,sans-serif}
+main{width:min(100%,700px);margin:auto;border:2px solid #ad793e;background:repeating-linear-gradient(43deg,#ffffff04 0 1px,transparent 1px 4px),radial-gradient(ellipse at top,#265356,#0a292e 70%);padding:clamp(8px,2.5vw,18px);min-height:100dvh}
+h1,h2,p{margin:0}
+h1,h2,.card strong,.plaque,#end{font-family:Georgia,serif}
+h1{font-size:clamp(1.65rem,6vw,2.65rem);text-align:center;text-transform:uppercase;font-style:italic;color:var(--gold);text-shadow:2px 3px #321d0a}
+header p{text-align:center;font-weight:800;color:var(--gold);font-size:.75rem;letter-spacing:.12em;text-transform:uppercase}
+.plaque{padding:6px;border:1px solid #e9b866;background:#0b292c;text-align:center;font-weight:800;margin:9px 0}
+.arena{aspect-ratio:2.44;background:center/cover url('assets/3a5d242ff0a49983a63b.webp');position:relative;border:2px solid #d5a557;border-radius:6px}
+button{font:inherit;cursor:pointer;touch-action:manipulation;min-height:44px}
+button:focus-visible{outline:3px solid white;outline-offset:2px}
+button:disabled{cursor:default}
+#target{position:absolute;inset:0 0 0 59%;border:0;background:transparent}
+#target:not(:disabled){box-shadow:inset 0 0 0 3px var(--teal),inset 0 0 24px #39eccc84}
+.fighters{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:6px}
+.fighter{min-width:0;border:1px solid #c59553;padding:5px 7px;background:#102529;text-align:center}
+.fighter strong{font: bold italic clamp(.85rem,3.6vw,1.2rem) Georgia,serif;display:block}
+.health{display:block;margin:4px 0;background:linear-gradient(90deg,#982f35 var(--hp),#291f27 var(--hp));border:1px solid #e9b468;font-weight:800}
+.status{font-size:.77rem;min-height:1.15em;display:block}
+#intent{color:#ffd986;font-weight:800}
+#prompt{background:var(--paper);color:#291808;text-align:center;font-weight:750;padding:6px;border:2px solid #bc8346;margin:9px 0 6px;min-height:2.5em}
+#energy{text-align:center;color:var(--gold);font-weight:900;margin:4px 0 8px}
+#hand{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:7px}
+.card{grid-column:span 2;position:relative;border:2px solid #d59f53;border-radius:7px;background:var(--paper);color:#291808;padding:0;overflow:hidden;text-align:center;display:flex;flex-direction:column;min-height:110px;box-shadow:0 3px #041317}
+.card:nth-child(4){grid-column:2/span 2}.card:nth-child(5){grid-column:4/span 2}
+.card[aria-pressed=true]{outline:2px solid var(--teal);box-shadow:0 0 13px var(--teal)}
+.card:disabled{opacity:.58}
+.card strong{display:block;width:100%;font-size:clamp(.74rem,2.9vw,1rem);font-style:italic;padding:4px 2px 3px 19px;line-height:1.05;min-height:2.45em}
+.card .cost{position:absolute;top:2px;left:2px;border:1px solid #ce974b;border-radius:50%;min-width:19px;background:#103b40;color:#fff1ca;font-weight:900}
+.card img{width:100%;height:clamp(30px,10vw,62px);object-fit:cover;display:block}
+.card small{padding:4px;line-height:1.15}
+.actions{display:flex;gap:8px;margin:10px 0;align-items:stretch}
+#end{flex:1;background:linear-gradient(#f7a54c,#a24216);color:#fff1c7;text-shadow:1px 2px #592008;border:2px solid var(--gold);font-weight:900;font-size:1.25rem;text-transform:uppercase;border-radius:7px}
+#end:disabled{opacity:.6}
+#restart{color:var(--paper);background:#112e32;border:1px solid #b18c52;border-radius:7px}
+details{font-size:.84rem;margin-top:8px}summary{cursor:pointer}ol{margin:6px 0;padding-left:24px}
+@media(min-width:600px){#hand{grid-template-columns:repeat(5,minmax(0,1fr))}.card,.card:nth-child(4),.card:nth-child(5){grid-column:auto}}
+</style>
+<style>
+main{padding:clamp(8px,2vw,14px);border:3px double #e0a857}
+header{min-height:56px;display:grid;place-content:center;background:center/contain no-repeat url('assets/8dd96991f9e7b7bcb316.webp')}
+header h1,header p,#end span{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+.plaque,#prompt,.fighter strong,.health,#energy,.card,#end{clip-path:polygon(5% 0,95% 0,100% 17%,100% 83%,95% 100%,5% 100%,0 83%,0 17%)}
+.plaque{background:linear-gradient(110deg,#082629,#1c4a4b,#082629);border:4px double #ecc47d;text-transform:uppercase;font-style:italic;letter-spacing:.035em}
+.arena{aspect-ratio:2.18;margin-inline:-5px;border-radius:0;border-width:2px 0;isolation:isolate}
+.fighters{position:absolute;inset:auto 4px 4px;align-items:end;pointer-events:none}
+.fighter{background:none;border:0;padding:0;text-shadow:1px 1px #2a140a}
+.fighter strong{width:max-content;max-width:100%;margin:auto;padding:3px 13px;border:3px double #b67e38;background:linear-gradient(130deg,#ffe9aa,#d99d4c);color:#211403;text-shadow:none}
+.health{display:block;position:relative;border:3px double #f2cc83;margin:2px 0;background:linear-gradient(180deg,#ffffff26,transparent),linear-gradient(90deg,#a8282c var(--hp),#35262d var(--hp));color:#fff3ce;font:italic 900 clamp(.88rem,4vw,1.2rem) Georgia,serif;padding:2px}
+.health::before{content:'♥';color:#ffae99;margin-right:.4em}
+.status{display:inline-block;min-height:0;background:#0a2529f2;font-weight:750;padding:1px 6px;border:1px solid #bd914f}
+#intent{display:block;width:fit-content;max-width:100%;margin:5px auto;font-size:.82rem;text-align:center;background:#092327;border:2px double #cf9b51;padding:2px 10px}
+#intent:empty{display:none}
+#target{z-index:1;inset:5% 5% 24% 59%}
+#target:not(:disabled){box-shadow:none;background:linear-gradient(var(--teal),var(--teal)) top left/18px 3px,linear-gradient(var(--teal),var(--teal)) top left/3px 18px,linear-gradient(var(--teal),var(--teal)) top right/18px 3px,linear-gradient(var(--teal),var(--teal)) top right/3px 18px,linear-gradient(var(--teal),var(--teal)) bottom left/18px 3px,linear-gradient(var(--teal),var(--teal)) bottom left/3px 18px,linear-gradient(var(--teal),var(--teal)) bottom right/18px 3px,linear-gradient(var(--teal),var(--teal)) bottom right/3px 18px;background-repeat:no-repeat;filter:drop-shadow(0 0 5px #33e8d1)}
+#prompt{font-family:Georgia,serif;font-style:italic;background:repeating-linear-gradient(43deg,#c6853320 0 1px,transparent 1px 6px),linear-gradient(120deg,#ffe7a3,#e6b569);border:4px double #9e582c}
+#energy{width:max-content;max-width:100%;margin:4px auto 9px;padding:3px 21px;border:4px double #d5a459;background:#123b3e;font:italic 900 1.1rem Georgia,serif;text-transform:uppercase}
+#energy:empty{display:none}
+.card{border:4px double #925626;background:repeating-linear-gradient(40deg,#b26c2717 0 1px,transparent 1px 5px),linear-gradient(130deg,#ffedba,#e6b56c);border-radius:0;min-height:clamp(117px,29vw,158px)}
+.card img{height:clamp(42px,12vw,75px);border-block:2px solid #865624}
+.card .cost{border:3px double #f0bd6c;min-width:24px;font-size:.92rem;top:0;left:0}
+.card strong{padding-left:23px}
+.card[aria-pressed=true]{border-color:#10a693;box-shadow:inset 0 0 0 2px #047d74,inset 0 0 14px #52f6d8;outline:none}
+.card:focus-visible,#end:focus-visible{outline:none;box-shadow:inset 0 0 0 3px #177e79}
+.actions{justify-content:center}
+#end{position:relative;clip-path:none;flex:0 1 360px;height:clamp(54px,14vw,77px);border:0;background:transparent} #end::before{content:"";position:absolute;left:50%;top:50%;width:min(100%,calc(clamp(44px,7dvh,72px)*5.617));aspect-ratio:719/128;transform:translate(-50%,-50%);background:center/100% 100% no-repeat url('assets/0db497b1134e010670d3.webp');clip-path:polygon(8% 5%,92% 5%,98% 33%,98% 76%,92% 96%,8% 96%,2% 76%,2% 33%);pointer-events:none}
+#restart{min-height:44px;font-size:.83rem}
+.menu{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:6px}
+.menu details{flex:1}
+</style><style>
+.plaque,#prompt,.fighter strong,.health,#energy,.card{clip-path:none;border-radius:0;border-style:double;border-width:4px}
+.card{width:100%;height:100%;overflow:visible;padding-top:3px}
+.card strong{padding:4px 3px 5px;min-height:2.2em} .card{padding-top:37px} .card .cost{position:absolute;top:6px;left:3px;margin:0} #restart,.arena{border-radius:0} .card-info::after{content:"";position:absolute;inset:-6px}
+.card .cost{align-self:flex-start;border-radius:2px;padding:1px 5px;font:900 .82rem system-ui;white-space:nowrap}
+.card-slot{grid-column:span 2;position:relative;min-width:0}
+.card-slot:nth-child(4){grid-column:2/span 2}.card-slot:nth-child(5){grid-column:4/span 2}
+.card-info{position:absolute;top:5px;right:5px;min-width:32px;min-height:32px;border:2px solid #895b29;background:#102d32;color:#fff2cb;font:bold 1rem Georgia,serif}
+#feedback{padding:7px 10px;border:2px solid var(--gold);background:#081e22;min-height:3em;margin:5px 0 9px}
+#feedback:empty{display:none}
+#feedback strong{color:var(--gold)} #feedback span{display:block;font-size:.85rem}
+.flash{animation:card-feedback .55s ease-out}
+@keyframes card-feedback{0%{box-shadow:0 0 16px #60f9d7;background:#246963}100%{box-shadow:none}}
+dialog{width:min(90vw,390px);background:#10292d;color:var(--paper);border:4px double var(--gold);padding:16px}
+dialog::backdrop{background:#0009}dialog p{margin:.6em 0}
+dialog button{background:var(--paper);color:#21180b;border:2px solid #9c682d;padding:4px 15px}
+@media(min-width:600px){.card-slot,.card-slot:nth-child(4),.card-slot:nth-child(5){grid-column:auto}}
+@media(prefers-reduced-motion:reduce){.flash{animation:none}}
+</style><style>
+main{height:100dvh;min-height:0;display:flex;flex-direction:column;position:relative}
+main>header,main>.plaque,main>.arena,main>#intent,main>.message,main>#energy,main>.actions,main>.menu,main>details{flex-shrink:0}
+main>header{min-height:clamp(33px,6dvh,66px)}
+main>.plaque{margin:4px 0 6px;padding:3px;font-size:clamp(1rem,3.2dvh,1.5rem)}
+main>.arena{height:clamp(108px,24dvh,280px);aspect-ratio:auto}
+.message{display:grid;min-height:3.15rem;margin:4px 0}
+.message>*{grid-area:1/1;margin:0!important;min-height:0!important;align-self:stretch}
+.message:has(#feedback:not(:empty)) #prompt{visibility:hidden}
+#feedback{font-size:.85rem;padding:4px 8px}
+#feedback span{font-size:.77rem}
+#prompt{display:grid;place-content:center;padding:4px}
+#energy{margin:1px auto 4px;padding-block:1px}
+#hand{flex:1 1 auto;min-height:0;overflow:auto;align-content:start;padding:3px 3px 5px;scrollbar-width:thin}
+.card-info{top:0;right:0;width:44px;height:44px;min-width:0;min-height:0;border:0;padding:0;display:grid;place-content:start end;background:transparent}
+.card-info::after{content:none}
+.card-info span{display:grid;place-items:center;width:17px;height:17px;margin:6px 6px 0 0;border:1px solid #936c3b;border-radius:50%;background:#17373a;color:#fff2cb;font:bold italic 12px Georgia,serif}
+.card .cost{font-size:clamp(.66rem,2.15vw,.82rem);padding-inline:3px}
+.actions{margin:3px 0;padding-bottom:env(safe-area-inset-bottom)}
+#end{height:clamp(44px,7dvh,72px)}
+.menu{margin-top:0}
+.menu details,main>details{margin-top:2px;font-size:.76rem}
+#restart{min-height:34px}
+#log,main>details>p{position:absolute;z-index:3;inset:auto 8px 66px;max-height:38dvh;overflow:auto;margin:0;border:2px solid var(--gold);padding:10px 12px 10px 28px;background:#10292d}
+@media(max-height:830px) and (max-width:599px){
+  #hand{display:flex;align-items:flex-start;gap:5px}
+  .card-slot{flex:1 0 max(84px,calc((100% - 20px)/5))}
+  .card{min-height:0;padding-top:30px}
+  .card strong{font-size:.76rem;padding:2px;min-height:2.2em}
+  .card img{height:clamp(24px,5.5dvh,46px)}
+  .card small{font-size:.65rem;padding:2px}
+  main>.arena{height:clamp(105px,24dvh,220px)}
+}
+@media(max-height:515px){
+  main>.arena{height:94px}
+  main>header{min-height:25px}
+  .message{min-height:2.5rem}
+  main>#intent{margin-block:2px}
+}
+</style><style>
+.hand-table{flex:1 1 auto;min-height:0;display:flex;position:relative;isolation:isolate;margin:3px 0 4px;padding:6px clamp(6px,4vw,26px);border:4px double #bd9556;background:#102f33 center/100% 100% no-repeat url('assets/900d13aaf4f6e7038271.webp');box-shadow:inset 0 0 18px #001218,0 2px 7px #041719}
+#hand{display:flex;flex:1;min-width:0;min-height:0;flex-wrap:wrap;align-content:center;justify-content:center;gap:5px;overflow:hidden;padding:3px}
+.card-slot,.card-slot:nth-child(4),.card-slot:nth-child(5){flex:0 0 calc((100% - 10px)/3);height:min(100px,calc((100% - 5px)/2));min-width:0}
+.card{min-height:0;display:grid;grid-template-rows:16px minmax(11px,auto) minmax(0,1fr) auto;gap:0;padding:2px 0 0;overflow:hidden;border:4px double #9a5d27;box-shadow:inset 0 0 0 1px #ffe09e,0 3px 7px #081b1d;background:radial-gradient(ellipse at top,#fff4ce,transparent 80%),repeating-linear-gradient(38deg,#a7733026 0 1px,transparent 1px 5px),#e8b972;text-align:center}
+.card strong{grid-row:2;min-height:0;font-size:clamp(.66rem,2.45vw,.91rem);padding:0 2px 2px;line-height:1}
+.card img{grid-row:3;height:100%;min-height:0;object-fit:cover;border-block:1px solid #8d562e}
+.card small{grid-row:4;font-weight:750;font-size:clamp(.62rem,2.25vw,.78rem);line-height:1.05;padding:2px 1px}
+.card .cost{top:1px;left:2px;min-width:20px;padding:0 3px;font:bold 1rem/1 Georgia,serif;border-width:2px}
+.card-info{top:0;right:0;width:35px;height:34px}
+.card-info span{margin:4px 4px 0 0;width:14px;height:14px;font-size:10px;border-color:#b2793b;background:#ffde99;color:#172c2c}
+.card[aria-pressed=true]{border-color:#6dffdb;box-shadow:0 0 8px #39f6ca}
+.card:disabled{opacity:1;filter:saturate(.6) brightness(.77)}
+#hand:empty{padding:0}
+.hand-table:has(#hand:empty){flex:0 0 auto;min-height:2rem}
+@media(min-width:600px){
+  .card-slot,.card-slot:nth-child(4),.card-slot:nth-child(5){flex-basis:calc((100% - 20px)/5);height:min(156px,100%)}
+  .card{grid-template-rows:20px minmax(15px,auto) minmax(0,1fr) auto}
+  .card strong,.card small{padding:3px}
+}
+@media(max-height:650px){
+  main>header{min-height:29px}
+  main>.arena{height:clamp(74px,19dvh,132px)}
+  .plaque{border-width:2px}
+  .message{min-height:2.65rem}
+  #intent{margin-block:2px}
+  .hand-table{padding-block:3px}
+}
+@media(max-height:460px) and (orientation:landscape){
+  main{height:auto;min-height:100dvh}
+  .hand-table{min-height:110px}
+  .card-slot,.card-slot:nth-child(4),.card-slot:nth-child(5){flex-basis:calc((100% - 20px)/5);height:92px}
+}
+</style><style>main{background:linear-gradient(145deg,#17473350,#06271db8),#103c2e url('assets/5b48c9e823a609350b43.webp') repeat;}</style><style>
+button{transition:filter .14s,transform .14s,box-shadow .14s}
+button:not(:disabled):hover{filter:brightness(1.13)}
+button:not(:disabled):active{transform:translateY(2px) scale(.97);filter:brightness(1.28)}
+#target:active{transform:none}
+#end:not(:disabled):hover::before,#end:not(:disabled):active::before{filter:brightness(1.25)}
+.menu{justify-content:flex-end;gap:6px}
+#battle-menu,#restart,#change-mode{min-height:34px;padding:3px 9px;border:2px solid #be9355;background:linear-gradient(#255458,#0a2529);box-shadow:0 2px #061618,inset 0 1px #fff2c330;color:var(--paper);font-size:.78rem;font-weight:750}
+#battle-tools{max-height:80dvh;overflow:auto}
+#battle-tools details{margin:12px 0}
+#battle-tools summary{color:var(--gold);font-weight:800}
+#battle-tools #log{position:static;max-height:33dvh;border:0;background:none;padding:6px 0 6px 20px}
+#battle-tools form{margin-top:12px}
+.stage-fx{position:absolute;inset:0;z-index:2;pointer-events:none;overflow:hidden}
+.fighter-fx{position:absolute;top:12%;width:38%;height:65%;display:grid;place-items:center;opacity:0}
+.fighter-fx.player{left:4%}.fighter-fx.enemy{right:4%}
+.fighter-fx span{background:#082427ef;color:#fff4d0;border:2px solid #f1c673;padding:3px 6px;font:bold clamp(.75rem,3vw,1.1rem) Georgia,serif;white-space:nowrap;text-shadow:0 1px #000}
+.fighter-fx.impact{background:radial-gradient(ellipse,#fa7c35c0,transparent 67%)}
+.fighter-fx.shield{background:radial-gradient(ellipse,#61fde0a8,transparent 68%)}
+.fighter-fx.status-fx{background:radial-gradient(ellipse,#df9effa0,transparent 68%)}
+.brass-wave{position:absolute;top:41%;left:27%;width:46%;height:29%;opacity:0;background:repeating-radial-gradient(ellipse at left center,transparent 0 9px,#ffdf84 11px,#ffba48 13px,transparent 15px 21px);filter:drop-shadow(0 0 7px #ff7b2e)}
+@media(prefers-reduced-motion:reduce){button{transition:none}button:not(:disabled):active{transform:none}}
+</style><style>
+.arena[data-loser]::after{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(90deg,transparent 51%,#051219b8 68%,#030d12d8);z-index:0}
+.arena[data-loser="player"]::after{transform:scaleX(-1)}
+.arena .fighters{z-index:1}
+.result-banner{position:absolute;z-index:3;top:6%;left:50%;transform:translateX(-50%);width:max-content;max-width:90%;padding:3px 18px;border:4px double #e4b975;background:#092529ee;color:#ffdd91;text-align:center;font:bold italic clamp(1.1rem,5vw,2rem) Georgia,serif;pointer-events:none}
+.result-banner.victory{background:radial-gradient(ellipse,#744316,#28190d);box-shadow:0 0 22px #ed9f4e;text-shadow:0 2px #291605;animation:win-banner .6s ease-out}
+@keyframes win-banner{from{opacity:0;transform:translateX(-50%) scale(.7)}to{opacity:1;transform:translateX(-50%) scale(1)}}
+.celebration{position:absolute;inset:0;z-index:2;pointer-events:none;overflow:hidden}
+.celebration b{position:absolute;top:38%;left:28%;color:#ffdd82;text-shadow:0 0 8px #e79539;font-size:clamp(.8rem,4vw,1.6rem)}
+#end.rematch{border:3px double #ffcc7c;border-radius:0;background:linear-gradient(#df8738,#85360f);box-shadow:0 3px 5px #061719;letter-spacing:.04em}
+#end.rematch::before{content:none}
+#end.rematch span{position:static;clip-path:none;width:auto;height:auto;overflow:visible}
+@media(prefers-reduced-motion:reduce){.result-banner.victory{animation:none}}
+</style><style>
+[hidden]{display:none!important}
+#setup-screen{width:min(100%,560px);margin:auto;padding:12px;text-align:center;background:radial-gradient(#22584e,#092529);min-height:100dvh;border:4px double #d5a459}
+#setup-screen h2{color:var(--gold);margin:.3em}
+#setup-seat{color:#94ffde;font-weight:bold}
+#roster{width:min(100%,405px);aspect-ratio:1;margin:auto;position:relative;border:4px double #d5a459;border-radius:50%;overflow:hidden;background:#0b3033}
+.roster-tile{width:36%;height:34%;position:absolute;left:50%;top:50%;translate:-50% -50%;border:0;background:#e5b36b;color:#211808;clip-path:polygon(25% 0,75% 0,100% 50%,75% 100%,25% 100%,0 50%);display:grid;grid-template-rows:minmax(0,1fr) auto;padding:3px 14% 9px;padding-inline:15px;font-weight:900}
+.roster-tile img{width:100%;height:100%;object-fit:cover;object-position:center 24%}
+.roster-tile span{background:#ffdb93;padding:1px}
+.roster-tile[aria-pressed=true]{width:39%;height:38%;background:#74ffe0;z-index:1}
+.roster-tile:focus-visible,.section-tile:focus-visible{filter:brightness(1.25);outline:3px solid white;outline-offset:-5px}
+#sections{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:10px auto;max-width:430px}
+.section-tile,#setup-next,#setup-back{background:linear-gradient(#295955,#0c2729);border:3px double #d5a459;color:#ffe4aa;font-weight:900;padding:6px}
+.section-tile img{display:block;width:100%;height:70px;object-fit:cover}
+.section-tile[aria-pressed=true]{border-color:#6effdd;box-shadow:0 0 8px #57ffda}
+#section-preview{max-width:425px;margin:8px auto;font-size:.9rem}
+#section-preview strong{color:var(--gold)}
+#setup-next{background:linear-gradient(#a75329,#6b2f16);min-width:125px}
+.arena.alternate-lineup{background-image:radial-gradient(ellipse at center,#3b6357,#102a2c)}
+#battle-portraits{position:absolute;inset:0;display:flex;justify-content:space-between;overflow:hidden;background:linear-gradient(#06343842,#0c2026cc)}
+#battle-portraits img{width:42%;object-fit:cover;object-position:center 20%;border-inline:2px solid #dda451}
+</style><style>
+#setup-screen.character-screen{width:min(100%,calc(100dvh * 2 / 3),560px);height:auto;min-height:0;aspect-ratio:2/3;padding:0;border:0;position:relative;background:#092529}
+.character-screen>h1,.character-screen>#setup-title{
+  position:absolute;width:1px;height:1px;clip-path:inset(50%);overflow:hidden;
+}
+.character-screen>#roster{
+  position:absolute;inset:0;width:100%;height:100%;margin:0;border:0;border-radius:0;overflow:visible;
+  background:#092529 url('assets/cebee4c0e6f016dd418e.webp') center/100% 100% no-repeat;
+}
+.wheel-hit{position:absolute;min-height:0;display:grid;place-items:center;padding:0;border:0;background:transparent;color:#211608;overflow:hidden}
+.wheel-hit:hover{background:#fff4c41c}
+.wheel-hit:focus-visible{background:#66ffe949;outline:none}
+.wheel-hit:active{transform:none}
+.wheel-hit.swapped{background:radial-gradient(#fce3a6,#ad733c);border:5px double #d59f50}
+.wheel-hit.swapped[aria-pressed=true]{border:8px double #67ffe4;box-shadow:inset 0 0 0 7px #67ffe4,inset 0 0 22px #126d5f}
+.wheel-hit.swapped img{width:100%;height:100%;position:absolute;inset:0;object-fit:cover;object-position:center 30%;pointer-events:none}
+.wheel-hit.swapped strong{z-index:1;align-self:end;margin-bottom:5%;border:3px double #9d5f29;padding:1px 10px;background:#ffdfa0;font:italic 900 clamp(.75rem,3.7vw,1.5rem) Georgia,serif;text-transform:uppercase}
+.character-screen>#setup-seat{position:absolute;z-index:1;top:12%;left:50%;transform:translateX(-50%);background:#092529e8;border:1px solid #bd985e;padding:2px 9px;font-size:.72rem;white-space:nowrap}
+.character-screen>#setup-next{position:absolute;left:16%;top:86%;width:68%;height:11%;min-height:0;border:0;background:transparent;color:transparent;clip-path:polygon(10% 0,90% 0,100% 30%,100% 70%,90% 100%,10% 100%,0 70%,0 30%)}
+.character-screen>#setup-next:hover,.character-screen>#setup-next:focus-visible{background:#ffe0a040;outline:none}
+.character-screen>#setup-back{position:absolute;left:2%;top:84%;font-size:.65rem;min-height:34px;padding:2px 5px}
+.character-screen>#collection-note:not([hidden]){position:absolute;top:16%;left:8%;right:8%;z-index:1;padding:4px;background:#082328ed;border:1px solid #bd985e;font-size:.72rem}
+</style><style>
+.wheel-hit[aria-pressed=true]{filter:drop-shadow(0 0 6px #60ffe0);background:#66ffe92e;box-shadow:inset 0 0 0 7px #62ffe0}
+.wheel-hit[aria-pressed=true]:not(.swapped)::after{content:"";position:absolute;inset:0;background:#66ffe0;clip-path:polygon(evenodd,25% 0,75% 0,100% 48%,75% 100%,25% 100%,0 48%,25% 0,26% 3%,3% 48%,26% 97%,74% 97%,97% 48%,74% 3%,26% 3%)}
+.character-screen>#setup-next:disabled{background:#09252955}
+#setup-screen.section-screen{width:min(100%,calc(100dvh * .75),540px);min-height:0;position:relative;padding:0;border:0;aspect-ratio:683/1013;background:#092529 url('assets/bccb222d83cc11f62559.webp') center/100% 100% no-repeat}
+.section-screen>h1,.section-screen>#setup-title,.section-screen>#collection-note{position:absolute;width:1px;height:1px;clip-path:inset(50%);overflow:hidden}
+.section-screen>#setup-seat{position:absolute;z-index:2;top:11%;left:50%;transform:translateX(-50%);background:#092529e8;border:1px solid #bd985e;padding:2px 9px;font-size:.72rem;white-space:nowrap}
+.section-screen>#sections{position:absolute;inset:0;display:block;margin:0;max-width:none}
+.section-screen>#sections::before{content:"";position:absolute;left:1%;right:1%;top:12%;bottom:57%;background:var(--chosen-portrait) center 26%/auto 125% no-repeat,radial-gradient(ellipse,#678061,#092529 78%);box-shadow:0 0 0 2px #c29351;pointer-events:none}
+.section-screen .section-tile{position:absolute;width:44%;height:15%;min-height:0;border:0;background:transparent;padding:0;clip-path:polygon(6% 0,94% 0,100% 12%,100% 88%,94% 100%,6% 100%,0 88%,0 12%)}
+.section-screen .section-tile:nth-child(1),.section-screen .section-tile:nth-child(3){left:5%}
+.section-screen .section-tile:nth-child(2),.section-screen .section-tile:nth-child(4){left:51%}
+.section-screen .section-tile:nth-child(-n+2){top:44%}
+.section-screen .section-tile:nth-child(n+3){top:60%}
+.section-screen .section-tile img{display:none}
+.section-screen .section-tile span{position:absolute;width:1px;height:1px;clip-path:inset(50%);overflow:hidden}
+.section-screen .section-tile[aria-pressed=true]{background:#58ffdf28;box-shadow:inset 0 0 0 4px #65ffe3}
+.section-screen>#section-preview{position:absolute;left:4%;right:4%;top:76%;height:10%;margin:0;overflow:auto;padding:3px 7px;background:#09272a;color:#fff0cc;font-size:clamp(.65rem,2.25vw,.86rem)}
+.section-screen>#setup-next{position:absolute;left:15%;width:70%;top:87%;height:10%;min-height:0;border:0;background:transparent;color:transparent}
+.section-screen>#setup-next{background:linear-gradient(#c36929,#873613);border:4px double #ebbd76;color:#fff0cb;font:bold italic clamp(.8rem,3vw,1.25rem) Georgia,serif;text-transform:uppercase}.section-screen>#setup-next:disabled{filter:saturate(.5);opacity:.9}
+.section-screen>#setup-next:focus-visible{outline:2px solid #fff;outline-offset:-5px}
+.section-screen>#setup-back{position:absolute;left:2%;top:86%;min-height:32px;font-size:.67rem;padding:2px 5px}
+</style><style>
+.wheel-hit.swapped img{
+  inset:5% 11% auto;
+  width:78%;
+  height:77%;
+  object-fit:contain;
+  object-position:center bottom;
+  mask-image:linear-gradient(#000 0 88%,transparent 100%);
+}
+.wheel-hit.swapped strong{margin-bottom:5%;max-width:76%;padding-inline:5px}
+#battle-portraits{padding:4px 3% 0;background:linear-gradient(90deg,#163636,#203d37,#163636)}
+#battle-portraits img{
+  width:43%;height:calc(100% - 45px);object-fit:contain;object-position:center top;
+  border:0;filter:drop-shadow(0 2px 3px #0d231f);
+}
+@media(max-height:650px){#battle-portraits img{height:calc(100% - 32px)}}
+.section-screen>#sections::before{background-size:auto 91%,auto;background-position:center center}
+</style><style>
+.wheel-hit.swapped{
+  border:0;
+  background:repeating-linear-gradient(126deg,#b577282a 0 1px,transparent 1px 6px),radial-gradient(ellipse at 50% 35%,#ffe8a8,#d59b4f);
+}
+.wheel-hit.swapped[aria-pressed=true]{border:0;box-shadow:none}
+.wheel-hit.swapped[aria-pressed=true]::after{
+  content:"";position:absolute;inset:0;pointer-events:none;
+  background:#6effdd;
+  clip-path:polygon(evenodd,25% 0,75% 0,100% 47%,75% 100%,25% 100%,0 47%,25% 0,26% 2.5%,2.8% 47%,26% 97.5%,74% 97.5%,97.2% 47%,74% 2.5%,26% 2.5%);
+}
+.wheel-hit.swapped img{
+  inset:7% 10% auto;
+  width:80%;height:77%;
+  object-fit:contain;object-position:center bottom;
+  mask-image:none;
+  filter:drop-shadow(1px 2px 1px #60401765);
+}
+.wheel-hit.swapped strong{
+  position:absolute;bottom:4%;left:50%;transform:translateX(-50%);margin:0;
+  min-width:47%;padding:2px 6px;border:3px double #9a622c;background:linear-gradient(#ffe8a7,#d6a15a);
+}
+#battle-portraits{padding:4px 3% 0;background:linear-gradient(90deg,#123431,#173c38,#123431)}
+#battle-portraits img{
+  width:44%;height:calc(100% - 37px);object-fit:contain;object-position:center bottom;
+  border:0;filter:drop-shadow(0 3px 5px #061716);
+}
+.section-screen>#sections::before{background-size:auto 85%,auto;background-position:center bottom}
+</style><style>
+#battle-portraits{background:transparent;padding:4px 1% 0}
+#battle-portraits img{width:47%;height:calc(100% - 17px);object-position:center bottom}
+#battle-portraits #enemy-art{transform:scaleX(-1)}
+.arena .fighter strong{font-size:clamp(.72rem,3.5vw,1.05rem)}
+.arena .fighter .health{line-height:1.05}
+</style><style>
+.duel-screen{width:min(100%,530px);margin:0 auto;min-height:100dvh;text-align:center;padding:clamp(16px,6vw,36px);border:4px double #d5aa65;background:radial-gradient(ellipse at top,#275c4b,#0b2729 70%);color:var(--paper)}
+.duel-screen>p{margin:.4rem 0 1rem;color:var(--gold)}
+.duel-actions{display:grid;gap:12px;margin:24px auto;max-width:350px}
+.duel-actions button,#reveal-hand{border:4px double #dcb06a;background:linear-gradient(#a55228,#743518);color:#fff1c9;padding:10px;font:bold 1.17rem Georgia,serif}
+.duel-actions small{display:block;margin-top:3px;font:normal .8rem system-ui,sans-serif}
+#handoff-recap{text-align:left;max-width:360px;margin:12px auto 22px;line-height:1.45}
+#handoff-recap:empty{display:none}
+#handoff-recap li+li{margin-top:5px}
+#second-wind-option:not([hidden]){position:absolute;z-index:3;top:37%;left:6%;right:6%;padding:4px;background:#092529eb;border:1px solid #bd985e;font-size:clamp(.64rem,2vw,.85rem)}
+</style><style>
+.duel-screen{
+  width:min(100%,700px);padding:clamp(9px,3vw,20px);
+  border:4px double #c89b59;box-shadow:0 0 18px #020e11;
+  background:linear-gradient(145deg,#17473350,#06271db8),#103c2e url('assets/5b48c9e823a609350b43.webp') repeat;
+}
+.duel-crest{height:clamp(45px,9dvh,76px);background:center/contain no-repeat url('assets/8dd96991f9e7b7bcb316.webp');filter:drop-shadow(0 2px 3px #04181a)}
+.duel-arena{position:relative;height:clamp(92px,21dvh,192px);margin:7px 0 9px;border:4px double #edc284;background:center/cover url('assets/3a5d242ff0a49983a63b.webp');box-shadow:0 2px 6px #05191c}
+.duel-plaque{
+  border:4px double #e9c279;background:linear-gradient(110deg,#09272a,#24504b,#09272a);
+  color:#ffdd97;text-shadow:0 2px #261909;font:bold italic clamp(1.25rem,5vw,2rem) Georgia,serif;
+  padding:5px 8px;text-transform:uppercase;
+}
+.duel-actions{max-width:440px;gap:9px;margin:13px auto}
+.duel-actions button,#reveal-hand{
+  border:4px double #f4c77e;background:linear-gradient(160deg,#b96931,#763317);
+  box-shadow:inset 0 0 8px #5d290f,0 3px 5px #041719;color:#fff0c1;
+  padding:6px 14px;font:bold italic clamp(1.1rem,4vw,1.4rem) Georgia,serif;text-shadow:0 1px #56260e;
+}
+.duel-actions small{color:#ffe5ad}
+#handoff-seat{width:max-content;margin:0 auto 4px;padding:2px 10px;border:2px double #dfac61;background:#09272a;font-weight:bold;font-size:.8rem}
+.duel-screen>.handoff-instruction{margin:7px 0 8px;color:#fff0c6}
+#handoff-recap{margin:8px auto 12px;border:4px double #a56b36;background:linear-gradient(140deg,#fff0bb,#deb16a);color:#271909;padding:8px 12px 8px 28px;font-size:.85rem;max-height:22dvh;overflow:auto}
+@media(max-height:520px){.duel-arena{height:82px}.duel-crest{height:38px}#handoff-recap{max-height:17dvh}}
+</style><style>#help-art{display:block;width:100%;max-height:24dvh;object-fit:contain;background:#091d21;border:3px double #ce9e59;margin-top:.55rem}.card img{object-position:center 47%}</style><style>
+#mode-screen .duel-arena{display:none}
+#mode-screen .duel-plaque{margin-top:8px}
+#mode-screen .duel-actions{max-width:620px;gap:10px}
+#mode-screen button{display:block;position:relative;width:100%;aspect-ratio:962/410;padding:0;border:0;background:center/100% 100% no-repeat;box-shadow:0 4px 9px #051719}
+#mode-screen #mode-ai{background-image:url('assets/1fadff0e90ae3013a49f.webp')}
+#mode-screen #mode-local{background-image:url('assets/8dc4753c72c535de5d99.webp');aspect-ratio:962/403}
+#mode-screen button span,#reveal-hand span{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+#handoff-screen .handoff-hero{height:clamp(112px,35dvh,320px);overflow:hidden;background-position:center 42%}
+.handoff-hero img{width:100%;height:100%;object-fit:contain;object-position:center bottom;filter:drop-shadow(0 4px 6px #07181b)}
+#handoff-seat{background:linear-gradient(#ffedb3,#e0ae66);color:#2c1709;border:4px double #945a2b;font:bold italic .9rem Georgia,serif;text-transform:uppercase;padding:2px 18px}
+#handoff-title.duel-plaque{background:none;border:0;color:#ffe3a1;font-size:clamp(1.5rem,7vw,2.75rem);text-transform:none;padding:2px}
+#handoff-screen>.handoff-instruction{width:fit-content;margin:5px auto 8px;padding:3px 10px;border:3px double #965d30;background:linear-gradient(#ffedb3,#deb16f);color:#291907;font:bold italic clamp(.85rem,3vw,1.04rem) Georgia,serif}
+#handoff-recap{max-height:clamp(46px,15dvh,135px)}
+#reveal-hand{position:relative;display:block;margin:7px auto 0;width:min(83%,335px);aspect-ratio:429/116;padding:0;border:0;background:center/100% 100% no-repeat url('assets/c80f30a8f414cd90b249.webp');clip-path:polygon(6% 0,94% 0,100% 24%,100% 76%,94% 100%,6% 100%,0 76%,0 24%)}
+#reveal-hand:focus-visible{filter:brightness(1.27)}
+@media(max-height:530px){#handoff-screen .handoff-hero{height:23dvh}#handoff-recap{max-height:12dvh}#reveal-hand{width:min(70%,230px)}}
+</style><style>
+.comic-impact{position:absolute;z-index:4;top:0;left:50%;translate:-50% 0;width:min(78%,460px);height:clamp(74px,17dvh,150px);pointer-events:none;filter:drop-shadow(2px 4px 2px #1d0d06cc)}
+.impact-face{position:relative;width:100%;height:100%;display:grid;place-items:center;transform:rotate(-4deg)}
+.impact-ink{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
+#impact-line{z-index:1;width:73%;text-align:center;color:#211208;font:italic 900 clamp(.78rem,3.5vw,1.45rem)/1.02 Impact,"Arial Black",system-ui,sans-serif;text-transform:uppercase;text-wrap:balance;transform:rotate(-2deg)}
+#impact-speaker{position:absolute;left:12%;bottom:3%;padding:1px 7px;color:#261508;background:#ffda8f;border:2px solid #432717;font:bold italic .68rem Georgia,serif;text-transform:uppercase}
+.comic-impact.long-line #impact-line{font-size:clamp(.69rem,2.8vw,1.09rem)}
+.comic-impact[data-side=enemy] #impact-speaker{left:auto;right:12%}
+.comic-impact[data-result=true]{top:auto;bottom:18%;height:clamp(67px,13dvh,115px)}
+.comic-impact[data-result=true] #impact-line{font-size:clamp(.72rem,3vw,1.22rem)}
+@media(max-height:550px){.comic-impact{height:67px;width:85%}}
+</style><style>
+.comic-impact{width:min(86%,490px);height:clamp(80px,18dvh,154px)}
+#impact-line{width:74%;color:#160b06;text-shadow:0 1px #fff5d2;font-size:clamp(1rem,4.2vw,1.68rem);line-height:1.05}
+.comic-impact.long-line #impact-line{font-size:clamp(.85rem,3.5vw,1.34rem)}
+.comic-impact[data-result=true] #impact-line{font-size:clamp(.83rem,3.6vw,1.32rem)}
+@media(max-height:550px){.comic-impact{height:74px}}
+</style><style>
+#opening-screen{position:relative;width:min(100%,66.667dvh,720px);aspect-ratio:2/3;margin:auto;background:#082326 url('assets/dc50f4f39daeb5a6ccd5.webp') center/100% 100% no-repeat}
+#opening-screen button{position:absolute;border:0;padding:0;background:transparent;color:#fff0c0;box-shadow:none}
+#opening-screen button:hover,#opening-screen button:focus-visible{background:#ffe5aa36;outline:2px solid #ffe4a4;outline-offset:1px}
+#enter-band-room{left:7%;top:82%;width:86%;height:12%;clip-path:polygon(6% 0,94% 0,100% 30%,100% 70%,94% 100%,6% 100%,0 70%,0 30%)}
+#opening-audio{right:2%;bottom:1%;width:12%;height:7%;font:bold 1.45rem Georgia,serif;text-shadow:1px 2px #110e06}
+#opening-audio[aria-pressed=true]::after{content:"";position:absolute;left:29%;right:25%;top:49%;border-top:3px solid #ffdd8d;transform:rotate(-45deg);filter:drop-shadow(1px 1px #231207)}
+</style><style>
+.audio-settings,#mode-screen button.audio-settings{min-height:34px;padding:3px 9px;width:auto;aspect-ratio:auto;border:2px solid #be9355;background:linear-gradient(#255458,#0a2529);color:var(--paper);font-size:.78rem;font-weight:750}
+#mode-screen button.audio-settings{margin:7px 0 0 auto}
+#audio-dialog label{display:block;padding:7px 0}
+#audio-dialog input[type=checkbox]{accent-color:#ebbe72}
+#audio-volume{width:100%;accent-color:#efbe6f}
+#audio-volume-label{float:right;color:var(--gold)}
+#audio-dialog form{margin-top:12px}
+#impact-speaker{display:flex;align-items:center;gap:4px;left:2%;bottom:0;padding:2px 6px 2px 2px;box-shadow:0 2px 5px #21120bd6}
+#impact-speaker img{width:clamp(23px,6vw,36px);height:clamp(23px,6vw,36px);object-fit:contain;background:#123e38;border:1px solid #9e683b;border-radius:50%}
+#impact-name,#impact-side{display:block;white-space:nowrap}
+#impact-side{color:#503216;font:800 .57rem system-ui,sans-serif}
+.comic-impact[data-side=enemy] #impact-speaker{left:auto;right:2%}
+</style><style>.battle-tool-actions{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}.battle-tool-actions button{min-height:44px}main>.menu{justify-content:center}</style><link rel="preload" as="image" href="assets/dc50f4f39daeb5a6ccd5.webp">
+<link rel="canonical" href="https://pocketplayroom.com/games/section-war/"><script src="../../recent-games.js" defer></script><style>.section-war-return{display:block;position:relative;z-index:5;text-align:center;padding:10px 12px;background:#06171b;color:#ffe1a2;font:600 14px system-ui;text-decoration:none}.section-war-return:focus-visible{outline:2px solid #ffe1a2;outline-offset:-3px}</style></head>
+<body><a class="section-war-return" href="../../#home">Back to Pocket Playroom</a>
+<main id="battle-screen" hidden>
+<header><h1>Section War</h1><p id="battle-mode-label">Band Room Battles · Scrimmage</p></header>
+<h2 id="turn" class="plaque"></h2>
+<div id="arena" class="arena" role="group" aria-label="Battlefield"><div id="battle-portraits" hidden><img id="player-art" alt=""><img id="enemy-art" alt=""></div>
+  <button id="target" aria-label="Target rival" type="button" disabled></button><div id="comic-impact" class="comic-impact" hidden><div class="impact-face"><svg class="impact-ink" viewBox="0 0 400 160" preserveAspectRatio="none" aria-hidden="true"><defs><linearGradient id="burst-paper" x2=".25" y2="1"><stop stop-color="#fff1bd"/><stop offset="1" stop-color="#e5a74f"/></linearGradient><pattern id="burst-grain" width="7" height="7" patternUnits="userSpaceOnUse"><path d="M0 1l7 5M-2 4l6 5" stroke="#914423" stroke-opacity=".16" stroke-width=".7"/></pattern></defs><path fill="#eb6a21" stroke="#20110b" stroke-width="2" d="M50 49 3 21 77 39 57 5 102 41 119 9 132 40 165 4 175 35 213 8 220 36 254 4 260 32 301 8 291 41 348 6 327 46 395 24 357 62 396 64 361 82 399 98 350 104 373 131 334 120 339 151 302 122 282 153 268 126 239 155 223 125 190 156 176 128 142 154 128 125 83 158 97 123 46 145 66 119 7 137 51 107 4 112 41 91 4 78 42 70 5 53Z"/><path id="paper-shape" fill="url(#burst-paper)" stroke="#231508" stroke-width="4" stroke-linejoin="round" d="M62 53 35 35 91 47 80 23 121 43 135 26 148 43 172 23 188 40 215 25 231 42 257 20 270 44 302 24 304 45 341 30 325 55 369 45 347 66 375 76 348 86 369 101 336 101 345 123 316 111 310 135 284 118 267 139 249 118 224 140 211 121 185 140 168 121 144 138 135 118 103 134 111 113 67 134 83 110 44 116 63 97 26 98 59 82 26 70 61 67 32 52Z"/><use href="#paper-shape" style="fill:url(#burst-grain);stroke:none"/></svg><strong id="impact-line"></strong></div><span id="impact-speaker"><img id="impact-portrait" alt=""><span><strong id="impact-name"></strong><small id="impact-side"></small></span></span></div><div id="celebration" class="celebration" aria-hidden="true"></div><div id="result-banner" class="result-banner" aria-hidden="true" hidden></div><div class="stage-fx" aria-hidden="true"><div id="brass-wave" class="brass-wave"></div><div id="player-fx" class="fighter-fx player"><span></span></div><div id="enemy-fx" class="fighter-fx enemy"><span></span></div></div><div class="fighters">
+  <div class="fighter"><strong id="player-name"></strong><span id="playerHP" class="health"></span><span id="playerStatus" class="status"></span></div>
+  <div class="fighter"><strong id="enemy-name"></strong><span id="enemyHP" class="health"></span><span id="enemyStatus" class="status"></span></div>
+</div>
+</div><p id="intent" class="status"></p><div class="message"><p id="prompt" role="status"></p><div id="feedback" role="status" aria-atomic="true"></div></div>
+<p id="energy"></p>
+<div class="hand-table"><div id="hand" aria-label="Your cards"></div></div>
+<div class="actions"><button id="end" type="button"><span>End Turn</span></button></div>
+<div class="menu"><button id="battle-menu" type="button" aria-haspopup="dialog">Battle Tools</button></div><dialog id="battle-tools" aria-labelledby="tools-title"><h2 id="tools-title">Battle Tools</h2><div class="battle-tool-actions"><button id="restart" type="button">New Battle</button><button id="change-mode" type="button">Modes</button><button type="button" class="audio-settings" data-audio-settings>Audio</button></div><details open><summary>Battle Log · <span id="counts"></span></summary><ol id="log"></ol></details><details><summary>How to play</summary><p>Tap an attack, then tap your rival. Mute also needs a target. Block and utility cards resolve when tapped. Block expires at the start of its owner's turn. Long Reach adds 2 to your first single-target attack each turn. Squeak makes your next attack miss and expires at the end of the turn. Tempo Brake reduces the next attack that would hit by 4. Duct Tape clears Squeak and Out of Tune. Fortified adds 3 to the next Block gain. Out of Tune deals 2 damage per stack at the start of a turn, then loses one stack. Knock your rival to 0 HP to win.</p></details><form method="dialog"><button>Close</button></form></dialog>
+<dialog id="card-help" aria-labelledby="help-title"><h2 id="help-title"></h2><img id="help-art" alt=""><p id="help-copy"></p><form method="dialog"><button>Close</button></form></dialog></main>
+<section id="opening-screen" aria-label="Section War: Band Room Battles">
+  <button id="enter-band-room" type="button" aria-label="Enter the Band Room"></button>
+  <button id="opening-audio" type="button" aria-label="Audio settings" aria-haspopup="dialog" data-audio-settings></button>
+</section><section hidden id="mode-screen" class="duel-screen">
+  <div class="duel-crest" role="img" aria-label="Section War: Band Room Battles"></div><div class="duel-arena" aria-hidden="true"></div><h1 class="duel-plaque">Choose How to Play</h1><button type="button" class="audio-settings" data-audio-settings>Audio</button>
+  <div class="duel-actions">
+    <button id="mode-ai" type="button"><span>Scrimmage · Play against the AI</span></button>
+    <button id="mode-local" type="button"><span>Pass &amp; Play · Two players on one device</span></button>
+  </div>
+</section>
+<section id="handoff-screen" class="duel-screen" hidden aria-labelledby="handoff-title">
+  <div class="duel-crest" role="img" aria-label="Section War: Band Room Battles"></div><div class="duel-arena handoff-hero" aria-hidden="true"><img id="handoff-art" alt=""></div><p id="handoff-seat"></p>
+  <h1 id="handoff-title" class="duel-plaque" tabindex="-1"></h1>
+  <p class="handoff-instruction">Hand over the device, then reveal your hand.</p>
+  <ol id="handoff-recap"></ol>
+  <button id="reveal-hand" type="button"><span>Reveal My Hand</span></button>
+</section><section hidden id="setup-screen" aria-labelledby="setup-title">
+  <h1>Section War</h1>
+  <p id="setup-seat"></p>
+  <h2 id="setup-title"></h2>
+  <div id="roster"></div>
+  <div id="sections" hidden></div>
+  <p id="section-preview" aria-live="polite"></p><p id="collection-note" hidden>Unlocked: Second Wind · 1 Energy · Deal 4 damage and gain 3 Block. Equip in human duels when available.</p>
+  <label id="second-wind-option" hidden><input id="second-wind-check" type="checkbox"> Equip Second Wind in place of one Warm-Up Hit</label>
+  <button id="setup-back" type="button">Back</button>
+  <button id="setup-next" type="button"></button>
+</section><dialog id="audio-dialog" aria-labelledby="audio-title">
+  <h2 id="audio-title">Audio</h2>
+  <label><input id="music-enabled" type="checkbox" checked> Music</label>
+  <label><input id="sounds-enabled" type="checkbox" checked> Sound effects</label>
+  <label for="audio-volume">Volume <output id="audio-volume-label" for="audio-volume">58%</output></label>
+  <input id="audio-volume" type="range" min="0" max="100" value="58">
+  <form method="dialog"><button>Done</button></form>
+</dialog><script>
+"use strict";
+
+const cardArt = {"screech":"assets/a6d5feaccd9fdd48a614.webp","roll":"assets/878d4945b9861f88decb.webp","guard":"assets/843825c81fb011733e67.webp","taunt":"assets/cbf5192d9442faecebe8.webp","oil":"assets/71cff453cc271e55d761.webp","stab":"assets/8de302c12e4e3b60fe4c.webp","cadence":"assets/04d50b81da2423f067fa.webp","hit":"assets/0f04f76b6521062d8155.webp","sweep":"assets/8fd9eafca82469a32e63.webp","secondWind":"assets/2be0054ba034bb8d5705.webp","brake":"assets/fb3a82b566f93ed58620.webp","mute":"assets/72a7a54d21b880857956.webp","tape":"assets/18ee5454a0df13e3a203.webp","wall":"assets/c99209ca7224899920cc.webp"};
+const cards = {
+  secondWind:{name:"Second Wind",cost:1,damage:4,block:3,target:true,detail:"Deal 4 damage and gain 3 Block. You still gain Block if Squeak makes the attack miss."},
+  screech:{name:"Screech Blast",cost:2,damage:9,tune:2,target:true,detail:"Deal 9 damage and apply 2 Out of Tune if the attack lands."},
+  taunt:{name:"Taunt",cost:1,block:4,tune:1,target:true,detail:"Gain 4 Block and apply 1 Out of Tune. Against AI, replace its first defensive move with Warm-Up Hit."},
+  wall:{name:"Brass Wall",cost:1,block:8,detail:"Gain 8 Block."},
+  brake:{name:"Tempo Brake",cost:2,damage:5,block:4,brake:true,target:true,detail:"Deal 5 damage, gain 4 Block, and reduce the rival’s next successful attack by 4."},
+  cadence:{name:"Cadence",cost:0,energy:1,detail:"Gain 1 Energy. Once per turn."},
+  roll:{name:"Roll Finish",cost:2,damage:10,target:true,detail:"Deal 10 damage."},
+  stab:  {name:"Slide Stab", cost:1, damage:7, target:true, detail:"Deal 7 damage."},
+  sweep: {name:"Slide Sweep", cost:2, damage:12, target:true, cleave:true, detail:"Deal 12 damage in a duel."},
+  hit:   {name:"Warm-Up Hit", cost:1, damage:6, target:true, detail:"Deal 6 damage."},
+  guard: {name:"Brass Guard", cost:1, block:7, detail:"Gain 7 Block."},
+  tape:  {name:"Duct Tape", cost:1, block:3, detail:"Clear Squeak and Out of Tune. Gain 3 Block."},
+  oil:   {name:"Valve Oil", cost:0, detail:"Draw 1 card."},
+  mute:  {name:"Mute", cost:1, target:true, detail:"Apply Squeak."}
+};
+
+const shortEffects = {
+  secondWind:"4 damage · 3 Block",
+  screech:"9 damage · 2 Out of Tune", taunt:"4 Block · Out of Tune", wall:"8 Block",
+  brake:"5 damage · 4 Block · Slow", cadence:"+1 Energy", roll:"10 damage",
+  stab:"7 damage", sweep:"12 duel damage", hit:"6 damage",
+  guard:"7 Block", tape:"Clear debuffs · 3 Block", oil:"Draw 1 card", mute:"Apply Squeak"
+};
+
+const cardHelp = {
+  secondWind:cards.secondWind.detail,
+  screech:cards.screech.detail, taunt:cards.taunt.detail, wall:cards.wall.detail,
+  brake:cards.brake.detail, cadence:cards.cadence.detail, roll:cards.roll.detail,
+  stab:"A cheap single-target attack. Use it first to get +2 damage from Long Reach. Tap Nia to confirm.",
+  sweep:"A wide attack. It deals 12 to Nia in this duel. In battles with multiple rivals it deals 9 to your target and 5 to each other rival. It does not use Long Reach.",
+  hit:"A basic single-target attack. It can use Long Reach or clear Squeak cheaply by taking the miss.",
+  guard:"Use this before End Turn to absorb Nia's attack. Unused Block expires when your next turn starts.",
+  tape:"Removes Squeak before it makes your attack miss and clears Out of Tune. You also gain 3 Block.",
+  oil:"Draw another card without spending Energy. Useful when your current hand does not have the move you need.",
+  mute:"Tap Nia to apply Squeak. Her next attack misses, but she can still gain Block or use utility moves. Squeak expires at the end of her turn."
+};
+
+
+const core = ["hit","hit","guard","tape","oil","mute"];
+const plans = {
+  Trombones:[["stab","guard","hit"],["sweep","stab"],["mute","sweep"],["stab","stab","guard"]],
+  Trumpets:[["screech","taunt"],["taunt","hit","guard"],["screech","hit"],["mute","screech"]],
+  Tubas:[["brake","wall"],["hit","hit","guard"],["hit","wall","tape"],["hit","brake"],["hit","mute","guard"]],
+  Drumline:[["cadence","guard","roll","hit"],["cadence","mute","roll","hit"],["guard","hit","hit"],["cadence","tape","roll","hit"]]
+};
+const saveKey = "section-war.scrimmage.v1";
+let completed = 0;
+try {
+  completed = Math.min(10, Math.max(0, parseInt(localStorage.getItem(saveKey),10) || 0));
+} catch {}
+
+const el = id => document.getElementById(id);
+let state;
+let mode = "ai";
+const roster = {
+  Malik:"assets/34f21e5562ef62178cbe.webp", Maya:"assets/f8421cc8afcb3ac5a790.webp", Eli:"assets/71c76eb5ec488423abee.webp", Samira:"assets/20353a05278e4f8e1d31.webp",
+  Jae:"assets/37d916b700c8ea8c5c13.webp", Nia:"assets/77b99104d4d5ebc5099c.webp", Mateo:"assets/adbf7dbcbb47f560afa4.webp"
+};
+const sections = {
+  Trombones:{signature:["stab","sweep"], image:"assets/a8c100af4cfd011dd305.webp", ability:"Long Reach · Your first single-target attack each turn deals +2 damage."},
+  Trumpets:{signature:["screech","taunt"], image:"assets/3192a0a269627d08df0f.webp", ability:"Lead Voice · The first time you apply Out of Tune each turn, deal 2 extra damage."},
+  Tubas:{signature:["wall","brake"], image:"assets/3c5c4bacf67a24b7e9c1.webp", ability:"Heavy Brass · Start Fortified. Once per turn, gain 2 extra Block when adding to existing Block."},
+  Drumline:{signature:["cadence","roll"], image:"assets/18a543a8f565648b5a27.webp", ability:"In the Pocket · Your first attack played as your third card or later each turn deals ×1.5 damage."}
+};
+let lineup = [{name:"Malik",section:"Trombones"},{name:"Nia",section:"Tubas"}];
+let draftLineup;
+let setupStep = 0;
+let setupFromBattle = false;
+
+function openSetup(fromBattle = false) {
+  setupFromBattle = fromBattle;
+  draftLineup = lineup.map(() => ({name:null,section:null,secondWind:false}));
+  setupStep = 0;
+  cancelEffects();
+  el("battle-screen").hidden = true;
+  el("setup-screen").hidden = false;
+  renderSetup();
+}
+
+function renderSetup() {
+  el("collection-note").hidden = completed < 10;
+  const seat = Math.floor(setupStep / 2);
+  const pickingSection = setupStep % 2 === 1;
+  const pick = draftLineup[seat];
+  el("setup-seat").textContent = mode === "local" ? "Player " + (seat + 1) : (seat ? "AI opponent" : "Your lineup");
+  el("second-wind-option").hidden = !(mode === "local" && pickingSection && completed >= 10);
+  el("second-wind-check").checked = pick.secondWind;
+  el("setup-title").textContent = pickingSection ? "Choose " + pick.name + "’s Section" : "Choose Character";
+  el("setup-screen").classList.toggle("character-screen",!pickingSection);
+  el("setup-screen").classList.toggle("section-screen",pickingSection);
+  el("setup-next").disabled = !(pickingSection ? pick.section : pick.name);
+  el("roster").hidden = pickingSection;
+  el("sections").hidden = !pickingSection;
+  el("setup-back").hidden = false;
+  el("setup-next").textContent = (mode === "local" ? ["Choose Section","Next Player","Choose Section","Start Duel"] : ["Choose Section","Choose Opponent","Choose Section","Start Scrimmage"])[setupStep];
+  if (!pickingSection) {
+    renderWheel(pick);
+    el("section-preview").replaceChildren();
+    return;
+  }
+  const section = sections[pick.section];
+  el("sections").style.setProperty("--chosen-portrait", "url(" + roster[pick.name] + ")");
+  el("sections").replaceChildren(...Object.entries(sections).map(([name, data]) =>
+    selectionTile(name, data.image, name === pick.section, "section-tile", () => {
+      pick.section = name;
+      renderSetup();
+      el("sections").querySelector('[aria-pressed="true"]').focus();
+    })
+  ));
+  if (!section) {el("section-preview").replaceChildren(); return;}
+  const sprite = battleSprites[pick.name]?.[pick.section];
+  if (sprite) el("sections").style.setProperty("--chosen-portrait", "url(" + sprite + ")");
+  const ability = document.createElement("strong");
+  ability.textContent = section.ability;
+  const signatures = document.createElement("span");
+  signatures.textContent = " Signature cards: " + section.signature.map(id =>
+    cards[id].name + " (" + cards[id].cost + ") · " + cards[id].detail
+  ).join(" / ");
+  el("section-preview").replaceChildren(ability,signatures);
+}
+
+
+const battleSprites = {"Eli":{"Trombones":"assets/aa777b78b93cad33a330.webp","Trumpets":"assets/512606c2b26558214450.webp","Drumline":"assets/8af5c56e250560a42727.webp","Tubas":"assets/fbb5e4656be28fc25f81.webp"},"Nia":{"Trombones":"assets/338b869317f394be3e83.webp","Trumpets":"assets/64f7cf6adce518f0e463.webp","Drumline":"assets/030d2d38abe3ca840183.webp","Tubas":"assets/f65b4d9c53673b33cd46.webp"},"Jae":{"Trombones":"assets/358b61531257b6d46139.webp","Trumpets":"assets/000e77deae2e093509fe.webp","Drumline":"assets/8f9223a51eda85ced0de.webp","Tubas":"assets/a619158ac6185fa85422.webp"},"Maya":{"Trombones":"assets/4903c7461f1c4d85b17e.webp","Trumpets":"assets/7c295c5fb75d3224de17.webp","Drumline":"assets/7ef8722cee6f79837503.webp","Tubas":"assets/f2f3add261f1a4a07e9c.webp"},"Mateo":{"Trombones":"assets/6e801ed3d11b860689c0.webp","Trumpets":"assets/ebb07a3fdce06b3eb43a.webp","Drumline":"assets/d71bb133207ba606be5c.webp","Tubas":"assets/d910dbd86db677c4c754.webp"},"Samira":{"Trombones":"assets/cfe63d9f6fb7e5d02949.webp","Trumpets":"assets/684b7ed73508b5320ae8.webp","Drumline":"assets/45c73edfc27580f1a822.webp","Tubas":"assets/a006bfaabb2ac26ab10d.webp"},"Malik":{"Trombones":"assets/373b58e668e3cd84e9bd.webp","Trumpets":"assets/d29a645fffd6fb30b63e.webp","Drumline":"assets/23def78eb374e4dda3b6.webp","Tubas":"assets/2b2dedf08ed0cab28543.webp"}};
+const wheelTiles = [
+  ["Malik", [[397,579],[619,579],[723,754],[618,950],[397,950],[290,754]]],
+  ["Maya", [[277,333],[511,268],[746,333],[619,579],[397,579]]],
+  ["Eli", [[746,333],[886,442],[973,588],[999,754],[723,754],[619,579]]],
+  ["Samira", [[723,754],[999,754],[965,922],[885,1063],[748,1181],[618,950]]],
+  ["Jae", [[397,950],[618,950],[748,1181],[636,1241],[509,1265],[377,1241],[264,1181]]],
+  ["Nia", [[20,754],[290,754],[397,950],[264,1181],[121,1060],[49,914]]],
+  ["Mateo", [[20,754],[49,596],[135,448],[277,333],[397,579],[290,754]]]
+];
+
+function renderWheel(pick) {
+  el("roster").replaceChildren(...wheelTiles.map(([original, points], index) => {
+    const name = index === 0 ? (pick.name || "Malik") : original === pick.name ? "Malik" : original;
+    const selected = index === 0 && !!pick.name;
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "wheel-hit";
+    button.setAttribute("aria-label",name);
+    button.setAttribute("aria-pressed",String(selected));
+    const xs = points.map(point => point[0]);
+    const ys = points.map(point => point[1]);
+    const left = Math.min(...xs), top = Math.min(...ys);
+    const width = Math.max(...xs) - left, height = Math.max(...ys) - top;
+    button.style.left = left / 1024 * 100 + "%";
+    button.style.top = top / 1536 * 100 + "%";
+    button.style.width = width / 1024 * 100 + "%";
+    button.style.height = height / 1536 * 100 + "%";
+    button.style.clipPath = "polygon(" + points.map(([x,y]) =>
+      (x-left)/width*100 + "% " + (y-top)/height*100 + "%"
+    ).join(",") + ")";
+    if (name !== original) {
+      const image = document.createElement("img");
+      image.alt = "";
+      image.src = roster[name];
+      const label = document.createElement("strong");
+      label.textContent = name;
+      button.append(image,label);
+      button.classList.add("swapped");
+    }
+    button.addEventListener("click", () => {
+      if (name === pick.name) return;
+      pick.name = name;
+      renderSetup();
+      el("roster").firstElementChild.focus();
+    });
+    return button;
+  }));
+}
+
+function selectionTile(name, src, selected, style, action) {
+  const button = document.createElement("button");
+  button.type = "button";
+  button.className = style;
+  button.setAttribute("aria-pressed", String(selected));
+  const image = document.createElement("img");
+  image.src = src;
+  image.alt = "";
+  const label = document.createElement("span");
+  label.textContent = name;
+  button.append(image,label);
+  button.addEventListener("click", action);
+  return button;
+}
+
+function buildDeck(pick) {
+  const signature = sections[pick.section].signature;
+  const deck = [...core,...signature,...signature];
+  if (mode === "local" && completed >= 10 && pick.secondWind) {
+    deck[deck.indexOf("hit")] = "secondWind";
+  }
+  return shuffle(deck);
+}
+
+function openMode(nextMode) {
+  setMusicPhase("menu");
+  unlockMusic();
+  mode = nextMode;
+  el("mode-screen").hidden = true;
+  openSetup();
+}
+
+function leaveSetup() {
+  el("setup-screen").hidden = true;
+  if (setupFromBattle) {
+    el("battle-screen").hidden = false;
+    el("battle-menu").focus();
+  } else {
+    el("mode-screen").hidden = false;
+    el("mode-ai").focus();
+  }
+}
+
+function handoff(events) {
+  cancelEffects();
+  el("battle-screen").hidden = true;
+  el("hand").replaceChildren();
+  el("feedback").replaceChildren();
+  el("handoff-seat").textContent = "Player " + state.seat;
+  el("handoff-title").textContent = "Pass to " + lineup[0].name;
+  el("handoff-art").src = battleSprites[lineup[0].name][lineup[0].section];
+  el("handoff-recap").replaceChildren(...events.map(event => {
+    const item = document.createElement("li");
+    item.textContent = event;
+    return item;
+  }));
+  el("handoff-screen").hidden = false;
+  el("handoff-title").focus();
+}
+
+function revealHand() {
+  if (!state || !state.passing) return;
+  state.passing = false;
+  el("handoff-screen").hidden = true;
+  setBattleLineup();
+  render();
+  if (state.turn === 1) {setMusicPhase("battle"); impact("player","opening");}
+  focusAvailable();
+}
+
+function passTurn() {
+  if (state.outcome || state.passing) return;
+  state.passing = true;
+  el("battle-screen").hidden = true;
+  el("hand").replaceChildren();
+  state.selected = null;
+  state.player.squeak = false;
+  state.player.braked = false;
+  const outgoing = {pile:state.pile, discard:[...state.discard,...state.hand]};
+  const incoming = state.waitingDeck;
+  state.waitingDeck = outgoing;
+  state.pile = incoming.pile;
+  state.discard = incoming.discard;
+  state.hand = [];
+  [state.player,state.enemy] = [state.enemy,state.player];
+  [lineup[0],lineup[1]] = [lineup[1],lineup[0]];
+  state.seat = state.seat === 1 ? 2 : 1;
+  state.turn++;
+  state.energy = 3;
+  state.prompt = "Your turn. Choose a card or end your turn.";
+  const outgoingRecap = state.events.slice(0,state.events.length-state.turnEventStart).reverse();
+  beginTurn("player");
+  state.turnEventStart = state.events.length;
+  if (!endIfDefeated()) draw(5);
+  handoff(outgoingRecap.slice(-6));
+}
+
+el("change-mode").addEventListener("click", () => {
+  if (!state.outcome && !window.confirm("Leave this battle and return to the mode menu?")) return;
+  el("battle-tools").close();
+  cancelEffects();
+  el("battle-screen").hidden = true;
+  el("hand").replaceChildren();
+  el("mode-screen").hidden = false;
+  el("mode-ai").focus();
+});
+el("mode-ai").addEventListener("click", () => openMode("ai"));
+el("mode-local").addEventListener("click", () => openMode("local"));
+el("reveal-hand").addEventListener("click", revealHand);
+el("second-wind-check").addEventListener("change", event => {
+  draftLineup[Math.floor(setupStep/2)].secondWind = event.target.checked;
+});
+function setBattleLineup() {
+  const [player,enemy] = lineup;
+  for (const [side,pick] of [["player",player],["enemy",enemy]]) {
+    el(side+"-name").textContent = pick.name + " · " + pick.section;
+    const art = el(side+"-art");
+    art.src = battleSprites[pick.name][pick.section];
+    art.dataset.section = pick.section;
+  }
+  el("battle-portraits").hidden = false;
+  el("target").setAttribute("aria-label","Target " + enemy.name);
+  el("battle-mode-label").textContent = "Band Room Battles · " + (mode === "local" ? "Pass & Play" : "Scrimmage");
+  el("setup-screen").hidden = true;
+  el("battle-screen").hidden = false;
+}
+
+el("setup-next").addEventListener("click", () => {
+  if (el("setup-next").disabled) return;
+  if (setupStep === 3) { lineup = draftLineup; start(); if (!state.passing) focusAvailable(); return; }
+  setupStep++;
+  renderSetup();
+  el("setup-next").focus();
+});
+el("setup-back").addEventListener("click", () => {
+  if (setupStep) {setupStep--; renderSetup(); return;}
+  leaveSetup();
+});
+
+
+const battleLoopStart = 67.61;
+const battleLoopEnd = 111.35;
+const musicUrl = "assets/1b2a5dc460c4ac535b60.mp3";
+let musicContext, musicBuffer, musicDecode, musicSource, musicGain;
+let musicPhase = "menu", playingMusicPhase = null;
+const audioKey = "section-war.audio.v1";
+const audioPrefs = {music:true,sounds:true,volume:.58};
+try {
+  const savedAudio = JSON.parse(localStorage.getItem(audioKey));
+  if (typeof savedAudio?.music === "boolean") audioPrefs.music = savedAudio.music;
+  if (typeof savedAudio?.sounds === "boolean") audioPrefs.sounds = savedAudio.sounds;
+  if (typeof savedAudio?.volume === "number") audioPrefs.volume = Math.max(0,Math.min(1,savedAudio.volume));
+} catch {}
+
+function updateAudioControls() {
+  el("music-enabled").checked = audioPrefs.music;
+  el("sounds-enabled").checked = audioPrefs.sounds;
+  el("audio-volume").value = Math.round(audioPrefs.volume * 100);
+  el("audio-volume-label").textContent = el("audio-volume").value + "%";
+}
+
+function saveAudio() {
+  if (musicGain) musicGain.gain.value = audioPrefs.music ? audioPrefs.volume : 0;
+  try {localStorage.setItem(audioKey,JSON.stringify(audioPrefs));} catch {}
+  updateAudioControls();
+}
+
+function unlockMusic() {
+  const AudioEngine = window.AudioContext || window.webkitAudioContext;
+  if (!AudioEngine) return;
+  try {
+    musicContext ||= new AudioEngine();
+    musicContext.resume().then(() => {
+      syncMusic();
+      if (!audioPrefs.music) return;
+      musicDecode ||= fetch(musicUrl).then(response => {
+        if (!response.ok) throw new Error("Soundtrack unavailable");
+        return response.arrayBuffer();
+      }).then(bytes => musicContext.decodeAudioData(bytes)).then(buffer => {
+        musicBuffer = buffer;
+        syncMusic();
+      }).catch(() => {musicDecode = null;});
+    }).catch(() => {});
+  } catch {}
+}
+
+function setMusicPhase(phase) {
+  musicPhase = phase;
+  syncMusic();
+}
+
+function syncMusic() {
+  if (!musicBuffer || musicContext.state !== "running" || musicPhase === playingMusicPhase) return;
+  if (musicSource) {
+    musicSource.onended = null;
+    musicSource.stop();
+    musicSource.disconnect();
+    musicSource = null;
+    musicGain?.disconnect();
+    musicGain = null;
+  }
+  playingMusicPhase = musicPhase;
+  if (musicPhase === "silent") return;
+  const source = musicContext.createBufferSource();
+  source.buffer = musicBuffer;
+  const battle = musicPhase === "battle";
+  if (battle) {
+    source.loop = true;
+    source.loopStart = battleLoopStart;
+    source.loopEnd = battleLoopEnd;
+  }
+  const volume = musicContext.createGain();
+  volume.gain.value = audioPrefs.music ? audioPrefs.volume : 0;
+  musicGain = volume;
+  source.connect(volume);
+  volume.connect(musicContext.destination);
+  source.onended = () => {
+    if (musicSource === source) { musicSource = null; musicGain = null; }
+    source.disconnect();
+    volume.disconnect();
+  };
+  musicSource = source;
+  source.start(0, battle ? battleLoopStart : 0);
+}
+function playSound(kind) {
+  if (!audioPrefs.sounds || !audioPrefs.volume || musicContext?.state !== "running") return;
+  const notes = {
+    card:[["sine",490,180,0,.10]],
+    attack:[["sawtooth",235,95,0,.16]],
+    block:[["triangle",420,102,0,.16],["sine",910,310,0,.08]],
+    miss:[["triangle",620,240,0,.12]],
+    win:[["triangle",392,392,0,.15],["triangle",523,523,.12,.17],["triangle",659,659,.24,.25]],
+    loss:[["triangle",293,293,0,.17],["triangle",196,160,.13,.25]]
+  }[kind];
+  for (const [shape,from,to,offset,length] of notes) {
+    const start = musicContext.currentTime + offset;
+    const tone = musicContext.createOscillator();
+    const gain = musicContext.createGain();
+    tone.type = shape;
+    tone.frequency.setValueAtTime(from,start);
+    tone.frequency.exponentialRampToValueAtTime(to,start+length);
+    gain.gain.setValueAtTime(.001,start);
+    gain.gain.linearRampToValueAtTime(audioPrefs.volume * .16,start+.018);
+    gain.gain.exponentialRampToValueAtTime(.001,start+length);
+    tone.connect(gain);
+    gain.connect(musicContext.destination);
+    tone.start(start);
+    tone.stop(start+length);
+    tone.onended = () => {tone.disconnect();gain.disconnect();};
+  }
+}
+const characterLines = {"Maya":["Warm-up’s over. Race you to the downbeat.","Oh, we’re keeping score? Good.","Nice try. Run it back.","One freebie. That’s it.","Still got a turn.","Rematch? I’m still warmed up.","I want another shot at that turn."],"Eli":["I practiced this. Parts of this.","That one was on purpose. I swear.","I meant to be standing right here.","That’s going in the squeak tally.","Okay. Actual focus now.","Do I bow, or is that weird?","Good game. Please forget turn three."],"Samira":["Okay. First panel.","That gets a whole page.","I left room for that.","Leaving that panel blank.","We’re a page from the ending. I can work with that.","I’m drawing that ending.","You got me. Same time tomorrow?"],"Jae":["I made a sticker for this matchup.","Yeah, that’s going on the poster.","Caught it on the beat.","We can edit that out, right?","Keep it simple. One good move.","Okay. Now I need a victory sticker.","You made that look easy. Rude."],"Nia":["I’ve got a playlist for either outcome.","That’s the part you turn up.","Good entrance. I was ready for it.","That take stays in rehearsal.","Skip to the good part. I’m still in.","Cue track one.","You earned the last track."],"Mateo":["You ready? I saved you the good stand.","Felt that all the way in the back row.","I’m good right here.","First take. Nobody write that down.","Give me one clean measure.","Good game. This one gets a pin.","I’ll reset the stands. You want another?"],"Malik":["If I lose, tell the whole bus I was being generous.","Somebody check the trophy shelf.","Hold that thought. And that damage.","That was the chair. You heard the chair.","Okay, I’m gonna need the whole bus for this one.","Good game. We’re gonna be unbearable on the bus.","Good game. I’ll be quiet for one whole stop."]};
+const quoteSlot = {opening:0,big:1,block:2,miss:3,low:4,win:5,loss:6};
+let impactTimer, impactMotion;
+
+function clearImpact() {
+  clearTimeout(impactTimer);
+  impactMotion?.cancel();
+  el("comic-impact").hidden = true;
+
+}
+
+function impact(side, event, force = false) {
+  if (state.passing || (state.outcome && !force)) return;
+
+  if (!force && !el("comic-impact").hidden) return;
+  const speaker = lineup[side === "player" ? 0 : 1].name;
+  const text = characterLines[speaker]?.[quoteSlot[event]];
+  if (!text) return;
+  clearImpact();
+
+  const panel = el("comic-impact");
+  panel.dataset.side = side;
+  panel.classList.toggle("long-line", text.length > 42);
+  panel.dataset.result = String(force);
+  el("impact-line").textContent = text;
+  el("impact-name").textContent = speaker;
+  el("impact-portrait").src = roster[speaker];
+  el("impact-side").textContent = mode === "local"
+    ? "Player " + (side === "player" ? state.seat : 3 - state.seat)
+    : (side === "player" ? "You" : "Opponent");
+  panel.hidden = false;
+  const duration = Math.max(force ? 4200 : 3500, 1450 + text.length * 62);
+  if (!reducedMotion()) impactMotion = panel.animate([
+    {opacity:0,transform:"scale(.63) rotate(6deg)"},
+    {opacity:1,transform:"scale(1.075) rotate(-2deg)",offset:.11},
+    {opacity:1,transform:"scale(1)",offset:.22},
+    {opacity:1,transform:"scale(1)",offset:.87},
+    {opacity:0,transform:"scale(.97)"}
+  ],{duration,easing:"ease-out"});
+  impactTimer = setTimeout(() => clearImpact(),duration);
+}
+const effectTimers = new Set();
+const effects = new Map();
+const reducedMotion = () => matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+function cancelEffects() {
+  clearImpact();
+  for (const timer of effectTimers) clearTimeout(timer);
+  effectTimers.clear();
+  for (const animation of effects.values()) animation.cancel();
+  effects.clear();
+}
+
+function cue(delay, action) {
+  if (!delay) { action(); return; }
+  const timer = setTimeout(() => {
+    effectTimers.delete(timer);
+    action();
+  }, delay);
+  effectTimers.add(timer);
+}
+
+function animateEffect(node, frames, duration) {
+  effects.get(node)?.cancel();
+  const animation = node.animate(frames, {duration, easing:"ease-out"});
+  effects.set(node, animation);
+  animation.onfinish = () => {
+    if (effects.get(node) === animation) effects.delete(node);
+  };
+}
+
+function fighterEffect(side, kind, label, delay = 0) {
+  cue(delay, () => {
+    const node = el(side + "-fx");
+    node.className = "fighter-fx " + side + " " + kind;
+    node.firstElementChild.textContent = label;
+    const move = reducedMotion() ? "none" : "translateY(-10px)";
+    animateEffect(node, [
+      {opacity:1, transform:"none"},
+      {opacity:1, transform:move, offset:.72},
+      {opacity:0, transform:move}
+    ], 700);
+  });
+}
+
+function brassWave(source, delay) {
+  if (reducedMotion()) return;
+  cue(delay, () => {
+    const from = source === "player" ? -30 : 30;
+    const flip = source === "player" ? 1 : -1;
+    animateEffect(el("brass-wave"), [
+      {opacity:0, transform:"translateX(" + from + "%) scaleX(" + flip + ")"},
+      {opacity:.95, offset:.25},
+      {opacity:0, transform:"translateX(" + (-from) + "%) scaleX(" + flip + ")"}
+    ], 320);
+  });
+}
+
+document.addEventListener("click", event => {
+  if (event.target.closest("button:not(:disabled)")) navigator.vibrate?.(12);
+}, true);
+el("battle-menu").addEventListener("click", () => el("battle-tools").showModal());
+
+function celebrateVictory() {
+  if (reducedMotion()) return;
+  const field = el("celebration");
+  const symbols = ["✦", "♪", "✧", "♫"];
+  for (let index = 0; index < 18; index++) {
+    const spark = document.createElement("b");
+    spark.textContent = symbols[index % symbols.length];
+    field.append(spark);
+    const angle = index * Math.PI * 2 / 18;
+    const x = Math.round(Math.cos(angle) * (48 + index * 4));
+    const y = Math.round(Math.sin(angle) * (28 + index * 2));
+    const animation = spark.animate([
+      {opacity:0, transform:"scale(.4)"},
+      {opacity:1, offset:.2},
+      {opacity:0, transform:"translate(" + x + "px," + y + "px) rotate(" + x + "deg) scale(1.25)"}
+    ], {duration:1000 + index * 25,easing:"ease-out"});
+    animation.onfinish = () => spark.remove();
+  }
+}
+
+function renderResult(outcome) {
+  const arena = el("arena");
+  const banner = el("result-banner");
+  const end = el("end");
+  end.classList.toggle("rematch", !!outcome);
+  end.firstElementChild.textContent = outcome ? "Start New Battle" : "End Turn";
+  el("restart").hidden = !!outcome;
+  banner.hidden = !outcome;
+  if (!outcome) {
+    delete arena.dataset.loser;
+    el("celebration").replaceChildren();
+    return;
+  }
+  const won = outcome === "Victory";
+  arena.dataset.loser = won ? "enemy" : "player";
+  banner.textContent = won ? "✦ Victory! ✦" : lineup[1].name + " Wins";
+  banner.classList.toggle("victory", won);
+  if (won && !state.announced) celebrateVictory();
+  if (!state.announced) {
+    setMusicPhase("silent");
+    playSound(won ? "win" : "loss");
+    impact("player", won ? "win" : "loss",true);
+  }
+  state.announced = true;
+}
+
+function shuffle(list) {
+  const result = [...list];
+  for (let i = result.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [result[i], result[j]] = [result[j], result[i]];
+  }
+  return result;
+}
+
+function fighter() {
+  return {hp:60,block:0,squeak:false,braked:false,fortified:false,outOfTune:0,played:0,leadUsed:false,heavyUsed:false,cadenceUsed:false};
+}
+
+function start() {
+  setBattleLineup();
+
+  cancelEffects();
+  state = {
+    player:fighter(), enemy:fighter(), turn:1, energy:2, hand:[],
+    pile:buildDeck(lineup[0]), seat:1, turnEventStart:0, passing:false,
+    discard:[], selected:null, taunted:false, outcome:null, events:[],
+    announced:false, prompt:"Choose a card. You start this battle with 2 Energy."
+  };
+  el("feedback").replaceChildren();
+  state.player.fortified = lineup[0].section === "Tubas";
+  state.enemy.fortified = lineup[1].section === "Tubas";
+  draw(5);
+  if (mode === "local") {
+    state.waitingDeck = {pile:buildDeck(lineup[1]), discard:[]};
+    state.passing = true;
+    handoff([]);
+    return;
+  }
+  render();
+  setMusicPhase("battle");
+  impact("player","opening");
+}
+
+function draw(count) {
+  for (let i = 0; i < count; i++) {
+    if (!state.pile.length) {
+      state.pile = shuffle(state.discard);
+      state.discard = [];
+    }
+    if (!state.pile.length) return;
+    state.hand.push(state.pile.shift());
+  }
+}
+
+
+function attacks(card) { return !!card.damage; }
+
+function attackValue(card, actor = state.player, section = lineup[0].section) {
+  const bonus = section === "Trombones" && !actor.leadUsed && !card.cleave ? 2 : 0;
+  const combo = section === "Drumline" && !actor.leadUsed && actor.played >= 2;
+  const base = Math.floor((card.damage + bonus) * (combo ? 1.5 : 1));
+  const reduced = actor.braked ? 4 : 0;
+  return {bonus, combo, base, reduced, value:Math.max(0,base - reduced)};
+}
+
+function log(message) { state.events.unshift(message); }
+
+function applyCard(id, side, delay = 0) {
+  const index = side === "player" ? 0 : 1;
+  const {name, section} = lineup[index];
+  const rival = lineup[1-index].name;
+  const actor = state[side];
+  const defender = state[index ? "player" : "enemy"];
+  const target = index ? "player" : "enemy";
+  const card = cards[id];
+  let landed = true;
+  if (attacks(card)) {
+    const {base, combo} = attackValue(card,actor,section);
+    landed = hit(actor,defender,base,name + " · " + card.name,delay);
+    if (combo) log(name + " triggered In the Pocket.");
+    if ((section === "Trombones" && !card.cleave) || combo) actor.leadUsed = true;
+  }
+  if (id === "tape") {
+    actor.squeak = false;
+    actor.outOfTune = 0;
+    log(name + " cleared Squeak and Out of Tune.");
+  }
+  if (card.block) {
+    const heavy = section === "Tubas" && !actor.heavyUsed && actor.block > 0;
+    const gained = grantBlock(actor,card.block + (heavy ? 2 : 0));
+    if (heavy) actor.heavyUsed = true;
+    log(name + " gained " + gained + " Block.");
+    fighterEffect(side,"shield","+" + gained + " Block",delay + (card.damage ? 180 : 0));
+  }
+  if (id === "oil" && side === "player") {
+    draw(1);
+    log("Valve Oil drew a card.");
+  }
+  if (card.energy) {
+    actor.cadenceUsed = true;
+    if (side === "player") state.energy += card.energy;
+    log(name + " gained " + card.energy + " Energy.");
+  }
+  if (card.brake && landed && defender.hp) {
+    defender.braked = true;
+    log(rival + " gained Tempo Brake.");
+  }
+  if (id === "mute") {
+    defender.squeak = true;
+    log(rival + " gained Squeak.");
+    fighterEffect(target,"status-fx","Squeak",delay);
+  }
+  if (card.tune && landed && defender.hp) {
+    defender.outOfTune = Math.min(3,defender.outOfTune + card.tune);
+    log(rival + " has " + defender.outOfTune + " Out of Tune.");
+    if (section === "Trumpets" && !actor.leadUsed) {
+      actor.leadUsed = true;
+      const blocked = Math.min(2,defender.block);
+      defender.block -= blocked;
+      const damage = Math.min(defender.hp,2 - blocked);
+      defender.hp -= damage;
+  if (defender.hp > 0 && defender.hp <= 15 && defender.hp + damage > 15) cue(delay, () => impact(target,"low"));
+  else if (damage >= 9) cue(delay, () => impact(source,"big"));
+  else if (blocked >= 5 && damage === 0) cue(delay, () => impact(target,"block"));
+      log(name + " triggered Lead Voice for " + damage + " HP damage.");
+    }
+  }
+  if (mode === "ai" && id === "taunt" && side === "player") state.taunted = true;
+  actor.played++;
+}
+
+function beginTurn(side) {
+  const actor = state[side];
+  const name = lineup[side === "player" ? 0 : 1].name;
+  actor.block = 0;
+  actor.played = 0;
+  actor.leadUsed = false;
+  actor.heavyUsed = false;
+  actor.cadenceUsed = false;
+  if (actor.outOfTune) {
+    const damage = Math.min(actor.hp,actor.outOfTune * 2);
+    actor.hp -= damage;
+    actor.outOfTune--;
+    log(name + " took " + damage + " HP damage from Out of Tune.");
+    fighterEffect(side,"status-fx","−" + damage + " HP · Out of Tune");
+  }
+}
+
+function eligible(card) {
+  return card.cost <= state.energy && !(card.energy && state.player.cadenceUsed);
+}
+
+function hit(attacker, defender, amount, label, delay = 0) {
+  const source = attacker === state.player ? "player" : "enemy";
+  const target = source === "player" ? "enemy" : "player";
+  if (attacker.squeak) {
+    attacker.squeak = false;
+    cue(delay, () => {impact(source,"miss");playSound("miss");});
+    fighterEffect(source, "status-fx", "Squeak · Miss", delay);
+    state.events.unshift(label + " missed (Squeak).");
+    return false;
+  }
+  if (attacker.braked) {
+    attacker.braked = false;
+    amount = Math.max(0, amount - 4);
+  }
+  const blocked = Math.min(amount, defender.block);
+  defender.block -= blocked;
+  const damage = Math.min(defender.hp, amount - blocked);
+  defender.hp -= damage;
+  if (defender.hp > 0 && defender.hp <= 15 && defender.hp + damage > 15) cue(delay, () => impact(target,"low"));
+  else if (damage >= 9) cue(delay, () => impact(source,"big"));
+  else if (blocked >= 5 && damage === 0) cue(delay, () => impact(target,"block"));
+  brassWave(source, delay);
+  cue(delay, () => playSound(damage ? "attack" : "block"));
+  fighterEffect(target, damage ? "impact" : "shield", damage ? "−" + damage + " HP" : "Blocked", delay + 180);
+  state.events.unshift(label + " dealt " + damage + " HP damage" +
+    (blocked ? " (" + blocked + " blocked)." : "."));
+  return true;
+}
+
+function grantBlock(who, amount) {
+  const total = amount + (who.fortified ? 3 : 0);
+  who.fortified = false;
+  who.block += total;
+  return total;
+}
+
+function endIfDefeated() {
+  if (state.outcome) return true;
+  if (state.enemy.hp && state.player.hp) return false;
+  state.outcome = state.enemy.hp === 0 ? "Victory" : "Defeat";
+  state.prompt = lineup[state.outcome === "Victory" ? 0 : 1].name + (mode === "local" ? " wins the duel." : " wins the scrimmage.");
+  if (mode === "ai" && completed < 10) {
+    completed++;
+    try {localStorage.setItem(saveKey,String(completed));} catch {}
+    state.reward = completed === 10;
+  }
+  state.selected = null;
+  return true;
+}
+
+function play(index) {
+  const id = state.hand[index];
+  const card = cards[id];
+  if (!card || state.outcome || state.passing || !eligible(card)) return;
+  const energyBefore = state.energy;
+  const eventCount = state.events.length;
+  state.energy -= card.cost;
+  state.hand.splice(index, 1);
+  state.selected = null;
+  if (!card.damage) playSound(card.block ? "block" : "card");
+  applyCard(id,"player");
+  state.discard.push(id);
+  if (!endIfDefeated()) state.prompt = "Choose another card or end your turn.";
+  if (state.reward) el("feedback").replaceChildren();
+  else showFeedback(card, energyBefore, eventCount);
+  render();
+  focusAvailable();
+}
+
+function showFeedback(card, before, eventCount) {
+  const title = document.createElement("strong");
+  title.textContent = card.name + " played · " +
+    (card.cost ? "−" + card.cost + " Energy" : "0 Energy spent") +
+    " (" + before + " → " + state.energy + ")";
+  const result = document.createElement("span");
+  result.textContent = state.events.slice(0, state.events.length - eventCount).reverse().join(" ");
+  const panel = el("feedback");
+  panel.replaceChildren(title, result);
+  for (const item of [panel, el("energy")]) {
+    item.classList.remove("flash");
+    void item.offsetWidth;
+    item.classList.add("flash");
+  }
+}
+
+function enemyPlan() {
+  const list = plans[lineup[1].section];
+  const plan = list[(state.turn - 1) % list.length];
+  if (!state.taunted) return plan;
+  const defensive = plan.findIndex(id => !cards[id].damage && cards[id].block);
+  return plan.map((id,index) => index === defensive ? "hit" : id);
+}
+
+function endTurn() {
+  if (state.outcome) return;
+  state.selected = null;
+  el("feedback").replaceChildren();
+  state.discard.push(...state.hand);
+  state.hand = [];
+  state.player.squeak = false;
+  state.player.braked = false;
+  beginTurn("enemy");
+  if (!endIfDefeated()) {
+    for (const [index, id] of enemyPlan().entries()) {
+      applyCard(id,"enemy",index * 400);
+      if (endIfDefeated()) break;
+    }
+    state.taunted = false;
+    state.enemy.squeak = false;
+    state.enemy.braked = false;
+  }
+  if (!state.outcome) {
+    state.turn++;
+    state.energy = 3;
+    beginTurn("player");
+    if (!endIfDefeated()) {
+      state.prompt = "Your turn. Choose a card or end your turn.";
+      draw(5);
+    }
+  }
+  render();
+  focusAvailable();
+}
+
+function choose(index) {
+  const card = cards[state.hand[index]];
+  if (!card || state.outcome || state.passing || !eligible(card)) return;
+  if (!card.target) {play(index); return;}
+  el("feedback").replaceChildren();
+  state.selected = state.selected === index ? null : index;
+  render();
+  if (state.selected !== null) el("target").focus();
+  else focusAvailable();
+}
+
+function focusAvailable() {
+  (el("hand").querySelector("button:not(:disabled)") ||
+    el("end")).focus();
+}
+
+function describe(who) {
+  return [who.block + " Block", who.fortified && "Fortified",
+    who.squeak && "Squeak", who.braked && "Tempo Brake", who.outOfTune && "Out of Tune ×" + who.outOfTune].filter(Boolean).join(" · ");
+}
+
+function render() {
+  const {player,enemy,selected,outcome} = state;
+  el("turn").textContent = outcome || "Turn " + state.turn + " · " + (mode === "local" ? "P" + state.seat + " · " + lineup[0].name : "Your Turn");
+  for (const [id, who] of [["player",player],["enemy",enemy]]) {
+    el(id+"HP").textContent = who.hp + " / 60 HP";
+    el(id+"HP").style.setProperty("--hp", (who.hp/60*100) + "%");
+    el(id+"Status").textContent = describe(who);
+  }
+  el("intent").textContent = outcome || mode === "local" ? "" : "Next: " + enemyPlan().map(id => cards[id].name).join(" → ");
+  el("intent").title = outcome || mode === "local" ? "" : enemyPlan().map(id => cards[id].detail).join(" ");
+  const card = selected === null ? null : cards[state.hand[selected]];
+  let prompt = state.prompt;
+  if (card?.damage) {
+    const {bonus,combo,reduced,value} = attackValue(card);
+    const through = Math.max(0, value - enemy.block);
+    const modifiers = [bonus && "+" + bonus + " Long Reach", combo && "×1.5 In the Pocket", reduced && "−" + reduced + " Tempo Brake",
+      enemy.block && Math.min(enemy.block,value) + " blocked"].filter(Boolean);
+    prompt = player.squeak ? "Tap " + lineup[1].name + " to play. Squeak will make the attack miss." :
+      "Tap " + lineup[1].name + " to deal " + through + " damage" + (modifiers.length ? " (" + modifiers.join(", ") + ")" : "") + ".";
+  } else if (card) prompt = "Tap " + lineup[1].name + " to " + (card.tune ? "apply Out of Tune and gain Block." : "apply Squeak.");
+  el("prompt").textContent = state.reward ? prompt + " Secret card unlocked: Second Wind · 1 Energy · Deal 4 damage and gain 3 Block." : prompt;
+  el("energy").textContent = outcome ? "" : state.energy + " Energy";
+  el("counts").textContent = state.pile.length + " draw / " + state.discard.length + " discard";
+  el("target").disabled = !card || !!outcome;
+  renderResult(outcome);
+  el("hand").replaceChildren(...(outcome ? [] : state.hand.map((id,index) => {
+    const item = cards[id];
+    const button = document.createElement("button");
+    button.className = "card";
+    button.type = "button";
+    button.disabled = !eligible(item);
+    button.setAttribute("aria-pressed", String(selected === index));
+    const cost = document.createElement("span");
+    cost.className = "cost";
+    cost.textContent = item.cost;
+    cost.setAttribute("aria-label", item.cost + " Energy");
+    const name = document.createElement("strong");
+    name.textContent = item.name;
+    const art = document.createElement("img");
+    art.src = cardArt[id];
+    art.alt = "";
+    const detail = document.createElement("small");
+    detail.textContent = shortEffects[id];
+    button.append(cost,name,art,detail);
+    button.addEventListener("click", () => choose(index));
+    const slot = document.createElement("div");
+    slot.className = "card-slot";
+    const info = document.createElement("button");
+    info.className = "card-info";
+    info.type = "button";
+    const infoIcon = document.createElement("span");
+    infoIcon.textContent = "i";
+    info.append(infoIcon);
+    info.title = cardHelp[id];
+    button.title = cardHelp[id];
+    slot.title = cardHelp[id];
+    info.setAttribute("aria-label", "About " + item.name);
+    info.addEventListener("click", () => {
+      el("help-title").textContent = item.name + " · " + item.cost + " Energy";
+      el("help-copy").textContent = cardHelp[id];
+      el("help-art").src = cardArt[id];
+      el("card-help").showModal();
+    });
+    slot.append(button, info);
+    return slot;
+  })));
+  el("log").replaceChildren(...state.events.slice(0,10).map(event => {
+    const item = document.createElement("li");
+    item.textContent = event;
+    return item;
+  }));
+}
+
+el("target").addEventListener("click", () => {
+  if (state.selected !== null) play(state.selected);
+});
+el("end").addEventListener("click", () => {
+  if (state.outcome) {setMusicPhase("menu"); openSetup(true);}
+  else if (mode === "local") passTurn();
+  else endTurn();
+});
+el("restart").addEventListener("click", () => {
+  if (state.outcome || window.confirm("Choose a new lineup and leave this battle?")) {
+    el("battle-tools").close();
+    openSetup(true);
+  }
+});
+document.addEventListener("keydown", event => {
+  if (event.key === "Escape" && state.selected !== null) {
+    state.selected = null;
+    render();
+    focusAvailable();
+  }
+});
+el("enter-band-room").addEventListener("click", () => {
+  unlockMusic();
+  el("opening-screen").hidden = true;
+  el("mode-screen").hidden = false;
+  el("mode-ai").focus();
+});
+document.addEventListener("click", event => {
+  if (!event.target.closest("[data-audio-settings]")) return;
+  updateAudioControls();
+  if (el("battle-tools").open) el("battle-tools").close();
+  el("audio-dialog").showModal();
+});
+el("music-enabled").addEventListener("change", event => {
+  audioPrefs.music = event.target.checked;
+  saveAudio();
+  if (audioPrefs.music) unlockMusic();
+});
+el("sounds-enabled").addEventListener("change", event => {
+  audioPrefs.sounds = event.target.checked;
+  saveAudio();
+  if (audioPrefs.sounds) unlockMusic();
+});
+el("audio-volume").addEventListener("input", event => {
+  audioPrefs.volume = Number(event.target.value) / 100;
+  saveAudio();
+});
+unlockMusic();</script>
+</body>
+</html>
