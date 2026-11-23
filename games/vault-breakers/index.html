@@ -371,9 +371,16 @@ svg.mini .gnext,svg.mini .cnext{display:none}
 }
 .join .note{font-size:13px;color:var(--dim);border-top:1px solid var(--line);padding-top:12px}
 @media (prefers-reduced-motion:reduce){.tv-stage{animation:none}.beam,.emp rect,.ex.open .pad{animation:none}}
+
+/* Always available, outside the scaled game canvas. */
+.game-nav{height:48px;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:0 18px;background:#0b101b;border-bottom:1px solid #2c3b57;font:600 14px system-ui;position:relative;z-index:100}.game-nav a{color:#c9d6ee;text-decoration:none;min-height:44px;display:inline-flex;align-items:center}.game-nav a:hover{color:#00f0ff}.game-nav a:focus-visible,.setup input:focus-visible,.setup select:focus-visible{outline:3px solid #00f0ff;outline-offset:3px}
+#tvViewport{top:48px!important;height:calc(100% - 48px)!important}#phoneApp{top:48px!important;height:calc(100% - 48px)!important;min-height:0}.setup{height:calc(100% - 48px);overflow:auto;padding:clamp(24px,5vw,64px) 20px;background:radial-gradient(ellipse at top,#102533,#05070b 70%)}.setup-inner{max-width:1040px;margin:auto}.setup h1{font-size:clamp(36px,6vw,64px);margin:0 0 12px;color:#effaff}.setup h1 em{font-style:normal;color:#00f0ff}.setup-intro{max-width:720px;font-size:18px;line-height:1.6;color:#b6c8dd}.setup-grid{display:grid;grid-template-columns:1.2fr 1fr;gap:22px;margin-top:28px}.setup-card{background:#0b1320;border:1px solid #2c3b57;border-radius:18px;padding:26px}.setup-card.primary{border-color:#00d9e8}.setup h2{font-size:26px;margin:0 0 12px}.setup p{line-height:1.6}.setup label{display:block;margin:18px 0 8px;font-weight:700}.setup input,.setup select{width:100%;min-height:48px;padding:12px;border:1px solid #526987;border-radius:8px;background:#050b14;color:#f4f8ff;font:18px system-ui}.setup .btn{width:100%;margin-top:20px;min-height:52px;font-size:17px}.setup small{display:block;margin-top:14px;font-size:14px;line-height:1.6;color:#a8bcd3}.setup .room-entry{text-transform:uppercase;font:700 26px ui-monospace,monospace;letter-spacing:.15em}.setup .err{color:#ff9caf}.setup-host{border-top:1px solid #2c3b57;margin-top:24px;padding-top:18px}.setup-host summary{cursor:pointer;font-size:18px;font-weight:700;min-height:44px}.local-tip{font-size:20px;line-height:1.6;color:#b9d5e7;margin-bottom:14px}.local-tip b{color:#00f0ff}.join .note{font-size:15px}.join input{font-size:20px!important;min-height:48px}.join #jRoom{letter-spacing:.1em}.mode-link{display:block;margin-top:16px;color:#00f0ff;text-align:center;font-size:16px}@media(max-width:700px){.setup-grid{grid-template-columns:1fr}.setup-card{padding:20px}.game-nav{padding:0 12px;font-size:13px}}
+
 </style>
 </head>
 <body>
+<nav class="game-nav" aria-label="Game navigation"><a href="../../families-and-games.html">Back to Pocket Playroom</a><a href="./">Play options / room code</a></nav>
+<div id="setup" class="setup" hidden></div>
 <div id="tvViewport" hidden></div>
 <div id="phoneApp" hidden></div>
 <noscript>Vault Breakers needs JavaScript.</noscript>
@@ -1418,7 +1425,7 @@ class Controller {
         timeout: ['CONNECTION FAILED', 'Could not reach the TV in 10 seconds. Check that both devices are online, then retry.'],
         noroom: ['ROOM NOT FOUND', 'Check the room code on the TV and retry.'], broker: ['NETWORK UNREACHABLE', 'The matchmaking server did not respond. Check Wi-Fi and retry.'], error: ['CONNECTION ERROR', 'Something went wrong. Retry.'] }[this.status] || ['OFFLINE', ''];
       ov = '<div class="ov-card ' + (this.status === 'connecting' || this.status === 'lost' ? '' : 'bad') + '"><h3>' + T[0] + '</h3><p>' + T[1] + '</p>' +
-        (this.status === 'connecting' || this.status === 'lost' ? '<div class="spin"></div>' : '<button class="btn" data-act="retry">RETRY / CHECK WI-FI</button>') + '</div>';
+        (this.status === 'connecting' || this.status === 'lost' ? '<div class="spin"></div>' : '<button class="btn" data-act="retry">RETRY CONNECTION</button><a class="mode-link" href="?mode=join">Change room code</a><a class="mode-link" href="?mode=local">Play on this screen instead</a>') + '</div>';
     }
     else if (!s) ov = '<div class="ov-card"><h3>CREW LINKED</h3><p>' + (this.agents.length ? 'You control <b>' + this.agents.map(i => AGENTS[i].id).join(' + ') + '</b>.' : 'Waiting for the host to assign operatives.') + '<br>Waiting for the mission to start...</p><div class="spin"></div></div>';
     else if (s.phase === 'resolving') ov = '<div class="ov-card scan"><h3>RESOLUTION IN PROGRESS</h3><p>Eyes on the TV.</p><div class="spin"></div></div>';
@@ -1455,7 +1462,7 @@ class Controller {
       if (g.tgt === 'opt') hint += d.target ? ' Pulling teammate. <a data-act="cleartarget">Clear</a>' : ' Tap a teammate tile to pull them instead (optional).';
       if ((d.card === 'nitro' || d.card === 'grapple') && d.dir === 'HOLD') hint += ' <span class="tip">Pick a direction.</span>';
     } else hint = 'Pick a direction, optionally equip one gadget, then lock your plan.';
-    this.q('.c-hint').innerHTML = hint;
+    this.q('.c-hint').innerHTML = (this.o.header ? '' : '<b>Shared screen:</b> plan each operative, then pass the controls. Lock all four plans to resolve the turn.<br>') + hint;
     const lk = this.q('.c-lock');
     lk.className = 'c-lock' + (a.locked ? ' locked' : '');
     lk.disabled = !!a.out;
@@ -1627,7 +1634,8 @@ const Host = {
 const TV = {
   board: null, deck: null, sims: {}, activeSim: null, screen: 'lobby',
 
-  init() {
+  init(localOnly = false) {
+    this.localOnly = localOnly;
     const root = $('#tvViewport');
     root.innerHTML =
       '<div class="tv-scale" id="tvScale"><div class="tv-stage" id="tvStage">' +
@@ -1636,7 +1644,7 @@ const TV = {
       '<div class="head-right"><button class="hbtn" id="bMute" aria-label="Mute"></button><button class="hbtn" id="bNew" style="display:none">NEW MISSION</button><button class="hbtn" id="bLobby" style="display:none">LOBBY</button><button class="hbtn tog" id="bSim" aria-pressed="false">HOST + PHONE SIM</button></div></header>' +
       '<main class="tv-main" id="tvMain"></main><div class="banner" id="banner"></div><div class="spotbar" id="spotbar"></div><div class="flash" id="flash"></div><div class="endov" id="endov"></div>' +
       '</div></div>';
-    const fit = () => { root.style.setProperty('--s', Math.min(innerWidth / 1920, (innerHeight - (parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--bar')) || 0)) / 1080)); };
+    const fit = () => { root.style.setProperty('--s', Math.min(innerWidth / 1920, (innerHeight - 48 - (parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--bar')) || 0)) / 1080)); };
     fit(); addEventListener('resize', fit);
     this.updateMute();
     $('#bMute').onclick = () => { Sfx.toggle(); this.updateMute(); };
@@ -1644,7 +1652,7 @@ const TV = {
     $('#bLobby').onclick = () => Host.toLobby();
     $('#bSim').onclick = () => this.toggleSim();
     this.showLobby();
-    PeerBridge.initHost({
+    if (!this.localOnly) PeerBridge.initHost({
       onReady: (id, url) => { Host.roomCode = id; Host.joinUrl = url; this.drawQR(); this.netBadge(); this.headMid(); },
       onStatus: (st, detail) => { Host.net = st; Host.netDetail = detail || ''; this.netBadge(); if (this.screen === 'lobby') this.headMid(); },
       onPlayerJoin: (c, m) => Host.netJoin(c, m), onReconnect: (c, m) => Host.netReconnect(c, m),
@@ -1686,7 +1694,7 @@ const TV = {
     if (this.screen === 'lobby') {
       el.className = 'head-mid lobbymid';
       const bad = Host.net === 'offline' || Host.net === 'error';
-      el.innerHTML = Host.roomCode && Host.joinUrl ? '<span class="rl">ROOM</span><b class="mono">' + esc(Host.roomCode) + '</b>' : '<span class="rl">' + (bad ? 'NO ONLINE ROOM \u00b7 SOLO MODE AVAILABLE' : 'OPENING ROOM...') + '</span>';
+      el.innerHTML = this.localOnly ? '<b>SAME-SCREEN PLAY</b>' : Host.roomCode && Host.joinUrl ? '<span class="rl">ROOM</span><b class="mono">' + esc(Host.roomCode) + '</b>' : '<span class="rl">' + (bad ? 'NO ONLINE ROOM \u00b7 SOLO MODE AVAILABLE' : 'OPENING ROOM...') + '</span>';
     } else {
       el.className = 'head-mid';
       el.innerHTML = '<div class="meter"><span class="ml">SECURITY ALERT</span><div class="mbar"><i id="mFill"></i><u></u><u></u><u></u></div><b class="mono" id="mPct">0%</b></div>' +
@@ -1719,7 +1727,7 @@ const TV = {
     main.innerHTML = '<div class="lobby"><section class="lb-left"><h1>VAULT <em>BREAKERS</em></h1><p class="tagline">Cooperative heist for 1 to 4 players. Plan together, crack the relics, and get everyone out before the alarm hits 100%.</p>' +
       '<div class="diffs">' + diffs + '</div><div class="slots">' + slots + '</div><p class="scale mono">' + scale + '</p>' +
       '<div class="how"><div><b>1 · PLAN</b><span>Each operative picks a move and one gadget, then locks in.</span></div><div><b>2 · RESOLVE</b><span>Gadgets fire, the crew moves, guards and cameras patrol.</span></div><div><b>3 · SWEEP</b><span>Anyone seen adds 25% alert. At 100% the vault locks down.</span></div><div><b>4 · ESCAPE</b><span>Secure every relic, then get all four operatives into the airlock.</span></div></div>' +
-      '<div class="lb-actions"><button class="btn big" id="bStart"' + (n ? '' : ' disabled') + '>' + (n ? 'START MISSION' : 'WAITING FOR CREW') + '</button><button class="btn ghost" id="bSolo">SOLO / LOCAL PASS-AND-PLAY</button>' +
+      '<div class="lb-actions"><button class="btn big" id="bStart"' + (n ? '' : ' disabled') + '>' + (n ? 'START MISSION' : 'WAITING FOR CREW') + '</button><button class="btn ghost" id="bSolo">PLAY ON THIS SCREEN</button>' +
       (Host.simOpen ? '<button class="btn ghost sim" id="bAddSim"' + (n >= 4 ? ' disabled' : '') + '>+ SIM PHONE</button>' : '') + '</div></section>' +
       '<section class="lb-right"><div class="qrcard"><div class="qrbox" id="qr-container"></div><div class="rc"><span>ROOM CODE</span><b class="mono">' + esc(Host.roomCode || '....') + '</b></div><div class="joinurl mono" id="joinUrl"></div><div class="netstat" id="netstat"></div></div>' +
       '<div class="legend"><h4>BLUEPRINT KEY</h4>' + this.legend() + '</div></section></div>';
@@ -1740,9 +1748,10 @@ const TV = {
   },
   drawQR() {
     const t = $('#qr-container'); if (!t) return;
+    const code = document.querySelector('.rc b'); if (code) code.textContent = Host.roomCode ? Host.roomCode.slice(-4) : '....';
     const u = $('#joinUrl'); if (u) u.textContent = Host.joinUrl ? Host.joinUrl.replace(/^https?:\/\//, '') : '';
     t.innerHTML = '';
-    if (!Host.joinUrl) { const bad = Host.net === 'offline' || Host.net === 'error'; t.classList.toggle('off', bad); t.innerHTML = '<div class="qrwait">' + (bad ? 'No online room.<br>Use Solo mode.' : 'Opening room...') + '</div>'; return; }
+    if (!Host.joinUrl) { const bad = Host.net === 'offline' || Host.net === 'error'; t.classList.toggle('off', bad); t.innerHTML = '<div class="qrwait">' + (bad ? 'No online room.<br>Choose Play options, then Play on this screen.' : 'Opening room...') + '</div>'; return; }
     t.classList.remove('off');
     if (window.QRCode) new QRCode(t, { text: Host.joinUrl, width: 250, height: 250, colorDark: '#05070B', colorLight: '#7FDCE4', correctLevel: QRCode.CorrectLevel.M });
     else t.innerHTML = '<div class="qrwait">QR library unavailable.<br>Type the address below on your phone.</div>';
@@ -1877,8 +1886,8 @@ const Phone = {
     const room = PeerBridge.normalizeRoom(rawRoom);
     app.innerHTML = '<div class="join"><h1>VAULT <em>BREAKERS</em></h1><p>Join the crew on the big screen. Pick a call sign and confirm the room code shown on the TV.</p>' +
       '<div><label for="jName">CALL SIGN</label><input id="jName" maxlength="14" autocomplete="off" autocapitalize="characters" placeholder="YOUR NAME" value="' + esc(saved) + '"></div>' +
-      '<div><label for="jRoom">ROOM CODE</label><input id="jRoom" maxlength="16" autocomplete="off" autocapitalize="characters" placeholder="PPR-VB-XXXX" value="' + esc(room) + '"></div>' +
-      '<div class="err" id="jErr"></div><button class="btn big" id="jGo">JOIN CREW</button>' + (opts && opts.note ? '<p class="note">Vault Breakers is hosted on a big screen (TV or laptop). Open this page there to start a room, then join from phones with the room code.</p>' : '<p class="note">Tip: join from the same Wi-Fi as the host laptop for the best connection.</p>') + '</div>';
+      '<div><label for="jRoom">ROOM CODE</label><input id="jRoom" maxlength="16" autocomplete="off" autocapitalize="characters" placeholder="ABCD" spellcheck="false" value="' + esc(room) + '"></div>' +
+      '<small>Enter just the 4 characters, or paste the full room code.</small><div class="err" id="jErr" role="alert"></div><button class="btn big" id="jGo">JOIN CREW</button>' + (opts && opts.note ? '<p class="note">Enter the room code from the host. For a shared device, choose Play options above and start a same-screen game.</p>' : '<p class="note">Tip: join from the same Wi-Fi as the host laptop for the best connection.</p>') + '</div>';
     const go = () => {
       const name = $('#jName').value.trim().toUpperCase() || 'AGENT', rm = PeerBridge.normalizeRoom($('#jRoom').value);
       if (!/^PPR-VB-[A-Z0-9]{4}$/.test(rm)) { $('#jErr').textContent = 'Enter the 4-character room code from the TV.'; return; }
@@ -1909,14 +1918,23 @@ const Phone = {
 };
 
 (function boot() {
-  const q = new URLSearchParams(location.search), room = q.get('room');
+  const q = new URLSearchParams(location.search), room = q.get('room'), mode = q.get('mode');
   const unlock = () => { Sfx.unlock(); };
   addEventListener('pointerdown', unlock, { once: true, passive: true });
   addEventListener('keydown', unlock, { once: true });
   if (room !== null) { Phone.start(room); return; }
-  if (innerWidth < 700 && innerHeight > innerWidth) { Phone.start('', { note: true }); return; }
-  const tv = $('#tvViewport'); tv.hidden = false;
-  TV.init();
+  if (mode === 'join') { Phone.start('', { note: true }); return; }
+  if (mode === 'host' || mode === 'local') {
+    $('#tvViewport').hidden = false;
+    TV.init(mode === 'local');
+    if (mode === 'local') { Host.diff = q.get('difficulty') in DIFFS ? q.get('difficulty') : 'ROOKIE'; Host.solo(); }
+    return;
+  }
+  const setup = $('#setup'); setup.hidden = false;
+  setup.innerHTML = '<div class="setup-inner"><h1>VAULT <em>BREAKERS</em></h1><p class="setup-intro">Plan the heist. Escape together. Choose how your crew wants to play.</p><div class="setup-grid"><section class="setup-card primary"><h2>Play on this screen</h2><p>Solo or together: take turns planning Cipher, Forge, Lynx and Ghost on one device. No room code, phones or network connection needed after the game loads.</p><label for="localDifficulty">Mission difficulty</label><select id="localDifficulty"><option value="ROOKIE">Rookie — 1 relic, 2 guards</option><option value="PRO">Pro — 2 relics, guards and cameras</option><option value="MASTERMIND">Mastermind — extra relics and hazards</option></select><button class="btn" id="startLocal">Start same-screen game</button><small>Choose a move, optionally use a gadget, then lock the plan. The next operative is selected for you. Share the controls or command the whole crew yourself. A landscape screen gives you more room.</small></section><section class="setup-card"><h2>Join a room</h2><p>Have a code from another screen? Enter its four characters here.</p><form id="quickJoin"><label for="quickRoom">Room code</label><input class="room-entry" id="quickRoom" maxlength="16" placeholder="ABCD" autocomplete="off" autocapitalize="characters" spellcheck="false" required><p class="err" id="quickError" role="alert"></p><button class="btn" type="submit">Join room</button></form><details class="setup-host"><summary>Host with phones</summary><p>Open a room on this screen, then let each phone join using the code or QR. Some networks block phone connections. Same-screen play is always available.</p><a class="btn" href="?mode=host">Open phone-host lobby</a></details></section></div></div>';
+  $('#startLocal').onclick = () => { location.href = '?mode=local&difficulty=' + $('#localDifficulty').value; };
+  $('#quickJoin').onsubmit = e => { e.preventDefault(); const code = PeerBridge.normalizeRoom($('#quickRoom').value.trim()); if (!/^PPR-VB-[A-Z0-9]{4}$/.test(code)) { $('#quickError').textContent = 'Enter the four characters shown on the host screen.'; $('#quickRoom').focus(); return; } location.href = '?room=' + encodeURIComponent(code); };
+
 })();
 </script>
 </body>
