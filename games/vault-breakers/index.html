@@ -1649,12 +1649,13 @@ const TV = {
     this.updateMute();
     $('#bMute').onclick = () => { Sfx.toggle(); this.updateMute(); };
     $('#bNew').onclick = () => Host.newMission();
-    $('#bLobby').onclick = () => Host.toLobby();
+    $('#bLobby').textContent = this.localOnly ? 'PLAY OPTIONS' : 'LOBBY';
+    $('#bLobby').onclick = () => { if (this.localOnly) location.href = './'; else Host.toLobby(); };
     $('#bSim').onclick = () => this.toggleSim();
     this.showLobby();
     if (!this.localOnly) PeerBridge.initHost({
       onReady: (id, url) => { Host.roomCode = id; Host.joinUrl = url; this.drawQR(); this.netBadge(); this.headMid(); },
-      onStatus: (st, detail) => { Host.net = st; Host.netDetail = detail || ''; this.netBadge(); if (this.screen === 'lobby') this.headMid(); },
+      onStatus: (st, detail) => { Host.net = st; Host.netDetail = detail || ''; this.netBadge(); if (this.screen === 'lobby') { this.drawQR(); this.headMid(); } },
       onPlayerJoin: (c, m) => Host.netJoin(c, m), onReconnect: (c, m) => Host.netReconnect(c, m),
       onPlanReceived: (c, m) => Host.netPlan(c, m), onPlayerDrop: c => Host.netDrop(c)
     });
