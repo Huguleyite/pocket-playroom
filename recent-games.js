@@ -3,6 +3,7 @@
  'use strict';
  const base=new URL('./',document.currentScript.src),key='room-for-play:last';
  const games={
+  'origami-angler':['Origami Angler','games/origami-angler/'],
   skyborn:['Skyborn','games/skyborn/'],
   'signal-room':['Signal Room','games/signal-room/'],
   'hows-it-go':["How's It Go?",'games/hows-it-go/'],
