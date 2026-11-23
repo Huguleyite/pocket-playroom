@@ -1445,6 +1445,7 @@ header {
   </div>
   <div style="display:flex; gap:8px;">
     <button class="btn-emerald" id="btnOnlineRematch" style="display:none; padding:5px 10px; font-size:12px;">Rematch</button>
+    <button id="btnReconnectNet" style="display:none; padding:5px 10px; font-size:12px;">Reconnect</button>
     <button id="btnDisconnectNet" style="padding:5px 10px; font-size:12px;">Leave Room</button>
   </div>
 </div>
@@ -2555,6 +2556,9 @@ header {
   }
 
   const PEER_PREFIX = 'gridshift-gs-';
+  const ONLINE_SESSION_KEY = 'gridshift_online_session_v1';
+  let reconnectTimer = null;
+  let reconnectAttempts = 0;
 
   function generateRoomCode() {
     const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
@@ -2563,167 +2567,260 @@ header {
     return code;
   }
 
-  function cleanupPeer() {
-    if (state.net.conn) {
-      try { state.net.conn.close(); } catch (e) {}
-    }
-    if (state.net.peer) {
-      try { state.net.peer.destroy(); } catch (e) {}
-    }
-    state.net.peer = null;
-    state.net.conn = null;
-    state.net.connected = false;
-    state.net.roomCode = '';
-    state.net.myRole = null;
-    document.getElementById('netBar').classList.remove('active');
+  function onlineSnapshot() {
+    return {
+      board: state.board, p1: state.p1, p2: state.p2,
+      patternDeck: state.patternDeck, patternMarket: state.patternMarket,
+      turn: state.turn, phase: state.phase, logs: state.logs, notice: state.notice,
+      abilityMode: state.abilityMode, abilityAnchor: state.abilityAnchor,
+      abilityValidCells: state.abilityValidCells, scoutPending: state.scoutPending || null
+    };
   }
 
-  function hostOnlineRoom() {
-    if (typeof Peer === 'undefined') {
-      document.getElementById('hostStatusMsg').textContent = 'PeerJS library unavailable offline.';
+  function sessionEnvelope() {
+    return {matchId: state.net.matchId, startedAt: state.net.startedAt,
+      revision: state.net.revision || 0, payload: onlineSnapshot()};
+  }
+
+  function saveOnlineSession() {
+    if (state.mode !== 'online' || !state.net.matchId || !state.net.roomCode) return;
+    try {
+      sessionStorage.setItem(ONLINE_SESSION_KEY, JSON.stringify({
+        roomCode: state.net.roomCode, role: state.net.myRole, ...sessionEnvelope()
+      }));
+    } catch (e) { /* The live peer can still restore the match if storage is unavailable. */ }
+  }
+
+  function readOnlineSession() {
+    try {
+      const saved = JSON.parse(sessionStorage.getItem(ONLINE_SESSION_KEY));
+      if (!saved || !/^[A-Z2-9]{4}$/.test(saved.roomCode) ||
+          !['p1', 'p2'].includes(saved.role) || !saved.matchId ||
+          !Array.isArray(saved.payload?.board) || saved.payload.board.length !== 36) return null;
+      return saved;
+    } catch (e) { return null; }
+  }
+
+  function showNetworkStatus(text) {
+    document.getElementById('netBar').classList.add('active');
+    document.getElementById('netRoomCodeDisplay').textContent = state.net.roomCode;
+    document.getElementById('netStatusLabel').textContent = text;
+    document.getElementById('btnReconnectNet').style.display = state.net.connected ? 'none' : 'inline-block';
+  }
+
+  function cleanupPeer(keepMatch = false) {
+    state.net.generation = (state.net.generation || 0) + 1;
+    clearTimeout(reconnectTimer);
+    reconnectTimer = null;
+    const conn = state.net.conn, peer = state.net.peer;
+    state.net.conn = null;
+    state.net.peer = null;
+    state.net.connected = false;
+    try { conn?.close(); } catch (e) {}
+    try { peer?.destroy(); } catch (e) {}
+    if (!keepMatch) {
+      state.net.roomCode = '';
+      state.net.myRole = null;
+      state.net.matchId = null;
+      state.net.startedAt = 0;
+      state.net.revision = 0;
+      state.scoutPending = null;
+      reconnectAttempts = 0;
+      try { sessionStorage.removeItem(ONLINE_SESSION_KEY); } catch (e) {}
+      document.getElementById('netBar').classList.remove('active');
+    }
+  }
+
+  function retryOnlineConnection() {
+    if (!state.net.roomCode || reconnectTimer || state.net.connected) return;
+    if (reconnectAttempts >= 12) {
+      showNetworkStatus('Room unavailable. Ask your opponent to return, then reconnect.');
       return;
     }
-    cleanupPeer();
-    const code = generateRoomCode();
-    document.getElementById('hostCodeBox').textContent = code;
-    document.getElementById('hostStatusMsg').textContent = 'Initializing signaling room...';
+    showNetworkStatus('Connection interrupted. Reconnecting to the same room…');
+    reconnectTimer = setTimeout(() => {
+      reconnectTimer = null;
+      reconnectAttempts++;
+      reconnectOnlineRoom();
+    }, 1500);
+  }
 
-    const peer = new Peer(PEER_PREFIX + code, {
-      config: {
-        iceServers: [
-          { urls: 'stun:stun.l.google.com:19302' },
-          { urls: 'stun:stun1.l.google.com:19302' }
-        ]
-      }
+  function reconnectOnlineRoom() {
+    const code = state.net.roomCode;
+    if (!code) return;
+    if (state.net.myRole === 'p1') hostOnlineRoom(code);
+    else joinOnlineRoom(code);
+  }
+
+  function attachPeerRecovery(peer, generation, isHost) {
+    peer.on('disconnected', () => {
+      if (generation !== state.net.generation) return;
+      try { peer.reconnect(); } catch (e) { retryOnlineConnection(); }
     });
+    peer.on('error', err => {
+      if (generation !== state.net.generation) return;
+      const id = isHost ? 'hostStatusMsg' : 'joinStatusMsg';
+      document.getElementById(id).textContent = `Connection interrupted (${err.type}).`;
+      if (!state.net.connected) retryOnlineConnection();
+    });
+  }
 
-    state.net.peer = peer;
+  const PEER_OPTIONS = {config: {iceServers: [
+    {urls: 'stun:stun.l.google.com:19302'}, {urls: 'stun:stun1.l.google.com:19302'}
+  ]}};
+
+  function hostOnlineRoom(resumeCode = null) {
+    if (typeof Peer === 'undefined') {
+      document.getElementById('hostStatusMsg').textContent = 'Online play is unavailable. Please reload and try again.';
+      return;
+    }
+    const resume = typeof resumeCode === 'string';
+    const code = resume ? resumeCode : generateRoomCode();
+    cleanupPeer(resume);
     state.net.roomCode = code;
     state.net.myRole = 'p1';
-
+    const generation = state.net.generation;
+    document.getElementById('hostCodeBox').textContent = code;
+    document.getElementById('hostStatusMsg').textContent = 'Opening room…';
+    if (resume) showNetworkStatus('Restoring room. Waiting for your opponent…');
+    const peer = new Peer(PEER_PREFIX + code, PEER_OPTIONS);
+    state.net.peer = peer;
     peer.on('open', () => {
+      if (generation !== state.net.generation) return;
       document.getElementById('hostStatusMsg').textContent = 'Room open! Waiting for Player 2 to join...';
+      if (resume) showNetworkStatus('Room restored. Waiting for your opponent…');
     });
-
-    peer.on('connection', (conn) => {
+    peer.on('connection', conn => {
+      if (generation !== state.net.generation || state.net.conn?.open) { conn.close(); return; }
       state.net.conn = conn;
-      setupConnectionHandlers(conn, true);
+      setupConnectionHandlers(conn, true, generation);
     });
-
-    peer.on('error', (err) => {
-      document.getElementById('hostStatusMsg').textContent = `Connection error: ${err.type}. Try again.`;
-    });
+    attachPeerRecovery(peer, generation, true);
+    if (state.mode === 'online') renderAll();
   }
 
-  function joinOnlineRoom() {
+  function joinOnlineRoom(resumeCode = null) {
     if (typeof Peer === 'undefined') {
-      document.getElementById('joinStatusMsg').textContent = 'PeerJS library unavailable offline.';
+      document.getElementById('joinStatusMsg').textContent = 'Online play is unavailable. Please reload and try again.';
       return;
     }
-    const raw = document.getElementById('joinCodeInput').value.trim().toUpperCase();
-    if (raw.length !== 4) {
+    const raw = typeof resumeCode === 'string' ? resumeCode : document.getElementById('joinCodeInput').value.trim().toUpperCase();
+    if (!/^[A-Z2-9]{4}$/.test(raw)) {
       document.getElementById('joinStatusMsg').textContent = 'Enter a valid 4-character Room Code.';
       return;
     }
-
-    cleanupPeer();
-    document.getElementById('joinStatusMsg').textContent = `Connecting to room ${raw}...`;
-
-    const peer = new Peer({
-      config: {
-        iceServers: [
-          { urls: 'stun:stun.l.google.com:19302' },
-          { urls: 'stun:stun1.l.google.com:19302' }
-        ]
-      }
-    });
-
-    state.net.peer = peer;
+    const resume = state.net.roomCode === raw && state.net.myRole === 'p2';
+    cleanupPeer(resume);
     state.net.roomCode = raw;
     state.net.myRole = 'p2';
-
+    const generation = state.net.generation;
+    document.getElementById('joinStatusMsg').textContent = `Connecting to room ${raw}...`;
+    if (resume) showNetworkStatus('Reconnecting to the same room…');
+    const peer = new Peer(PEER_OPTIONS);
+    state.net.peer = peer;
     peer.on('open', () => {
-      const conn = peer.connect(PEER_PREFIX + raw, { reliable: true });
+      if (generation !== state.net.generation) return;
+      const conn = peer.connect(PEER_PREFIX + raw, {reliable: true});
       state.net.conn = conn;
-      setupConnectionHandlers(conn, false);
+      setupConnectionHandlers(conn, false, generation);
     });
-
-    peer.on('error', (err) => {
-      document.getElementById('joinStatusMsg').textContent = `Could not reach room (${err.type}).`;
-    });
+    attachPeerRecovery(peer, generation, false);
+    if (state.mode === 'online') renderAll();
   }
 
   function getSelectedOnlineDeckPayload() {
     const choice = document.getElementById('deckSelect').value;
     const desc = getDeckDescriptor(choice);
-    return {
-      choice,
-      label: desc.label,
-      customDeck: choice.startsWith('slot_') ? desc.cards : null
-    };
+    return {choice, label: desc.label, customDeck: choice.startsWith('slot_') ? desc.cards : null};
   }
 
-  function setupConnectionHandlers(conn, isHost) {
+  function startOnlineMatch(guest = {}) {
+    state.net.matchId = crypto.randomUUID();
+    state.net.startedAt = Date.now();
+    state.net.revision = 0;
+    state.scoutPending = null;
+    initNewMatch('online', document.getElementById('deckSelect').value,
+      guest.choice || 'balanced', guest.customDeck || null, guest.label || null);
+  }
+
+  function connectionReady(isHost) {
+    clearTimeout(reconnectTimer);
+    reconnectTimer = null;
+    reconnectAttempts = 0;
+    state.net.connected = true;
+    showNetworkStatus(isHost ? 'Connected • You are Player 1 (Blue)' : 'Connected • You are Player 2 (Red)');
+    document.getElementById('onlineModal').classList.remove('open');
+  }
+
+  function setupConnectionHandlers(conn, isHost, generation) {
+    const current = () => generation === state.net.generation && conn === state.net.conn;
     conn.on('open', () => {
-      state.net.connected = true;
+      if (!current()) return;
       state.mode = 'online';
       document.getElementById('modeSelect').value = 'online';
       document.getElementById('p2DeckSelect').style.display = 'none';
-      document.getElementById('onlineModal').classList.remove('open');
-      document.getElementById('netBar').classList.add('active');
-      document.getElementById('netRoomCodeDisplay').textContent = state.net.roomCode;
-      document.getElementById('netStatusLabel').textContent = isHost
-        ? 'Connected • You are Player 1 (Blue)'
-        : 'Connected • You are Player 2 (Red)';
-
-      const myPayload = getSelectedOnlineDeckPayload();
-
-      if (isHost) {
-        initNewMatch('online', myPayload.choice, 'balanced');
-        broadcastNetState('place');
-      } else {
-        conn.send({
-          type: 'guest_ready',
-          choice: myPayload.choice,
-          label: myPayload.label,
-          customDeck: myPayload.customDeck
-        });
-      }
+      showNetworkStatus('Connected. Restoring match…');
+      // Only the host handles a ready message. Opening a transport never starts a match.
+      if (!isHost) conn.send({type: 'guest_ready', protocol: 2, ...getSelectedOnlineDeckPayload(),
+        resume: state.net.matchId ? sessionEnvelope() : null});
     });
-
-    conn.on('data', (msg) => {
-      if (!msg || typeof msg !== 'object') return;
-      if ((msg.type === 'guest_ready' || msg.type === 'request_rematch') && state.net.myRole === 'p1') {
-        const hostChoice = document.getElementById('deckSelect').value;
-        initNewMatch('online', hostChoice, msg.choice || 'balanced', msg.customDeck || null, msg.label || null);
+    conn.on('data', msg => {
+      if (!current() || !msg || typeof msg !== 'object') return;
+      if (['guest_ready', 'request_rematch', 'sync_state'].includes(msg.type) && msg.protocol !== 2) {
+        cleanupPeer(true);
+        const text = 'Online play was updated. Both players need to reload GRIDSHIFT.';
+        showNetworkStatus(text);
+        showToast(text);
+        renderAll();
+        return;
+      }
+      if (msg.type === 'guest_ready' && isHost) {
+        const saved = msg.resume;
+        if (state.net.matchId && saved?.payload &&
+            ((saved.matchId === state.net.matchId && saved.revision > state.net.revision) ||
+             saved.startedAt > state.net.startedAt)) {
+          state.net.matchId = saved.matchId;
+          state.net.startedAt = saved.startedAt;
+          state.net.revision = saved.revision;
+          applyRemoteState(saved.payload);
+        }
+        connectionReady(true);
+        if (!state.net.matchId) startOnlineMatch(msg);
+        broadcastNetState();
+        renderAll();
+      } else if (msg.type === 'request_rematch' && isHost && state.phase === 'game_over') {
+        startOnlineMatch(msg);
         broadcastNetState('place');
       } else if (msg.type === 'sync_state') {
+        if (msg.matchId === state.net.matchId && msg.revision < state.net.revision) return;
+        state.net.matchId = msg.matchId;
+        state.net.startedAt = msg.startedAt;
+        state.net.revision = msg.revision;
+        connectionReady(isHost);
         applyRemoteState(msg.payload, msg.sfx);
       }
     });
-
-    conn.on('close', () => {
+    const interrupted = () => {
+      if (!current()) return;
       state.net.connected = false;
-      document.getElementById('netStatusLabel').textContent = 'Opponent disconnected.';
-      addLog('Opponent disconnected from the room.', 'sys-log');
+      state.net.conn = null;
+      saveOnlineSession();
+      showNetworkStatus('Opponent disconnected. Your match is saved.');
       renderAll();
-    });
+      // Hosts keep the room ID listening; guests reconnect to that same room.
+      if (!isHost) retryOnlineConnection();
+    };
+    conn.on('close', interrupted);
+    conn.on('error', interrupted);
   }
 
   function broadcastNetState(sfxName = null) {
-    if (state.mode !== 'online' || !state.net.connected || !state.net.conn) return;
-    const payload = {
-      board: state.board,
-      p1: state.p1,
-      p2: state.p2,
-      patternDeck: state.patternDeck,
-      patternMarket: state.patternMarket,
-      turn: state.turn,
-      phase: state.phase,
-      logs: state.logs,
-      notice: state.notice
-    };
-    state.net.conn.send({ type: 'sync_state', payload, sfx: sfxName });
+    if (state.mode !== 'online' || !state.net.matchId) return;
+    state.net.revision = (state.net.revision || 0) + 1;
+    saveOnlineSession();
+    if (!state.net.connected || !state.net.conn?.open) return;
+    try { state.net.conn.send({type: 'sync_state', protocol: 2, ...sessionEnvelope(), sfx: sfxName}); }
+    catch (e) { state.net.connected = false; retryOnlineConnection(); }
   }
 
   function applyRemoteState(payload, sfxName) {
@@ -2735,10 +2832,13 @@ header {
     state.turn = payload.turn;
     state.phase = payload.phase;
     state.logs = payload.logs;
+    renderLogs();
+    state.notice = payload.notice || null;
     state.selectedHandIdx = null;
-    state.abilityMode = null;
-    state.abilityAnchor = null;
-    state.abilityValidCells = [];
+    state.abilityMode = payload.abilityMode || null;
+    state.abilityAnchor = payload.abilityAnchor ?? null;
+    state.abilityValidCells = payload.abilityValidCells || [];
+    state.scoutPending = payload.scoutPending || null;
     state.previewCells = [];
     state.nearCells = [];
     if (payload.notice && payload.notice.id !== state.lastNoticeId) {
@@ -2746,8 +2846,26 @@ header {
       showToast(payload.notice.text);
     }
     if (sfxName && SFX[sfxName]) SFX[sfxName]();
+    saveOnlineSession();
     renderAll();
   }
+
+  function restoreSavedOnlineSession() {
+    const saved = readOnlineSession();
+    if (!saved) return false;
+    state.mode = 'online';
+    state.net.roomCode = saved.roomCode;
+    state.net.myRole = saved.role;
+    state.net.matchId = saved.matchId;
+    state.net.startedAt = saved.startedAt;
+    state.net.revision = saved.revision;
+    document.getElementById('modeSelect').value = 'online';
+    document.getElementById('p2DeckSelect').style.display = 'none';
+    applyRemoteState(saved.payload);
+    reconnectOnlineRoom();
+    return true;
+  }
+
 
   /* =========================================================================
      8. INTERACTIVE 6-STEP TUTORIAL ROUND
@@ -2957,6 +3075,8 @@ header {
      ========================================================================= */
   function initNewMatch(mode, p1Choice = 'balanced', p2Choice = 'balanced', remoteGuestCustomDeck = null, remoteGuestLabel = null) {
     state.tutorial.active = false;
+    state.scoutPending = null;
+    document.getElementById('scoutModal').classList.remove('open');
     updateTutorialBanner();
     prevOwnerSnap = null;
     prevHandKeys = [];
@@ -3100,6 +3220,7 @@ header {
         state.abilityAnchor = idx;
         state.abilityMode = 'gear_dest';
         state.abilityValidCells = getOrthogonalNeighbors(idx).filter(n => state.board[n].owner === null);
+        broadcastNetState();
         SFX.select();
         renderAll();
         return;
@@ -3124,6 +3245,7 @@ header {
         state.abilityValidCells = state.board
           .filter(c => c.owner !== null && !c.locked && !c.shielded && c.index !== idx)
           .map(c => c.index);
+        broadcastNetState();
         SFX.select();
         renderAll();
         return;
@@ -3313,12 +3435,28 @@ header {
       return;
     }
 
+    state.scoutPending = {activePid, drawn};
+    state.phase = 'ability';
+    state.abilityMode = 'scout';
+    broadcastNetState('overdrive');
+    renderAll();
+  }
+
+  function renderScoutChoices() {
+    const pending = state.scoutPending;
+    const modal = document.getElementById('scoutModal');
+    if (!pending || !canLocalUserAct()) { modal.classList.remove('open'); return; }
+    const {activePid, drawn} = pending;
+    const p = state[activePid];
     const container = document.getElementById('scoutChoices');
     container.innerHTML = '';
     drawn.forEach((card, i) => {
       const el = createCardElement(card, false);
       el.style.cursor = 'pointer';
       el.onclick = () => {
+        if (!canLocalUserAct() || state.scoutPending !== pending) return;
+        state.scoutPending = null;
+        state.abilityMode = null;
         p.hand.push(drawn[i]);
         p.deck.unshift(drawn[1 - i]);
         document.getElementById('scoutModal').classList.remove('open');
@@ -3717,6 +3855,8 @@ header {
   }
 
   function renderAll() {
+    saveOnlineSession();
+    renderScoutChoices();
     const viewerPid = getViewerId();
     const viewerPlayer = state[viewerPid];
     const canAct = canLocalUserAct();
@@ -3766,7 +3906,9 @@ header {
       statusText.textContent = 'AI Rival is evaluating the 6×6 grid...';
     } else if (state.mode === 'online' && !canAct) {
       phaseLabel.textContent = 'Opponent Turn';
-      statusText.textContent = `Waiting for ${state[state.turn].name} to make their move...`;
+      statusText.textContent = state.net.connected
+        ? `Waiting for ${state[state.turn].name} to make their move...`
+        : 'Connection interrupted. Your match is saved; waiting to reconnect.';
     } else if (state.phase === 'ability') {
       phaseLabel.textContent = 'Overdrive Ability!';
       statusBanner.classList.add('targeting');
@@ -4234,8 +4376,9 @@ header {
   document.getElementById('btnCloseOnline').onclick = () => {
     document.getElementById('onlineModal').classList.remove('open');
   };
-  document.getElementById('btnCreateRoom').onclick = hostOnlineRoom;
-  document.getElementById('btnJoinRoom').onclick = joinOnlineRoom;
+  document.getElementById('btnCreateRoom').onclick = () => hostOnlineRoom();
+  document.getElementById('btnReconnectNet').onclick = () => { reconnectAttempts = 0; reconnectOnlineRoom(); };
+  document.getElementById('btnJoinRoom').onclick = () => joinOnlineRoom();
   document.getElementById('btnCopyRoomCode').onclick = () => {
     if (!state.net.roomCode) return;
     navigator.clipboard?.writeText(state.net.roomCode);
@@ -4252,11 +4395,11 @@ header {
   document.getElementById('btnOnlineRematch').onclick = () => {
     const myPayload = getSelectedOnlineDeckPayload();
     if (state.net.myRole === 'p1') {
-      initNewMatch('online', myPayload.choice, 'balanced');
+      startOnlineMatch();
       broadcastNetState('place');
     } else if (state.net.conn) {
       state.net.conn.send({
-        type: 'request_rematch',
+        type: 'request_rematch', protocol: 2,
         choice: myPayload.choice,
         label: myPayload.label,
         customDeck: myPayload.customDeck
@@ -4307,8 +4450,8 @@ header {
     btn.onclick = () => renderRulesTab(btn.dataset.tab);
   });
 
-  // Start default Solo vs AI match on load
-  initNewMatch('ai', 'balanced', 'balanced');
+  // Resume this tab's room after refresh; otherwise start the default solo match.
+  if (!restoreSavedOnlineSession()) initNewMatch('ai', 'balanced', 'balanced');
 })();
 </script>
 </body>
