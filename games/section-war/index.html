@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Section War: Band Room Battles</title><meta name="description" content="A marching-band deckbuilder with AI Scrimmage, Pass &amp; Play, and online room-code battles.">
 <style>
 :root{color-scheme:dark;--gold:#f9ca75;--paper:#ffedbc;--ink:#10272a;--teal:#78ffe8}
@@ -420,6 +420,17 @@ button:not(:disabled):active{transform:translateY(2px) scale(.97);filter:brightn
 #mode-screen button.audio-settings{position:absolute;top:1.8%;right:3.2%;width:15.5%;height:3.3%;min-height:0;margin:0;padding:0;border:0;background:none;box-shadow:none;color:transparent}
 @media(max-height:440px) and (orientation:landscape){#mode-screen{width:min(100%,340px);min-height:0}}
 </style>
+<style id="immersive-opening">
+/* Fill the current visible phone viewport, including changes to browser chrome. */
+body:has(#opening-screen:not([hidden])){overflow:hidden}
+body:has(#opening-screen:not([hidden]))>.section-war-return{display:none}
+#opening-screen{width:100%;max-width:600px;height:100vh;height:100dvh;aspect-ratio:auto;margin:0 auto;background:#082326 url('assets/opening-immersive.png') center/100% 100% no-repeat;isolation:isolate}
+#opening-screen .opening-return{position:absolute;left:25%;top:max(1%,env(safe-area-inset-top));width:50%;height:4%;min-height:32px;z-index:2}
+#opening-screen .opening-return:focus-visible{outline:2px solid #ffe4a4;background:#ffe5aa36}
+#opening-screen #enter-band-room{left:4%;top:auto;bottom:max(4.5%,env(safe-area-inset-bottom));width:92%;height:8%;min-height:44px;clip-path:polygon(5% 0,95% 0,100% 25%,100% 75%,95% 100%,5% 100%,0 75%,0 25%)}
+#opening-screen #opening-audio{right:2%;bottom:max(.5%,env(safe-area-inset-bottom));width:10%;height:4%;min-height:36px}
+@media(min-width:700px),(orientation:landscape){#opening-screen{max-width:calc(100dvh * .43164)}}
+</style>
 <link rel="canonical" href="https://pocketplayroom.com/games/section-war/"><script src="../../recent-games.js" defer></script><style>.section-war-return{display:block;position:relative;z-index:5;text-align:center;padding:10px 12px;background:#06171b;color:#ffe1a2;font:600 14px system-ui;text-decoration:none}.section-war-return:focus-visible{outline:2px solid #ffe1a2;outline-offset:-3px}</style></head>
 <body><a class="section-war-return" href="../../#home">Back to Pocket Playroom</a>
 <main id="battle-screen" hidden>
@@ -437,6 +448,7 @@ button:not(:disabled):active{transform:translateY(2px) scale(.97);filter:brightn
 <div class="menu"><button id="battle-menu" type="button" aria-haspopup="dialog">Battle Tools</button></div><dialog id="battle-tools" aria-labelledby="tools-title"><h2 id="tools-title">Battle Tools</h2><div class="battle-tool-actions"><button id="restart" type="button">New Battle</button><button id="change-mode" type="button">Modes</button><button type="button" class="audio-settings" data-audio-settings>Audio</button></div><details open><summary>Battle Log · <span id="counts"></span></summary><ol id="log"></ol></details><details><summary>How to play</summary><p>Tap an attack, then tap your rival. Mute also needs a target. Block and utility cards resolve when tapped. Block expires at the start of its owner's turn. Long Reach adds 2 to your first single-target attack each turn. Squeak makes your next attack miss and expires at the end of the turn. Tempo Brake reduces the next attack that would hit by 4. Duct Tape clears Squeak and Out of Tune. Fortified adds 3 to the next Block gain. Out of Tune deals 2 damage per stack at the start of a turn, then loses one stack. Knock your rival to 0 HP to win.</p></details><form method="dialog"><button>Close</button></form></dialog>
 <dialog id="card-help" aria-labelledby="help-title"><h2 id="help-title"></h2><img id="help-art" alt=""><p id="help-copy"></p><form method="dialog"><button>Close</button></form></dialog></main>
 <section id="opening-screen" aria-label="Section War: Band Room Battles">
+  <a class="opening-return" href="../../#home" aria-label="Back to Pocket Playroom"></a>
   <button id="enter-band-room" type="button" aria-label="Enter the Band Room"></button>
   <button id="opening-audio" type="button" aria-label="Audio settings" aria-haspopup="dialog" data-audio-settings></button>
 </section><section hidden id="mode-screen" class="duel-screen">
