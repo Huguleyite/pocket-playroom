@@ -177,6 +177,10 @@ body.local #phones{display:flex;gap:14px;padding:14px;overflow-x:auto;align-item
 .phone .roster2 .dot,.dot{display:inline-block;width:.7em;height:.7em;border-radius:50%;margin-right:.35em;vertical-align:baseline}
 .smallbtn.wide{width:auto;height:auto;padding:.5em 1em;font-size:.9em}
 .mutebtn{position:fixed;right:10px;top:10px;z-index:50;background:rgba(29,38,70,.92);border-radius:2em;padding:.45em .9em;font-weight:800;font-size:14px;color:#fff;min-height:44px}
+.tv-sky{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+.tv{background:linear-gradient(180deg,rgba(7,5,31,.42),rgba(7,5,31,.72))}
+.phone-music{flex:0 0 auto;align-self:center;min-height:44px;padding:8px 16px;border:1px solid var(--line);border-radius:24px;background:rgba(15,22,48,.92);color:var(--ink);font-weight:700}
+.phone-music:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 /* ---- toy-brick polish ---- */
 .btn{background:linear-gradient(#ffe08a,var(--accent));box-shadow:0 .22em 0 #b88a1e,inset 0 .12em 0 rgba(255,255,255,.55)}
 .btn:active{transform:translateY(.14em);box-shadow:0 .08em 0 #b88a1e}
@@ -2665,22 +2669,25 @@ const sfx = (() => {
    --------------------------------------------------------------------- */
 const music = (() => {
   const SRC = { setup: 'music/starlit-workshop.mp3', play: 'music/cosmic-playroom.mp3' }, VOL = { setup: 0.5, play: 0.42 };
-  const els = {}; let want = null;
+  const els = {}; let want = null, enabled = true;
+  try { enabled = localStorage.getItem('bmusic') !== '0'; } catch (e) {}
   const el = k => { if (!els[k]) { const a = new Audio(SRC[k]); a.loop = true; a.preload = 'auto'; a.volume = 0; els[k] = a; } return els[k]; };
   const fade = (a, to, ms, done) => {
     clearInterval(a._f); const from = a.volume, t0 = performance.now();
     a._f = setInterval(() => { const q = Math.min(1, (performance.now() - t0) / ms); a.volume = Math.max(0, Math.min(1, from + (to - from) * q)); if (q >= 1) { clearInterval(a._f); if (done) done(); } }, 40);
   };
   const start = k => { const a = el(k); if (a.paused) { const pr = a.play(); if (pr && pr.catch) pr.catch(() => {}); } fade(a, VOL[k], 1800); };
-  const halt = (k, ms) => { const a = els[k]; if (!a || a.paused) return; fade(a, 0, ms == null ? 1200 : ms, () => { if (want !== k) a.pause(); }); };
+  const halt = (k, ms) => { const a = els[k]; if (!a || a.paused) return; fade(a, 0, ms == null ? 1200 : ms, () => { if (want !== k || !enabled || sfx.muted) a.pause(); }); };
   const api = {
-    play(k) { want = k; for (const o in els) if (o !== k) halt(o); if (!sfx.muted) start(k); },
+    play(k) { want = k; for (const o in els) if (o !== k) halt(o); if (!sfx.muted && enabled) start(k); },
     stop(k) { if (!k || want === k) want = null; for (const o in els) if (!k || o === k) halt(o); },
-    sync() { if (sfx.muted) { for (const o in els) halt(o, 300); } else if (want) start(want); },
+    sync() { if (sfx.muted || !enabled) { for (const o in els) halt(o, 300); } else if (want) start(want); },
+    toggle() { enabled = !enabled; try { localStorage.setItem('bmusic', enabled ? '1' : '0'); } catch (e) {} this.sync(); return enabled; },
+    get enabled() { return enabled; },
     prime(k) { const a = el(k); try { a.muted = true; const pr = a.play(); if (pr && pr.then) pr.then(() => { a.pause(); a.currentTime = 0; a.muted = false; }).catch(() => { a.muted = false; }); } catch (e) {} },
     get now() { return want; }
   };
-  ['pointerdown', 'keydown', 'touchstart'].forEach(ev => document.addEventListener(ev, () => { if (want && !sfx.muted && el(want).paused) start(want); }, { passive: true }));
+  ['pointerdown', 'keydown', 'touchstart'].forEach(ev => document.addEventListener(ev, () => { if (want && !sfx.muted && enabled && el(want).paused) start(want); }, { passive: true }));
   window.__musicSync = () => api.sync(); window.__music = api; api._els = els;
   return api;
 })();
@@ -2955,7 +2962,15 @@ class Phone {
   clearTimers() { this.timers.forEach(clearInterval); this.timers = []; }
   applyTheme(i) { try { this.root.style.background = avBackground(i); } catch (e) {} }
   meBadge() { const me = this.me || {}; return `<span class="badge mebadge" style="--bc:${me.color || '#445'}">${me.avatar || '🧱'}</span>`; }
-  setScreen(html, cls) { this.clearTimers(); this.editor = null; this.el.className = 'phone' + (cls ? ' ' + cls : ''); this.el.innerHTML = html; }
+  setScreen(html, cls) {
+    this.clearTimers(); this.editor = null; this.el.className = 'phone' + (cls ? ' ' + cls : ''); this.el.innerHTML = html;
+    this.addMusicControl();
+  }
+  addMusicControl() {
+    const button = document.createElement('button'); button.className = 'phone-music';
+    const label = () => { button.textContent = music.enabled ? '♫ Music on' : '♫ Music off'; button.setAttribute('aria-pressed', String(music.enabled)); };
+    label(); button.onclick = () => { music.toggle(); label(); }; this.el.appendChild(button);
+  }
 
   /* ---- join / lobby ---- */
   showJoin(auto) {
@@ -3096,6 +3111,7 @@ class Phone {
       <div class="layers"><span class="lbl">LAYER<br>up ↑</span>${[0, 1, 2, 3, 4, 5, 6, 7].map(i => `<button data-l="${i}">${i + 1}</button>`).join('')}</div>
       <div class="pal">${COLORS.map((c, i) => `<button data-c="${i + 1}" style="background:${c}" aria-label="Color ${i + 1}"></button>`).join('')}</div>
       <div class="acts"><button id="undo" aria-label="Undo">↶</button><button id="clr" aria-label="Clear">🗑</button>${this.local ? '<button id="rnd" title="test: fill randomly">🎲</button>' : ''}<button class="done" id="done">Done ✔</button></div>`;
+    this.addMusicControl();
     const prev = document.createElement('canvas'); this.el.querySelector('.edprev').insertBefore(prev, this.el.querySelector('.rot'));
     const gcv = document.createElement('canvas'); this.el.querySelector('.edgrid').appendChild(gcv);
     ed.gcv = gcv;
@@ -3216,6 +3232,9 @@ class Host {
     this.settings = { buildMs: 60000, lookMs: LOOK_MS };
     this.autoReveal = true; this.hostRound = 0;
     { const mb = document.createElement('button'); mb.className = 'mutebtn'; mb.textContent = sfx.muted ? '🔇 Sound off' : '🔊 Sound on'; mb.onclick = () => { sfx.toggle(); mb.textContent = sfx.muted ? '🔇 Sound off' : '🔊 Sound on'; }; document.body.appendChild(mb); }
+    const sky = document.createElement('canvas'); sky.className = 'tv-sky'; sky.setAttribute('aria-hidden', 'true'); wrap.appendChild(sky);
+    const paintSky = () => { const r = wrap.getBoundingClientRect(), W = Math.max(1, Math.round(r.width)), H = Math.max(1, Math.round(r.height)); if (sky.width === W && sky.height === H) return; sky.width = W; sky.height = H; sky.getContext('2d').drawImage(spaceBg(W, H), 0, 0); };
+    this.skyObserver = new ResizeObserver(paintSky); this.skyObserver.observe(wrap); paintSky();
     this.tv = document.createElement('div'); this.tv.className = 'tv'; wrap.appendChild(this.tv);
     this.opt = opt;
     window.addEventListener('keydown', e => { if ((e.code === 'Space' || e.code === 'Enter') && this.phase === 'reveal') { e.preventDefault(); this.revealNext(true); } });
@@ -3304,6 +3323,7 @@ class Host {
   startGame() {
     this.players = this.players.filter(p => p.connected || this.local);
     this.N = this.players.length; if (this.N < MIN_PLAYERS) return;
+    music.stop('setup');
     this.hostRound++;
     const prompts = shuffle(PROMPTS).slice(0, this.N);
     this.chains = prompts.map(pr => ({ prompt: pr, builds: [], builders: [] }));
