@@ -3,6 +3,7 @@
  'use strict';
  const base=new URL('./',document.currentScript.src),key='room-for-play:last';
  const games={
+  'block-telephone':['Block Telephone','games/block-telephone/'],
   'section-war':['Section War','games/section-war/'],
   'origami-angler':['Origami Angler','games/origami-angler/'],
   skyborn:['Skyborn','games/skyborn/'],
