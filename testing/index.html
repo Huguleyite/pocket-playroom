@@ -19,6 +19,8 @@
     h1 { font-size: clamp(32px, 7vw, 58px); line-height: 1.08; letter-spacing: -.04em; margin: 16px 0; }
     .intro { max-width: 560px; font-size: 18px; line-height: 1.6; }
     .empty { margin-top: 38px; padding: clamp(24px, 5vw, 44px); background: #fffdf7; border: 1px dashed #326b4d70; border-radius: 20px; }
+    .preview-link { display:inline-flex; align-items:center; justify-content:center; min-height:48px; padding:12px 20px; margin-top:20px; border-radius:12px; background:#326b4d; color:#fff; text-decoration:none; font-weight:750; }
+    .preview-meta { font-size:14px; margin-bottom:10px !important; color:#326b4d !important; font-weight:700; }
     h2 { font-size: 22px; margin: 0 0 10px; }
     p { line-height: 1.6; }
     .empty p { margin: 0; color: #4d5d64; }
@@ -35,8 +37,10 @@
     <h1>Pocket Playroom Testing</h1>
     <p class="intro">A little room to try things out. Test games, explore designs, and smooth out the kinks before release.</p>
     <section class="empty" aria-labelledby="previews-title">
-      <h2 id="previews-title">Game previews will appear here.</h2>
-      <p>No games are in testing yet. Check back when the next preview is ready.</p>
+      <p class="preview-meta">Party game preview · 3–10 players</p>
+      <h2 id="previews-title">Puzzle Telephone</h2>
+      <p>Spin a clue challenge on your phone, pass a hint, and race to solve the secret phrase. Host on a shared screen and join with family phones, or choose Launch Demo to try all three players on one device.</p>
+      <a class="preview-link" href="/testing/puzzle-telephone/">Try Puzzle Telephone</a>
     </section>
   </main>
   <footer class="wrap">Unlisted testing area. Previews may change, reset, or disappear.</footer>

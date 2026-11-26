@@ -1,0 +1,1297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Puzzle Telephone Preview · Pocket Playroom</title>
+<meta name="robots" content="noindex, nofollow, noarchive">
+<link rel="icon" href="/favicon.ico">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
+<style>*,:after,:before{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgba(59,130,246,.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }::backdrop{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgba(59,130,246,.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }/*! tailwindcss v3.4.17 | MIT License | https://tailwindcss.com*/*,:after,:before{box-sizing:border-box;border:0 solid #e5e7eb}:after,:before{--tw-content:""}:host,html{line-height:1.5;-webkit-text-size-adjust:100%;-moz-tab-size:4;-o-tab-size:4;tab-size:4;font-family:ui-sans-serif,system-ui,sans-serif,Apple Color Emoji,Segoe UI Emoji,Segoe UI Symbol,Noto Color Emoji;font-feature-settings:normal;font-variation-settings:normal;-webkit-tap-highlight-color:transparent}body{margin:0;line-height:inherit}hr{height:0;color:inherit;border-top-width:1px}abbr:where([title]){-webkit-text-decoration:underline dotted;text-decoration:underline dotted}h1,h2,h3,h4,h5,h6{font-size:inherit;font-weight:inherit}a{color:inherit;text-decoration:inherit}b,strong{font-weight:bolder}code,kbd,pre,samp{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,Liberation Mono,Courier New,monospace;font-feature-settings:normal;font-variation-settings:normal;font-size:1em}small{font-size:80%}sub,sup{font-size:75%;line-height:0;position:relative;vertical-align:baseline}sub{bottom:-.25em}sup{top:-.5em}table{text-indent:0;border-color:inherit;border-collapse:collapse}button,input,optgroup,select,textarea{font-family:inherit;font-feature-settings:inherit;font-variation-settings:inherit;font-size:100%;font-weight:inherit;line-height:inherit;letter-spacing:inherit;color:inherit;margin:0;padding:0}button,select{text-transform:none}button,input:where([type=button]),input:where([type=reset]),input:where([type=submit]){-webkit-appearance:button;background-color:transparent;background-image:none}:-moz-focusring{outline:auto}:-moz-ui-invalid{box-shadow:none}progress{vertical-align:baseline}::-webkit-inner-spin-button,::-webkit-outer-spin-button{height:auto}[type=search]{-webkit-appearance:textfield;outline-offset:-2px}::-webkit-search-decoration{-webkit-appearance:none}::-webkit-file-upload-button{-webkit-appearance:button;font:inherit}summary{display:list-item}blockquote,dd,dl,figure,h1,h2,h3,h4,h5,h6,hr,p,pre{margin:0}fieldset{margin:0}fieldset,legend{padding:0}menu,ol,ul{list-style:none;margin:0;padding:0}dialog{padding:0}textarea{resize:vertical}input::-moz-placeholder,textarea::-moz-placeholder{opacity:1;color:#9ca3af}input::placeholder,textarea::placeholder{opacity:1;color:#9ca3af}[role=button],button{cursor:pointer}:disabled{cursor:default}audio,canvas,embed,iframe,img,object,svg,video{display:block;vertical-align:middle}img,video{max-width:100%;height:auto}[hidden]:where(:not([hidden=until-found])){display:none}.visible{visibility:visible}.fixed{position:fixed}.absolute{position:absolute}.relative{position:relative}.inset-0{inset:0}.-top-2{top:-.5rem}.right-4{right:1rem}.top-4{top:1rem}.z-10{z-index:10}.z-40{z-index:40}.z-50{z-index:50}.mx-auto{margin-left:auto;margin-right:auto}.mb-2{margin-bottom:.5rem}.mt-0\.5{margin-top:.125rem}.mt-1{margin-top:.25rem}.inline-block{display:inline-block}.flex{display:flex}.grid{display:grid}.hidden{display:none}.aspect-square{aspect-ratio:1/1}.h-0{height:0}.h-11{height:2.75rem}.h-9{height:2.25rem}.h-full{height:100%}.min-h-\[120px\]{min-height:120px}.min-h-screen{min-height:100vh}.w-0{width:0}.w-11{width:2.75rem}.w-9{width:2.25rem}.w-full{width:100%}.max-w-2xl{max-width:42rem}.max-w-4xl{max-width:56rem}.max-w-7xl{max-width:80rem}.max-w-\[290px\]{max-width:290px}.max-w-md{max-width:28rem}.max-w-sm{max-width:24rem}.flex-1{flex:1 1 0%}.transform{transform:translate(var(--tw-translate-x),var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))}.cursor-pointer{cursor:pointer}.select-none{-webkit-user-select:none;-moz-user-select:none;user-select:none}.grid-cols-1{grid-template-columns:repeat(1,minmax(0,1fr))}.grid-cols-2{grid-template-columns:repeat(2,minmax(0,1fr))}.grid-cols-7{grid-template-columns:repeat(7,minmax(0,1fr))}.flex-col{flex-direction:column}.flex-wrap{flex-wrap:wrap}.items-start{align-items:flex-start}.items-center{align-items:center}.justify-center{justify-content:center}.justify-between{justify-content:space-between}.gap-1\.5{gap:.375rem}.gap-2{gap:.5rem}.gap-2\.5{gap:.625rem}.gap-3{gap:.75rem}.gap-4{gap:1rem}.gap-6{gap:1.5rem}.gap-x-5{-moz-column-gap:1.25rem;column-gap:1.25rem}.gap-y-4{row-gap:1rem}.space-y-1>:not([hidden])~:not([hidden]){--tw-space-y-reverse:0;margin-top:calc(.25rem*(1 - var(--tw-space-y-reverse)));margin-bottom:calc(.25rem*var(--tw-space-y-reverse))}.space-y-2>:not([hidden])~:not([hidden]){--tw-space-y-reverse:0;margin-top:calc(.5rem*(1 - var(--tw-space-y-reverse)));margin-bottom:calc(.5rem*var(--tw-space-y-reverse))}.space-y-2\.5>:not([hidden])~:not([hidden]){--tw-space-y-reverse:0;margin-top:calc(.625rem*(1 - var(--tw-space-y-reverse)));margin-bottom:calc(.625rem*var(--tw-space-y-reverse))}.space-y-3>:not([hidden])~:not([hidden]){--tw-space-y-reverse:0;margin-top:calc(.75rem*(1 - var(--tw-space-y-reverse)));margin-bottom:calc(.75rem*var(--tw-space-y-reverse))}.space-y-5>:not([hidden])~:not([hidden]){--tw-space-y-reverse:0;margin-top:calc(1.25rem*(1 - var(--tw-space-y-reverse)));margin-bottom:calc(1.25rem*var(--tw-space-y-reverse))}.space-y-6>:not([hidden])~:not([hidden]){--tw-space-y-reverse:0;margin-top:calc(1.5rem*(1 - var(--tw-space-y-reverse)));margin-bottom:calc(1.5rem*var(--tw-space-y-reverse))}.space-y-8>:not([hidden])~:not([hidden]){--tw-space-y-reverse:0;margin-top:calc(2rem*(1 - var(--tw-space-y-reverse)));margin-bottom:calc(2rem*var(--tw-space-y-reverse))}.overflow-hidden,.truncate{overflow:hidden}.truncate{text-overflow:ellipsis;white-space:nowrap}.rounded{border-radius:.25rem}.rounded-2xl{border-radius:1rem}.rounded-3xl{border-radius:1.5rem}.rounded-full{border-radius:9999px}.rounded-lg{border-radius:.5rem}.rounded-xl{border-radius:.75rem}.border{border-width:1px}.border-2{border-width:2px}.border-b{border-bottom-width:1px}.border-l-\[10px\]{border-left-width:10px}.border-r-\[10px\]{border-right-width:10px}.border-t-\[18px\]{border-top-width:18px}.border-amber-400{--tw-border-opacity:1;border-color:rgb(251 191 36/var(--tw-border-opacity,1))}.border-amber-500\/30{border-color:rgba(245,158,11,.3)}.border-amber-500\/40{border-color:rgba(245,158,11,.4)}.border-blue-500{--tw-border-opacity:1;border-color:rgb(59 130 246/var(--tw-border-opacity,1))}.border-blue-500\/40{border-color:rgba(59,130,246,.4)}.border-emerald-500\/40{border-color:rgba(16,185,129,.4)}.border-indigo-500\/40{border-color:rgba(99,102,241,.4)}.border-rose-500\/30{border-color:rgba(244,63,94,.3)}.border-slate-600{--tw-border-opacity:1;border-color:rgb(71 85 105/var(--tw-border-opacity,1))}.border-slate-700{--tw-border-opacity:1;border-color:rgb(51 65 85/var(--tw-border-opacity,1))}.border-slate-700\/70{border-color:rgba(51,65,85,.7)}.border-slate-800{--tw-border-opacity:1;border-color:rgb(30 41 59/var(--tw-border-opacity,1))}.border-white{--tw-border-opacity:1;border-color:rgb(255 255 255/var(--tw-border-opacity,1))}.border-l-transparent{border-left-color:transparent}.border-r-transparent{border-right-color:transparent}.border-t-white{--tw-border-opacity:1;border-top-color:rgb(255 255 255/var(--tw-border-opacity,1))}.bg-amber-400{--tw-bg-opacity:1;background-color:rgb(251 191 36/var(--tw-bg-opacity,1))}.bg-amber-500{--tw-bg-opacity:1;background-color:rgb(245 158 11/var(--tw-bg-opacity,1))}.bg-amber-500\/20{background-color:rgba(245,158,11,.2)}.bg-blue-500\/20{background-color:rgba(59,130,246,.2)}.bg-blue-600{--tw-bg-opacity:1;background-color:rgb(37 99 235/var(--tw-bg-opacity,1))}.bg-blue-600\/20{background-color:rgba(37,99,235,.2)}.bg-blue-950\/60{background-color:rgba(23,37,84,.6)}.bg-emerald-500{--tw-bg-opacity:1;background-color:rgb(16 185 129/var(--tw-bg-opacity,1))}.bg-emerald-900\/60{background-color:rgba(6,78,59,.6)}.bg-emerald-950\/60{background-color:rgba(2,44,34,.6)}.bg-indigo-950\/70{background-color:rgba(30,27,75,.7)}.bg-rose-500\/15{background-color:rgba(244,63,94,.15)}.bg-rose-500\/20{background-color:rgba(244,63,94,.2)}.bg-rose-600{--tw-bg-opacity:1;background-color:rgb(225 29 72/var(--tw-bg-opacity,1))}.bg-slate-800{--tw-bg-opacity:1;background-color:rgb(30 41 59/var(--tw-bg-opacity,1))}.bg-slate-800\/50{background-color:rgba(30,41,59,.5)}.bg-slate-800\/70{background-color:rgba(30,41,59,.7)}.bg-slate-900{--tw-bg-opacity:1;background-color:rgb(15 23 42/var(--tw-bg-opacity,1))}.bg-slate-900\/90{background-color:rgba(15,23,42,.9)}.bg-slate-950{--tw-bg-opacity:1;background-color:rgb(2 6 23/var(--tw-bg-opacity,1))}.bg-slate-950\/60{background-color:rgba(2,6,23,.6)}.bg-slate-950\/75{background-color:rgba(2,6,23,.75)}.bg-slate-950\/80{background-color:rgba(2,6,23,.8)}.bg-white{--tw-bg-opacity:1;background-color:rgb(255 255 255/var(--tw-bg-opacity,1))}.bg-gradient-to-br{background-image:linear-gradient(to bottom right,var(--tw-gradient-stops))}.bg-gradient-to-r{background-image:linear-gradient(to right,var(--tw-gradient-stops))}.from-rose-500{--tw-gradient-from:#f43f5e var(--tw-gradient-from-position);--tw-gradient-to:rgba(244,63,94,0) var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from),var(--tw-gradient-to)}.via-amber-400{--tw-gradient-to:rgba(251,191,36,0) var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from),#fbbf24 var(--tw-gradient-via-position),var(--tw-gradient-to)}.to-amber-500{--tw-gradient-to:#f59e0b var(--tw-gradient-to-position)}.to-blue-500{--tw-gradient-to:#3b82f6 var(--tw-gradient-to-position)}.p-1\.5{padding:.375rem}.p-2\.5{padding:.625rem}.p-3{padding:.75rem}.p-4{padding:1rem}.p-5{padding:1.25rem}.p-6{padding:1.5rem}.p-7{padding:1.75rem}.px-2\.5{padding-left:.625rem;padding-right:.625rem}.px-3{padding-left:.75rem;padding-right:.75rem}.px-3\.5{padding-left:.875rem;padding-right:.875rem}.px-4{padding-left:1rem;padding-right:1rem}.py-1{padding-top:.25rem;padding-bottom:.25rem}.py-1\.5{padding-top:.375rem;padding-bottom:.375rem}.py-2{padding-top:.5rem;padding-bottom:.5rem}.py-2\.5{padding-top:.625rem;padding-bottom:.625rem}.py-3{padding-top:.75rem;padding-bottom:.75rem}.py-4{padding-top:1rem;padding-bottom:1rem}.pb-3{padding-bottom:.75rem}.pb-4{padding-bottom:1rem}.text-center{text-align:center}.text-right{text-align:right}.text-2xl{font-size:1.5rem;line-height:2rem}.text-3xl{font-size:1.875rem;line-height:2.25rem}.text-base{font-size:1rem;line-height:1.5rem}.text-lg{font-size:1.125rem;line-height:1.75rem}.text-sm{font-size:.875rem;line-height:1.25rem}.text-xl{font-size:1.25rem;line-height:1.75rem}.text-xs{font-size:.75rem;line-height:1rem}.font-bold{font-weight:700}.font-medium{font-weight:500}.font-semibold{font-weight:600}.uppercase{text-transform:uppercase}.normal-case{text-transform:none}.leading-none{line-height:1}.tracking-tight{letter-spacing:-.025em}.tracking-wide{letter-spacing:.025em}.tracking-wider{letter-spacing:.05em}.tracking-widest{letter-spacing:.1em}.text-amber-300{--tw-text-opacity:1;color:rgb(252 211 77/var(--tw-text-opacity,1))}.text-blue-300{--tw-text-opacity:1;color:rgb(147 197 253/var(--tw-text-opacity,1))}.text-emerald-300{--tw-text-opacity:1;color:rgb(110 231 183/var(--tw-text-opacity,1))}.text-emerald-400{--tw-text-opacity:1;color:rgb(52 211 153/var(--tw-text-opacity,1))}.text-indigo-300{--tw-text-opacity:1;color:rgb(165 180 252/var(--tw-text-opacity,1))}.text-rose-300{--tw-text-opacity:1;color:rgb(253 164 175/var(--tw-text-opacity,1))}.text-rose-400{--tw-text-opacity:1;color:rgb(251 113 133/var(--tw-text-opacity,1))}.text-rose-500{--tw-text-opacity:1;color:rgb(244 63 94/var(--tw-text-opacity,1))}.text-slate-200{--tw-text-opacity:1;color:rgb(226 232 240/var(--tw-text-opacity,1))}.text-slate-300{--tw-text-opacity:1;color:rgb(203 213 225/var(--tw-text-opacity,1))}.text-slate-400{--tw-text-opacity:1;color:rgb(148 163 184/var(--tw-text-opacity,1))}.text-slate-950{--tw-text-opacity:1;color:rgb(2 6 23/var(--tw-text-opacity,1))}.text-transparent{color:transparent}.text-white{--tw-text-opacity:1;color:rgb(255 255 255/var(--tw-text-opacity,1))}.placeholder-slate-500::-moz-placeholder{--tw-placeholder-opacity:1;color:rgb(100 116 139/var(--tw-placeholder-opacity,1))}.placeholder-slate-500::placeholder{--tw-placeholder-opacity:1;color:rgb(100 116 139/var(--tw-placeholder-opacity,1))}.opacity-50{opacity:.5}.shadow{--tw-shadow:0 1px 3px 0 rgba(0,0,0,.1),0 1px 2px -1px rgba(0,0,0,.1);--tw-shadow-colored:0 1px 3px 0 var(--tw-shadow-color),0 1px 2px -1px var(--tw-shadow-color)}.shadow,.shadow-2xl{box-shadow:var(--tw-ring-offset-shadow,0 0 #0000),var(--tw-ring-shadow,0 0 #0000),var(--tw-shadow)}.shadow-2xl{--tw-shadow:0 25px 50px -12px rgba(0,0,0,.25);--tw-shadow-colored:0 25px 50px -12px var(--tw-shadow-color)}.shadow-lg{--tw-shadow:0 10px 15px -3px rgba(0,0,0,.1),0 4px 6px -4px rgba(0,0,0,.1);--tw-shadow-colored:0 10px 15px -3px var(--tw-shadow-color),0 4px 6px -4px var(--tw-shadow-color)}.shadow-lg,.shadow-xl{box-shadow:var(--tw-ring-offset-shadow,0 0 #0000),var(--tw-ring-shadow,0 0 #0000),var(--tw-shadow)}.shadow-xl{--tw-shadow:0 20px 25px -5px rgba(0,0,0,.1),0 8px 10px -6px rgba(0,0,0,.1);--tw-shadow-colored:0 20px 25px -5px var(--tw-shadow-color),0 8px 10px -6px var(--tw-shadow-color)}.shadow-amber-500\/20{--tw-shadow-color:rgba(245,158,11,.2);--tw-shadow:var(--tw-shadow-colored)}.shadow-blue-600\/20{--tw-shadow-color:rgba(37,99,235,.2);--tw-shadow:var(--tw-shadow-colored)}.shadow-rose-600\/20{--tw-shadow-color:rgba(225,29,72,.2);--tw-shadow:var(--tw-shadow-colored)}.drop-shadow{--tw-drop-shadow:drop-shadow(0 1px 2px rgba(0,0,0,.1)) drop-shadow(0 1px 1px rgba(0,0,0,.06))}.drop-shadow,.filter{filter:var(--tw-blur) var(--tw-brightness) var(--tw-contrast) var(--tw-grayscale) var(--tw-hue-rotate) var(--tw-invert) var(--tw-saturate) var(--tw-sepia) var(--tw-drop-shadow)}.backdrop-blur{--tw-backdrop-blur:blur(8px)}.backdrop-blur,.backdrop-blur-sm{-webkit-backdrop-filter:var(--tw-backdrop-blur) var(--tw-backdrop-brightness) var(--tw-backdrop-contrast) var(--tw-backdrop-grayscale) var(--tw-backdrop-hue-rotate) var(--tw-backdrop-invert) var(--tw-backdrop-opacity) var(--tw-backdrop-saturate) var(--tw-backdrop-sepia);backdrop-filter:var(--tw-backdrop-blur) var(--tw-backdrop-brightness) var(--tw-backdrop-contrast) var(--tw-backdrop-grayscale) var(--tw-backdrop-hue-rotate) var(--tw-backdrop-invert) var(--tw-backdrop-opacity) var(--tw-backdrop-saturate) var(--tw-backdrop-sepia)}.backdrop-blur-sm{--tw-backdrop-blur:blur(4px)}.transition{transition-property:color,background-color,border-color,text-decoration-color,fill,stroke,opacity,box-shadow,transform,filter,-webkit-backdrop-filter;transition-property:color,background-color,border-color,text-decoration-color,fill,stroke,opacity,box-shadow,transform,filter,backdrop-filter;transition-property:color,background-color,border-color,text-decoration-color,fill,stroke,opacity,box-shadow,transform,filter,backdrop-filter,-webkit-backdrop-filter;transition-timing-function:cubic-bezier(.4,0,.2,1);transition-duration:.15s}.hover\:bg-amber-400:hover{--tw-bg-opacity:1;background-color:rgb(251 191 36/var(--tw-bg-opacity,1))}.hover\:bg-blue-500:hover{--tw-bg-opacity:1;background-color:rgb(59 130 246/var(--tw-bg-opacity,1))}.hover\:bg-blue-600:hover{--tw-bg-opacity:1;background-color:rgb(37 99 235/var(--tw-bg-opacity,1))}.hover\:bg-emerald-400:hover{--tw-bg-opacity:1;background-color:rgb(52 211 153/var(--tw-bg-opacity,1))}.hover\:bg-rose-500:hover{--tw-bg-opacity:1;background-color:rgb(244 63 94/var(--tw-bg-opacity,1))}.hover\:bg-slate-700:hover{--tw-bg-opacity:1;background-color:rgb(51 65 85/var(--tw-bg-opacity,1))}.hover\:from-rose-400:hover{--tw-gradient-from:#fb7185 var(--tw-gradient-from-position);--tw-gradient-to:rgba(251,113,133,0) var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from),var(--tw-gradient-to)}.hover\:to-amber-400:hover{--tw-gradient-to:#fbbf24 var(--tw-gradient-to-position)}.focus\:border-amber-400:focus{--tw-border-opacity:1;border-color:rgb(251 191 36/var(--tw-border-opacity,1))}.focus\:border-emerald-400:focus{--tw-border-opacity:1;border-color:rgb(52 211 153/var(--tw-border-opacity,1))}.focus\:border-rose-500:focus{--tw-border-opacity:1;border-color:rgb(244 63 94/var(--tw-border-opacity,1))}.focus\:outline-none:focus{outline:2px solid transparent;outline-offset:2px}@media (min-width:640px){.sm\:h-14{height:3.5rem}.sm\:w-11{width:2.75rem}.sm\:grid-cols-4{grid-template-columns:repeat(4,minmax(0,1fr))}.sm\:p-6{padding:1.5rem}.sm\:p-7{padding:1.75rem}.sm\:p-8{padding:2rem}.sm\:px-6{padding-left:1.5rem;padding-right:1.5rem}.sm\:text-2xl{font-size:1.5rem;line-height:2rem}.sm\:text-4xl{font-size:2.25rem;line-height:2.5rem}.sm\:text-5xl{font-size:3rem;line-height:1}.sm\:text-base{font-size:1rem;line-height:1.5rem}.sm\:text-xl{font-size:1.25rem;line-height:1.75rem}}@media (min-width:768px){.md\:col-span-5{grid-column:span 5/span 5}.md\:col-span-7{grid-column:span 7/span 7}.md\:grid-cols-12{grid-template-columns:repeat(12,minmax(0,1fr))}.md\:grid-cols-2{grid-template-columns:repeat(2,minmax(0,1fr))}.md\:grid-cols-3{grid-template-columns:repeat(3,minmax(0,1fr))}}@media (min-width:1024px){.lg\:col-span-12{grid-column:span 12/span 12}.lg\:col-span-5{grid-column:span 5/span 5}.lg\:col-span-7{grid-column:span 7/span 7}.lg\:grid-cols-12{grid-template-columns:repeat(12,minmax(0,1fr))}}
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: #0f172a;
+    color: #f8fafc;
+  }
+  .font-display {
+    font-family: 'Fredoka', sans-serif;
+  }
+  @keyframes popIn {
+    0% { transform: scale(0.75); opacity: 0; }
+    70% { transform: scale(1.05); opacity: 1; }
+    100% { transform: scale(1); opacity: 1; }
+  }
+  .animate-pop {
+    animation: popIn 0.35s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  }
+  .tile-cell {
+    transition: transform 0.25s ease, background-color 0.25s ease;
+  }
+  .tile-revealed {
+    transform: rotateX(0deg);
+  }
+button,input { min-height:44px; }
+button:disabled { opacity:.5; cursor:not-allowed; }
+body { margin:0; }
+#workspaceGrid > * {min-width:0;}
+#tvPuzzleTiles > div {flex-wrap:nowrap;gap:clamp(2px,.4vw,6px);max-width:100%;}
+#tvPuzzleTiles .tile-cell {width:clamp(18px,2.9vw,44px);height:clamp(30px,4vw,56px);font-size:clamp(14px,2vw,24px);flex-shrink:1;}
+#phonePanel {padding:16px;}
+#phonePanel > * + * {margin-top:12px;}
+#phoneWheelBox > div {max-width:min(250px,32vh);}
+#phonePanel input {min-width:0;width:100%;}
+#demoSwitcherBar {flex-wrap:wrap;}
+#demoPlayerTabs {flex-wrap:wrap;}
+@media (min-width:1024px) and (max-height:800px) {
+ #workspaceView {padding:12px;}
+ #tvPanel {padding:16px;}
+ #tvPanel > * + * {margin-top:16px;}
+}
+@media (prefers-reduced-motion:reduce) {.animate-pop {animation:none;} .tile-cell {transition:none;}}
+</style>
+</head>
+<body class="min-h-screen flex flex-col">
+  <!-- Toast Notification -->
+  <div id="toast" class="fixed top-4 right-4 z-50 hidden max-w-sm rounded-xl bg-slate-800 border border-slate-600 px-4 py-3 text-sm font-medium text-white shadow-2xl"></div>
+  <!-- Top Bar -->
+  <header class="border-b border-slate-800 bg-slate-900/90 backdrop-blur px-4 sm:px-6 py-3 flex items-center justify-between gap-3">
+    <div class="flex items-center gap-3">
+      <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-rose-500 via-amber-400 to-blue-500 flex items-center justify-center font-display font-bold text-slate-950 text-lg shadow">P</div>
+      <div>
+        <h1 class="font-display font-bold text-lg sm:text-xl leading-none text-white">Puzzle Telephone</h1>
+        <p id="headerSubtitle" class="text-xs text-slate-400 mt-0.5">PeerJS Phone-Wheel + TV Party Game</p>
+      </div>
+    </div>
+    <div class="flex items-center gap-2">
+      <button id="muteBtn" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-200 border border-slate-700 transition">Sound: ON</button>
+      <button id="homeBtn" class="hidden px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-200 border border-slate-700 transition">Exit Room</button>
+    </div>
+  </header>
+  <!-- VIEW 1: Landing / Mode Selection -->
+  <main id="landingView" class="flex-1 flex items-center justify-center p-4 sm:p-8">
+    <div class="max-w-4xl w-full space-y-8">
+      <div class="text-center space-y-3">
+        <span class="inline-block px-3 py-1 rounded-full bg-rose-500/15 border border-rose-500/30 text-rose-300 text-xs font-semibold">100% Static GitHub Pages + PeerJS</span>
+        <h2 class="font-display font-bold text-3xl sm:text-5xl text-white tracking-tight">Spin on Your Phone. Pop Up on the TV.</h2>
+        <p class="text-slate-300 max-w-2xl mx-auto text-sm sm:text-base">
+          Open <strong>Host TV Screen</strong> on your laptop or TV, scan the QR code with family phones, or launch <strong>Local Demo Mode</strong> to test both screens side-by-side right now.
+        </p>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <!-- Host TV Card -->
+        <div class="rounded-2xl bg-slate-800/70 border border-slate-700 p-6 flex flex-col justify-between space-y-5">
+          <div class="space-y-2">
+            <div class="w-11 h-11 rounded-xl bg-blue-500/20 text-blue-300 flex items-center justify-center font-display font-bold text-xl">TV</div>
+            <h3 class="font-display font-bold text-xl text-white">Host TV Screen</h3>
+            <p class="text-sm text-slate-300">Creates a 4-letter room code & QR code on your shared screen and listens for phone spins via PeerJS.</p>
+          </div>
+          <button id="startHostBtn" class="w-full py-3 rounded-xl bg-blue-600 hover:bg-blue-500 font-semibold text-white transition shadow-lg shadow-blue-600/20">Start TV Host</button>
+        </div>
+        <!-- Join on Phone Card -->
+        <div class="rounded-2xl bg-slate-800/70 border border-slate-700 p-6 flex flex-col justify-between space-y-5">
+          <div class="space-y-3">
+            <div class="w-11 h-11 rounded-xl bg-rose-500/20 text-rose-300 flex items-center justify-center font-display font-bold text-xl">P</div>
+            <h3 class="font-display font-bold text-xl text-white">Join on Phone</h3>
+            <div class="space-y-2.5">
+              <input id="joinNameInput" type="text" maxlength="14" placeholder="Your Name (e.g. Maya)" class="w-full px-3 py-2 rounded-lg bg-slate-900 border border-slate-700 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-rose-500">
+              <input id="joinCodeInput" type="text" maxlength="4" placeholder="Room Code (e.g. ABCD)" class="w-full px-3 py-2 rounded-lg bg-slate-900 border border-slate-700 text-sm uppercase tracking-widest text-white placeholder-slate-500 focus:outline-none focus:border-rose-500">
+              <label class="flex items-center gap-2 text-xs text-slate-300 cursor-pointer select-none">
+                <input id="joinKidMode" type="checkbox" class="rounded border-slate-600 bg-slate-900 text-rose-500">
+                Kid-Friendly Helper (shows 2 extra vowels on phone)
+              </label>
+            </div>
+          </div>
+          <button id="joinPhoneBtn" class="w-full py-3 rounded-xl bg-rose-600 hover:bg-rose-500 font-semibold text-white transition shadow-lg shadow-rose-600/20">Join Game</button>
+        </div>
+        <!-- Local Demo Mode Card -->
+        <div class="rounded-2xl bg-slate-800/70 border border-amber-500/40 p-6 flex flex-col justify-between space-y-5">
+          <div class="space-y-2">
+            <div class="w-11 h-11 rounded-xl bg-amber-500/20 text-amber-300 flex items-center justify-center font-display font-bold text-xl">2X</div>
+            <h3 class="font-display font-bold text-xl text-white">Local Demo Mode</h3>
+            <p class="text-sm text-slate-300">Simulate the TV Host and 3 family phones side-by-side on one screen—no second device needed.</p>
+          </div>
+          <button id="startDemoBtn" class="w-full py-3 rounded-xl bg-amber-500 hover:bg-amber-400 font-semibold text-slate-950 transition shadow-lg shadow-amber-500/20">Launch Demo</button>
+        </div>
+      </div>
+    </div>
+  </main>
+  <!-- VIEW 2: TV Host & Demo Container -->
+  <section id="workspaceView" class="hidden flex-1 p-4 sm:p-6 max-w-7xl w-full mx-auto">
+    <div id="workspaceGrid" class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+      <!-- TV SCREEN PANEL -->
+      <div id="tvPanel" class="lg:col-span-12 rounded-3xl bg-slate-900 border border-slate-800 p-5 sm:p-7 space-y-6 relative overflow-hidden shadow-2xl">
+        <!-- TV Popup Overlay (when phone finishes spinning) -->
+        <div id="tvPopupOverlay" class="hidden fixed inset-0 z-40 flex items-center justify-center bg-slate-950/75 backdrop-blur-sm p-4">
+          <div id="tvPopupCard" class="animate-pop max-w-md w-full rounded-3xl bg-slate-900 border-2 border-amber-400 p-7 text-center space-y-3 shadow-2xl">
+            <p id="tvPopupSpinner" class="text-xs font-bold uppercase tracking-widest text-amber-300"></p>
+            <h3 id="tvPopupTitle" class="font-display font-bold text-3xl sm:text-4xl text-white"></h3>
+            <p id="tvPopupDesc" class="text-sm text-slate-300"></p>
+          </div>
+        </div>
+        <!-- TV Top Info Row -->
+        <div class="flex flex-wrap items-center justify-between gap-4 border-b border-slate-800 pb-4">
+          <div class="flex flex-wrap items-center gap-3">
+            <span id="tvRoomBadge" class="px-3.5 py-1.5 rounded-xl bg-blue-600/20 border border-blue-500/40 text-blue-300 font-display font-bold text-base tracking-wider">ROOM: ----</span>
+            <span id="tvRoundBadge" class="px-3 py-1.5 rounded-xl bg-slate-800 text-slate-200 text-xs font-semibold">Lobby</span>
+            <span id="tvPeerStatus" class="text-xs text-slate-400">Connecting...</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <button id="tvStartRoundBtn" class="px-4 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-semibold text-sm transition">Start Round</button>
+            <button id="tvRevealAnswerBtn" class="hidden px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold border border-slate-700 transition">Skip / Reveal</button>
+          </div>
+        </div>
+        <!-- Lobby QR + Players (shown before round starts) -->
+        <div id="tvLobbyArea" class="grid grid-cols-1 md:grid-cols-12 gap-6 items-center py-4">
+          <div class="md:col-span-5 flex flex-col items-center justify-center bg-slate-950/60 border border-slate-800 rounded-2xl p-5 space-y-3">
+            <div id="qrBox" class="bg-white p-3 rounded-xl"></div>
+            <p class="text-xs text-slate-400 text-center">Scan with phone camera or enter room code <strong id="qrRoomCodeText" class="text-white">----</strong></p>
+          </div>
+          <div class="md:col-span-7 space-y-3">
+            <h3 class="font-display font-bold text-xl text-white">Connected Family Players</h3>
+            <div id="tvLobbyPlayers" class="flex flex-wrap gap-2.5"></div>
+            <p class="text-sm text-slate-400">Need at least 3 players to play a round. When everyone's in, hit <strong>Start Round</strong>.</p>
+          </div>
+        </div>
+        <!-- Active Game Board (hidden in lobby) -->
+        <div id="tvBoardArea" class="hidden space-y-6">
+          <div class="flex flex-wrap items-center justify-between gap-2">
+            <span id="tvCategoryBadge" class="px-3 py-1 rounded-full bg-amber-500/20 border border-amber-500/30 text-amber-300 text-xs font-bold uppercase tracking-wider">Category</span>
+            <span id="tvPhaseBanner" class="text-sm font-semibold text-blue-300">Waiting for spin...</span>
+          </div>
+          <!-- Letter Tile Board -->
+          <div id="tvPuzzleTiles" class="min-h-[120px] rounded-2xl bg-slate-950/80 border border-slate-800 p-4 sm:p-6 flex flex-wrap items-center justify-center gap-x-5 gap-y-4"></div>
+          <!-- Active Wedge & Clue Display -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="rounded-2xl bg-slate-800/50 border border-slate-700/70 p-4">
+              <p class="text-xs font-semibold uppercase tracking-wider text-slate-400">Active Constraint Wedge</p>
+              <p id="tvActiveWedge" class="font-display font-bold text-xl text-amber-300 mt-1">Waiting for phone spin...</p>
+              <p id="tvActiveWedgeRule" class="text-xs text-slate-300 mt-1">Active player flicks the wheel on their phone.</p>
+            </div>
+            <div class="rounded-2xl bg-slate-800/50 border border-slate-700/70 p-4">
+              <p class="text-xs font-semibold uppercase tracking-wider text-slate-400">Clue on the Board</p>
+              <p id="tvClueDisplay" class="font-display font-bold text-2xl text-white mt-1">—</p>
+              <p id="tvClueMeta" class="text-xs text-slate-300 mt-1">Guessers type answers on their phones.</p>
+            </div>
+          </div>
+          <!-- Scoreboard -->
+          <div>
+            <p class="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">Family Scoreboard</p>
+            <div id="tvScoreboard" class="grid grid-cols-2 sm:grid-cols-4 gap-3"></div>
+          </div>
+        </div>
+      </div>
+      <!-- PHONE CONTROLLER PANEL (shown in Phone Mode OR right side of Demo Mode) -->
+      <div id="phonePanel" class="hidden lg:col-span-5 rounded-3xl bg-slate-900 border border-slate-700 p-5 space-y-5 shadow-2xl">
+        <!-- Demo Player Switcher -->
+        <div id="demoSwitcherBar" class="hidden flex items-center justify-between gap-2 pb-3 border-b border-slate-800">
+          <span class="text-xs font-semibold text-amber-300">Viewing Phone:</span>
+          <div id="demoPlayerTabs" class="flex gap-1.5"></div>
+        </div>
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-xs text-slate-400">Player Controller</p>
+            <h3 id="phonePlayerName" class="font-display font-bold text-xl text-white">Player</h3>
+          </div>
+          <div class="text-right">
+            <p class="text-xs text-slate-400">Score</p>
+            <p id="phonePlayerScore" class="font-display font-bold text-xl text-emerald-400">0</p>
+          </div>
+        </div>
+        <div id="phoneStatusBox" class="rounded-xl bg-slate-800/70 border border-slate-700 p-3 text-sm text-slate-200 text-center">
+          Waiting for host to start the round...
+        </div>
+        <!-- Secret Phrase Card (only visible to clue-giver / relay) -->
+        <div id="phoneSecretBox" class="hidden rounded-2xl bg-indigo-950/70 border border-indigo-500/40 p-4 text-center space-y-1">
+          <p id="phoneSecretLabel" class="text-xs font-bold uppercase tracking-wider text-indigo-300">Your Secret Phrase</p>
+          <p id="phoneSecretText" class="font-display font-bold text-2xl text-white tracking-wide"></p>
+        </div>
+        <!-- 60FPS Mobile Canvas Wheel -->
+        <div id="phoneWheelBox" class="hidden flex flex-col items-center space-y-3">
+          <div class="relative w-full max-w-[290px] aspect-square flex items-center justify-center">
+            <div class="absolute -top-2 z-10 w-0 h-0 border-l-[10px] border-l-transparent border-r-[10px] border-r-transparent border-t-[18px] border-t-white drop-shadow"></div>
+            <canvas id="wheelCanvas" width="300" height="300" class="w-full h-full rounded-full shadow-xl cursor-pointer"></canvas>
+          </div>
+          <button id="spinWheelBtn" class="w-full py-3 rounded-xl bg-gradient-to-r from-rose-500 to-amber-500 hover:from-rose-400 hover:to-amber-400 font-display font-bold text-lg text-slate-950 shadow-lg transition">SPIN WHEEL</button>
+        </div>
+        <!-- Clue Input Area (for active clue-giver or relay player) -->
+        <div id="phoneClueBox" class="hidden space-y-3">
+          <p id="phoneCluePrompt" class="text-sm font-semibold text-amber-300"></p>
+          <div id="phoneEmojiPicker" class="hidden flex flex-wrap gap-2 bg-slate-950 p-3 rounded-xl border border-slate-800"></div>
+          <div id="phoneConsonantPicker" class="hidden grid grid-cols-7 gap-1.5 bg-slate-950 p-3 rounded-xl border border-slate-800"></div>
+          <div id="phoneTextClueWrap" class="space-y-2">
+            <input id="phoneClueInput" type="text" placeholder="Type your clue here..." class="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-white text-sm focus:outline-none focus:border-amber-400">
+            <p id="phoneClueValidation" class="text-xs text-rose-400 hidden"></p>
+            <button id="submitClueBtn" class="w-full py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 font-semibold text-slate-950 text-sm transition">Send Clue to TV</button>
+          </div>
+        </div>
+        <!-- Guesser Input Area -->
+        <div id="phoneGuessBox" class="hidden space-y-3">
+          <div id="phoneKidHint" class="hidden rounded-xl bg-emerald-950/60 border border-emerald-500/40 p-2.5 text-xs text-emerald-300 text-center"></div>
+          <p class="text-xs font-semibold uppercase tracking-wider text-slate-400">TV Clue: <span id="phoneMirrorClue" class="text-white normal-case font-bold"></span></p>
+          <input id="phoneGuessInput" type="text" placeholder="Type your guess..." class="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-white text-sm uppercase focus:outline-none focus:border-emerald-400">
+          <button id="submitGuessBtn" class="w-full py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 font-semibold text-slate-950 text-sm transition">Submit Guess</button>
+          <p id="phoneLockoutMsg" class="hidden text-xs text-rose-400 text-center font-semibold"></p>
+        </div>
+      </div>
+    </div>
+  </section>
+<script>
+// ==================== DATA: 12 WEDGES & 30 STARTER PHRASES ====================
+const WEDGES = [
+  { id: 1,  name: "Reveal 3",          cat: "boost", color: "#3b82f6", rule: "TV flips 3 random letters, then you write a 5-word clue." },
+  { id: 2,  name: "3-Word Clue",       cat: "twist", color: "#f59e0b", rule: "Write a clue using at most 3 words." },
+  { id: 3,  name: "Pass & Remix",      cat: "relay", color: "#f43f5e", rule: "Send a 4-word clue to the next player; they rewrite it for the TV!" },
+  { id: 4,  name: "Vowel Flood",       cat: "boost", color: "#2563eb", rule: "TV reveals all vowels (A, E, I, O, U) — everyone races to solve!" },
+  { id: 5,  name: "2 Rhymes",          cat: "twist", color: "#d97706", rule: "Write exactly 2 rhyming words as your clue." },
+  { id: 6,  name: "Whisper Chain",     cat: "relay", color: "#e11d48", rule: "Send 3 emojis to the next player; they translate them into 2 words." },
+  { id: 7,  name: "First & Last",      cat: "boost", color: "#60a5fa", rule: "TV reveals the first & last letter of every word, plus a 4-word clue." },
+  { id: 8,  name: "Emoji Only",        cat: "twist", color: "#fbbf24", rule: "Pick up to 5 emojis to display on the TV." },
+  { id: 9,  name: "Swap & Scramble",   cat: "relay", color: "#fb7185", rule: "TV reveals 4 letters and scrambles your 3-word clue!" },
+  { id: 10, name: "Pick 2 Consonants", cat: "boost", color: "#1d4ed8", rule: "Tap 2 consonants on your phone to flip them on the TV board." },
+  { id: 11, name: "No E's Allowed",    cat: "twist", color: "#b45309", rule: "Write any clue, but the letter 'E' is completely banned!" },
+  { id: 12, name: "Double Pot Pass",   cat: "relay", color: "#be123c", rule: "Points double! Next player takes over clueing this phrase." }
+];
+const PHRASES = [
+  { cat: "Movies & Cartoons", text: "TOY STORY" },
+  { cat: "Movies & Cartoons", text: "FINDING NEMO" },
+  { cat: "Movies & Cartoons", text: "THE LION KING" },
+  { cat: "Movies & Cartoons", text: "SPONGEBOB SQUAREPANTS" },
+  { cat: "Movies & Cartoons", text: "JURASSIC PARK" },
+  { cat: "Movies & Cartoons", text: "FROZEN SNOWMAN" },
+  { cat: "Food & Kitchen", text: "PEANUT BUTTER JELLY" },
+  { cat: "Food & Kitchen", text: "PEPPERONI PIZZA" },
+  { cat: "Food & Kitchen", text: "CHOCOLATE CHIP COOKIE" },
+  { cat: "Food & Kitchen", text: "MACARONI AND CHEESE" },
+  { cat: "Food & Kitchen", text: "SPAGHETTI AND MEATBALLS" },
+  { cat: "Food & Kitchen", text: "ICE CREAM SUNDAE" },
+  { cat: "Animal Antics", text: "SLEEPY SLOTH" },
+  { cat: "Animal Antics", text: "DANCING PENGUIN" },
+  { cat: "Animal Antics", text: "FLYING SQUIRREL" },
+  { cat: "Animal Antics", text: "SNEAKY RACCOON" },
+  { cat: "Animal Antics", text: "BARKING PUPPY" },
+  { cat: "Animal Antics", text: "GIANT PANDA" },
+  { cat: "Everyday Chaos", text: "MISSING LEFT SOCK" },
+  { cat: "Everyday Chaos", text: "STEPPING ON LEGO" },
+  { cat: "Everyday Chaos", text: "DEAD PHONE BATTERY" },
+  { cat: "Everyday Chaos", text: "FORGOT MY KEYS" },
+  { cat: "Everyday Chaos", text: "BRAIN FREEZE" },
+  { cat: "Everyday Chaos", text: "BEDTIME STORY" },
+  { cat: "Compound Mashups", text: "TREEHOUSE FORT" },
+  { cat: "Compound Mashups", text: "RAINBOW UMBRELLA" },
+  { cat: "Compound Mashups", text: "MOONLIGHT CAMPFIRE" },
+  { cat: "Compound Mashups", text: "ROLLERCOASTER RIDE" },
+  { cat: "Compound Mashups", text: "SNOWBALL FIGHT" },
+  { cat: "Compound Mashups", text: "BIRTHDAY SURPRISE" }
+];
+const EMOJIS = ["🍕","🧀","🔥","🐶","🐱","🦁","🐧","🦥","🚀","🎉","❄️","🌈","🧦","🧱","🔋","🔑","🍦","🍪","🎬","⛺","🎢","🎂","👻","⚡"];
+const CONSONANTS = "BCDFGHJKLMNPQRSTVWXYZ".split("");
+// ==================== SOUND SYNTH (WEB AUDIO API) ====================
+let audioCtx = null;
+let isMuted = false;
+function ensureAudio() {
+  if (isMuted) return null;
+  if (!audioCtx) {
+    const Ctx = window.AudioContext || window.webkitAudioContext;
+    if (Ctx) audioCtx = new Ctx();
+  }
+  if (audioCtx && audioCtx.state === "suspended") audioCtx.resume();
+  return audioCtx;
+}
+function playTone(freq, dur, type = "sine", vol = 0.12) {
+  const ctx = ensureAudio();
+  if (!ctx) return;
+  const osc = ctx.createOscillator();
+  const gain = ctx.createGain();
+  osc.type = type;
+  osc.frequency.setValueAtTime(freq, ctx.currentTime);
+  gain.gain.setValueAtTime(vol, ctx.currentTime);
+  gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + dur);
+  osc.connect(gain);
+  gain.connect(ctx.destination);
+  osc.start();
+  osc.stop(ctx.currentTime + dur);
+}
+function playWinFanfare() {
+  [523.25, 659.25, 783.99, 1046.5].forEach((f, i) => {
+    setTimeout(() => playTone(f, 0.22, "triangle", 0.14), i * 90);
+  });
+}
+// ==================== APP STATE ====================
+const app = {
+  mode: null, // 'host' | 'phone' | 'demo'
+  roomCode: "",
+  peer: null,
+  conns: {}, // host: peerId -> DataConnection
+  hostConn: null, // phone: DataConnection to host
+  myId: null,
+  myName: "",
+  myKidMode: false,
+  demoActiveId: "p1",
+  lockoutUntil: 0,
+  lockoutTimer: null,
+  // Authoritative Game State (lives on Host or Demo)
+  game: {
+    round: 0,
+    maxRounds: 5,
+    phase: "lobby", // 'lobby' | 'spin' | 'clue' | 'relay' | 'guess' | 'round_end'
+    players: [], // { id, name, score, kidMode }
+    phraseObj: null,
+    revealedIndices: [],
+    activeIdx: 0,
+    relayIdx: null,
+    wedge: null,
+    clue: "",
+    hopCount: 0,
+    pointsMultiplier: 1,
+    winnerName: null,
+    usedIndices: []
+  },
+  // Phone's local mirror of game state
+  phoneState: null,
+  // Wheel animation
+  wheelAngle: 0,
+  wheelSpinning: false,
+  wheelAnimId: null,
+  selectedEmojis: [],
+  selectedConsonants: []
+};
+// ==================== HELPERS ====================
+function $(id) { return document.getElementById(id); }
+function showToast(msg, ms = 3200) {
+  const t = $("toast");
+  t.textContent = msg;
+  t.classList.remove("hidden");
+  clearTimeout(t._timer);
+  t._timer = setTimeout(() => t.classList.add("hidden"), ms);
+}
+function makeRoomCode() {
+  const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ";
+  let out = "";
+  for (let i = 0; i < 4; i++) out += chars[Math.floor(Math.random() * chars.length)];
+  return out;
+}
+function normalizeText(s) {
+  return (s || "").toUpperCase().replace(/[^A-Z0-9 ]/g, "").replace(/\s+/g, " ").trim();
+}
+function safeSaveLocal(key, val) {
+  try { localStorage.setItem(key, JSON.stringify(val)); } catch (e) {}
+}
+function safeLoadLocal(key) {
+  try {
+    const raw = localStorage.getItem(key);
+    return raw ? JSON.parse(raw) : null;
+  } catch (e) { return null; }
+}
+// ==================== INITIALIZATION ====================
+window.addEventListener("load", () => {
+  drawWheel(0);
+  buildEmojiPicker();
+  buildConsonantPicker();
+  const params = new URLSearchParams(window.location.search);
+  const urlRoom = params.get("room");
+  if (urlRoom) {
+    $("joinCodeInput").value = urlRoom.toUpperCase().slice(0, 4);
+  }
+  const saved = safeLoadLocal("ptel_player");
+  if (saved) {
+    if (saved.name) $("joinNameInput").value = saved.name;
+    if (!urlRoom && saved.code) $("joinCodeInput").value = saved.code;
+    $("joinKidMode").checked = !!saved.kidMode;
+  }
+  $("muteBtn").addEventListener("click", () => {
+    isMuted = !isMuted;
+    $("muteBtn").textContent = isMuted ? "Sound: OFF" : "Sound: ON";
+  });
+  $("homeBtn").addEventListener("click", () => {
+    cleanupPeers();
+    $("workspaceView").classList.add("hidden");
+    $("landingView").classList.remove("hidden");
+    $("homeBtn").classList.add("hidden");
+    $("headerSubtitle").textContent = "PeerJS Phone-Wheel + TV Party Game";
+  });
+  $("startHostBtn").addEventListener("click", startHostMode);
+  $("joinPhoneBtn").addEventListener("click", startPhoneMode);
+  $("startDemoBtn").addEventListener("click", startDemoMode);
+  $("tvStartRoundBtn").addEventListener("click", hostStartRound);
+  $("tvRevealAnswerBtn").addEventListener("click", hostRevealAndEndRound);
+  $("spinWheelBtn").addEventListener("click", triggerWheelSpin);
+  $("wheelCanvas").addEventListener("click", triggerWheelSpin);
+  $("submitClueBtn").addEventListener("click", submitPhoneClue);
+  $("submitGuessBtn").addEventListener("click", submitPhoneGuess);
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "visible" && app.mode === "phone" && (!app.hostConn || !app.hostConn.open)) {
+      if (app.roomCode && app.myName) {
+        showToast("Reconnecting to TV room...");
+        connectPhoneToHost(app.roomCode);
+      }
+    }
+  });
+});
+function cleanupPeers() {
+  if (app.wheelAnimId) cancelAnimationFrame(app.wheelAnimId);
+  if (app.peer) {
+    try { app.peer.destroy(); } catch (e) {}
+    app.peer = null;
+  }
+  app.conns = {};
+  app.hostConn = null;
+  app.mode = null;
+  app.wheelSpinning = false;
+  clearInterval(app.lockoutTimer);
+  clearTimeout(app.reconnectTimer);
+  $("spinWheelBtn").disabled = false;
+  $("tvPopupOverlay").classList.add("hidden");
+}
+// ==================== MODE 1: HOST TV (PEERJS) ====================
+function startHostMode() {
+  cleanupPeers();
+  ensureAudio();
+  app.mode = "host";
+  app.roomCode = makeRoomCode();
+  app.game = {
+    round: 0, maxRounds: 5, phase: "lobby",
+    players: [], phraseObj: null, revealedIndices: [],
+    activeIdx: 0, relayIdx: null, wedge: null, clue: "",
+    hopCount: 0, pointsMultiplier: 1, winnerName: null, usedIndices: []
+  };
+  $("landingView").classList.add("hidden");
+  $("workspaceView").classList.remove("hidden");
+  $("homeBtn").classList.remove("hidden");
+  $("tvPanel").classList.remove("hidden", "lg:col-span-7");
+  $("tvPanel").classList.add("lg:col-span-12");
+  $("phonePanel").classList.add("hidden");
+  $("demoSwitcherBar").classList.add("hidden");
+  $("tvRoomBadge").textContent = "ROOM: " + app.roomCode;
+  $("qrRoomCodeText").textContent = app.roomCode;
+  $("tvPeerStatus").textContent = "Connecting to PeerJS...";
+  renderQR(app.roomCode);
+  renderTV();
+  if (typeof Peer === "undefined") {
+    $("tvPeerStatus").textContent = "PeerJS library offline — try Demo Mode";
+    showToast("PeerJS CDN unavailable. Use Demo Mode to preview locally.");
+    return;
+  }
+  try {
+    app.peer = new Peer("PTEL-" + app.roomCode);
+    app.peer.on("open", () => {
+      $("tvPeerStatus").textContent = "Ready for phones";
+    });
+    app.peer.on("connection", (conn) => {
+      conn.on("data", (msg) => handleHostMessage(conn, msg));
+      conn.on("close", () => {
+        if (app.conns[conn.peer] === conn) delete app.conns[conn.peer];
+      });
+    });
+    app.peer.on("error", (err) => {
+      $("tvPeerStatus").textContent = "Peer error: " + (err.type || "network");
+      showToast("PeerJS error: " + (err.type || "connection issue"));
+    });
+  } catch (e) {
+    $("tvPeerStatus").textContent = "Could not initialize PeerJS";
+  }
+}
+function renderQR(code) {
+  const box = $("qrBox");
+  box.innerHTML = "";
+  const url = window.location.origin + window.location.pathname + "?room=" + code;
+  if (typeof QRCode !== "undefined") {
+    new QRCode(box, { text: url, width: 150, height: 150, colorDark: "#0f172a", colorLight: "#ffffff" });
+  } else {
+    box.textContent = url;
+  }
+}
+// ==================== MODE 2: PHONE JOIN (PEERJS) ====================
+function startPhoneMode() {
+  ensureAudio();
+  const name = $("joinNameInput").value.trim();
+  const code = $("joinCodeInput").value.trim().toUpperCase();
+  const kidMode = $("joinKidMode").checked;
+  if (!name || !/^[A-Z]{4}$/.test(code)) {
+    showToast("Enter your name and a 4-letter room code.");
+    return;
+  }
+  app.mode = "phone";
+  app.myName = name;
+  app.myKidMode = kidMode;
+  app.roomCode = code;
+  safeSaveLocal("ptel_player", { name, code, kidMode });
+  $("landingView").classList.add("hidden");
+  $("workspaceView").classList.remove("hidden");
+  $("homeBtn").classList.remove("hidden");
+  $("tvPanel").classList.add("hidden");
+  $("phonePanel").classList.remove("hidden");
+  $("phonePanel").classList.remove("lg:col-span-5");
+  $("phonePanel").classList.add("lg:col-span-12", "max-w-md", "mx-auto", "w-full");
+  $("demoSwitcherBar").classList.add("hidden");
+  $("headerSubtitle").textContent = "Room " + code + " · Mobile Wheel Controller";
+  if (typeof Peer === "undefined") {
+    showToast("PeerJS CDN unavailable. Use Demo Mode to preview locally.");
+    return;
+  }
+  connectPhoneToHost(code);
+}
+function connectPhoneToHost(code) {
+  if (app.peer) {
+    try { app.peer.destroy(); } catch (e) {}
+  }
+  app.peer = new Peer();
+  app.peer.on("open", (id) => {
+    app.myId = id;
+    const conn = app.peer.connect("PTEL-" + code, { reliable: true });
+    app.hostConn = conn;
+    conn.on("open", () => {
+      conn.send({ type: "JOIN", token: playerToken(), id, name: app.myName, kidMode: app.myKidMode });
+      showToast("Connected to TV Room " + code + "!");
+    });
+    conn.on("data", (msg) => {
+      if (msg.type === "ERROR") showToast(msg.message);
+      if (msg.type === "STATE") {
+        app.phoneState = msg.state;
+        renderPhone();
+      }
+    });
+    conn.on("close", () => {
+      showToast("Disconnected. Reconnecting to TV…");
+      clearTimeout(app.reconnectTimer);
+      if (app.mode === "phone") app.reconnectTimer = setTimeout(() => { if (app.mode === "phone") connectPhoneToHost(app.roomCode); }, 2500);
+    });
+  });
+  app.peer.on("error", () => showToast("Could not find room " + code + ". Check the TV screen."));
+}
+// ==================== MODE 3: LOCAL DEMO MODE ====================
+function startDemoMode() {
+  cleanupPeers();
+  ensureAudio();
+  app.mode = "demo";
+  app.roomCode = "DEMO";
+  app.demoActiveId = "p1";
+  app.myId = "p1";
+  app.game = {
+    round: 0, maxRounds: 5, phase: "lobby",
+    players: [
+      { id: "p1", name: "Maya", score: 0, kidMode: false },
+      { id: "p2", name: "Leo", score: 0, kidMode: true },
+      { id: "p3", name: "Grandma", score: 0, kidMode: false }
+    ],
+    phraseObj: null, revealedIndices: [],
+    activeIdx: 0, relayIdx: null, wedge: null, clue: "",
+    hopCount: 0, pointsMultiplier: 1, winnerName: null, usedIndices: []
+  };
+  $("landingView").classList.add("hidden");
+  $("workspaceView").classList.remove("hidden");
+  $("homeBtn").classList.remove("hidden");
+  $("tvPanel").classList.remove("hidden", "lg:col-span-12");
+  $("tvPanel").classList.add("lg:col-span-7");
+  $("phonePanel").classList.remove("hidden", "lg:col-span-12", "max-w-md", "mx-auto");
+  $("phonePanel").classList.add("lg:col-span-5");
+  $("demoSwitcherBar").classList.remove("hidden");
+  $("tvRoomBadge").textContent = "ROOM: DEMO";
+  $("qrRoomCodeText").textContent = "DEMO";
+  $("tvPeerStatus").textContent = "Local Simulator (3 Phones)";
+  renderQR("DEMO");
+  renderDemoTabs();
+  syncDemoPhone();
+  renderTV();
+}
+function renderDemoTabs() {
+  const wrap = $("demoPlayerTabs");
+  wrap.innerHTML = "";
+  app.game.players.forEach((p) => {
+    const btn = document.createElement("button");
+    const active = p.id === app.demoActiveId;
+    btn.className = "px-2.5 py-1 rounded-lg text-xs font-semibold transition " +
+      (active ? "bg-amber-500 text-slate-950" : "bg-slate-800 text-slate-300 hover:bg-slate-700");
+    btn.textContent = p.name;
+    btn.addEventListener("click", () => {
+      app.demoActiveId = p.id;
+      app.myId = p.id;
+      renderDemoTabs();
+      syncDemoPhone();
+    });
+    wrap.appendChild(btn);
+  });
+}
+function syncDemoPhone() {
+  app.phoneState = buildSanitizedStateFor(app.demoActiveId);
+  renderPhone();
+}
+// ==================== HOST GAME LOGIC ====================
+function handleHostMessage(conn, msg) {
+  if (!msg || typeof msg !== "object") return;
+  if (conn) {
+    msg = { ...msg, id: conn.peer };
+    if (msg.type !== "JOIN" && app.conns[conn.peer] !== conn) return;
+  }
+  if (msg.type === "JOIN") {
+    if (typeof msg.name !== "string" || !msg.name.trim()) return;
+    msg.name = msg.name.trim().slice(0,14);
+    const returning = app.game.players.find(p => p.token && p.token === msg.token);
+    if (!returning && (app.game.phase !== "lobby" || app.game.players.length >= 10)) {
+      conn?.send({type:"ERROR", message:"Room is full or the game has already started."}); return;
+    }
+    app.conns[msg.id] = conn;
+    const existing = returning;
+    if (existing) {
+      if (app.game.answerSeenIds) app.game.answerSeenIds = app.game.answerSeenIds.map(id => id === existing.id ? msg.id : id);
+      delete app.conns[existing.id];
+      app.conns[msg.id] = conn;
+      existing.id = msg.id;
+      existing.kidMode = !!msg.kidMode;
+    } else {
+      app.game.players.push({ id: msg.id, name: msg.name, score: 0, token: msg.token, kidMode: !!msg.kidMode });
+    }
+    playTone(587.33, 0.12, "sine", 0.08);
+    broadcastHostState();
+    return;
+  }
+  const g = app.game;
+  const activePlayer = g.players[g.activeIdx];
+  const relayPlayer = g.relayIdx !== null ? g.players[g.relayIdx] : null;
+  if (msg.type === "SPIN_RESULT" && g.phase === "spin" && activePlayer && msg.id === activePlayer.id) {
+    const wedge = WEDGES.find((w) => w.id === msg.wedgeId);
+    if (!wedge) return;
+    applyWedgeToHost(wedge);
+  } else if (msg.type === "SUBMIT_CLUE") {
+    if (g.phase === "clue" && activePlayer && msg.id === activePlayer.id) {
+      if (!validHostClue(msg, false)) return;
+      applyClueFromHost(msg);
+    } else if (g.phase === "relay" && relayPlayer && msg.id === relayPlayer.id) {
+      if (!validHostClue(msg, true)) return;
+      g.clue = msg.clue;
+      g.hopCount = 2;
+      g.phase = "guess";
+      playTone(659.25, 0.14, "triangle", 0.1);
+      broadcastHostState();
+    }
+  } else if (msg.type === "SUBMIT_GUESS" && g.phase === "guess") {
+    handleGuessOnHost(msg.id, msg.guess);
+  }
+}
+function sendToHost(msg) {
+  msg.id = app.myId;
+  if (app.mode === "demo") {
+    handleHostMessage(null, msg);
+  } else if (app.hostConn && app.hostConn.open) {
+    app.hostConn.send(msg);
+  } else {
+    showToast("Not connected to TV yet.");
+  }
+}
+function hostStartRound() {
+  const g = app.game;
+  if (!["lobby", "round_end"].includes(g.phase)) return;
+  if (g.players.length < 3) {
+    showToast("Need at least 3 players to start!");
+    return;
+  }
+  if (g.round >= g.maxRounds) {
+    g.round = 0;
+    g.players.forEach((p) => (p.score = 0));
+    g.usedIndices = [];
+  }
+  g.players.forEach(p => p.lockoutUntil = 0);
+  g.answerSeenIds = [];
+  g.round += 1;
+  g.phase = "spin";
+  g.activeIdx = (g.round - 1) % g.players.length;
+  g.relayIdx = null;
+  g.wedge = null;
+  g.clue = "";
+  g.hopCount = 0;
+  g.pointsMultiplier = 1;
+  g.winnerName = null;
+  g.revealedIndices = [];
+  let pool = PHRASES.map((_, i) => i).filter((i) => !g.usedIndices.includes(i));
+  if (pool.length === 0) {
+    g.usedIndices = [];
+    pool = PHRASES.map((_, i) => i);
+  }
+  const pick = pool[Math.floor(Math.random() * pool.length)];
+  g.usedIndices.push(pick);
+  g.phraseObj = PHRASES[pick];
+  if (app.mode === "demo") {
+    app.demoActiveId = g.players[g.activeIdx].id;
+    app.myId = app.demoActiveId;
+    renderDemoTabs();
+  }
+  playTone(523.25, 0.15, "triangle", 0.1);
+  broadcastHostState();
+}
+function applyWedgeToHost(wedge) {
+  const g = app.game;
+  g.wedge = wedge;
+  const spinnerName = g.players[g.activeIdx].name;
+  showTVPopup(spinnerName + " spun...", wedge.name, wedge.rule);
+  playTone(784, 0.18, "triangle", 0.12);
+  const chars = g.phraseObj.text.split("");
+  if (wedge.id === 1) {
+    revealRandomLetters(3);
+    g.phase = "clue";
+  } else if (wedge.id === 4) {
+    chars.forEach((c, i) => { if ("AEIOU".includes(c) && !g.revealedIndices.includes(i)) g.revealedIndices.push(i); });
+    g.clue = "(Vowel Flood — Race to Solve!)";
+    g.phase = "guess";
+  } else if (wedge.id === 7) {
+    revealFirstAndLast();
+    g.phase = "clue";
+  } else if (wedge.id === 12) {
+    g.answerSeenIds = [g.players[g.activeIdx].id];
+    g.pointsMultiplier = 2;
+    g.activeIdx = (g.activeIdx + 1) % g.players.length;
+    g.phase = "clue";
+  } else {
+    g.phase = "clue";
+  }
+  broadcastHostState();
+}
+function revealRandomLetters(count) {
+  const g = app.game;
+  const hidden = [];
+  g.phraseObj.text.split("").forEach((c, i) => {
+    if (c !== " " && !g.revealedIndices.includes(i)) hidden.push(i);
+  });
+  for (let k = 0; k < count && hidden.length > 0; k++) {
+    const r = Math.floor(Math.random() * hidden.length);
+    g.revealedIndices.push(hidden.splice(r, 1)[0]);
+  }
+}
+function revealFirstAndLast() {
+  const g = app.game;
+  const text = g.phraseObj.text;
+  text.split("").forEach((c, i) => {
+    if (c === " ") return;
+    const isFirst = i === 0 || text[i - 1] === " ";
+    const isLast = i === text.length - 1 || text[i + 1] === " ";
+    if ((isFirst || isLast) && !g.revealedIndices.includes(i)) g.revealedIndices.push(i);
+  });
+}
+function applyClueFromHost(msg) {
+  const g = app.game;
+  const wId = g.wedge.id;
+  if (wId === 10 && Array.isArray(msg.consonants)) {
+    g.phraseObj.text.split("").forEach((c, i) => {
+      if (msg.consonants.includes(c) && !g.revealedIndices.includes(i)) g.revealedIndices.push(i);
+    });
+    g.clue = "Revealed: " + msg.consonants.join(" & ");
+    g.phase = "guess";
+  } else if (wId === 3 || wId === 6) {
+    g.clue = msg.clue;
+    g.hopCount = 1;
+    g.relayIdx = (g.activeIdx + 1) % g.players.length;
+    g.phase = "relay";
+    if (app.mode === "demo") {
+      app.demoActiveId = g.players[g.relayIdx].id;
+      app.myId = app.demoActiveId;
+      renderDemoTabs();
+    }
+  } else if (wId === 9) {
+    revealRandomLetters(4);
+    const words = (msg.clue || "").trim().split(/\s+/);
+    g.clue = words.sort(() => Math.random() - 0.5).join(" ");
+    g.phase = "guess";
+  } else {
+    g.clue = msg.clue;
+    g.phase = "guess";
+  }
+  playTone(659.25, 0.14, "sine", 0.1);
+  broadcastHostState();
+}
+function handleGuessOnHost(playerId, guess) {
+  const g = app.game;
+  const player = g.players.find((p) => p.id === playerId);
+  if (!player || g.phase !== "guess" || typeof guess !== "string" || guess.length > 160) return;
+  if (playerId === g.players[g.activeIdx].id || (g.answerSeenIds || []).includes(playerId) || (g.relayIdx !== null && playerId === g.players[g.relayIdx].id)) return;
+  if (Date.now() < (player.lockoutUntil || 0)) return;
+  if (normalizeText(guess) === normalizeText(g.phraseObj.text)) {
+    const mult = g.pointsMultiplier || 1;
+    player.score += 300 * mult;
+    const clueGiver = g.players[g.activeIdx];
+    if (clueGiver) clueGiver.score += 200 * mult;
+    if (g.relayIdx !== null && g.players[g.relayIdx]) {
+      g.players[g.relayIdx].score += 150 * mult;
+      clueGiver.score += 150 * mult;
+    }
+    g.winnerName = player.name;
+    hostRevealAndEndRound();
+  } else {
+    player.lockoutUntil = Date.now() + 5000;
+    if (app.mode === "demo") { syncDemoPhone(); }
+    playTone(196, 0.2, "sawtooth", 0.08);
+    if (app.mode === "demo") {
+      showToast(player.name + " guessed wrong! (5s cooldown)");
+    } else if (app.conns[playerId]) {
+      app.conns[playerId].send({ type: "STATE", state: { ...buildSanitizedStateFor(playerId), wrongGuessAt: Date.now() } });
+    }
+  }
+}
+function hostRevealAndEndRound() {
+  const g = app.game;
+  if (!g.phraseObj) return;
+  g.revealedIndices = g.phraseObj.text.split("").map((_, i) => i);
+  g.phase = "round_end";
+  playWinFanfare();
+  if (typeof confetti === "function") {
+    confetti({ particleCount: 90, spread: 70, origin: { y: 0.6 } });
+  }
+  broadcastHostState();
+}
+function buildSanitizedStateFor(playerId) {
+  const g = app.game;
+  const activePlayer = g.players[g.activeIdx];
+  const relayPlayer = g.relayIdx !== null ? g.players[g.relayIdx] : null;
+  const me = g.players.find((p) => p.id === playerId);
+  const canSeeAnswer = (activePlayer && activePlayer.id === playerId) || g.phase === "round_end";
+  let kidHint = null;
+  if (me && me.kidMode && g.phraseObj && g.phase === "guess") {
+    const vowels = g.phraseObj.text.split("").filter((c) => "AEIOU".includes(c));
+    kidHint = [...new Set(vowels)].slice(0, 2);
+  }
+  return {
+    round: g.round,
+    maxRounds: g.maxRounds,
+    answerSeenIds: g.answerSeenIds || [],
+    phase: g.phase,
+    players: g.players.map(({id,name,score,kidMode}) => ({id,name,score,kidMode})),
+    activeId: activePlayer ? activePlayer.id : null,
+    activeName: activePlayer ? activePlayer.name : "",
+    relayId: relayPlayer ? relayPlayer.id : null,
+    relayName: relayPlayer ? relayPlayer.name : "",
+    wedge: g.wedge,
+    clue: (g.phase === "relay" && relayPlayer && relayPlayer.id !== playerId) ? "" : g.clue,
+    secretPhrase: canSeeAnswer && g.phraseObj ? g.phraseObj.text : null,
+    category: g.phraseObj ? g.phraseObj.cat : "",
+    winnerName: g.winnerName,
+    lockoutUntil: me ? (me.lockoutUntil || 0) : 0,
+    kidHint
+  };
+}
+function broadcastHostState() {
+  renderTV();
+  if (app.mode === "demo") {
+    syncDemoPhone();
+  } else {
+    Object.keys(app.conns).forEach((pid) => {
+      const conn = app.conns[pid];
+      if (conn && conn.open) {
+        conn.send({ type: "STATE", state: buildSanitizedStateFor(pid) });
+      }
+    });
+  }
+}
+// ==================== TV RENDERING ====================
+function showTVPopup(spinner, title, desc) {
+  $("tvPopupSpinner").textContent = spinner;
+  $("tvPopupTitle").textContent = title;
+  $("tvPopupDesc").textContent = desc;
+  $("tvPopupOverlay").classList.remove("hidden");
+  clearTimeout(showTVPopup._t);
+  showTVPopup._t = setTimeout(() => {
+    $("tvPopupOverlay").classList.add("hidden");
+  }, 3400);
+}
+function renderTV() {
+  const g = app.game;
+  $("tvRoundBadge").textContent = g.round > 0 ? ("Round " + g.round + " / " + g.maxRounds) : "Lobby";
+  if (g.phase === "lobby") {
+    $("tvLobbyArea").classList.remove("hidden");
+    $("tvBoardArea").classList.add("hidden");
+    $("tvStartRoundBtn").classList.remove("hidden");
+    $("tvStartRoundBtn").textContent = "Start Round 1";
+    $("tvRevealAnswerBtn").classList.add("hidden");
+    const list = $("tvLobbyPlayers");
+    list.innerHTML = "";
+    g.players.forEach((p) => {
+      const pill = document.createElement("span");
+      pill.className = "px-3.5 py-2 rounded-xl bg-slate-800 border border-slate-700 text-sm font-semibold text-white";
+      pill.textContent = p.name + (p.kidMode ? " (Helper)" : "");
+      list.appendChild(pill);
+    });
+    return;
+  }
+  $("tvLobbyArea").classList.add("hidden");
+  $("tvBoardArea").classList.remove("hidden");
+  $("tvCategoryBadge").textContent = g.phraseObj ? g.phraseObj.cat : "";
+  const activeName = g.players[g.activeIdx] ? g.players[g.activeIdx].name : "";
+  const relayName = g.relayIdx !== null && g.players[g.relayIdx] ? g.players[g.relayIdx].name : "";
+  if (g.phase === "spin") {
+    $("tvPhaseBanner").textContent = activeName + "'s turn to spin on their phone!";
+    $("tvStartRoundBtn").classList.add("hidden");
+    $("tvRevealAnswerBtn").classList.remove("hidden");
+  } else if (g.phase === "clue") {
+    $("tvPhaseBanner").textContent = activeName + " is crafting a clue...";
+  } else if (g.phase === "relay") {
+    $("tvPhaseBanner").textContent = "Telephone Relay! " + relayName + " is remixing " + activeName + "'s clue...";
+  } else if (g.phase === "guess") {
+    $("tvPhaseBanner").textContent = "Everyone: type your guess on your phone!";
+  } else if (g.phase === "round_end") {
+    $("tvPhaseBanner").textContent = g.winnerName ? (g.winnerName + " solved it!") : "Round Complete!";
+    $("tvStartRoundBtn").classList.remove("hidden");
+    $("tvStartRoundBtn").textContent = g.round >= g.maxRounds ? "New 5-Round Game" : "Next Round";
+    $("tvRevealAnswerBtn").classList.add("hidden");
+  }
+  // Render Puzzle Tiles word by word
+  const board = $("tvPuzzleTiles");
+  board.innerHTML = "";
+  if (g.phraseObj) {
+    const words = g.phraseObj.text.split(" ");
+    let globalIdx = 0;
+    words.forEach((word) => {
+      const wordWrap = document.createElement("div");
+      wordWrap.className = "flex gap-1.5 flex-wrap justify-center";
+      for (let c = 0; c < word.length; c++) {
+        const revealed = g.revealedIndices.includes(globalIdx);
+        const tile = document.createElement("div");
+        tile.className = "tile-cell w-9 h-11 sm:w-11 sm:h-14 rounded-lg flex items-center justify-center font-display font-bold text-xl sm:text-2xl border " +
+          (revealed ? "bg-white text-slate-950 border-white shadow" : "bg-emerald-900/60 text-transparent border-emerald-500/40");
+        tile.textContent = revealed ? word[c] : "_";
+        wordWrap.appendChild(tile);
+        globalIdx++;
+      }
+      globalIdx++; // space
+      board.appendChild(wordWrap);
+    });
+  }
+  $("tvActiveWedge").textContent = g.wedge ? g.wedge.name : "Waiting for phone spin...";
+  $("tvActiveWedgeRule").textContent = g.wedge ? g.wedge.rule : "Active player flicks the wheel on their phone.";
+  $("tvClueDisplay").textContent = g.phase === "relay" ? "🔒 Secretly passing clue..." : (g.clue || "—");
+  // Scoreboard
+  const sb = $("tvScoreboard");
+  sb.innerHTML = "";
+  g.players.forEach((p, idx) => {
+    const isAct = idx === g.activeIdx && g.phase !== "round_end";
+    const card = document.createElement("div");
+    card.className = "rounded-xl p-3 border " + (isAct ? "bg-blue-950/60 border-blue-500" : "bg-slate-800/50 border-slate-700");
+    const label = document.createElement("div");
+    label.className = "text-xs text-slate-400 truncate";
+    label.textContent = p.name;
+    const points = document.createElement("div");
+    points.className = "font-display font-bold text-xl text-white";
+    points.textContent = p.score;
+    card.append(label, points);
+    sb.appendChild(card);
+  });
+}
+// ==================== PHONE RENDERING & WHEEL ====================
+function renderPhone() {
+  const s = app.phoneState;
+  if (!s) return;
+  app.lockoutUntil = s.lockoutUntil || 0;
+  $("submitGuessBtn").disabled = Date.now() < app.lockoutUntil;
+  if (Date.now() < app.lockoutUntil) startGuessLockout(app.lockoutUntil);
+  const me = s.players.find((p) => p.id === app.myId);
+  $("phonePlayerName").textContent = me ? me.name : app.myName;
+  $("phonePlayerScore").textContent = me ? me.score : 0;
+  const isActive = s.activeId === app.myId;
+  const isRelay = s.relayId === app.myId;
+  // Hide all sub-boxes first
+  $("phoneSecretBox").classList.add("hidden");
+  $("phoneWheelBox").classList.add("hidden");
+  $("phoneClueBox").classList.add("hidden");
+  $("phoneGuessBox").classList.add("hidden");
+  if (s.secretPhrase) {
+    $("phoneSecretBox").classList.remove("hidden");
+    $("phoneSecretLabel").textContent = s.phase === "round_end" ? "Answer" : "Your Secret Phrase (" + s.category + ")";
+    $("phoneSecretText").textContent = s.secretPhrase;
+  }
+  if (s.phase === "lobby") {
+    $("phoneStatusBox").textContent = "You're in! Watch the TV to start Round 1.";
+  } else if (s.phase === "spin") {
+    if (isActive) {
+      $("phoneStatusBox").textContent = "Your turn! Spin the wheel below.";
+      $("phoneWheelBox").classList.remove("hidden");
+      drawWheel(app.wheelAngle);
+    } else {
+      $("phoneStatusBox").textContent = s.activeName + " is spinning the wheel...";
+    }
+  } else if (s.phase === "clue") {
+    if (isActive) {
+      $("phoneStatusBox").textContent = "Landed on: " + s.wedge.name;
+      setupClueUI(s.wedge, false, "");
+    } else {
+      $("phoneStatusBox").textContent = s.activeName + " landed on " + s.wedge.name + " and is writing a clue...";
+    }
+  } else if (s.phase === "relay") {
+    if (isRelay) {
+      $("phoneStatusBox").textContent = "Telephone Relay! Remix " + s.activeName + "'s clue.";
+      setupClueUI(s.wedge, true, s.clue);
+    } else {
+      $("phoneStatusBox").textContent = s.relayName + " is remixing the secret clue...";
+    }
+  } else if (s.phase === "guess") {
+    if (isActive || (s.answerSeenIds || []).includes(app.myId)) {
+      $("phoneStatusBox").textContent = "Your clue is on the TV! Watch everyone guess.";
+    } else if (isRelay) {
+      $("phoneStatusBox").textContent = "Your remixed clue is on the TV! Watch everyone guess.";
+    } else {
+      $("phoneStatusBox").textContent = "Race to solve the phrase!";
+      $("phoneGuessBox").classList.remove("hidden");
+      $("phoneMirrorClue").textContent = s.clue || "—";
+      if (s.kidHint && s.kidHint.length > 0) {
+        $("phoneKidHint").classList.remove("hidden");
+        $("phoneKidHint").textContent = "Helper Vowels: " + s.kidHint.join(", ");
+      } else {
+        $("phoneKidHint").classList.add("hidden");
+      }
+      if (s.wrongGuessAt) startGuessLockout();
+    }
+  } else if (s.phase === "round_end") {
+    $("phoneStatusBox").textContent = s.winnerName ? (s.winnerName + " solved it!") : "Round ended.";
+  }
+}
+function setupClueUI(wedge, isRelay, incomingClue) {
+  $("phoneClueBox").classList.remove("hidden");
+  $("phoneClueValidation").classList.add("hidden");
+  $("phoneEmojiPicker").classList.add("hidden");
+  $("phoneConsonantPicker").classList.add("hidden");
+  $("phoneTextClueWrap").classList.remove("hidden");
+  $("phoneClueInput").value = "";
+  app.selectedEmojis = [];
+  app.selectedConsonants = [];
+  if (isRelay) {
+    $("phoneCluePrompt").textContent = "Incoming clue: \"" + incomingClue + "\" — Rewrite it in " + (wedge.id === 6 ? "exactly 2" : "2–3") + " different words (don't name the answer!):";
+    return;
+  }
+  $("phoneCluePrompt").textContent = wedge.rule;
+  if (wedge.id === 8 || wedge.id === 6) {
+    $("phoneEmojiPicker").classList.remove("hidden");
+  } else if (wedge.id === 10) {
+    $("phoneConsonantPicker").classList.remove("hidden");
+    $("phoneTextClueWrap").classList.add("hidden");
+    renderConsonantStates();
+  }
+}
+function buildEmojiPicker() {
+  const wrap = $("phoneEmojiPicker");
+  EMOJIS.forEach((em) => {
+    const b = document.createElement("button");
+    b.type = "button";
+    b.className = "text-xl p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 transition";
+    b.textContent = em;
+    b.addEventListener("click", () => {
+      const max = (app.phoneState && app.phoneState.wedge && app.phoneState.wedge.id === 6) ? 3 : 5;
+      const current = emojiParts($("phoneClueInput").value);
+      if (current.length >= max) {
+        showToast("Max " + max + " emojis for this wedge!");
+        return;
+      }
+      $("phoneClueInput").value += em;
+    });
+    wrap.appendChild(b);
+  });
+}
+function buildConsonantPicker() {
+  const wrap = $("phoneConsonantPicker");
+  CONSONANTS.forEach((ch) => {
+    const b = document.createElement("button");
+    b.type = "button";
+    b.dataset.letter = ch;
+    b.className = "py-1.5 rounded-lg bg-slate-800 hover:bg-blue-600 text-xs font-bold text-white transition";
+    b.textContent = ch;
+    b.addEventListener("click", () => {
+      if (app.selectedConsonants.includes(ch)) {
+        app.selectedConsonants = app.selectedConsonants.filter((x) => x !== ch);
+      } else if (app.selectedConsonants.length < 2) {
+        app.selectedConsonants.push(ch);
+      }
+      renderConsonantStates();
+      if (app.selectedConsonants.length === 2) {
+        sendToHost({ type: "SUBMIT_CLUE", consonants: app.selectedConsonants });
+      }
+    });
+    wrap.appendChild(b);
+  });
+}
+function renderConsonantStates() {
+  document.querySelectorAll("#phoneConsonantPicker button").forEach((b) => {
+    const sel = app.selectedConsonants.includes(b.dataset.letter);
+    b.className = "py-1.5 rounded-lg text-xs font-bold transition " +
+      (sel ? "bg-amber-400 text-slate-950" : "bg-slate-800 hover:bg-blue-600 text-white");
+  });
+}
+function submitPhoneClue() {
+  const s = app.phoneState;
+  const val = $("phoneClueInput").value.trim();
+  const err = $("phoneClueValidation");
+  err.classList.add("hidden");
+  if (!val) {
+    err.textContent = "Please enter a clue first.";
+    err.classList.remove("hidden");
+    return;
+  }
+  const words = val.split(/\s+/).filter(Boolean);
+  if (s.phase === "clue" && s.wedge) {
+    if (s.wedge.id === 2 && words.length > 3) {
+      err.textContent = "3-Word Clue limit: shorten to 3 words or fewer.";
+      err.classList.remove("hidden");
+      return;
+    }
+    if (s.wedge.id === 5 && words.length !== 2) {
+      err.textContent = "2 Rhymes: enter exactly 2 words.";
+      err.classList.remove("hidden");
+      return;
+    }
+    if (s.wedge.id === 11 && /e/i.test(val)) {
+      err.textContent = "Lipogram rule: remove every letter 'E'!";
+      err.classList.remove("hidden");
+      return;
+    }
+  }
+  sendToHost({ type: "SUBMIT_CLUE", clue: val });
+}
+function submitPhoneGuess() {
+  if (Date.now() < app.lockoutUntil) return;
+  const guess = $("phoneGuessInput").value.trim();
+  if (!guess) return;
+  $("phoneGuessInput").value = "";
+  sendToHost({ type: "SUBMIT_GUESS", guess });
+}
+function startGuessLockout(until = Date.now() + 5000) {
+  app.lockoutUntil = until;
+  const msg = $("phoneLockoutMsg");
+  const btn = $("submitGuessBtn");
+  msg.classList.remove("hidden");
+  btn.disabled = true;
+  btn.classList.add("opacity-50");
+  clearInterval(app.lockoutTimer);
+  app.lockoutTimer = setInterval(() => {
+    const rem = Math.ceil((app.lockoutUntil - Date.now()) / 1000);
+    if (rem <= 0) {
+      clearInterval(app.lockoutTimer);
+      msg.classList.add("hidden");
+      btn.disabled = false;
+      btn.classList.remove("opacity-50");
+    } else {
+      msg.textContent = "Wrong guess! Cooldown: " + rem + "s";
+    }
+  }, 250);
+}
+// ==================== 60FPS CANVAS WHEEL ====================
+function drawWheel(angle) {
+  const canvas = $("wheelCanvas");
+  if (!canvas) return;
+  const ctx = canvas.getContext("2d");
+  const cx = canvas.width / 2;
+  const cy = canvas.height / 2;
+  const r = cx - 8;
+  const slice = (Math.PI * 2) / WEDGES.length;
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  WEDGES.forEach((w, i) => {
+    const start = angle + i * slice - Math.PI / 2;
+    const end = start + slice;
+    ctx.beginPath();
+    ctx.moveTo(cx, cy);
+    ctx.arc(cx, cy, r, start, end);
+    ctx.closePath();
+    ctx.fillStyle = w.color;
+    ctx.fill();
+    ctx.lineWidth = 2;
+    ctx.strokeStyle = "#0f172a";
+    ctx.stroke();
+    ctx.save();
+    ctx.translate(cx, cy);
+    ctx.rotate(start + slice / 2);
+    ctx.textAlign = "right";
+    ctx.fillStyle = "#ffffff";
+    ctx.font = "bold 11px Inter, sans-serif";
+    ctx.fillText(w.name, r - 12, 4);
+    ctx.restore();
+  });
+  ctx.beginPath();
+  ctx.arc(cx, cy, 24, 0, Math.PI * 2);
+  ctx.fillStyle = "#0f172a";
+  ctx.fill();
+  ctx.lineWidth = 3;
+  ctx.strokeStyle = "#ffffff";
+  ctx.stroke();
+}
+function triggerWheelSpin() {
+  if (app.wheelSpinning) return;
+  if (!app.phoneState || app.phoneState.phase !== "spin" || app.phoneState.activeId !== app.myId) return;
+  ensureAudio();
+  app.wheelSpinning = true;
+  $("spinWheelBtn").disabled = true;
+  const extraSpins = 4 + Math.random() * 3;
+  const targetOffset = Math.random() * Math.PI * 2;
+  const startAngle = app.wheelAngle;
+  const totalDelta = extraSpins * Math.PI * 2 + targetOffset;
+  const duration = 3000;
+  const startTime = performance.now();
+  let lastSliceIdx = -1;
+  function frame(now) {
+    const t = Math.min(1, (now - startTime) / duration);
+    const eased = 1 - Math.pow(1 - t, 3);
+    app.wheelAngle = startAngle + totalDelta * eased;
+    drawWheel(app.wheelAngle);
+    const slice = (Math.PI * 2) / WEDGES.length;
+    const norm = (((-app.wheelAngle) % (Math.PI * 2)) + Math.PI * 2) % (Math.PI * 2);
+    const idx = Math.floor(norm / slice) % WEDGES.length;
+    if (idx !== lastSliceIdx) {
+      lastSliceIdx = idx;
+      playTone(420 + (idx % 3) * 40, 0.03, "triangle", 0.05);
+    }
+    if (t < 1) {
+      app.wheelAnimId = requestAnimationFrame(frame);
+    } else {
+      app.wheelSpinning = false;
+      $("spinWheelBtn").disabled = false;
+      const landed = WEDGES[idx];
+      sendToHost({ type: "SPIN_RESULT", wedgeId: landed.id });
+    }
+  }
+  app.wheelAnimId = requestAnimationFrame(frame);
+}
+function playerToken() {
+  if (!app.playerToken) {
+    app.playerToken = safeLoadLocal("ptel_token") || (crypto.randomUUID ? crypto.randomUUID() : String(Math.random()).slice(2) + Date.now());
+    safeSaveLocal("ptel_token", app.playerToken);
+  }
+  return app.playerToken;
+}
+function emojiParts(value) {
+  return typeof Intl.Segmenter === "function" ? [...new Intl.Segmenter(undefined,{granularity:"grapheme"}).segment(value)].map(p=>p.segment) : Array.from(value.replace(/\uFE0F/g,""));
+}
+function validHostClue(msg, relay) {
+  const w = app.game.wedge.id;
+  let error = "";
+  if (w === 10 && !relay) {
+    if (!Array.isArray(msg.consonants) || new Set(msg.consonants).size !== 2 || msg.consonants.length !== 2 || msg.consonants.some(c => !CONSONANTS.includes(c))) error = "Choose two different consonants.";
+  } else {
+    const text = typeof msg.clue === "string" ? msg.clue.trim() : "";
+    const n = text ? text.split(/\s+/).length : 0;
+    if (!text || text.length > 160) error = "Enter a clue of 1–160 characters.";
+    else if (relay) {
+      if (w === 6 ? n !== 2 : n < 2 || n > 3) error = w === 6 ? "Translate into exactly 2 words." : "Use 2–3 words.";
+    } else {
+      const limits = {1:5,2:3,3:4,5:2,7:4,9:3};
+      if (limits[w] && (w === 2 ? n > 3 : n !== limits[w])) error = "Use " + (w === 2 ? "at most " : "exactly ") + limits[w] + " words.";
+      if (w === 11 && /e/i.test(text)) error = "Remove every letter E.";
+      if (w === 6 || w === 8) {
+        const parts = emojiParts(text);
+        if (parts.some(p => !EMOJIS.includes(p)) || (w === 6 ? parts.length !== 3 : parts.length < 1 || parts.length > 5)) error = w === 6 ? "Choose exactly 3 emojis from the picker." : "Choose 1–5 emojis from the picker.";
+      }
+    }
+  }
+  if (error) {
+    if (app.mode === "demo") showToast(error);
+    else app.conns[msg.id]?.send({type:"ERROR",message:error});
+    return false;
+  }
+  return true;
+}
+window.addEventListener("load", () => {
+  $("phoneClueInput").maxLength = 160;
+  $("phoneGuessInput").maxLength = 160;
+  $("phoneGuessInput").addEventListener("keydown", e => {if(e.key === "Enter") submitPhoneGuess();});
+  $("phoneClueInput").addEventListener("keydown", e => {if(e.key === "Enter") submitPhoneClue();});
+  $("toast").setAttribute("role","status");
+  $("joinNameInput").setAttribute("aria-label","Player name");
+  $("joinCodeInput").setAttribute("aria-label","Four-letter room code");
+});
+</script>
+</body>
+</html>
