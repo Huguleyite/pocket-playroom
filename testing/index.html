@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow, noarchive">
+  <meta name="theme-color" content="#fff7e8">
+  <title>Testing · Pocket Playroom</title>
+  <link rel="icon" href="/favicon.ico" sizes="any">
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; min-height: 100svh; background: #fff7e8; color: #182d40; font-family: system-ui, sans-serif; }
+    .wrap { width: min(100% - 40px, 920px); margin: auto; }
+    header { padding: 28px 0; border-bottom: 1px solid #182d4020; }
+    .brand { display: inline-flex; align-items: center; gap: 12px; color: inherit; text-decoration: none; font-size: 20px; font-weight: 800; min-height: 44px; }
+    .brand img { width: 40px; height: 44px; object-fit: contain; }
+    main { padding: clamp(40px, 8vw, 90px) 0; }
+    .label { color: #326b4d; font-size: 12px; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; }
+    h1 { font-size: clamp(32px, 7vw, 58px); line-height: 1.08; letter-spacing: -.04em; margin: 16px 0; }
+    .intro { max-width: 560px; font-size: 18px; line-height: 1.6; }
+    .empty { margin-top: 38px; padding: clamp(24px, 5vw, 44px); background: #fffdf7; border: 1px dashed #326b4d70; border-radius: 20px; }
+    h2 { font-size: 22px; margin: 0 0 10px; }
+    p { line-height: 1.6; }
+    .empty p { margin: 0; color: #4d5d64; }
+    footer { padding: 24px 0 32px; color: #4d5d64; font-size: 14px; }
+    a:focus-visible { outline: 3px solid #326b4d; outline-offset: 5px; border-radius: 4px; }
+  </style>
+</head>
+<body>
+  <header class="wrap">
+    <a class="brand" href="/" aria-label="Pocket Playroom home"><img src="/assets/branding/pocket-playroom-logo.webp" alt="" width="40" height="44">Pocket Playroom</a>
+  </header>
+  <main class="wrap">
+    <span class="label">Work in play</span>
+    <h1>Pocket Playroom Testing</h1>
+    <p class="intro">A little room to try things out. Test games, explore designs, and smooth out the kinks before release.</p>
+    <section class="empty" aria-labelledby="previews-title">
+      <h2 id="previews-title">Game previews will appear here.</h2>
+      <p>No games are in testing yet. Check back when the next preview is ready.</p>
+    </section>
+  </main>
+  <footer class="wrap">Unlisted testing area. Previews may change, reset, or disappear.</footer>
+</body>
+</html>
