@@ -1,0 +1,1002 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="robots" content="noindex, nofollow, noarchive">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+<title>Six-Pack Trivia | Pocket Playroom</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎲</text></svg>" />
+<script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
+<style>
+:root{--bg:#0f172a;--surface:#1e293b;--surface-light:#334155;--text:#f8fafc;--muted:#94a3b8;--accent:#38bdf8;--gold:#facc15;
+--opt-0:#ef4444;--opt-1:#3b82f6;--opt-2:#ca9a04;--opt-3:#0e9f6e;--opt-4:#a855f7;--opt-5:#ea6a0c}
+*{box-sizing:border-box;margin:0;padding:0;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
+[hidden]{display:none!important}
+body{background:var(--bg);color:var(--text);min-height:100vh;min-height:100dvh;display:flex;flex-direction:column;overflow-x:hidden}
+.top-bar{display:flex;justify-content:space-between;align-items:center;padding:.45rem .9rem;background:#090d16;border-bottom:1px solid #1e293b;gap:.5rem;flex-wrap:wrap}
+.brand{font-weight:800;letter-spacing:.04em;font-size:1rem;color:var(--accent)}
+.brand small{font-size:.72rem;color:var(--muted);font-weight:600;margin-left:.4rem}
+.top-right{display:flex;gap:.5rem;align-items:center;flex-wrap:wrap}
+.mode-toggle{display:flex;background:var(--surface);border-radius:999px;padding:3px;border:1px solid var(--surface-light)}
+.mode-btn{border:none;background:transparent;color:var(--muted);padding:.3rem .8rem;border-radius:999px;font-weight:700;font-size:.82rem;cursor:pointer}
+.mode-btn.active{background:var(--accent);color:#090d16}
+.view{display:none;flex:1;width:100%;max-width:1280px;margin:0 auto;padding:.7rem;flex-direction:column;min-height:0}
+.view.active{display:flex}
+.btn{background:var(--accent);color:#090d16;border:none;padding:.7rem 1.4rem;border-radius:.75rem;font-weight:800;font-size:1rem;cursor:pointer;touch-action:manipulation}
+.btn:active{transform:scale(.97)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn-secondary{background:var(--surface-light);color:var(--text)}
+.btn-sm{padding:.42rem .8rem;font-size:.82rem;border-radius:.5rem}
+input,select{background:var(--surface);border:2px solid var(--surface-light);color:var(--text);padding:.75rem 1rem;border-radius:.75rem;font-size:1rem;font-weight:600;outline:none}
+input:focus,select:focus{border-color:var(--accent)}
+
+/* ---------- Host ---------- */
+.host-header{display:flex;justify-content:space-between;align-items:center;background:var(--surface);padding:.5rem 1rem;border-radius:1rem;margin-bottom:.7rem;flex-wrap:wrap;gap:.6rem}
+.room-badge{font-size:1.1rem;font-weight:800;letter-spacing:.06em}
+.room-code{color:var(--gold);background:var(--bg);padding:.1rem .65rem;border-radius:.5rem;margin-left:.35rem;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:1.7rem;letter-spacing:.14em}
+.muted{color:var(--muted)}
+.panel{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:.8rem;background:var(--surface);border-radius:1.25rem;padding:1rem}
+.lobby-title{display:flex;align-items:center;justify-content:center;gap:1rem;flex-wrap:wrap}
+.lobby-title h1{font-size:clamp(1.5rem,3vw,2.3rem)}
+.lobby-title img{height:84px;border-radius:.75rem;background:#fff}
+.join-line{font-size:clamp(1rem,1.8vw,1.35rem);font-weight:700;line-height:1.5}
+.join-line b{color:var(--gold);word-break:break-all}
+.cat-board-wrap{width:100%;max-width:860px;background:var(--bg);border:1px solid var(--surface-light);border-radius:1rem;padding:.75rem 1rem}
+.cat-board-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:.55rem;flex-wrap:wrap;gap:.5rem;font-size:.85rem}
+.cat-chip-grid{display:flex;flex-wrap:wrap;justify-content:center;gap:.4rem}
+.cat-toggle-chip{background:var(--surface);color:var(--muted);border:2px solid var(--surface-light);padding:.35rem .75rem;border-radius:999px;font-size:.82rem;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:.35rem}
+.cat-toggle-chip:hover{border-color:var(--accent);color:var(--text)}
+.cat-toggle-chip.selected{background:rgba(56,189,248,.18);color:#fff;border-color:var(--accent)}
+.options-row{display:flex;gap:.7rem;flex-wrap:wrap;justify-content:center;align-items:center}
+.player-grid{display:flex;flex-wrap:wrap;justify-content:center;gap:.6rem;max-width:900px}
+.player-chip{background:var(--bg);border:2px solid var(--surface-light);padding:.4rem .5rem .4rem .9rem;border-radius:999px;font-weight:700;display:flex;align-items:center;gap:.45rem;animation:popIn .25s ease-out}
+.player-chip button{background:none;border:none;color:var(--muted);cursor:pointer;font-size:.9rem;padding:0 .25rem}
+@keyframes popIn{from{transform:scale(.8);opacity:0}to{transform:scale(1);opacity:1}}
+
+#hostStage{flex:1;display:flex;flex-direction:column}
+.timer-row{display:flex;align-items:center;gap:.75rem;margin-bottom:.6rem}
+.timer-track{flex:1;height:12px;background:var(--surface);border-radius:999px;overflow:hidden}
+.timer-fill{height:100%;background:linear-gradient(90deg,#38bdf8,#facc15);width:100%;transition:width .25s linear}
+.timer-num{font-family:ui-monospace,Menlo,Consolas,monospace;font-weight:900;font-size:1.25rem;color:var(--gold);background:var(--surface);padding:.1rem .6rem;border-radius:.5rem;min-width:62px;text-align:center}
+.question-card{background:var(--surface);padding:.75rem 1.1rem;border-radius:1.25rem;margin-bottom:.7rem;border:1px solid var(--surface-light);display:flex;align-items:center;justify-content:center;gap:1.25rem;flex-wrap:wrap}
+.question-body{flex:1;min-width:260px;text-align:center}
+.cat-pill{display:inline-block;background:rgba(56,189,248,.15);color:var(--accent);font-weight:800;font-size:.8rem;text-transform:uppercase;letter-spacing:.08em;padding:.25rem .8rem;border-radius:999px;margin-bottom:.55rem}
+.question-text{font-size:clamp(1.25rem,2.7vw,2.15rem);font-weight:800;line-height:1.25}
+.media-frame{--h:clamp(150px,29vh,320px);height:var(--h);width:calc(var(--h) * 1.45);max-width:100%;border-radius:.9rem;overflow:hidden;border:2px solid var(--surface-light);background:#05070d;flex-shrink:0;position:relative}
+.meme-card{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.5rem;padding:.8rem;text-align:center;background:radial-gradient(circle at 50% 35%,#334155,#090d16)}
+.meme-emoji{font-size:calc(var(--h,200px) * .34);line-height:1;animation:bob 2.4s ease-in-out infinite}
+@keyframes bob{50%{transform:translateY(-6px) rotate(4deg)}}
+.meme-caption{font-family:Impact,"Arial Narrow",system-ui,sans-serif;font-size:1.25rem;text-transform:uppercase;letter-spacing:.03em;color:#fff;text-shadow:-2px -2px 0 #000,2px -2px 0 #000,-2px 2px 0 #000,2px 2px 0 #000;line-height:1.15}
+.media-frame img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;background:#05070d;opacity:0}
+.media-frame.loaded img{opacity:1}
+.media-frame .meme-bar{position:absolute;left:0;right:0;bottom:0;padding:.3rem .5rem;display:none;text-align:center}
+.media-frame.loaded .meme-bar{display:block}
+.host-options{display:grid;grid-template-columns:repeat(3,1fr);gap:.65rem;margin-bottom:.7rem}
+@media (max-width:760px){.host-options{grid-template-columns:repeat(2,1fr)}}
+.host-tile{position:relative;background:var(--surface);border-radius:1rem;padding:.7rem .8rem;display:flex;align-items:center;gap:.7rem;border:3px solid transparent;overflow:hidden;transition:transform .25s,opacity .25s,border-color .25s}
+.tile-badge{width:46px;height:46px;border-radius:.75rem;display:flex;flex-direction:column;align-items:center;justify-content:center;font-weight:900;color:#fff;flex-shrink:0;text-shadow:0 1px 2px rgba(0,0,0,.4);z-index:1}
+.tile-label{font-size:clamp(1rem,1.8vw,1.4rem);font-weight:800;z-index:1;line-height:1.15}
+.vote-bar{position:absolute;left:0;top:0;bottom:0;width:0;opacity:.3;transition:width .7s cubic-bezier(.22,1,.36,1);pointer-events:none}
+.vote-count{margin-left:auto;font-weight:900;font-size:.9rem;background:rgba(15,23,42,.8);padding:.2rem .5rem;border-radius:.5rem;z-index:1;white-space:nowrap}
+.host-tile.dimmed{opacity:.4}
+.host-tile.correct{border-color:#22c55e;transform:scale(1.03);box-shadow:0 0 24px rgba(34,197,94,.4)}
+.fact-box{background:rgba(34,197,94,.12);border:1px solid rgba(34,197,94,.4);padding:.6rem 1rem;border-radius:.9rem;margin-bottom:.7rem;text-align:center;font-size:1.05rem;color:#dcfce7}
+.host-dock{margin-top:auto;display:flex;justify-content:space-between;align-items:center;background:var(--surface);padding:.55rem .9rem;border-radius:1rem;flex-wrap:wrap;gap:.6rem}
+.dock-avatars{display:flex;flex-wrap:wrap;gap:.4rem;flex:1}
+.dock-pill{padding:.3rem .7rem;border-radius:999px;font-size:.85rem;font-weight:700;background:var(--bg);color:var(--muted);border:2px solid transparent}
+.dock-pill.locked{color:#fff;border-color:#22c55e;background:rgba(34,197,94,.15)}
+.dock-pill.away{opacity:.5;border-style:dashed;border-color:var(--surface-light)}
+.dock-pill.miss{color:#fecaca;border-color:#ef4444}
+.podium-wrap{display:flex;gap:1.25rem;align-items:center;justify-content:center;flex-wrap:wrap;width:100%}
+.scoreboard-list{width:100%;max-width:560px;display:flex;flex-direction:column;gap:.5rem}
+.score-row{display:flex;justify-content:space-between;align-items:center;background:var(--bg);padding:.65rem 1.1rem;border-radius:.85rem;font-weight:800;font-size:1.15rem}
+.score-row.first{border:2px solid var(--gold);background:rgba(250,204,21,.12);font-size:1.35rem}
+.credit{font-size:.7rem;color:var(--muted);text-align:center;padding-top:.35rem}
+
+/* ---------- Phone ---------- */
+.phone-join{flex:1;display:flex;flex-direction:column;justify-content:center;gap:.9rem;max-width:420px;width:100%;margin:0 auto}
+#phoneController{flex:1;display:flex;flex-direction:column;min-height:0;max-width:560px;width:100%;margin:0 auto;gap:.5rem}
+body.playing .top-bar{display:none}
+body.playing{height:100vh;height:100dvh;overflow:hidden}
+body.playing #phoneView{padding:max(.5rem,env(safe-area-inset-top)) .55rem max(.55rem,env(safe-area-inset-bottom))}
+.phone-header{display:flex;justify-content:space-between;align-items:center;gap:.5rem;background:var(--surface);padding:.4rem .7rem;border-radius:.75rem;font-weight:800;font-size:.9rem;flex-shrink:0}
+.phone-header span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#btnLeave{background:none;border:none;color:var(--muted);font-weight:800;font-size:1rem;padding:.1rem .3rem;cursor:pointer}
+.phone-question{flex-shrink:0;font-weight:700;font-size:.92rem;line-height:1.25;text-align:center;display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden}
+.pad-grid{flex:1;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:repeat(3,minmax(0,1fr));gap:.55rem;min-height:0}
+.pad-btn{border:none;border-radius:1rem;color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.2rem;padding:.35rem;cursor:pointer;text-align:center;min-height:0;overflow:hidden;box-shadow:inset 0 -5px 0 rgba(0,0,0,.28);touch-action:manipulation;-webkit-user-select:none;user-select:none;text-shadow:0 1px 3px rgba(0,0,0,.55)}
+.pad-btn:active:not(:disabled){transform:translateY(2px)}
+.pad-btn:disabled{cursor:default}
+.pad-btn.dimmed{opacity:.28;filter:grayscale(.5)}
+.pad-btn.selected{outline:4px solid #fff;outline-offset:-4px}
+.pad-symbol{font-size:clamp(1rem,3.8vh,1.7rem);font-weight:900;line-height:1}
+.pad-text{font-size:clamp(.82rem,2.3vh,1.15rem);font-weight:800;line-height:1.12;overflow-wrap:anywhere}
+.action-bar{height:64px;flex-shrink:0;display:flex;gap:.5rem;align-items:stretch;justify-content:center}
+.action-bar .btn{flex:1;padding:.2rem .4rem;font-size:.95rem;line-height:1.15}
+.action-bar .btn small{display:block;font-size:.72rem;font-weight:700}
+.action-hint{align-self:center;font-weight:800;color:var(--muted);text-align:center;flex:2}
+#btnConfirmOne{background:#22c55e}
+#btnArmSecond{background:var(--gold)}
+.phone-banner{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;background:var(--surface);border-radius:1.25rem;padding:1.5rem;gap:.7rem;min-height:0}
+@media (max-height:640px){.action-bar{height:52px}.phone-question{-webkit-line-clamp:5;font-size:.8rem;line-height:1.2}.pad-text{font-size:.8rem}.pad-symbol{font-size:1rem}#phoneController{gap:.35rem}}
+@media (max-height:780px) and (min-width:761px){.media-frame{--h:clamp(130px,23vh,320px)}.question-card{padding:.5rem 1rem;margin-bottom:.5rem}.host-options{gap:.5rem;margin-bottom:.5rem}.host-tile{padding:.5rem .7rem}.tile-badge{width:42px;height:42px}.fact-box{padding:.4rem .8rem;margin-bottom:.5rem;font-size:.98rem}.timer-row{margin-bottom:.45rem}.host-header{margin-bottom:.5rem;padding:.35rem .9rem}#hostView{padding-top:.45rem;padding-bottom:.25rem}.credit{padding-top:.15rem}}
+</style>
+</head>
+<body>
+
+<header class="top-bar">
+  <div class="brand">🎲 SIX-PACK TRIVIA<small>POCKET PLAYROOM</small></div>
+  <div class="top-right">
+    <button id="btnFullscreen" class="btn btn-secondary btn-sm" type="button">⛶ Full Screen</button>
+    <div class="mode-toggle">
+      <button id="btnModeHost" class="mode-btn" type="button">📺 Host Screen</button>
+      <button id="btnModePhone" class="mode-btn" type="button">📱 Phone Controller</button>
+    </div>
+  </div>
+</header>
+
+<main id="hostView" class="view">
+  <div class="host-header">
+    <div class="room-badge">ROOM CODE: <span id="hostRoomCode" class="room-code">----</span></div>
+    <div id="hostStatusText" class="muted" style="font-weight:700;font-size:.9rem">Opening the room...</div>
+    <div id="hostRoundBadge" style="font-weight:800;color:var(--accent)">LOBBY</div>
+  </div>
+
+  <section id="hostLobby" class="panel">
+    <div class="lobby-title">
+      <img id="lobbyGif" alt="" hidden />
+      <h1 id="lobbyHeading">Gather Around the Screen!</h1>
+    </div>
+    <p id="joinLine" class="join-line"></p>
+
+    <div class="cat-board-wrap">
+      <div class="cat-board-header">
+        <span style="font-weight:800;color:var(--accent)">📚 CATEGORIES (<span id="selectedCatCount">12</span>/12)</span>
+        <div style="display:flex;gap:.4rem;align-items:center">
+          <span id="matchingPoolHint" class="muted" style="margin-right:.35rem"></span>
+          <button type="button" id="btnAllCats" class="btn btn-secondary btn-sm">Select All</button>
+          <button type="button" id="btnNoCats" class="btn btn-secondary btn-sm">Clear</button>
+        </div>
+      </div>
+      <div id="categoryChipGrid" class="cat-chip-grid"></div>
+    </div>
+
+    <div class="options-row">
+      <label class="muted" style="font-weight:700;font-size:.9rem">Rounds:
+        <select id="roundCountSelect" style="margin-left:.3rem;padding:.35rem .65rem">
+          <option value="5">5</option>
+          <option value="10" selected>10</option>
+          <option value="15">15</option>
+          <option value="20">20</option>
+          <option value="ALL">All Matching</option>
+        </select>
+      </label>
+      <button id="btnToggleSafetyNet" type="button" class="cat-toggle-chip selected"></button>
+      <button id="btnAddBot" type="button" class="btn btn-secondary btn-sm">+ Add Test Bot</button>
+    </div>
+
+    <div id="lobbyPlayerGrid" class="player-grid"></div>
+    <p id="lobbyEmptyHint" class="muted" style="font-size:.9rem">Waiting for at least 1 player (or add a Test Bot)...</p>
+    <button id="btnStartGame" class="btn" type="button" disabled>Start Game</button>
+  </section>
+
+  <section id="hostStage" hidden>
+    <div class="timer-row">
+      <div class="timer-track"><div id="timerFill" class="timer-fill"></div></div>
+      <div id="timerNum" class="timer-num">60s</div>
+    </div>
+    <div class="question-card">
+      <div id="mediaFrame" class="media-frame"></div>
+      <div class="question-body">
+        <div id="qCategory" class="cat-pill"></div>
+        <div id="qText" class="question-text"></div>
+      </div>
+    </div>
+    <div id="hostOptionsGrid" class="host-options"></div>
+    <div id="factBox" class="fact-box" hidden></div>
+    <div class="host-dock">
+      <div id="dockAvatars" class="dock-avatars"></div>
+      <div style="display:flex;gap:.5rem">
+        <button id="btnEndGame" class="btn btn-secondary btn-sm" type="button">End Game</button>
+        <button id="btnRevealEarly" class="btn btn-secondary btn-sm" type="button">Reveal Now</button>
+        <button id="btnNextQuestion" class="btn btn-sm" type="button" hidden>Next Question ➔</button>
+      </div>
+    </div>
+  </section>
+
+  <section id="hostPodium" class="panel" hidden>
+    <h1 style="font-size:2.2rem">🏆 Final Standings</h1>
+    <div class="podium-wrap">
+      <div id="podiumMedia" class="media-frame"></div>
+      <div id="finalScoreboard" class="scoreboard-list"></div>
+    </div>
+    <button id="btnPlayAgain" class="btn" type="button">Play Again</button>
+  </section>
+  <div class="credit">GIFs via GIPHY</div>
+</main>
+
+<main id="phoneView" class="view">
+  <section id="phoneJoin" class="phone-join">
+    <h2 style="text-align:center;font-size:1.6rem">Join a Room</h2>
+    <input id="inputRoomCode" type="text" maxlength="4" placeholder="ROOM CODE" autocomplete="off" autocapitalize="characters" spellcheck="false" style="text-transform:uppercase;text-align:center;font-size:1.5rem;letter-spacing:.2em" />
+    <input id="inputPlayerName" type="text" maxlength="14" placeholder="Your Nickname" autocomplete="off" />
+    <button id="btnJoinRoom" class="btn" type="button">Connect Controller</button>
+    <p id="phoneJoinStatus" class="muted" style="text-align:center;font-size:.9rem"></p>
+  </section>
+
+  <section id="phoneController" hidden>
+    <div class="phone-header">
+      <span id="ctrlPlayerName">Player</span>
+      <span id="ctrlTimer" style="color:var(--accent)"></span>
+      <span id="ctrlScore" style="color:var(--gold)">0 pts</span>
+      <button id="btnLeave" type="button" title="Leave room">✕</button>
+    </div>
+    <div id="phoneBanner" class="phone-banner">
+      <div id="bannerIcon" style="font-size:3rem">🎮</div>
+      <h2 id="bannerTitle">Connecting...</h2>
+      <p id="bannerSub" class="muted"></p>
+    </div>
+    <div id="phoneQuestion" class="phone-question" hidden></div>
+    <div id="padGrid" class="pad-grid" hidden></div>
+    <div id="padActionBar" class="action-bar" hidden>
+      <span id="actionHint" class="action-hint"></span>
+      <button id="btnConfirmOne" class="btn" type="button" hidden>🔒 Lock 1 Pick<small>Up to 1,000 pts</small></button>
+      <button id="btnArmSecond" class="btn" type="button" hidden>🛡️ Add 2nd Pick<small>400 pts flat</small></button>
+      <button id="btnCancelSecond" class="btn btn-secondary" type="button" hidden style="flex:.8">Cancel</button>
+    </div>
+  </section>
+</main>
+
+<script>
+"use strict";
+/* ================= 1. QUESTION BANK & MEDIA ================= */
+const QUESTIONS = [
+  {"id":1,"category":"Black Culture","question":"In the classic 90s sitcom 'Martin', what are the call letters of the Detroit radio station where Martin Payne works?","mediaCaption":"🎙️ DETROIT RADIO LEGEND","options":["WZUP","WBLK","WJLB","WBLS","KMEL","WVEE"],"answerIndex":0,"fact":"Martin Payne hosted his talk show on WZUP before later transitioning to television on Word on the Street!","gif":"HTytvka5AJIaI"},
+  {"id":2,"category":"Black Culture","question":"What is the name of the fictional HBCU attended by Whitley, Dwayne, and Denise in 'A Different World'?","mediaCaption":"🎓 RELAX, RELATE, RELEASE","options":["Hillman College","Mission College","Spelman Tech","Langston State","Morehouse West","Banneker U"],"answerIndex":0,"fact":"Hillman College was inspired by real-life HBCUs like Spelman, Morehouse, and Howard—and sparked a surge in HBCU applications."},
+  {"id":3,"category":"Black Culture","question":"In the 1995 comedy 'Friday', how much money did Big Worm say Smokey owed him by 10 o'clock?","mediaCaption":"🍦 PLAYING WITH MY MONEY","options":["$100","$200","$500","$1,000","$50","$250"],"answerIndex":1,"fact":"Smokey owed Big Worm $200—which sparked one of the most quoted ice-cream-truck confrontations in movie history.","gif":"l41m44jqM4K1mXQCk"},
+  {"id":4,"category":"Black Culture","question":"In 'Coming to America', what fast-food restaurant in Queens does Prince Akeem take a job at?","mediaCaption":"🍔 GOLDEN ARCS vs. GOLDEN ARCHES","options":["McDowell's","Burger Queen","Soul Burger","Zamunda Grill","Royal Burger","King's Sub"],"answerIndex":0,"fact":"Cleo McDowell famously insisted his restaurant had the Golden Arcs (not Arches) and buns with no seeds!"},
+  {"id":5,"category":"Black Culture","question":"Which Tom Jones song is famously linked to Carlton Banks' signature dance on 'The Fresh Prince of Bel-Air'?","mediaCaption":"🕺 THE CARLTON DANCE","options":["It's Not Unusual","What's New Pussycat","She's a Lady","Delilah","Help Yourself","Green Grass"],"answerIndex":0,"fact":"Alfonso Ribeiro based the dance on Courteney Cox in Bruce Springsteen's 'Dancing in the Dark' video and Eddie Murphy's stand-up.","gif":"HTjcWZwMtHpyhuCGKZ"},
+  {"id":6,"category":"Black Culture","question":"In Marvel's 'Black Panther', what is the name of the rare metal that powers Wakanda's advanced technology?","mediaCaption":"🐾 WAKANDA FOREVER","options":["Vibranium","Adamantium","Uru","Unobtainium","Promethium","Carbonadium"],"answerIndex":0,"fact":"Vibranium absorbs and stores kinetic energy—allowing Shuri to design kinetic-pulse Black Panther suits.","gif":"pNTxtmpDVOLToFpoDp"},
+  {"id":7,"category":"Black Culture","question":"Which 90s sketch comedy show launched the careers of Jim Carrey, Jamie Foxx, Damon Wayans, and Jennifer Lopez?","mediaCaption":"📺 90s SKETCH CLASSIC","options":["In Living Color","All That","MADtv","Chappelle's Show","ComicView","Def Comedy Jam"],"answerIndex":0,"fact":"Created by Keenen Ivory Wayans, 'In Living Color' debuted in 1990 with the iconic Fly Girls dance troupe.","gif":"RNctqpnWiXZ7i"},
+  {"id":8,"category":"Black Culture","question":"In 'Sister, Sister', where did twins Tia Landry and Tamera Campbell accidentally bump into each other for the first time?","mediaCaption":"👯‍♀️ SEPARATED AT BIRTH","options":["A clothing store at the mall","Summer camp","First day of high school","A talent show","An airplane","A roller rink"],"answerIndex":0,"fact":"Tia and Tamera discovered each other while shopping in a clothing store at a Detroit mall!","gif":"mOFz9jVCZ2EHS","revealGif":"q0NRi7APM9dNm"},
+  {"id":9,"category":"Black Culture","question":"In 'Living Single', what was the name of the urban lifestyle magazine founded and edited by Khadijah James?","mediaCaption":"📰 90s BROOKLYN FLAVOR","options":["Flavor","Vibe","Essence","Ebony","Hype","Brooklyn Beat"],"answerIndex":0,"fact":"Khadijah ran Flavor while sharing a Brooklyn brownstone with friends; her cousin Synclaire worked at the magazine."},
+  {"id":10,"category":"Black Culture","question":"In 'Everybody Hates Chris', who plays Julius, the dad who knows what everything costs?","mediaCaption":"💵 THAT'S 49 CENTS!","options":["Terry Crews","Anthony Anderson","Wayne Brady","Orlando Jones","David Alan Grier","Michael Clarke Duncan"],"answerIndex":0,"fact":"Julius could price spilled milk to the penny."},
+  {"id":11,"category":"R&B, Hip-Hop & Motown","question":"Which Detroit label, founded by Berry Gordy Jr. in 1959, called its headquarters 'Hitsville U.S.A.'?","options":["Motown Records","Stax Records","Atlantic Records","Def Jam","Death Row","Bad Boy"],"answerIndex":0,"fact":"Motown launched The Supremes, Stevie Wonder, Marvin Gaye, The Temptations, and The Jackson 5.","mediaCaption":"🏠 HITSVILLE CALLING"},
+  {"id":12,"category":"R&B, Hip-Hop & Motown","question":"Which 1990s R&B girl group released the multi-platinum album 'CrazySexyCool' featuring 'Waterfalls' and 'Creep'?","options":["TLC","Destiny's Child","SWV","En Vogue","Xscape","702"],"answerIndex":0,"fact":"'CrazySexyCool' became the first album by a female group to earn a Diamond certification from the RIAA.","mediaCaption":"💧 NO CHASING THOSE..."},
+  {"id":13,"category":"R&B, Hip-Hop & Motown","question":"Which Atlanta hip-hop duo released the double album 'Speakerboxxx/The Love Below' featuring 'Hey Ya!'?","options":["OutKast","Goodie Mob","UGK","Migos","Rae Sremmurd","8Ball & MJG"],"answerIndex":0,"fact":"It won Album of the Year and is certified 13x Platinum (each disc counts).","mediaCaption":"🎤 DOUBLE THE ALBUM","revealGif":"XUhRGXhFLLzqg"},
+  {"id":14,"category":"R&B, Hip-Hop & Motown","question":"Who is widely known as the 'Queen of Soul' and recorded iconic hits like 'Respect' and 'Natural Woman'?","options":["Aretha Franklin","Diana Ross","Gladys Knight","Patti LaBelle","Etta James","Chaka Khan"],"answerIndex":0,"fact":"Aretha Franklin was the first woman inducted into the Rock and Roll Hall of Fame in 1987.","mediaCaption":"👑 BOW TO THE QUEEN"},
+  {"id":15,"category":"R&B, Hip-Hop & Motown","question":"Which Lauryn Hill solo album won five Grammy Awards in 1999, including Album of the Year?","options":["The Miseducation of Lauryn Hill","The Score","Baduizm","Velvet Rope","Supa Dupa Fly","Brown Sugar"],"answerIndex":0,"fact":"It was the first hip-hop album to ever win Album of the Year at the Grammy Awards.","mediaCaption":"🏆 FIVE IN ONE NIGHT"},
+  {"id":16,"category":"R&B, Hip-Hop & Motown","question":"Which 1983 Michael Jackson video is a 14-minute short film with a zombie dance, directed by John Landis?","options":["Thriller","Beat It","Bad","Smooth Criminal","Billie Jean","Remember the Time"],"answerIndex":0,"fact":"The 'Thriller' short film was the first music video inducted into the Library of Congress National Film Registry.","mediaCaption":"🧟 EVERYBODY LEARNED THIS DANCE","revealGif":"ZXD5JEmd2VFxC"},
+  {"id":17,"category":"R&B, Hip-Hop & Motown","question":"Which Philly vocal group sang 'End of the Road', 'Motownphilly', and 'One Sweet Day'?","options":["Boyz II Men","Jodeci","112","Dru Hill","New Edition","Bell Biv DeVoe"],"answerIndex":0,"fact":"'One Sweet Day', with Mariah Carey, spent a then-record 16 weeks at No. 1.","mediaCaption":"🎶 PHILLY HARMONY"},
+  {"id":18,"category":"R&B, Hip-Hop & Motown","question":"Which Stevie Wonder double album from 1976 includes 'Sir Duke', 'I Wish', and 'Isn't She Lovely'?","options":["Songs in the Key of Life","Innervisions","Talking Book","Hotter Than July","Fulfillingness' First Finale","Music of My Mind"],"answerIndex":0,"fact":"'Songs in the Key of Life' debuted at #1 on the Billboard 200 and won Album of the Year.","mediaCaption":"🎹 DOUBLE ALBUM, NO SKIPS"},
+  {"id":19,"category":"R&B, Hip-Hop & Motown","question":"Which R&B superstar released the 2004 smash album 'Confessions' featuring 'Yeah!' and 'Burn'?","options":["Usher","Chris Brown","Ne-Yo","Trey Songz","Ginuwine","Mario"],"answerIndex":0,"fact":"'Confessions' sold about 1.1 million copies in its first week.","mediaCaption":"🙊 I GOT SOMETHING TO TELL YOU"},
+  {"id":20,"category":"R&B, Hip-Hop & Motown","question":"Which 1979 track by The Sugarhill Gang is credited with bringing hip-hop into the mainstream Top 40?","options":["Rapper's Delight","The Message","Planet Rock","Walk This Way","It's Tricky","Push It"],"answerIndex":0,"fact":"It was built on Chic's 'Good Times'; the full 12-inch runs nearly 15 minutes.","mediaCaption":"📻 HIP HOP HOORAY"},
+  {"id":21,"category":"90s & 2000s Nostalgia","question":"What handheld digital pet from 1996 required kids to feed it, clean up after it, and press buttons before it beeped in class?","options":["Tamagotchi","Furby","Game Boy","Polly Pocket","Giga Pet","Digimon"],"answerIndex":0,"fact":"Bandai sold over 82 million Tamagotchis worldwide after launching them in Japan in late 1996.","mediaCaption":"🔔 BEEP BEEP, FEED ME"},
+  {"id":22,"category":"90s & 2000s Nostalgia","question":"What was the name of the default first friend everyone automatically got when creating a MySpace profile in the mid-2000s?","options":["Tom Anderson","Mark Zuckerberg","Steve Huffman","Jack Dorsey","Kevin Systrom","Sean Parker"],"answerIndex":0,"fact":"Tom's iconic whiteboard profile photo made him 'friends' with hundreds of millions of early social media users.","mediaCaption":"🖥️ YOUR FIRST FRIEND"},
+  {"id":23,"category":"90s & 2000s Nostalgia","question":"In 'The Office', what item of Dwight Schrute's does Jim Halpert famously encase in Jell-O in Episode 1?","mediaCaption":"🍮 DUNDER MIFFLIN PRANK","options":["Stapler","Bobblehead","Coffee Mug","Calculator","Nameplate","Keys"],"answerIndex":0,"fact":"The Jell-O stapler prank originally appeared in the UK version of 'The Office' before becoming an instant US classic.","gif":"Bh45DNX3kz5Re","revealGif":"XfYyQFiq9ySc0"},
+  {"id":24,"category":"90s & 2000s Nostalgia","question":"Which iconic 90s Nickelodeon game show ended with contestants racing through 'The Aggro Crag'?","options":["Nickelodeon GUTS","Legends of the Hidden Temple","Double Dare","Figure It Out","Wild & Crazy Kids","What Would You Do?"],"answerIndex":0,"fact":"Winners took home a glowing piece of the radical rock—the Aggro Crag trophy!","mediaCaption":"⛰️ CLIMB THAT THING"},
+  {"id":25,"category":"90s & 2000s Nostalgia","question":"Before streaming took over, what phrase reminded Blockbuster renters to reset a VHS tape?","options":["Be Kind, Rewind","No Late Fees","Make It a Blockbuster Night","Return by Midnight","Check Your Tape","Rewind & Relax"],"answerIndex":0,"fact":"Some video stores charged a fee for unrewound tapes.","mediaCaption":"📼 DON'T MAKE THEM ASK"},
+  {"id":26,"category":"90s & 2000s Nostalgia","question":"Which 1990s dial-up internet provider greeted users with the famous voice clip 'You've Got Mail!'?","options":["AOL (America Online)","CompuServe","Netscape","Prodigy","EarthLink","Yahoo!"],"answerIndex":0,"fact":"Voice actor Elwood Edwards recorded 'You've Got Mail!' in his living room on a cassette deck for $200 in 1989.","mediaCaption":"📬 DIAL-UP DAYS"},
+  {"id":27,"category":"90s & 2000s Nostalgia","question":"What was the name of the coffee shop where the main characters hung out on the sitcom 'Friends'?","options":["Central Perk","Monk's Café","Luke's Diner","MacLaren's Pub","Café Nervosa","The Regal Beagle"],"answerIndex":0,"fact":"The iconic orange velvet couch in Central Perk was discovered in the basement of the Warner Bros. studio lot.","mediaCaption":"🛋️ PIVOT TO THE COUCH"},
+  {"id":28,"category":"90s & 2000s Nostalgia","question":"Which flip phone released in 2004 became an ultra-thin status symbol with a glowing blue keypad?","options":["Motorola RAZR V3","Nokia 3310","Sidekick II","BlackBerry Pearl","LG Chocolate","Sony Ericsson W810"],"answerIndex":0,"fact":"Motorola sold over 130 million RAZR V3 phones, making it the best-selling clamshell phone in history.","mediaCaption":"📱 SNAP IT SHUT"},
+  {"id":29,"category":"90s & 2000s Nostalgia","question":"Which colorful plastic shoes with ventilation holes became a viral comfort phenomenon after launching in 2002?","options":["Crocs","Heelys","Jelly Sandals","Skechers Shape-Ups","Vans Slip-Ons","Birkenstocks"],"answerIndex":0,"fact":"Crocs were originally designed as boating shoes because their foam resin wouldn't slip or leave marks on decks.","mediaCaption":"👟 FASHION? COMFORT."},
+  {"id":30,"category":"90s & 2000s Nostalgia","question":"Which Apple player launched in 2001 promising '1,000 songs in your pocket'?","options":["iPod","Zune","Walkman","Discman","Rio","Zen"],"answerIndex":0,"fact":"The first iPod held 5 GB.","mediaCaption":"🎧 POCKET JUKEBOX"},
+  {"id":31,"category":"Blockbuster Movies","question":"In L. Frank Baum's book 'The Wonderful Wizard of Oz', what color were Dorothy's magic shoes?","options":["Ruby","Silver","Gold","Emerald","Sapphire","Pearl"],"answerIndex":1,"fact":"Hollywood switched them from silver to ruby red to show off the vibrant new Technicolor film process.","mediaCaption":"📖 THE BOOK WAS DIFFERENT"},
+  {"id":32,"category":"Blockbuster Movies","question":"In 'Jurassic Park' (1993), what kind of insect preserved in amber provided the dinosaur DNA?","options":["Mosquito","Dragonfly","Beetle","Wasp","Butterfly","Grasshopper"],"answerIndex":0,"fact":"Scientists extracted dinosaur blood from prehistoric mosquitoes trapped inside fossilized tree sap.","mediaCaption":"🦖 HOLD ONTO YOUR BUTTS","gif":"IEkkhUSoBfbPy"},
+  {"id":33,"category":"Blockbuster Movies","question":"In 'Back to the Future', what speed must the DeLorean reach to trigger time travel?","options":["88 mph","55 mph","100 mph","75 mph","99 mph","121 mph"],"answerIndex":0,"fact":"Doc Brown needed 88 miles per hour and 1.21 gigawatts of power to activate the flux capacitor.","mediaCaption":"⚡ GREAT SCOTT!","gif":"IejMxsGvZbCLzrMDCm"},
+  {"id":34,"category":"Blockbuster Movies","question":"Which movie features the famous line, 'You're gonna need a bigger boat'?","options":["Jaws","Titanic","The Perfect Storm","Cast Away","Pirates of the Caribbean","Free Willy"],"answerIndex":0,"fact":"Roy Scheider ad-libbed it, riffing on a crew joke about their too-small support boat.","mediaCaption":"🦈 CUE THE SCARY MUSIC","revealGif":"57x4ApyRzkI1y"},
+  {"id":35,"category":"Blockbuster Movies","question":"In 'Harry Potter', what platform at King's Cross Station does the Hogwarts Express depart from?","options":["Platform 9¾","Platform 7½","Platform 10¼","Platform 8⅔","Platform 11","Platform 6¾"],"answerIndex":0,"fact":"Students reach Platform 9¾ by walking straight through the brick barrier between Platforms 9 and 10.","mediaCaption":"🚂 ALL ABOARD, WIZARDS"},
+  {"id":36,"category":"Blockbuster Movies","question":"In 'The Matrix' (1999), which color pill does Neo take to learn the truth about the Matrix?","options":["Red Pill","Blue Pill","Green Pill","Silver Pill","Gold Pill","Clear Pill"],"answerIndex":0,"fact":"Morpheus offered Neo the blue pill to wake up in bed believing whatever he wanted, or the red pill to see how deep the rabbit hole goes.","mediaCaption":"💊 CHOOSE WISELY"},
+  {"id":37,"category":"Blockbuster Movies","question":"In 'Star Wars', what material encases Han Solo at the end of 'The Empire Strikes Back'?","options":["Carbonite","Beskar Steel","Kyber Crystal","Durasteel","Amber","Titanium"],"answerIndex":0,"fact":"Darth Vader froze Han Solo in carbonite at Cloud City to test the facility before capturing Luke Skywalker.","mediaCaption":"🧊 ONE COOL SMUGGLER"},
+  {"id":38,"category":"Blockbuster Movies","question":"What is the name of the island where 'King Kong' is discovered in the classic monster movies?","options":["Skull Island","Isla Nublar","Monster Island","Easter Island","Ape Atoll","Dinosaur Island"],"answerIndex":0,"fact":"In the 1933 original, Skull Island hides in fog in the Indian Ocean.","mediaCaption":"🦍 GOING BANANAS"},
+  {"id":39,"category":"Blockbuster Movies","question":"In 'Home Alone', where is the McCallister family flying when they accidentally leave Kevin behind?","options":["Paris","London","Rome","Miami","New York","Madrid"],"answerIndex":0,"fact":"Kevin's dad accidentally threw away Kevin's plane ticket while cleaning up spilled milk the night before.","mediaCaption":"✈️ KEVIN!!!"},
+  {"id":40,"category":"Blockbuster Movies","question":"Which actor voiced the fast-talking donkey sidekick in DreamWorks' 'Shrek'?","options":["Eddie Murphy","Chris Rock","Will Smith","Martin Lawrence","Kevin Hart","Tracy Morgan"],"answerIndex":0,"fact":"Eddie Murphy's performance as Donkey earned him a BAFTA nomination—rare for a voice-only role.","mediaCaption":"🫏 ARE WE THERE YET?"},
+  {"id":41,"category":"Animated & Family Classics","question":"In 'Toy Story', what is the name of the bully kid next door who tortures toys in his bedroom?","options":["Sid Phillips","Andy Davis","Al McWhiggin","Stinky Pete","Lotso","Scud"],"answerIndex":0,"fact":"Sid's carpet pattern in 'Toy Story' matches the exact hexagonal carpet from 'The Shining'.","mediaCaption":"🤠 TOYS IN DANGER"},
+  {"id":42,"category":"Animated & Family Classics","question":"In 'The Lion King', what does the Swahili phrase 'Hakuna Matata' mean?","options":["No worries","Circle of life","Be prepared","King of beasts","Best friends","Follow your heart"],"answerIndex":0,"fact":"Timon and Pumbaa teach young Simba 'Hakuna Matata' to help him leave his past behind.","mediaCaption":"🦁 CHILL LIKE A WARTHOG"},
+  {"id":43,"category":"Animated & Family Classics","question":"In 'Finding Nemo', what street address is written on the diver's goggles that Marlin and Dory look for?","options":["42 Wallaby Way, Sydney","12 Kangaroo Court, Perth","99 Coral Reef, Brisbane","10 Downing St, London","221B Baker St","742 Evergreen Terrace"],"answerIndex":0,"fact":"Dory famously repeats 'P. Sherman, 42 Wallaby Way, Sydney' until she memorizes it.","mediaCaption":"🐠 JUST KEEP SWIMMING"},
+  {"id":44,"category":"Animated & Family Classics","question":"In 'Frozen', what is the name of the summer-loving snowman created by Elsa's magic?","options":["Olaf","Sven","Kristoff","Marshmallow","Oaken","Hans"],"answerIndex":0,"fact":"Olaf dreams of experiencing summer heat without realizing what happens to snow in the sun.","mediaCaption":"⛄ WARM HUGS","revealGif":"tIqKXKcVwmhmU"},
+  {"id":45,"category":"Animated & Family Classics","question":"In 'Aladdin', how many years did the Genie say he was trapped inside the magic lamp?","options":["10,000 years","1,000 years","500 years","100 years","1 million years","5,000 years"],"answerIndex":0,"fact":"Robin Williams recorded about 16 hours of improvised material.","mediaCaption":"🧞 PHENOMENAL COSMIC WAITING"},
+  {"id":46,"category":"Animated & Family Classics","question":"In 'Monsters, Inc.', what powers the city of Monstropolis at the END of the movie?","options":["Children's laughter","Children's screams","Wind turbines","Monster roars","Solar panels","Static electricity"],"answerIndex":0,"fact":"Sulley and Mike discover that kids' laughter is ten times more powerful than screams.","mediaCaption":"👾 SCARE FLOOR SHAKEUP"},
+  {"id":47,"category":"Animated & Family Classics","question":"In 'Moana', what is the name of Moana's pet rooster who accidentally stows away on her canoe?","options":["Heihei","Pua","Maui","Tamatoa","Tala","Sina"],"answerIndex":0,"fact":"Alan Tudyk voices Heihei's clucks and squawks.","mediaCaption":"🐔 NOT THE BRIGHTEST BIRD"},
+  {"id":48,"category":"Animated & Family Classics","question":"In 'Cinderella', what time does the Fairy Godmother's magic spell wear off?","options":["Midnight","11:00 PM","Sunrise","1:00 AM","10:00 PM","3:00 AM"],"answerIndex":0,"fact":"At the twelfth stroke of midnight, her carriage turns back into a pumpkin—leaving behind one glass slipper.","mediaCaption":"⏰ BETTER HURRY HOME"},
+  {"id":49,"category":"Animated & Family Classics","question":"In 'The Incredibles', what is Edna Mode's #1 rule when designing superhero costumes?","options":["No capes!","No masks!","Only spandex!","Always wear boots!","Bright colors only!","No pockets!"],"answerIndex":0,"fact":"Edna lists multiple heroes whose capes got snagged in jet turbines, missiles, and express elevators.","mediaCaption":"🕶️ FASHION RULES, DAHLING","gif":"RXFiL6IR083II"},
+  {"id":50,"category":"Animated & Family Classics","question":"In 'Encanto', which member of the Madrigal family is the subject of the hit song 'We Don't Talk About...'?","options":["Bruno","Camilo","Félix","Agustín","Mariano","Pedro"],"answerIndex":0,"fact":"It was the first song from a Disney animated film to top the Hot 100 since 'A Whole New World'.","mediaCaption":"🤫 WE DON'T TALK ABOUT IT"},
+  {"id":51,"category":"Video Games & Geek Culture","question":"What was Super Mario's original name when he debuted in the 1981 arcade game 'Donkey Kong'?","options":["Jumpman","Mr. Video","Plumber Boy","Red Cap","Luigi Sr.","Wario"],"answerIndex":0,"fact":"Nintendo later renamed Jumpman after Mario Segale, the landlord of Nintendo of America's warehouse.","mediaCaption":"🍄 BEFORE HE WAS FAMOUS"},
+  {"id":52,"category":"Video Games & Geek Culture","question":"In 'Pac-Man', what are the names of the four ghosts that chase Pac-Man through the maze?","options":["Blinky, Pinky, Inky & Clyde","Huey, Dewey, Louie & Webby","Dash, Flash, Crash & Bash","Red, Pink, Blue & Gold","Ghosty, Spooky, Boo & Shadow","Alpha, Beta, Gamma & Delta"],"answerIndex":0,"fact":"Each ghost has unique AI—Blinky chases directly while Clyde wanders away whenever he gets too close.","mediaCaption":"👻 CHOMP AND RUN"},
+  {"id":53,"category":"Video Games & Geek Culture","question":"In 'Minecraft', what green hostile mob sneaks up silently behind players and hisses before exploding?","options":["Creeper","Enderman","Zombie","Skeleton","Slime","Ghast"],"answerIndex":0,"fact":"The Creeper was created by accident when creator Notch mixed up the height and length dimensions of a pig model!","mediaCaption":"💥 HEAR THAT HISS?"},
+  {"id":54,"category":"Video Games & Geek Culture","question":"Which 'Mario Kart' item targets the player in 1st place and explodes on impact?","options":["Spiny Blue Shell","Red Shell","Green Shell","Banana Peel","Lightning Bolt","Blooper Squid"],"answerIndex":0,"fact":"First introduced in 'Mario Kart 64', the Blue Shell was designed to keep lead racers from running away with the race.","mediaCaption":"🏁 FIRST PLACE BEWARE","gif":"tNiFCzpRHlo1W"},
+  {"id":55,"category":"Video Games & Geek Culture","question":"What is the name of the green-tunic hero who rescues Princess Zelda in 'The Legend of Zelda'?","options":["Link","Zelda","Ganon","Epona","Tingle","Navi"],"answerIndex":0,"fact":"Shigeru Miyamoto named him Link because he was meant to be the connection between the player and the game world.","mediaCaption":"🗡️ HEY! LISTEN!"},
+  {"id":56,"category":"Video Games & Geek Culture","question":"In 'Pokémon', what number is Pikachu in the National Pokédex?","options":["#025","#001","#004","#007","#150","#100"],"answerIndex":0,"fact":"Bulbasaur is #001, Charmander is #004, Squirtle is #007, and Pikachu is #025.","mediaCaption":"⚡ GOTTA NUMBER 'EM ALL"},
+  {"id":57,"category":"Video Games & Geek Culture","question":"What is the best-selling video game of all time with over 300 million copies sold?","options":["Minecraft","Tetris","Grand Theft Auto V","Wii Sports","Mario Kart 8","Super Mario Bros."],"answerIndex":0,"fact":"Minecraft surpassed 300 million copies sold across PC, consoles, and mobile devices.","mediaCaption":"💰 SOLD. SOLD. SOLD."},
+  {"id":58,"category":"Video Games & Geek Culture","question":"In 'Sonic the Hedgehog', what golden items protect Sonic from losing a life when he hits an enemy?","options":["Rings","Coins","Emeralds","Stars","Gems","Chili Dogs"],"answerIndex":0,"fact":"As long as Sonic holds at least one Ring, getting hit scatters his rings instead of costing a life.","mediaCaption":"🦔 GOTTA GO FAST"},
+  {"id":59,"category":"Video Games & Geek Culture","question":"What classic cheat code sequence starts with 'Up, Up, Down, Down, Left, Right, Left, Right, B, A'?","options":["The Konami Code","God Mode","Infinite Lives","Warp Zone","Fatality Code","Debug Mode"],"answerIndex":0,"fact":"Created by Kazuhisa Hashimoto while testing 'Gradius' in 1986, it became famous in 'Contra' for granting 30 lives.","mediaCaption":"🎮 UP UP DOWN DOWN"},
+  {"id":60,"category":"Video Games & Geek Culture","question":"In 'Among Us', what do crewmates call an emergency gathering to vote out a suspected Impostor?","options":["Emergency Meeting","Red Alert","Crew Vote","Airlock Trial","Sabotage Check","Sus Summit"],"answerIndex":0,"fact":"Players call one with the emergency button; reporting a body also opens a meeting.","mediaCaption":"🚨 THAT'S KINDA SUS"},
+  {"id":61,"category":"Sports & Championships","question":"Which country invented the modern game of golf in the 15th century?","options":["England","Ireland","Scotland","Netherlands","Sweden","Canada"],"answerIndex":2,"fact":"King James II of Scotland actually banned golf in 1457 because it distracted soldiers from archery practice.","mediaCaption":"⛳ FORE!"},
+  {"id":62,"category":"Sports & Championships","question":"How many total players from ONE team are on the field at the same time during a regulation soccer match?","options":["11","9","10","12","7","8"],"answerIndex":0,"fact":"Each soccer team fields 10 outfield players plus 1 goalkeeper, making 22 players total on the pitch.","mediaCaption":"⚽ SQUAD GOALS"},
+  {"id":63,"category":"Sports & Championships","question":"In bowling, what is it called when you knock down all 10 pins with your very first ball?","options":["Strike","Spare","Turkey","Split","Frame","Gutter"],"answerIndex":0,"fact":"Three strikes in a row is called a 'Turkey', while knocking down all 10 pins in two rolls is a 'Spare'.","mediaCaption":"🎳 PINS EVERYWHERE"},
+  {"id":64,"category":"Sports & Championships","question":"Which NBA legend won six NBA championships with the Chicago Bulls and wore #23?","options":["Michael Jordan","Scottie Pippen","Kobe Bryant","LeBron James","Magic Johnson","Dennis Rodman"],"answerIndex":0,"fact":"Michael Jordan went 6-0 in the NBA Finals and won Finals MVP all six times.","mediaCaption":"🏀 SIX RINGS","revealGif":"iPg2OZbNXc7uM"},
+  {"id":65,"category":"Sports & Championships","question":"In baseball, how many double stitches are on an official Major League Baseball?","options":["108","64","180","90","144","54"],"answerIndex":0,"fact":"Every official MLB baseball is hand-stitched with exactly 108 double stitches of red waxed thread.","mediaCaption":"⚾ SEW MANY STITCHES"},
+  {"id":66,"category":"Sports & Championships","question":"Which tennis legend won 23 Grand Slam singles titles in the Open Era, including the 2017 Australian Open while pregnant?","options":["Serena Williams","Venus Williams","Steffi Graf","Naomi Osaka","Coco Gauff","Billie Jean King"],"answerIndex":0,"fact":"Serena Williams won her 23rd major singles title in Melbourne without dropping a single set.","mediaCaption":"🎾 GAME, SET, MOM"},
+  {"id":67,"category":"Sports & Championships","question":"What is the diameter of a regulation basketball hoop in inches?","options":["18 inches","15 inches","20 inches","24 inches","16 inches","22 inches"],"answerIndex":0,"fact":"An 18-inch rim is nearly twice the width of a standard men's basketball (about 9.4 inches across).","mediaCaption":"🏀 NOTHING BUT NET"},
+  {"id":68,"category":"Sports & Championships","question":"Which trophy is awarded annually to the NHL playoff champion?","options":["Stanley Cup","Lombardi Trophy","Commissioner's Trophy","Larry O'Brien Trophy","Heisman Trophy","Claret Jug"],"answerIndex":0,"fact":"Donated in 1892, the Stanley Cup is the oldest trophy competed for by professional athletes in North America.","mediaCaption":"🏒 HOIST IT HIGH"},
+  {"id":69,"category":"Sports & Championships","question":"In track and field, how long is a full marathon race?","options":["26.2 miles","13.1 miles","20.0 miles","30.0 miles","24.5 miles","10.0 miles"],"answerIndex":0,"fact":"The exact 26.2-mile distance was standardized at the 1908 London Olympics so the race could finish in front of the royal box.","mediaCaption":"🏃 LEGS SAY NO"},
+  {"id":70,"category":"Sports & Championships","question":"Which country has won the most FIFA Men's World Cup championships (5 titles)?","options":["Brazil","Germany","Argentina","Italy","France","Spain"],"answerIndex":0,"fact":"Brazil won the World Cup in 1958, 1962, 1970, 1994, and 2002—and is the only nation to play in every tournament.","mediaCaption":"🌍 FIVE-STAR COUNTRY"},
+  {"id":71,"category":"Odd One Out","question":"ODD ONE OUT: Five of these are Pixar animated films. Which one was made by a different studio?","options":["Coco","Inside Out","Zootopia","Ratatouille","Up","WALL-E"],"answerIndex":2,"fact":"Zootopia was produced by Walt Disney Animation Studios, not Pixar.","mediaCaption":"🎬 ONE OF THESE IS SNEAKY"},
+  {"id":72,"category":"Odd One Out","question":"ODD ONE OUT: Five of these are technically berries in botany. Which one is NOT a true berry?","options":["Banana","Watermelon","Strawberry","Blueberry","Kiwi","Grape"],"answerIndex":2,"fact":"Botanically, bananas and watermelons are berries, while strawberries are aggregate accessory fruits with seeds on the outside.","mediaCaption":"🍓 BERRY SUSPICIOUS"},
+  {"id":73,"category":"Odd One Out","question":"ODD ONE OUT: Five of these U.S. states border the Pacific Ocean. Which one does NOT?","options":["California","Oregon","Washington","Alaska","Hawaii","Idaho"],"answerIndex":5,"fact":"Idaho is landlocked, though Lewiston, Idaho has an inland seaport connected via the Snake and Columbia rivers.","mediaCaption":"🌊 SOMEBODY'S HIGH AND DRY"},
+  {"id":74,"category":"Odd One Out","question":"ODD ONE OUT: Five of these animals are mammals. Which one is NOT?","options":["Dolphin","Bat","Platypus","Penguin","Whale","Armadillo"],"answerIndex":3,"fact":"Penguins are flightless birds, while dolphins, whales, bats, and egg-laying platypuses are all mammals.","mediaCaption":"🐾 ONE DOESN'T BELONG"},
+  {"id":75,"category":"Odd One Out","question":"ODD ONE OUT: Five of these colors appear in the official Olympic Rings. Which one does NOT?","options":["Blue","Yellow","Black","Green","Red","Orange"],"answerIndex":5,"fact":"The five rings are blue, yellow, black, green, and red on a white background.","mediaCaption":"🏅 RING ME UP"},
+  {"id":76,"category":"Odd One Out","question":"ODD ONE OUT: Five of these characters belong to Super Mario's universe. Which one does NOT?","options":["Toad","Yoshi","Bowser","Kirby","Waluigi","Boo"],"answerIndex":3,"fact":"Kirby stars in his own Nintendo franchise created by Masahiro Sakurai and HAL Laboratory.","mediaCaption":"🍄 WRONG GAME, BUDDY"},
+  {"id":77,"category":"Odd One Out","question":"ODD ONE OUT: Five of these instruments belong to the orchestral string family. Which one does NOT?","options":["Violin","Viola","Cello","Double Bass","Harp","Oboe"],"answerIndex":5,"fact":"The oboe is a double-reed woodwind instrument, whereas the harp is a plucked member of the string section.","mediaCaption":"🎻 STRINGS ATTACHED"},
+  {"id":78,"category":"Odd One Out","question":"ODD ONE OUT: Five of these countries are in South America. Which one is in Central America?","options":["Peru","Chile","Costa Rica","Colombia","Ecuador","Uruguay"],"answerIndex":2,"fact":"Costa Rica sits in Central America between Nicaragua and Panama.","mediaCaption":"🗺️ LOST ON THE MAP"},
+  {"id":79,"category":"Odd One Out","question":"ODD ONE OUT: Five of these words are palindromes (spelled the same forward and backward). Which one is NOT?","options":["Kayak","Radar","Level","Civic","Canoe","Rotor"],"answerIndex":4,"fact":"Kayak, radar, level, civic, and rotor all read identically in reverse—canoe spells 'eonac'.","mediaCaption":"🔁 SAME BOTH WAYS?"},
+  {"id":80,"category":"Odd One Out","question":"ODD ONE OUT: Five of these are citrus fruits. Which one is NOT?","options":["Lemon","Lime","Orange","Grapefruit","Tangerine","Mango"],"answerIndex":5,"fact":"Mango is in the same plant family as cashews and pistachios.","mediaCaption":"🍋 SQUEEZE PLAY"},
+  {"id":81,"category":"Closest Match","question":"CLOSEST MATCH: Which of these landmarks is the TALLEST from base to tip?","options":["Statue of Liberty","Great Pyramid of Giza","Eiffel Tower","Big Ben","Space Needle","Washington Monument"],"answerIndex":2,"fact":"The Eiffel Tower stands 1,083 feet tall with its antenna—nearly twice the height of the 555-foot Washington Monument.","mediaCaption":"📏 HOW'S THE AIR UP THERE?"},
+  {"id":82,"category":"Closest Match","question":"CLOSEST MATCH: Which of these animals has the FASTEST top running speed on land?","options":["Greyhound","Lion","Cheetah","Pronghorn Antelope","Quarter Horse","Ostrich"],"answerIndex":2,"fact":"Cheetahs hit bursts of 60–70 mph, ahead of the Pronghorn Antelope at around 55 mph.","mediaCaption":"💨 BLINK AND IT'S GONE"},
+  {"id":83,"category":"Closest Match","question":"CLOSEST MATCH: Which of these inventions came EARLIEST in history?","options":["Telephone","Light Bulb","Steam Locomotive","Airplane","Radio","Television"],"answerIndex":2,"fact":"Richard Trevithick built the first full-scale working steam locomotive in 1804—over 70 years before the telephone.","mediaCaption":"💡 WHO CAME FIRST?"},
+  {"id":84,"category":"Closest Match","question":"CLOSEST MATCH: Which of these U.S. cities is located FARTHEST NORTH?","options":["Boston, MA","Chicago, IL","Seattle, WA","Minneapolis, MN","Detroit, MI","New York, NY"],"answerIndex":2,"fact":"Seattle sits at 47.6° N latitude—farther north than Toronto, Montreal, and every city in Maine.","mediaCaption":"🧭 BRING A COAT"},
+  {"id":85,"category":"Closest Match","question":"CLOSEST MATCH: Which of these sports uses the HEAVIEST regulation ball?","options":["Basketball","Soccer Ball","Volleyball","Baseball","Softball","Bowling Ball (Max)"],"answerIndex":5,"fact":"A regulation ten-pin bowling ball can weigh up to 16 pounds, compared to a men's basketball at about 1.4 pounds.","mediaCaption":"🏋️ HEAVY HITTER"},
+  {"id":86,"category":"Closest Match","question":"CLOSEST MATCH: Which of these planets has the MOST confirmed moons?","options":["Earth","Mars","Jupiter","Saturn","Uranus","Neptune"],"answerIndex":3,"fact":"Saturn leads by a wide margin, with more than 280 confirmed moons.","mediaCaption":"🪐 MOON MAGNET"},
+  {"id":87,"category":"Closest Match","question":"CLOSEST MATCH: Which of these foods typically contains the MOST water by weight?","options":["Cucumber","Watermelon","Apple","Carrot","Banana","Potato"],"answerIndex":0,"fact":"Cucumbers are roughly 96% water, beating even watermelon at about 92%.","mediaCaption":"💦 STAY HYDRATED"},
+  {"id":88,"category":"Closest Match","question":"CLOSEST MATCH: Which of these classic animated Disney movies was released EARLIEST?","options":["Cinderella","Snow White","Pinocchio","Bambi","Dumbo","Peter Pan"],"answerIndex":1,"fact":"Snow White and the Seven Dwarfs premiered in December 1937 as Disney's first full-length animated feature.","mediaCaption":"🏰 OLD SCHOOL MAGIC"},
+  {"id":89,"category":"Closest Match","question":"CLOSEST MATCH: By the usual textbook measure, which of these rivers is the LONGEST in the world?","options":["Amazon River","Nile River","Mississippi River","Yangtze River","Danube River","Colorado River"],"answerIndex":1,"fact":"The Nile stretches roughly 4,132 miles through northeastern Africa, narrowly ahead of the Amazon (~4,000 miles).","mediaCaption":"🛶 LONG HAUL"},
+  {"id":90,"category":"Closest Match","question":"CLOSEST MATCH: Which of these metals conducts electricity the BEST?","options":["Gold","Copper","Silver","Aluminum","Iron","Lead"],"answerIndex":2,"fact":"Silver has the highest electrical conductivity of any metal, though copper is used in wiring because it is far more affordable.","mediaCaption":"🔌 CURRENT EVENTS"},
+  {"id":91,"category":"Food & Kitchen Trivia","question":"Which fruit floats in water because roughly 25% of its volume is air?","options":["Banana","Mango","Apple","Pineapple","Grape","Peach"],"answerIndex":2,"fact":"Tiny air pockets between apple cells make them buoyant—which is why bobbing for apples works.","mediaCaption":"🛁 BOBBING ALONG"},
+  {"id":92,"category":"Food & Kitchen Trivia","question":"Which food made by bees can last for centuries without spoiling?","options":["Honey","Maple Syrup","Olive Oil","Molasses","Peanut Butter","Apple Cider"],"answerIndex":0,"fact":"Honey's low moisture content and natural acidity prevent bacteria from growing.","mediaCaption":"🐝 BEE PATIENT"},
+  {"id":93,"category":"Food & Kitchen Trivia","question":"What is the main ingredient in traditional Japanese miso soup paste?","options":["Fermented soybeans","Seaweed","Rice flour","Sesame seeds","Sweet potato","Bamboo shoots"],"answerIndex":0,"fact":"Miso is made by fermenting soybeans with salt and koji (a beneficial fermentation culture).","mediaCaption":"🍜 SOUP'S ON"},
+  {"id":94,"category":"Food & Kitchen Trivia","question":"Which spice is the most expensive in the world by weight because it must be hand-harvested from crocus flowers?","options":["Saffron","Vanilla Bean","Cardamom","Cinnamon","Nutmeg","Star Anise"],"answerIndex":0,"fact":"It takes roughly 75,000 saffron crocus blossoms to produce a single pound of saffron threads.","mediaCaption":"💸 SPICY PRICE TAG"},
+  {"id":95,"category":"Food & Kitchen Trivia","question":"What type of nut is used to make traditional Italian pesto sauce?","options":["Pine nuts","Walnuts","Almonds","Cashews","Pecans","Hazelnuts"],"answerIndex":0,"fact":"Classic Pesto alla Genovese blends fresh basil, pine nuts, garlic, Parmesan cheese, and olive oil.","mediaCaption":"🌿 PESTO CHANGE-O"},
+  {"id":96,"category":"Food & Kitchen Trivia","question":"Who created the chocolate chip cookie at the Toll House Inn in the 1930s?","options":["Ruth Wakefield","Julia Child","Sara Lee","Debbi Fields","Betty Crocker","Martha Washington"],"answerIndex":0,"fact":"Nestlé later printed her recipe on its packaging.","mediaCaption":"🍪 THANK THIS GENIUS"},
+  {"id":97,"category":"Food & Kitchen Trivia","question":"Which fruit is actually a giant herb plant rather than a tree, and grows upside-down in 'hands'?","options":["Banana","Papaya","Coconut","Fig","Avocado","Pomegranate"],"answerIndex":0,"fact":"Banana plants have no woody trunk—their 'stem' is tightly wrapped leaf bases.","mediaCaption":"🌱 HERB APPEAL"},
+  {"id":98,"category":"Food & Kitchen Trivia","question":"What scale is used to measure the spicy heat level of chili peppers?","options":["Scoville Scale","Richter Scale","Beaufort Scale","Mohs Scale","Kelvin Scale","pH Scale"],"answerIndex":0,"fact":"Pharmacist Wilbur Scoville invented the Scoville Organoleptic Test in 1912 to measure capsaicin concentration.","mediaCaption":"🌶️ SOMEBODY GET MILK"},
+  {"id":99,"category":"Food & Kitchen Trivia","question":"Which creamy green fruit is the main ingredient in guacamole?","options":["Avocado","Kiwi","Tomatillo","Artichoke","Zucchini","Edamame"],"answerIndex":0,"fact":"Avocados are technically large single-seeded berries native to south-central Mexico.","mediaCaption":"🥑 HOLY GUACAMOLE"},
+  {"id":100,"category":"Food & Kitchen Trivia","question":"In which U.S. state were chocolate-covered peanut butter Buckeye candies invented?","options":["Ohio","Georgia","Pennsylvania","Wisconsin","Texas","Indiana"],"answerIndex":0,"fact":"They are named after the nut of the Ohio buckeye tree, Ohio's official state tree.","mediaCaption":"🌰 SWEET HOME CANDY"},
+  {"id":101,"category":"Animals & Nature","question":"Which animal has rectangular pupils that give it a nearly 320-degree field of vision?","options":["Chameleon","Goat","Owl","Tree Frog","Cat","Mantis Shrimp"],"answerIndex":1,"fact":"Horizontal rectangular pupils help grazing animals like goats and sheep spot predators approaching from the horizon.","mediaCaption":"👀 SIDE-EYE CHAMPION"},
+  {"id":102,"category":"Animals & Nature","question":"How many hearts does an octopus have?","options":["1","2","3","4","6","8"],"answerIndex":2,"fact":"Two branchial hearts pump blood through the gills, while a third systemic heart circulates it to the rest of the body.","mediaCaption":"🐙 ALL HEART"},
+  {"id":103,"category":"Animals & Nature","question":"What is a group of flamingos famously called?","options":["A flamboyance","A parade","A shimmer","A blush","A gaggle","A prism"],"answerIndex":0,"fact":"Flamingos get their bright pink feathers from carotenoid pigments in the shrimp and algae they eat.","mediaCaption":"🦩 SQUAD IN PINK"},
+  {"id":104,"category":"Animals & Nature","question":"Which bird is the ONLY one known to be able to fly backward?","options":["Hummingbird","Kingfisher","Peregrine Falcon","Swallow","Woodpecker","Albatross"],"answerIndex":0,"fact":"Hummingbirds rotate their wings in a figure-eight pattern up to 80 times per second, letting them hover and fly in reverse.","mediaCaption":"🐦 REVERSE, REVERSE"},
+  {"id":105,"category":"Animals & Nature","question":"What color is a polar bear's actual skin underneath its white-looking fur?","options":["Black","Pink","White","Gray","Dark Blue","Tan"],"answerIndex":0,"fact":"Polar bears have black skin to absorb heat from the sun, and hollow, transparent hairs that scatter light to look white.","mediaCaption":"🐻‍❄️ SKIN DEEP"},
+  {"id":106,"category":"Animals & Nature","question":"Which sea creature holds hands with its partner while sleeping so they don't drift apart in ocean currents?","options":["Sea Otter","Manatee","Sea Lion","Harbor Seal","Walrus","Narwhal"],"answerIndex":0,"fact":"Sea otters also wrap themselves in giant kelp beds like an anchor while they nap.","mediaCaption":"🥰 HOLD MY PAW","revealGif":"dQ234KLlgOgWA"},
+  {"id":107,"category":"Animals & Nature","question":"Which insect tastes its food using sensory receptors located on its feet?","options":["Butterfly","Praying Mantis","Ladybug","Dragonfly","Firefly","Bumblebee"],"answerIndex":0,"fact":"Butterflies land on leaves and taste them with their feet to verify it's the right plant to lay eggs on.","mediaCaption":"👣 TASTY TOES"},
+  {"id":108,"category":"Animals & Nature","question":"What is the hardest natural substance found in the human body?","options":["Femur Bone","Kneecap","Tooth Enamel","Skull","Fingernails","Cartilage"],"answerIndex":2,"fact":"Tooth enamel is 96% mineral, making it even harder than bone—though it cannot regenerate once worn away.","mediaCaption":"💪 TOUGH STUFF"},
+  {"id":109,"category":"Animals & Nature","question":"Which Australian marsupial has cube-shaped poop that prevents it from rolling away?","options":["Wombat","Koala","Quokka","Wallaby","Tasmanian Devil","Kangaroo"],"answerIndex":0,"fact":"Wombats stack their cube-shaped droppings to mark territory without them rolling down hills.","mediaCaption":"🎲 SQUARE DEAL"},
+  {"id":110,"category":"Animals & Nature","question":"How long does it take for light from the Sun to reach Earth?","options":["About 8 minutes","About 1 second","About 1 hour","About 24 hours","About 30 seconds","About 45 minutes"],"answerIndex":0,"fact":"Traveling at 186,282 miles per second, sunlight covers the 93 million miles to Earth in 8 minutes and 20 seconds.","mediaCaption":"☀️ SPECIAL DELIVERY"},
+  {"id":111,"category":"World Geography","question":"What is the only letter in the English alphabet that does not appear in any U.S. state name?","options":["J","K","Q","V","X","Z"],"answerIndex":2,"fact":"Every other letter shows up at least once—even X (New Mexico, Texas) and Z (Arizona).","mediaCaption":"🔤 ONE LONELY LETTER"},
+  {"id":112,"category":"World Geography","question":"Which country has the most natural lakes in the world?","options":["Canada","Russia","United States","Finland","Brazil","Sweden"],"answerIndex":0,"fact":"Canada has hundreds of thousands of lakes.","mediaCaption":"🏞️ LAKE LIFE"},
+  {"id":113,"category":"World Geography","question":"Which continent contains NO permanent human residents and NO countries?","options":["Antarctica","Australia","Greenland","South America","Africa","Europe"],"answerIndex":0,"fact":"Antarctica is governed by the international Antarctic Treaty and is home only to rotating scientific researchers.","mediaCaption":"🧳 NO NEIGHBORS"},
+  {"id":114,"category":"World Geography","question":"In which European city can you visit the Colosseum and the Trevi Fountain?","options":["Rome","Athens","Paris","Madrid","Vienna","Lisbon"],"answerIndex":0,"fact":"Over 3,000 euros are tossed into Rome's Trevi Fountain every single day and donated to local charities.","mediaCaption":"⛲ TOSS A COIN"},
+  {"id":115,"category":"World Geography","question":"Which U.S. state is made up entirely of islands in the Pacific Ocean?","options":["Hawaii","Alaska","Florida","Rhode Island","California","Maine"],"answerIndex":0,"fact":"The Hawaiian archipelago spans 137 volcanic islands, atolls, and islets across 1,500 miles.","mediaCaption":"🌺 ISLAND LIFE"},
+  {"id":116,"category":"World Geography","question":"Which canal connects the Atlantic Ocean and the Pacific Ocean across Central America?","options":["Panama Canal","Suez Canal","Erie Canal","Grand Canal","Kiel Canal","Corinth Canal"],"answerIndex":0,"fact":"Ships traveling through the 51-mile Panama Canal save roughly 8,000 miles compared to sailing around South America.","mediaCaption":"🚢 SHORTCUT!"},
+  {"id":117,"category":"World Geography","question":"Which desert in northern Africa is the largest hot desert in the world?","options":["Sahara Desert","Gobi Desert","Mojave Desert","Arabian Desert","Kalahari Desert","Atacama Desert"],"answerIndex":0,"fact":"Covering 3.6 million square miles, the Sahara is roughly the same size as the entire United States.","mediaCaption":"🐪 BRING WATER"},
+  {"id":118,"category":"World Geography","question":"What is the capital city of Japan?","options":["Tokyo","Kyoto","Osaka","Hiroshima","Sapporo","Yokohama"],"answerIndex":0,"fact":"Tokyo's urban area has about 33 million people, third in the UN's 2025 ranking.","mediaCaption":"🗼 BIG CITY BRIGHT LIGHTS"},
+  {"id":119,"category":"World Geography","question":"Which U.S. National Park is home to the famous geyser named 'Old Faithful'?","options":["Yellowstone","Yosemite","Grand Canyon","Zion","Glacier","Acadia"],"answerIndex":0,"fact":"Established in 1872, Yellowstone was the very first national park in the United States and the world.","mediaCaption":"♨️ RIGHT ON SCHEDULE"},
+  {"id":120,"category":"World Geography","question":"Which mountain in the Himalayas has the highest peak above sea level on Earth?","options":["Mount Everest","K2","Mount Kilimanjaro","Denali","Mount Fuji","Mont Blanc"],"answerIndex":0,"fact":"Mount Everest reaches 29,032 feet above sea level on the border between Nepal and Tibet.","mediaCaption":"🏔️ TOP OF THE WORLD"}
+];
+const REACTIONS = {"all":["0lFBBVfvcWCUPamDfv","lsJCkIKV6AT28","aOL3fsoTtf5yU"],"some":["nTE6nHdPzsO26VbrYh","H5C8CevNMbpBqNqFjl","3gNotAoIRZsb9UHPnj"],"none":["XD4qHZpkyUFfq","3og0INyCmHlNylks9O","e5uyWolyR0y30Wo1ya","nAvSNP8Y3F94hq9Rga"],"podium":["lsJCkIKV6AT28","DyeL7OnyoPJdUyKs0e","3oriO6iUQtH2P0iaZ2"],"lobby":["u5XNBmPvY1vJ6"]};
+
+const TILE_META = [
+  { letter:"A", shape:"▲", color:"var(--opt-0)" }, { letter:"B", shape:"●", color:"var(--opt-1)" },
+  { letter:"C", shape:"★", color:"var(--opt-2)" }, { letter:"D", shape:"■", color:"var(--opt-3)" },
+  { letter:"E", shape:"◆", color:"var(--opt-4)" }, { letter:"F", shape:"⬡", color:"var(--opt-5)" }
+];
+const AVATARS = ["🦃","🦊","🐼","🦁","🐸","🐙","🦄","🐧","🐯","🐨","🦖","🐝","🦉","🐢","🦋","🐶"];
+const BOT_NAMES = ["Aunt Maya","Uncle Leo","Grandma Jo","Cousin Sam","Nana Kay","Kid Ace"];
+const PREFIX = "ppr-sixpack-";
+const QUESTION_DURATION = 60;
+const MAX_PLAYERS = 24;
+const ALL_CATEGORIES = [...new Set(QUESTIONS.map(q => q.category))];
+
+/* ================= HELPERS ================= */
+const $ = id => document.getElementById(id);
+function store(key, val) { try { if (val === undefined) return localStorage.getItem(key); if (val === null) localStorage.removeItem(key); else localStorage.setItem(key, val); } catch (e) { return null; } }
+function escapeHtml(s) { return String(s).replace(/[&<>"']/g, m => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[m])); }
+function shuffle(arr) { const a = arr.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
+function pickOne(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+function gifUrl(id) { return id ? "https://media.giphy.com/media/" + id + "/giphy.gif" : ""; }
+let wakeLock = null, wantWake = false;
+async function keepAwake() { wantWake = true; try { if (navigator.wakeLock && document.visibilityState === "visible") wakeLock = await navigator.wakeLock.request("screen"); } catch (e) {} }
+document.addEventListener("visibilitychange", () => { if (wantWake && document.visibilityState === "visible") keepAwake(); });
+
+/* Meme card sits underneath; the GIF covers it only after it loads. */
+function setMedia(frame, url, caption) {
+  frame.classList.remove("loaded");
+  frame.innerHTML = "";
+  const parts = String(caption || "🎲 TRIVIA TIME").split(" ");
+  const emoji = parts.shift(), words = parts.join(" ");
+  const card = document.createElement("div");
+  card.className = "meme-card";
+  card.innerHTML = `<div class="meme-emoji">${escapeHtml(emoji)}</div><div class="meme-caption">${escapeHtml(words)}</div>`;
+  frame.appendChild(card);
+  if (!url) return;
+  const img = document.createElement("img");
+  img.alt = "";
+  img.addEventListener("load", () => { if (img.parentNode === frame) frame.classList.add("loaded"); });
+  img.addEventListener("error", () => img.remove());
+  img.src = url;
+  const bar = document.createElement("div");
+  bar.className = "meme-bar meme-caption";
+  bar.textContent = words;
+  frame.append(img, bar);
+}
+
+/* ================= 2. MODE SWITCHING ================= */
+function switchMode(mode) {
+  $("hostView").classList.toggle("active", mode === "host");
+  $("phoneView").classList.toggle("active", mode === "phone");
+  $("btnModeHost").classList.toggle("active", mode === "host");
+  $("btnModePhone").classList.toggle("active", mode === "phone");
+  $("btnFullscreen").hidden = mode !== "host" || !document.documentElement.requestFullscreen;
+  document.body.classList.toggle("playing", mode === "phone" && client.joined);
+  if (mode === "host" && !hostPeer) initHost();
+}
+
+/* ================= 3. HOST ENGINE ================= */
+let hostPeer = null, roomCode = "", deck = [], currentIdx = -1, phase = "LOBBY", gameId = 0;
+let questionStartTime = 0, timerInterval = null, botTimers = [], revealPending = null;
+let safetyNetEnabled = true, botCounter = 0;
+const players = new Map();
+const selectedCategories = new Set(ALL_CATEGORIES);
+const usedIds = new Set();
+
+function generateRoomCode() {
+  const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+  let code = "";
+  for (let i = 0; i < 4; i++) code += chars[Math.floor(Math.random() * chars.length)];
+  return code;
+}
+function joinAddress() { return location.protocol.startsWith("http") ? location.host + location.pathname.replace(/index\.html$/, "").replace(/\/$/, "") : ""; }
+function renderJoinLine() {
+  const addr = joinAddress();
+  $("joinLine").innerHTML = addr
+    ? `On your phone, go to <b>${escapeHtml(addr)}</b><br>and enter room code <b>${escapeHtml(roomCode)}</b>`
+    : `⚠️ Phones can't join a file opened from this computer. Put it online first, then share that web address.`;
+}
+function initHost() {
+  if (typeof Peer === "undefined") { $("hostStatusText").textContent = "⚠️ Couldn't load the connection library. Check the internet and refresh."; return; }
+  roomCode = generateRoomCode();
+  $("hostRoomCode").textContent = roomCode;
+  renderJoinLine();
+  $("hostStatusText").textContent = "Opening the room...";
+  const peer = new Peer(PREFIX + roomCode);
+  hostPeer = peer;
+  peer.on("open", () => { $("hostStatusText").textContent = "🟢 Room Open & Ready"; });
+  peer.on("disconnected", () => {
+    $("hostStatusText").textContent = "🟡 Reconnecting the room...";
+    setTimeout(() => { if (hostPeer === peer && !peer.destroyed && peer.disconnected) peer.reconnect(); }, 1500);
+  });
+  peer.on("error", err => {
+    if (hostPeer !== peer) return;
+    if (err.type === "unavailable-id" && players.size === 0) { peer.destroy(); initHost(); return; }
+    $("hostStatusText").textContent = "⚠️ Network hiccup: " + err.type;
+    if (peer.destroyed && players.size === 0) setTimeout(() => { if (hostPeer === peer) initHost(); }, 3000);
+  });
+  peer.on("connection", conn => {
+    conn.on("data", msg => handleHostMessage(conn, msg));
+    conn.on("close", () => {
+      const p = players.get(conn.pid);
+      if (p && p.conn === conn) { p.lastSeen = 0; refreshPlayers(); checkAllAnswered(); }
+    });
+  });
+}
+function isConnected(p) { return p.isBot || !!(p.conn && p.conn.open && Date.now() - p.lastSeen < 12000); }
+function safeSend(conn, data) { try { if (conn && conn.open) conn.send(data); } catch (e) {} }
+
+function newPlayer(id, name, conn, isBot) {
+  const taken = new Set([...players.values()].map(p => p.avatar));
+  const avatar = AVATARS.find(a => !taken.has(a)) || pickOne(AVATARS);
+  return { id, name, avatar, conn, isBot, score:0, streak:0, picks:[], locked:false, staged:null, pickTime:0, lastEarned:0, lastSeen:Date.now() };
+}
+function handleHostMessage(conn, msg) {
+  if (!msg || !msg.type) return;
+  if (msg.type === "JOIN") {
+    let pid = String(msg.playerId || conn.peer).slice(0, 40);
+    const name = String(msg.name || "Player").trim().slice(0, 14) || "Player";
+    /* Two tabs on one device share an ID; a different nickname makes a separate player. */
+    const holder = players.get(pid);
+    if (holder && holder.name !== name && (players.has(pid + "~" + name) || isConnected(holder))) pid += "~" + name;
+    let p = players.get(pid);
+    if (p) {
+      const old = p.conn;
+      p.conn = conn; p.lastSeen = Date.now(); p.name = name; conn.pid = pid;
+      if (old && old !== conn) { safeSend(old, { type:"REPLACED" }); setTimeout(() => { try { old.close(); } catch (e) {} }, 500); }
+    } else {
+      if (players.size >= MAX_PLAYERS) { safeSend(conn, { type:"FULL" }); setTimeout(() => { try { conn.close(); } catch (e) {} }, 500); return; }
+      p = newPlayer(pid, name, conn, false); conn.pid = pid; players.set(pid, p);
+    }
+    refreshPlayers(); syncPlayer(p);
+    return;
+  }
+  const p = players.get(conn.pid);
+  if (!p || p.conn !== conn) return;
+  const wasAway = !isConnected(p);
+  p.lastSeen = Date.now();
+  if (wasAway) refreshPlayers();
+  if (msg.type === "PING") { safeSend(conn, { type:"PONG" }); return; }
+  if (msg.type === "LEAVE") { players.delete(p.id); refreshPlayers(); checkAllAnswered(); return; }
+  if (phase !== "QUESTION" || msg.key !== roundKey() || p.locked) return;
+  const valid = n => Number.isInteger(n) && n >= 0 && n <= 5;
+  if (msg.type === "STAGE") { p.staged = safetyNetEnabled && valid(msg.choice) ? msg.choice : null; return; }
+  if (msg.type === "PICK") {
+    const picks = [...new Set(Array.isArray(msg.picks) ? msg.picks : [])].filter(valid).slice(0, safetyNetEnabled ? 2 : 1);
+    if (!picks.length) return;
+    p.picks = picks; p.locked = true; p.staged = null; p.pickTime = Date.now();
+    renderDock(); syncPlayer(p); checkAllAnswered();
+  }
+}
+setInterval(() => { if (!hostPeer || !players.size) return; renderDock(); checkAllAnswered(); }, 2000);
+
+function addBotPlayer() {
+  if (players.size >= MAX_PLAYERS) return;
+  const pid = "bot-" + (++botCounter) + "-" + Date.now();
+  players.set(pid, newPlayer(pid, BOT_NAMES[(botCounter - 1) % BOT_NAMES.length], null, true));
+  refreshPlayers();
+}
+function removePlayer(id) {
+  const p = players.get(id);
+  if (!p) return;
+  safeSend(p.conn, { type:"KICK" });
+  players.delete(id);
+  refreshPlayers();
+  checkAllAnswered();
+}
+function refreshPlayers() { renderLobbyPlayers(); renderDock(); }
+function renderLobbyPlayers() {
+  const grid = $("lobbyPlayerGrid");
+  grid.innerHTML = "";
+  players.forEach(p => {
+    const chip = document.createElement("div");
+    chip.className = "player-chip";
+    chip.innerHTML = `<span>${p.avatar}</span><span>${escapeHtml(p.name)}</span>${p.isBot ? '<span style="font-size:.7rem;color:var(--accent)">BOT</span>' : isConnected(p) ? "" : "<span>💤</span>"}`;
+    const x = document.createElement("button");
+    x.type = "button"; x.textContent = "✕"; x.title = "Remove " + p.name;
+    x.addEventListener("click", () => removePlayer(p.id));
+    chip.appendChild(x);
+    grid.appendChild(chip);
+  });
+  $("lobbyEmptyHint").hidden = players.size > 0;
+  updateStartReadiness();
+}
+
+/* ---- Lobby: categories & Safety Net ---- */
+function matchingPool() { return QUESTIONS.filter(q => selectedCategories.has(q.category)); }
+function updateStartReadiness() {
+  const n = matchingPool().length;
+  $("selectedCatCount").textContent = selectedCategories.size;
+  $("matchingPoolHint").textContent = `${n} questions ready`;
+  $("btnStartGame").disabled = players.size === 0 || n === 0;
+}
+function renderCategoryChips() {
+  const grid = $("categoryChipGrid");
+  grid.innerHTML = "";
+  ALL_CATEGORIES.forEach(cat => {
+    const on = selectedCategories.has(cat);
+    const b = document.createElement("button");
+    b.type = "button";
+    b.className = "cat-toggle-chip" + (on ? " selected" : "");
+    b.setAttribute("aria-pressed", on);
+    b.innerHTML = `<span>${on ? "✓" : "+"}</span> ${escapeHtml(cat)} <span style="opacity:.6">(${QUESTIONS.filter(q => q.category === cat).length})</span>`;
+    b.addEventListener("click", () => { if (on) selectedCategories.delete(cat); else selectedCategories.add(cat); renderCategoryChips(); });
+    grid.appendChild(b);
+  });
+  updateStartReadiness();
+}
+function setAllCategories(all) { selectedCategories.clear(); if (all) ALL_CATEGORIES.forEach(c => selectedCategories.add(c)); renderCategoryChips(); }
+function renderSafetyToggle() {
+  const b = $("btnToggleSafetyNet");
+  b.classList.toggle("selected", safetyNetEnabled);
+  b.textContent = safetyNetEnabled ? "🛡️ Safety Net Hedge: ON (2 Picks = 400 pts)" : "🛡️ Safety Net Hedge: OFF (1 Pick Only)";
+}
+
+/* ---- Game flow ---- */
+/* Draws evenly across the chosen categories, unseen questions first, then shuffles each option set. */
+function buildDeck(count) {
+  const buckets = shuffle([...selectedCategories]).map(cat => {
+    const all = QUESTIONS.filter(q => q.category === cat);
+    return shuffle(all.filter(q => !usedIds.has(q.id))).concat(shuffle(all.filter(q => usedIds.has(q.id))));
+  }).filter(b => b.length);
+  const out = [];
+  while (out.length < count && buckets.some(b => b.length)) {
+    for (const b of buckets) { if (out.length >= count) break; if (b.length) out.push(b.shift()); }
+  }
+  return shuffle(out).map(q => {
+    const order = shuffle([0,1,2,3,4,5]);
+    return { ...q, options: order.map(i => q.options[i]), answerIndex: order.indexOf(q.answerIndex) };
+  });
+}
+function showHostPanel(name) { $("hostLobby").hidden = name !== "lobby"; $("hostStage").hidden = name !== "stage"; $("hostPodium").hidden = name !== "podium"; }
+function startGame() {
+  const pool = matchingPool();
+  if (!pool.length || !players.size) return;
+  const v = $("roundCountSelect").value;
+  deck = buildDeck(v === "ALL" ? pool.length : Math.min(Number(v) || 10, pool.length));
+  currentIdx = -1; gameId = Date.now();
+  players.forEach(p => { p.score = 0; p.streak = 0; });
+  keepAwake();
+  showHostPanel("stage");
+  nextQuestion();
+}
+function roundKey() { return gameId + ":" + currentIdx; }
+function clearRoundTimers() { clearInterval(timerInterval); botTimers.forEach(clearTimeout); botTimers = []; clearTimeout(revealPending); revealPending = null; }
+
+function nextQuestion() {
+  clearRoundTimers();
+  currentIdx++;
+  if (currentIdx >= deck.length) { showPodium(); return; }
+  phase = "QUESTION";
+  const q = deck[currentIdx];
+  usedIds.add(q.id);
+  questionStartTime = Date.now();
+  players.forEach(p => { p.picks = []; p.locked = false; p.staged = null; p.pickTime = 0; p.lastEarned = 0; });
+
+  $("hostRoundBadge").textContent = `ROUND ${currentIdx + 1} / ${deck.length}`;
+  $("qCategory").textContent = q.category;
+  $("qText").textContent = q.question;
+  $("factBox").hidden = true;
+  $("btnRevealEarly").hidden = false;
+  $("btnNextQuestion").hidden = true;
+  setMedia($("mediaFrame"), gifUrl(q.gif), q.mediaCaption);
+
+  const grid = $("hostOptionsGrid");
+  grid.innerHTML = "";
+  q.options.forEach((opt, i) => {
+    const m = TILE_META[i];
+    const tile = document.createElement("div");
+    tile.className = "host-tile"; tile.id = "hostTile-" + i;
+    tile.innerHTML = `<div class="vote-bar" id="voteBar-${i}" style="background:${m.color}"></div>
+      <div class="tile-badge" style="background:${m.color}"><span style="font-size:.85rem;line-height:1">${m.shape}</span><span style="font-size:1.1rem;line-height:1">${m.letter}</span></div>
+      <div class="tile-label">${escapeHtml(opt)}</div><div class="vote-count" id="voteCount-${i}" hidden></div>`;
+    grid.appendChild(tile);
+  });
+
+  [q.revealGif, deck[currentIdx + 1] && deck[currentIdx + 1].gif].forEach(id => { if (id) new Image().src = gifUrl(id); });
+  renderDock(); broadcastState(); scheduleBotAnswers(q);
+
+  $("timerFill").style.width = "100%";
+  $("timerNum").textContent = QUESTION_DURATION + "s";
+  timerInterval = setInterval(() => {
+    const elapsed = (Date.now() - questionStartTime) / 1000;
+    $("timerFill").style.width = Math.max(0, 100 - elapsed / QUESTION_DURATION * 100) + "%";
+    $("timerNum").textContent = Math.max(0, Math.ceil(QUESTION_DURATION - elapsed)) + "s";
+    if (elapsed >= QUESTION_DURATION) revealAnswer();
+  }, 200);
+}
+function scheduleBotAnswers(q) {
+  players.forEach(p => {
+    if (!p.isBot) return;
+    botTimers.push(setTimeout(() => {
+      if (phase !== "QUESTION" || p.locked) return;
+      const first = Math.random() < .55 ? q.answerIndex : Math.floor(Math.random() * 6);
+      p.picks = [first];
+      if (safetyNetEnabled && Math.random() < .35) p.picks.push(pickOne([0,1,2,3,4,5].filter(n => n !== first)));
+      p.locked = true; p.pickTime = Date.now();
+      renderDock(); checkAllAnswered();
+    }, 2500 + Math.random() * 8000));
+  });
+}
+function everyoneIn() { const here = [...players.values()].filter(isConnected); return here.length > 0 && here.every(p => p.locked); }
+function checkAllAnswered() {
+  if (phase !== "QUESTION" || revealPending || !everyoneIn()) return;
+  const key = roundKey();
+  revealPending = setTimeout(() => { revealPending = null; if (phase === "QUESTION" && key === roundKey() && everyoneIn()) revealAnswer(); }, 700);
+}
+function revealAnswer() {
+  if (phase !== "QUESTION") return;
+  phase = "REVEAL";
+  clearRoundTimers();
+  $("timerFill").style.width = "0%";
+  $("timerNum").textContent = "0s";
+  const q = deck[currentIdx], counts = [0,0,0,0,0,0];
+  let answered = 0, hits = 0;
+  players.forEach(p => {
+    if (!p.locked && p.staged !== null) { p.picks = [p.staged]; p.pickTime = Date.now(); }
+    p.locked = true;
+    if (p.picks.length) answered++;
+    p.picks.forEach(i => counts[i]++);
+    const hit = p.picks.includes(q.answerIndex);
+    if (hit) hits++;
+    if (hit && p.picks.length === 1) {
+      const elapsed = Math.min(QUESTION_DURATION, (p.pickTime - questionStartTime) / 1000);
+      const speed = Math.round(Math.max(0, 1 - elapsed / QUESTION_DURATION) * 400);
+      p.streak++;
+      p.lastEarned = 600 + speed + (p.streak > 1 ? 100 : 0);
+      if (safetyNetEnabled) p.lastEarned = Math.min(1000, p.lastEarned);
+    } else {
+      p.streak = 0;
+      p.lastEarned = hit ? 400 : 0;
+    }
+    p.score += p.lastEarned;
+    p.playedKey = roundKey();
+  });
+  q.options.forEach((_, i) => {
+    const pct = answered ? Math.round(counts[i] / answered * 100) : 0;
+    $("voteBar-" + i).style.width = pct + "%";
+    const c = $("voteCount-" + i); c.textContent = `${counts[i]} (${pct}%)`; c.hidden = false;
+    $("hostTile-" + i).classList.add(i === q.answerIndex ? "correct" : "dimmed");
+  });
+  const mood = !answered || !hits ? "none" : hits === answered ? "all" : "some";
+  const reactionCaption = { all:"🔥 EVERYBODY ATE!", some:"👀 SOME OF Y'ALL KNEW", none:"🤦 NOT ONE OF Y'ALL!" }[mood];
+  setMedia($("mediaFrame"), gifUrl(q.revealGif || pickOne(REACTIONS[mood])), reactionCaption);
+  $("factBox").innerHTML = `💡 <strong>Did You Know?</strong> ${escapeHtml(q.fact)}`;
+  $("factBox").hidden = false;
+  $("btnRevealEarly").hidden = true;
+  $("btnNextQuestion").hidden = false;
+  $("btnNextQuestion").disabled = true;
+  setTimeout(() => { $("btnNextQuestion").disabled = false; }, 800);
+  $("btnNextQuestion").textContent = currentIdx + 1 >= deck.length ? "See Final Scores 🏆" : "Next Question ➔";
+  renderDock(); broadcastState();
+}
+function ranked() { return [...players.values()].sort((a, b) => b.score - a.score); }
+function rankOf(p) { return 1 + [...players.values()].filter(x => x.score > p.score).length; }
+function showPodium() {
+  clearRoundTimers();
+  phase = "PODIUM";
+  showHostPanel("podium");
+  $("hostRoundBadge").textContent = "FINAL";
+  const board = $("finalScoreboard");
+  board.innerHTML = "";
+  ranked().forEach(p => {
+    const r = rankOf(p), medal = r === 1 ? "🥇" : r === 2 ? "🥈" : r === 3 ? "🥉" : "#" + r;
+    const row = document.createElement("div");
+    row.className = "score-row" + (r === 1 ? " first" : "");
+    row.innerHTML = `<span>${medal} ${p.avatar} ${escapeHtml(p.name)}</span><span style="color:var(--gold)">${p.score.toLocaleString()} pts</span>`;
+    board.appendChild(row);
+  });
+  setMedia($("podiumMedia"), gifUrl(pickOne(REACTIONS.podium)), "👑 BRAGGING RIGHTS SECURED");
+  broadcastState();
+}
+function resetToLobby() { clearRoundTimers(); phase = "LOBBY"; showHostPanel("lobby"); $("hostRoundBadge").textContent = "LOBBY"; refreshPlayers(); broadcastState(); }
+function renderDock() {
+  const dock = $("dockAvatars");
+  dock.innerHTML = "";
+  players.forEach(p => {
+    const pill = document.createElement("div");
+    const away = !isConnected(p);
+    let cls = "", tail = "";
+    if (phase === "REVEAL") { cls = p.lastEarned ? " locked" : " miss"; tail = ` +${p.lastEarned} · ${p.score.toLocaleString()}`; }
+    else if (p.locked) { cls = " locked"; tail = p.picks.length === 2 ? " 🛡️" : " ✓"; }
+    if (away) { cls += " away"; tail += " 💤"; }
+    pill.className = "dock-pill" + cls;
+    pill.textContent = `${p.avatar} ${p.name}${tail}`;
+    dock.appendChild(pill);
+  });
+}
+function broadcastState() { players.forEach(syncPlayer); }
+function syncPlayer(p) {
+  if (!p.conn || !p.conn.open) return;
+  const payload = { type:"STATE", phase, key:roundKey(), score:p.score, rank:rankOf(p), totalPlayers:players.size,
+    avatar:p.avatar, safetyNetEnabled, picks:p.picks, locked:p.locked };
+  if (phase === "QUESTION") {
+    const q = deck[currentIdx];   /* anti-cheat: answerIndex and fact are never sent during the round */
+    Object.assign(payload, { question:q.question, category:q.category, media:{ url:gifUrl(q.gif), caption:q.mediaCaption },
+      options:q.options, round:`${currentIdx + 1}/${deck.length}`, secondsLeft:Math.max(0, QUESTION_DURATION - (Date.now() - questionStartTime) / 1000) });
+  } else if (phase === "REVEAL") {
+    const q = deck[currentIdx];
+    Object.assign(payload, { correctIndex:q.answerIndex, correctLabel:q.options[q.answerIndex], earned:p.lastEarned, waiting:p.playedKey !== roundKey() });
+  }
+  safeSend(p.conn, payload);
+}
+
+/* ================= 4. PHONE CONTROLLER ================= */
+const client = { peer:null, conn:null, gen:0, joined:false, code:"", name:"", lastMsg:0, tries:0, retryTimer:null,
+  state:null, key:"", staged:null, armed:false, sent:false, endsAt:0 };
+let myPlayerId = store("sixpack_pid");
+if (!myPlayerId) { myPlayerId = "player-" + Math.random().toString(36).slice(2, 12); store("sixpack_pid", myPlayerId); }
+
+function setBanner(icon, title, sub, color) {
+  $("bannerIcon").textContent = icon; $("bannerTitle").textContent = title; $("bannerTitle").style.color = color || "var(--text)"; $("bannerSub").textContent = sub;
+  $("phoneBanner").hidden = false; $("padGrid").hidden = true; $("padActionBar").hidden = true; $("phoneQuestion").hidden = true; $("ctrlTimer").textContent = "";
+  client.endsAt = 0;
+}
+function joinRoom() {
+  const code = $("inputRoomCode").value.trim().toUpperCase();
+  const name = $("inputPlayerName").value.trim() || "Player";
+  if (code.length !== 4) { $("phoneJoinStatus").textContent = "Please enter the 4-character room code."; return; }
+  store("sixpack_name", name);
+  client.code = code; client.name = name; client.tries = 0; client.joined = false;
+  $("btnJoinRoom").disabled = true;
+  $("phoneJoinStatus").textContent = "Connecting to room " + code + "...";
+  connectToHost();
+}
+function connectToHost() {
+  if (typeof Peer === "undefined") { connectFailed("Couldn't load the connection library. Check the internet and refresh."); return; }
+  clearTimeout(client.retryTimer);
+  const gen = ++client.gen;
+  if (client.peer) { try { client.peer.destroy(); } catch (e) {} }
+  client.conn = null;
+  const peer = new Peer();
+  client.peer = peer;
+  let opened = false;
+  const fail = why => { if (gen !== client.gen) return; client.gen++; clearTimeout(watchdog); connectFailed(why); };
+  const watchdog = setTimeout(() => { if (!opened) fail("Couldn't reach room " + client.code + ". Check the code and try again."); }, 10000);
+  peer.on("open", () => {
+    if (gen !== client.gen || client.conn) return;
+    const conn = peer.connect(PREFIX + client.code, { reliable:true });
+    client.conn = conn;
+    conn.on("open", () => {
+      if (gen !== client.gen) return;
+      opened = true; clearTimeout(watchdog);
+      client.joined = true; client.tries = 0; client.lastMsg = Date.now();
+      store("sixpack_room", JSON.stringify({ code:client.code, t:Date.now() }));
+      showController(true);
+      client.sent = false;
+      safeSend(conn, { type:"JOIN", playerId:myPlayerId, name:client.name });
+    });
+    conn.on("data", msg => { if (gen === client.gen) handleClientMessage(msg); });
+    conn.on("close", () => fail("Connection to the host closed."));
+  });
+  peer.on("error", err => {
+    if (err.type === "peer-unavailable") { if (!client.joined && gen === client.gen) store("sixpack_room", null); fail("Room " + client.code + " wasn't found. Check the code on the big screen."); }
+    else if (!opened) fail("Connection problem (" + err.type + "). Try again.");
+  });
+}
+function connectFailed(why) {
+  if (client.joined && client.tries < 8) {
+    if (document.visibilityState === "visible") client.tries++;
+    setBanner("📡", "Reconnecting...", "Hang tight. Your score is saved on the host.");
+    client.retryTimer = setTimeout(connectToHost, 2000);
+    return;
+  }
+  leaveRoom(false, why);
+}
+function leaveRoom(forget, message) {
+  client.gen++; client.joined = false; clearTimeout(client.retryTimer);
+  if (client.peer) { try { client.peer.destroy(); } catch (e) {} }
+  client.peer = null; client.conn = null; client.key = ""; client.endsAt = 0;
+  if (forget) store("sixpack_room", null);
+  showController(false);
+  $("btnJoinRoom").disabled = false;
+  $("phoneJoinStatus").textContent = message || "";
+}
+function showController(on) {
+  const entering = on && $("phoneController").hidden;
+  $("phoneJoin").hidden = on;
+  $("phoneController").hidden = !on;
+  document.body.classList.toggle("playing", on && $("phoneView").classList.contains("active"));
+  if (entering) { $("ctrlPlayerName").textContent = client.name; setBanner("🎮", "You're In!", "Waiting for the host..."); keepAwake(); }
+}
+function handleClientMessage(msg) {
+  if (!msg || !msg.type) return;
+  client.lastMsg = Date.now();
+  if (msg.type === "KICK") { leaveRoom(true, "The host removed this controller. Join again any time."); return; }
+  if (msg.type === "FULL") { leaveRoom(true, "That room is full (24 players)."); return; }
+  if (msg.type === "REPLACED") { leaveRoom(false, "This controller was opened in another tab."); return; }
+  if (msg.type !== "STATE") return;
+  client.state = msg;
+  $("ctrlPlayerName").textContent = `${msg.avatar} ${client.name}`;
+  $("ctrlScore").textContent = `${msg.score.toLocaleString()} pts · #${msg.rank}`;
+  if (msg.phase === "LOBBY") { client.key = ""; setBanner("🎮", "You're In!", "Waiting for the host to start the game..."); }
+  else if (msg.phase === "QUESTION") renderPad(msg);
+  else if (msg.phase === "REVEAL" && msg.waiting) setBanner("🎮", "You're In!", "Next question coming up...");
+  else if (msg.phase === "REVEAL") {
+    const picked = msg.picks.length > 0, got = msg.picks.includes(msg.correctIndex);
+    setBanner(got ? "🎉" : picked ? "😬" : "⏰", got ? `+${msg.earned} Points!` : picked ? "Not Quite!" : "Time's Up!",
+      `Correct answer: ${TILE_META[msg.correctIndex].letter} — ${msg.correctLabel}`, got ? "#4ade80" : "#f87171");
+    if (navigator.vibrate) navigator.vibrate(got ? [40,40,80] : 120);
+  } else if (msg.phase === "PODIUM") {
+    setBanner(msg.rank === 1 ? "👑" : "🏆", `Finished #${msg.rank} of ${msg.totalPlayers}`, `Final score: ${msg.score.toLocaleString()} pts`, "var(--gold)");
+  }
+}
+function renderPad(s) {
+  const fresh = client.key !== s.key;
+  if (fresh) {
+    client.key = s.key; client.staged = null; client.armed = false; client.sent = false;
+    const pad = $("padGrid");
+    pad.innerHTML = "";
+    s.options.forEach((opt, i) => {
+      const m = TILE_META[i], b = document.createElement("button");
+      b.type = "button"; b.className = "pad-btn"; b.style.backgroundColor = m.color;
+      b.innerHTML = `<span class="pad-symbol">${m.shape} ${m.letter}</span><span class="pad-text">${escapeHtml(opt)}</span>`;
+      b.addEventListener("click", () => handlePadTap(i));
+      pad.appendChild(b);
+    });
+    $("phoneQuestion").textContent = s.question;
+    if (navigator.vibrate) navigator.vibrate(60);
+  } else if (!s.locked && client.staged !== null) {
+    safeSend(client.conn, { type:"STAGE", key:client.key, choice:client.staged });  /* restore after a reconnect */
+  }
+  client.endsAt = Date.now() + s.secondsLeft * 1000;
+  $("phoneBanner").hidden = true;
+  $("padGrid").hidden = false; $("padActionBar").hidden = false; $("phoneQuestion").hidden = false;
+  tickPhoneTimer();
+  updatePadSelectionUI();
+}
+function handlePadTap(i) {
+  const s = client.state;
+  if (!s || s.phase !== "QUESTION" || s.locked || client.sent) return;
+  if (navigator.vibrate) navigator.vibrate(25);
+  if (!s.safetyNetEnabled) { submitPicks([i]); return; }
+  if (client.armed) { if (i !== client.staged) submitPicks([client.staged, i]); return; }
+  client.staged = i;
+  safeSend(client.conn, { type:"STAGE", key:client.key, choice:i });
+  updatePadSelectionUI();
+}
+function submitPicks(picks) {
+  if (client.sent) return;
+  if (!client.conn || !client.conn.open) { $("actionHint").hidden = false; $("actionHint").textContent = "📡 Reconnecting... tap again in a moment"; return; }
+  client.sent = true; client.armed = false;
+  client.state.picks = picks;
+  safeSend(client.conn, { type:"PICK", playerId:myPlayerId, key:client.key, picks });
+  if (navigator.vibrate) navigator.vibrate([30,40,30]);
+  updatePadSelectionUI();
+}
+function updatePadSelectionUI() {
+  const s = client.state;
+  if (!s) return;
+  const locked = s.locked || client.sent;
+  const chosen = locked ? s.picks : client.staged === null ? [] : [client.staged];
+  document.querySelectorAll(".pad-btn").forEach((b, i) => {
+    b.disabled = locked;
+    b.classList.toggle("selected", chosen.includes(i));
+    b.classList.toggle("dimmed", locked && !chosen.includes(i));
+  });
+  const staged = !locked && client.staged !== null;
+  $("btnConfirmOne").hidden = !(staged && !client.armed);
+  $("btnArmSecond").hidden = !(staged && !client.armed);
+  $("btnCancelSecond").hidden = !(staged && client.armed);
+  $("actionHint").hidden = staged && !client.armed;
+  $("actionHint").textContent = locked ? (chosen.length === 2 ? "🛡️ Both picks locked in!" : "🔒 Locked in! Eyes on the big screen.")
+    : client.armed ? "👆 Tap a 2nd answer" : "👆 Tap your answer";
+}
+function tickPhoneTimer() { if (client.endsAt) $("ctrlTimer").textContent = "⏱ " + Math.max(0, Math.ceil((client.endsAt - Date.now()) / 1000)); }
+setInterval(tickPhoneTimer, 500);
+setInterval(() => {
+  if (!client.joined || !client.conn || !client.conn.open) return;
+  if (Date.now() - client.lastMsg > 15000 && document.visibilityState === "visible") { client.lastMsg = Date.now(); connectToHost(); return; }
+  safeSend(client.conn, { type:"PING" });
+}, 3000);
+document.addEventListener("visibilitychange", () => {
+  if (document.visibilityState !== "visible" || !client.joined) return;
+  if (!client.conn || !client.conn.open) { connectToHost(); return; }
+  const asked = Date.now(), gen = client.gen;
+  safeSend(client.conn, { type:"PING" });
+  setTimeout(() => { if (client.joined && gen === client.gen && client.lastMsg < asked) connectToHost(); }, 3000);
+});
+
+/* ================= 5. WIRING & BOOT ================= */
+$("btnModeHost").addEventListener("click", () => switchMode("host"));
+$("btnModePhone").addEventListener("click", () => switchMode("phone"));
+$("btnFullscreen").addEventListener("click", () => { if (document.fullscreenElement) document.exitFullscreen(); else document.documentElement.requestFullscreen().catch(() => {}); });
+$("btnAllCats").addEventListener("click", () => setAllCategories(true));
+$("btnNoCats").addEventListener("click", () => setAllCategories(false));
+$("btnToggleSafetyNet").addEventListener("click", () => { safetyNetEnabled = !safetyNetEnabled; renderSafetyToggle(); });
+$("btnAddBot").addEventListener("click", addBotPlayer);
+$("btnStartGame").addEventListener("click", startGame);
+$("btnRevealEarly").addEventListener("click", revealAnswer);
+$("btnNextQuestion").addEventListener("click", () => { if (phase === "REVEAL") nextQuestion(); });
+let endArmed = null;
+$("btnEndGame").addEventListener("click", () => {
+  const b = $("btnEndGame");
+  if (!endArmed) { b.textContent = "Tap again to end"; endArmed = setTimeout(() => { endArmed = null; b.textContent = "End Game"; }, 3000); return; }
+  clearTimeout(endArmed); endArmed = null; b.textContent = "End Game"; showPodium();
+});
+$("btnPlayAgain").addEventListener("click", resetToLobby);
+$("btnJoinRoom").addEventListener("click", joinRoom);
+["inputRoomCode","inputPlayerName"].forEach(id => $(id).addEventListener("keydown", e => { if (e.key === "Enter") joinRoom(); }));
+$("btnLeave").addEventListener("click", () => { safeSend(client.conn, { type:"LEAVE" }); setTimeout(() => leaveRoom(true), 150); });
+$("btnConfirmOne").addEventListener("click", () => { if (client.staged !== null) submitPicks([client.staged]); });
+$("btnArmSecond").addEventListener("click", () => { client.armed = true; updatePadSelectionUI(); });
+$("btnCancelSecond").addEventListener("click", () => { client.armed = false; updatePadSelectionUI(); });
+window.addEventListener("beforeunload", e => { if (hostPeer && [...players.values()].some(p => !p.isBot)) { e.preventDefault(); e.returnValue = ""; } });
+
+(function boot() {
+  const now = new Date();
+  if (now.getMonth() === 10 && now.getDate() >= 20) {
+    $("lobbyHeading").textContent = "🦃 Happy Thanksgiving! Gather Around!";
+    const g = $("lobbyGif"); g.addEventListener("load", () => g.hidden = false); g.src = gifUrl(REACTIONS.lobby[0]);
+  }
+  renderCategoryChips(); renderSafetyToggle();
+  $("inputPlayerName").value = store("sixpack_name") || "";
+  const urlRoom = (new URLSearchParams(location.search).get("room") || "").toUpperCase().slice(0, 4);
+  let saved = null;
+  try { saved = JSON.parse(store("sixpack_room")); } catch (e) {}
+  if (saved && Date.now() - saved.t > 3 * 3600 * 1000) saved = null;
+  const handheld = window.matchMedia("(pointer: coarse)").matches && Math.min(window.innerWidth, window.innerHeight) < 600;
+  const mode = urlRoom || handheld ? "phone" : "host";
+  $("inputRoomCode").value = urlRoom || (saved && saved.code) || "";
+  switchMode(mode);
+  /* Rejoin on its own after a refresh or a dropped tab. */
+  if (mode === "phone" && saved && store("sixpack_name") && (!urlRoom || urlRoom === saved.code)) joinRoom();
+})();
+</script>
+</body>
+</html>
